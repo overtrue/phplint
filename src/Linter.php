@@ -99,7 +99,7 @@ class Linter
                 }
             }
 
-            file_put_contents(__DIR__.'/../phplint.cache', json_encode($newCache));
+            file_put_contents(__DIR__.'/../.phplint-cache', json_encode($newCache));
         }
 
         return $errors;

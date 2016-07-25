@@ -88,8 +88,8 @@ class LintCommand extends Command
                 $linter->setProcessLimit($procLimit);
             }
 
-            if (file_exists(__DIR__.'/../../phplint.cache')) {
-                $linter->setCache(json_decode(file_get_contents(__DIR__.'/../../phplint.cache'), true));
+            if (file_exists(__DIR__.'/../../.phplint-cache')) {
+                $linter->setCache(json_decode(file_get_contents(__DIR__.'/../../.phplint-cache'), true));
             }
 
             $progress = new ProgressBar($output, $fileCount);
