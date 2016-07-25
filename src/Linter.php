@@ -1,0 +1,172 @@
+<?php
+
+/*
+ * This file is part of the overtrue/phplint.
+ *
+ * (c) 2016 overtrue <i@overtrue.me>
+ */
+
+namespace Overtrue\PHPLint;
+
+use Overtrue\PHPLint\Process\Lint;
+use Symfony\Component\Finder\Finder;
+
+/**
+ * Class Linter.
+ */
+class Linter
+{
+    /** @var callable */
+    private $processCallback;
+
+    /**
+     * @var bool
+     */
+    private $files = false;
+
+    /**
+     * @var string
+     */
+    private $path;
+
+    /**
+     * @var array
+     */
+    private $excludes;
+
+    /**
+     * @var array
+     */
+    private $extensions;
+
+    /**
+     * @var int
+     */
+    private $procLimit = 5;
+
+    /**
+     * Constructor.
+     *
+     * @param string $path
+     * @param array  $excludes
+     * @param array  $extensions
+     */
+    public function __construct($path, $excludes, $extensions)
+    {
+        $this->path = $path;
+        $this->excludes = $excludes;
+        $this->extensions = $extensions;
+    }
+
+    /**
+     * Check the files.
+     *
+     * @param array $files
+     *
+     * @return array
+     */
+    public function lint($files)
+    {
+        $processCallback = is_callable($this->processCallback) ? $this->processCallback : function () {};
+
+        $errors = [];
+        $running = [];
+        $newCache = [];
+
+        while ($files || $running) {
+            for ($i = count($running); $files && $i < $this->procLimit; ++$i) {
+                $file = array_shift($files);
+                $fileName = $file->getRealpath();
+
+                if (!isset($this->cache[$fileName]) || $this->cache[$fileName] !== md5_file($fileName)) {
+                    $running[$fileName] = new Lint(PHP_BINARY.' -l '.$fileName);
+                    $running[$fileName]->start();
+                }
+            }
+
+            foreach ($running as $fileName => $lintProcess) {
+                if ($lintProcess->isRunning()) {
+                    continue;
+                }
+
+                unset($running[$fileName]);
+                if ($lintProcess->hasSyntaxError()) {
+                    $processCallback('error', $fileName);
+                    $errors[$fileName] = $lintProcess->getSyntaxError();
+                } else {
+                    $newCache[$fileName] = md5_file($fileName);
+                    $processCallback('ok', $file);
+                }
+            }
+
+            file_put_contents(__DIR__.'/../phplint.cache', json_encode($newCache));
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Cache setter.
+     *
+     * @param array $cache
+     */
+    public function setCache($cache = [])
+    {
+        if (is_array($cache)) {
+            $this->cache = $cache;
+        } else {
+            $this->cache = [];
+        }
+    }
+
+    /**
+     * Fetch files.
+     *
+     * @return array
+     */
+    public function getFiles()
+    {
+        if (!$this->files) {
+            $this->files = new Finder();
+            $this->files->files()->ignoreUnreadableDirs()->in(realpath($this->path));
+
+            foreach ($this->excludes as $exclude) {
+                $this->files->notPath($exclude);
+            }
+
+            foreach ($this->extensions as $extension) {
+                $this->files->name('*.'.$extension);
+            }
+
+            $this->files = iterator_to_array($this->files);
+        }
+
+        return $this->files;
+    }
+
+    /**
+     * Set process callback.
+     *
+     * @param callable $processCallback
+     *
+     * @return ParallelLint
+     */
+    public function setProcessCallback($processCallback)
+    {
+        $this->processCallback = $processCallback;
+
+        return $this;
+    }
+
+    /**
+     * Set process limit.
+     *
+     * @param int $procLimit
+     */
+    public function setProcessLimit($procLimit)
+    {
+        $this->procLimit = $procLimit;
+
+        return $this;
+    }
+}
