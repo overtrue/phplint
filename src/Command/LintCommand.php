@@ -135,7 +135,6 @@ class LintCommand extends Command
         $output->writeln("\nThere was ".count($errors).' errors:');
 
         foreach ($errors as $filename => $error) {
-            $filename = str_replace(realpath('.'), '', $filename);
             $output->writeln('<comment>'.++$i.". {$filename}:".'</comment>');
             $error = preg_replace('~in\s+'.preg_quote($filename).'~', '', $error);
             $output->writeln("<error>{$error}</error>");
