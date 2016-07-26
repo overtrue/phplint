@@ -65,9 +65,14 @@ class Linter
      *
      * @return array
      */
-    public function lint($files)
+    public function lint($files = [])
     {
-        $processCallback = is_callable($this->processCallback) ? $this->processCallback : function () {};
+        if (empty($files)) {
+            $files = $this->getFiles();
+        }
+
+        $processCallback = is_callable($this->processCallback) ? $this->processCallback : function () {
+        };
 
         $errors = [];
         $running = [];
