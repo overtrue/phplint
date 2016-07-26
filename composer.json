@@ -16,7 +16,7 @@
     }
   ],
   "require": {
-    "php": ">=5.4",
+    "php": ">=5.5.9",
     "symfony/console": "^3.1",
     "symfony/finder": "^3.1",
     "symfony/process": "^3.1"
