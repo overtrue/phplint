@@ -59,7 +59,6 @@ class LintCommand extends Command
 
         $output->writeln($this->getApplication()->getLongVersion()." by overtrue and contributors.\n");
 
-        $phpBinary = PHP_BINARY;
         $path = $input->getArgument('path');
         $exclude = $input->getOption('exclude');
         $extensions = $input->getOption('extensions');

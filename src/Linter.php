@@ -16,13 +16,20 @@ use Symfony\Component\Finder\Finder;
  */
 class Linter
 {
-    /** @var callable */
+    /**
+     * @var callable
+     */
     private $processCallback;
 
     /**
-     * @var bool
+     * @var array
      */
-    private $files = false;
+    private $files = [];
+
+    /**
+     * @var array
+     */
+    private $cache = [];
 
     /**
      * @var string
@@ -78,7 +85,7 @@ class Linter
         $running = [];
         $newCache = [];
 
-        while ($files || $running) {
+        while (!empty($files) || !empty($running)) {
             for ($i = count($running); $files && $i < $this->procLimit; ++$i) {
                 $file = array_shift($files);
                 $fileName = $file->getRealpath();
@@ -100,7 +107,7 @@ class Linter
                     $errors[$fileName] = $lintProcess->getSyntaxError();
                 } else {
                     $newCache[$fileName] = md5_file($fileName);
-                    $processCallback('ok', $file);
+                    $processCallback('ok', $fileName);
                 }
             }
 
@@ -131,7 +138,7 @@ class Linter
      */
     public function getFiles()
     {
-        if (!$this->files) {
+        if (!empty($this->files)) {
             $this->files = new Finder();
             $this->files->files()->ignoreUnreadableDirs()->in(realpath($this->path));
 
