@@ -10,8 +10,8 @@ namespace Overtrue\PHPLint\Command;
 
 use Overtrue\PHPLint\Linter;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Helper;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -50,7 +50,6 @@ class LintCommand extends Command
                InputOption::VALUE_REQUIRED,
                'Number of parraled jobs to run (default: 5)'
             );
-        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -58,7 +57,7 @@ class LintCommand extends Command
         $startTime = microtime(true);
         $startMemUsage = memory_get_usage(true);
 
-        $output->writeln($this->getApplication()->getLongVersion(). " by overtrue and contributors.\n");
+        $output->writeln($this->getApplication()->getLongVersion()." by overtrue and contributors.\n");
 
         $phpBinary = PHP_BINARY;
         $path = $input->getArgument('path');
@@ -75,6 +74,7 @@ class LintCommand extends Command
 
         if ($fileCount <= 0) {
             $output->writeln('<info>Could not find files to lint</info>');
+
             return 0;
         }
 
@@ -126,15 +126,13 @@ class LintCommand extends Command
     /**
      * Show errors detail.
      *
-     * @param  array                                             $errors
-     * @param  \Symfony\Component\Console\Output\OutputInterface $output
-     *
-     * @return void
+     * @param array                                             $errors
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
      */
     protected function showErrors($errors, $output)
     {
         $i = 0;
-        $output->writeln("\nThere was ".count($errors)." errors:");
+        $output->writeln("\nThere was ".count($errors).' errors:');
 
         foreach ($errors as $filename => $error) {
             $filename = str_replace(realpath('.'), '', $filename);
