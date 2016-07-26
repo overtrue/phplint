@@ -1,0 +1,18 @@
+language: php
+
+php:
+  # using major version aliases
+  - 5.4
+  - 5.5
+  - 5.6
+  - 7.0
+  - hhvm
+
+before_script:
+  - composer self-update
+  - composer install --prefer-source --no-interaction --dev
+
+script: ./bin/phplint ./src
+
+matrix:
+  fast_finish: true
