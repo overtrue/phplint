@@ -51,7 +51,7 @@ class Linter
      * @param array  $excludes
      * @param array  $extensions
      */
-    public function __construct($path, $excludes, $extensions)
+    public function __construct($path, $excludes = [], $extensions = ['php'])
     {
         $this->path = $path;
         $this->excludes = $excludes;
