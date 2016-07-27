@@ -11,7 +11,6 @@ before_script:
   - composer self-update
   - composer install --prefer-source --no-interaction --dev
 
-script: ./bin/phplint ./src
-
+script: ./bin/phplint
 matrix:
   fast_finish: true
