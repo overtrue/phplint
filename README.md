@@ -44,7 +44,7 @@ example:
 $ ./vendor/bin/phplint ./ --exclude=vendor
 ```
 
-You can also configuration as a file `.phplint.yml`:
+You can also define configuration as a file `.phplint.yml`:
 
 ```yaml
 path: ./
