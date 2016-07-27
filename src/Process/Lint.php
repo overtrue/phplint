@@ -40,7 +40,7 @@ class Lint extends Process
     /**
      * Parse error message.
      *
-     * @param  string $message
+     * @param string $message
      *
      * @return array
      */
