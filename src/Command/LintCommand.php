@@ -44,6 +44,11 @@ class LintCommand extends Command
     protected $output;
 
     /**
+     * @var string
+     */
+    protected $cacheFile = __DIR__.'/../../.phplint-cache';
+
+    /**
      * Configures the current command.
      */
     protected function configure()
@@ -133,12 +138,16 @@ class LintCommand extends Command
 
         $output->writeln($this->getApplication()->getLongVersion()." by overtrue and contributors.\n");
 
+        if (!$input->getOption('no-cache') && file_exists($this->cacheFile)) {
+            $linter->setCache(json_decode(file_get_contents($this->cacheFile), true));
+        }
+
         $options = $this->mergeOptions();
 
         $linter = new Linter($options['path'], $options['exclude'], $options['extensions']);
+        $linter->setProcessLimit($options['jobs']);
 
-        $files = $linter->getFiles();
-        $fileCount = count($files);
+        $fileCount = count($linter->getFiles());
 
         if ($fileCount <= 0) {
             $output->writeln('<info>Could not find files to lint</info>');
@@ -146,28 +155,7 @@ class LintCommand extends Command
             return 0;
         }
 
-        $linter->setProcessLimit($options['jobs']);
-
-        if (!$input->getOption('no-cache') && file_exists(__DIR__.'/../../.phplint-cache')) {
-            $linter->setCache(json_decode(file_get_contents(__DIR__.'/../../.phplint-cache'), true));
-        }
-
-        $progress = new ProgressBar($output, $fileCount);
-        $progress->setBarWidth(50);
-        $progress->setBarCharacter('<info>.</info>');
-        $progress->setEmptyBarCharacter('<comment>.</comment>');
-        $progress->setProgressCharacter('|');
-        $progress->setMessage('', 'filename');
-        $progress->setFormat("%filename%\n\n%current%/%max% [%bar%] %percent:3s%% %elapsed:6s%\n");
-        $progress->start();
-
-        $linter->setProcessCallback(function ($status, $filename) use ($progress) {
-            $progress->setMessage("<info>Checking: </info>{$filename}", 'filename');
-            $progress->advance();
-        });
-
-        $errors = $linter->lint($files);
-        $progress->finish();
+        $errors = $this->executeLint($linter, $output, $fileCount);
 
         $timeUsage = Helper::formatTime(microtime(true) - $startTime);
         $memUsage = Helper::formatMemory(memory_get_usage(true) - $startMemUsage);
@@ -175,7 +163,7 @@ class LintCommand extends Command
         $code = 0;
         $errCount = count($errors);
 
-        $output->writeln("\nTime: {$timeUsage}, Memory: {$memUsage}MB\n");
+        $output->writeln("\n\nTime: {$timeUsage}, Memory: {$memUsage}MB\n");
 
         if ($errCount > 0) {
             $output->writeln('<error>FAILURES!</error>');
@@ -187,6 +175,24 @@ class LintCommand extends Command
         }
 
         return $code;
+    }
+
+    protected function executeLint($linter, $output, $fileCount)
+    {
+        $maxColumns = floor($this->getScreenColumns() / 2);
+
+        $linter->setProcessCallback(function ($status, $filename) use ($output, $fileCount, $maxColumns) {
+            static $i = 0;
+
+            if ($i && $i % $maxColumns === 0) {
+                $percent = floor(($i / $fileCount) * 100);
+                $output->writeln(str_pad(" {$i} / {$fileCount} ({$percent}%)", 18, " ", STR_PAD_LEFT));
+            }
+            $i++;
+            $output->write($status == 'ok' ? '<info>.</info>' : '<error>E</error>');
+        });
+
+        return $linter->lint();
     }
 
     /**
@@ -255,7 +261,64 @@ class LintCommand extends Command
 
             return $configuration;
         } catch (ParseException $e) {
-            $this->output->writeln(sprintf('<error>Unable to parse the YAML string: %s<error>', $e->getMessage()));
+            $this->output->writeln(sprintf('<error>Unable to parse the YAML string: %s</error>', $e->getMessage()));
         }
+    }
+
+    /**
+     * Get screen columns.
+     *
+     * @return int
+     */
+    protected function getScreenColumns()
+    {
+        if (DIRECTORY_SEPARATOR == '\\') {
+            $columns = 80;
+
+            if (preg_match('/^(\d+)x\d+ \(\d+x(\d+)\)$/', trim(getenv('ANSICON')), $matches)) {
+                $columns = $matches[1];
+            } elseif (function_exists('proc_open')) {
+                $process = proc_open(
+                    'mode CON',
+                    array(
+                        1 => array('pipe', 'w'),
+                        2 => array('pipe', 'w')
+                    ),
+                    $pipes,
+                    null,
+                    null,
+                    array('suppress_errors' => true)
+                );
+                if (is_resource($process)) {
+                    $info = stream_get_contents($pipes[1]);
+                    fclose($pipes[1]);
+                    fclose($pipes[2]);
+                    proc_close($process);
+                    if (preg_match('/--------+\r?\n.+?(\d+)\r?\n.+?(\d+)\r?\n/', $info, $matches)) {
+                        $columns = $matches[2];
+                    }
+                }
+            }
+
+            return $columns - 1;
+        }
+
+        if (!(function_exists('posix_isatty') && @posix_isatty($fileDescriptor))) {
+            return 80;
+        }
+
+        if (function_exists('shell_exec') && preg_match('#\d+ (\d+)#', shell_exec('stty size'), $match) === 1) {
+            if ((int) $match[1] > 0) {
+                return (int) $match[1];
+            }
+        }
+
+        if (function_exists('shell_exec') && preg_match('#columns = (\d+);#', shell_exec('stty'), $match) === 1) {
+            if ((int) $match[1] > 0) {
+                return (int) $match[1];
+            }
+        }
+
+        return 80;
     }
 }
