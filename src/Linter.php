@@ -58,7 +58,7 @@ class Linter
      * @param array  $excludes
      * @param array  $extensions
      */
-    public function __construct($path, $excludes = [], $extensions = ['php'])
+    public function __construct($path, array $excludes = [], array $extensions = ['php'])
     {
         $this->path = $path;
         $this->excludes = $excludes;
@@ -88,26 +88,26 @@ class Linter
         while (!empty($files) || !empty($running)) {
             for ($i = count($running); $files && $i < $this->procLimit; ++$i) {
                 $file = array_shift($files);
-                $fileName = $file->getRealpath();
+                $filename = $file->getRealpath();
 
-                if (!isset($this->cache[$fileName]) || $this->cache[$fileName] !== md5_file($fileName)) {
-                    $running[$fileName] = new Lint(PHP_BINARY.' -l '.$fileName);
-                    $running[$fileName]->start();
+                if (!isset($this->cache[$filename]) || $this->cache[$filename] !== md5_file($filename)) {
+                    $running[$filename] = new Lint(PHP_BINARY.' -l '.$filename);
+                    $running[$filename]->start();
                 }
             }
 
-            foreach ($running as $fileName => $lintProcess) {
+            foreach ($running as $filename => $lintProcess) {
                 if ($lintProcess->isRunning()) {
                     continue;
                 }
 
-                unset($running[$fileName]);
+                unset($running[$filename]);
                 if ($lintProcess->hasSyntaxError()) {
-                    $processCallback('error', $fileName);
-                    $errors[$fileName] = $lintProcess->getSyntaxError();
+                    $processCallback('error', $filename);
+                    $errors[$filename] = array_merge(['file' => $filename], $lintProcess->getSyntaxError());
                 } else {
-                    $newCache[$fileName] = md5_file($fileName);
-                    $processCallback('ok', $fileName);
+                    $newCache[$filename] = md5_file($filename);
+                    $processCallback('ok', $filename);
                 }
             }
 
@@ -138,7 +138,7 @@ class Linter
      */
     public function getFiles()
     {
-        if (!empty($this->files)) {
+        if (empty($this->files)) {
             $this->files = new Finder();
             $this->files->files()->ignoreUnreadableDirs()->in(realpath($this->path));
 
