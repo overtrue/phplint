@@ -57,40 +57,40 @@ class LintCommand extends Command
                 'Path to file or directory to lint'
             )
             ->addOption(
-               'exclude',
-               null,
-               InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
-               'Path to file or directory to exclude from linting'
+                'exclude',
+                null,
+                InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+                'Path to file or directory to exclude from linting'
             )
             ->addOption(
-               'extensions',
-               null,
-               InputOption::VALUE_REQUIRED,
-               'Check only files with selected extensions (default: php)'
+                'extensions',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Check only files with selected extensions (default: php)'
             )
             ->addOption(
-               'jobs',
-               'j',
-               InputOption::VALUE_REQUIRED,
-               'Number of parraled jobs to run (default: 5)'
+                'jobs',
+                'j',
+                InputOption::VALUE_REQUIRED,
+                'Number of parraled jobs to run (default: 5)'
             )
             ->addOption(
-               'configuration',
-               'c',
-               InputOption::VALUE_REQUIRED,
-               'Read configuration from config file (default: .phplint.yml).'
+                'configuration',
+                'c',
+                InputOption::VALUE_REQUIRED,
+                'Read configuration from config file (default: .phplint.yml).'
             )
             ->addOption(
-               'no-configuration',
-               null,
-               InputOption::VALUE_NONE,
-               'Ignore default configuration file (default: .phplint.yml).'
+                'no-configuration',
+                null,
+                InputOption::VALUE_NONE,
+                'Ignore default configuration file (default: .phplint.yml).'
             )
             ->addOption(
-               'no-cache',
-               null,
-               InputOption::VALUE_NONE,
-               'Ignore cached data.'
+                'no-cache',
+                null,
+                InputOption::VALUE_NONE,
+                'Ignore cached data.'
             );
     }
 
@@ -161,7 +161,7 @@ class LintCommand extends Command
         $progress->setFormat("%filename%\n\n%current%/%max% [%bar%] %percent:3s%% %elapsed:6s%\n");
         $progress->start();
 
-        $linter->setProcessCallback(function ($status, $filename) use ($progress) {
+        $linter->setProcessCallback(function($status, $filename) use ($progress) {
             $progress->setMessage("<info>Checking: </info>{$filename}", 'filename');
             $progress->advance();
         });

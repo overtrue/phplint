@@ -78,7 +78,7 @@ class Linter
             $files = $this->getFiles();
         }
 
-        $processCallback = is_callable($this->processCallback) ? $this->processCallback : function () {
+        $processCallback = is_callable($this->processCallback) ? $this->processCallback : function() {
         };
 
         $errors = [];
@@ -161,7 +161,7 @@ class Linter
      *
      * @param callable $processCallback
      *
-     * @return ParallelLint
+     * @return Linter
      */
     public function setProcessCallback($processCallback)
     {
