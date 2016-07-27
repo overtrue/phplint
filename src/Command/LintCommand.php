@@ -16,12 +16,36 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class LintCommand.
  */
 class LintCommand extends Command
 {
+    /**
+     * @var array
+     */
+    protected $defaults = [
+        'jobs' => 5,
+        'exclude' => [],
+        'extensions' => ['php'],
+    ];
+
+    /**
+     * @var \Symfony\Component\Console\Output\InputInterface
+     */
+    protected $input;
+
+    /**
+     * @var \Symfony\Component\Console\Output\OutputInterface
+     */
+    protected $ouput;
+
+    /**
+     * Configures the current command.
+     */
     protected function configure()
     {
         $this
@@ -29,7 +53,7 @@ class LintCommand extends Command
             ->setDescription('Lint something')
             ->addArgument(
                 'path',
-                InputArgument::REQUIRED,
+                InputArgument::OPTIONAL,
                 'Path to file or directory to lint'
             )
             ->addOption(
@@ -49,9 +73,59 @@ class LintCommand extends Command
                'j',
                InputOption::VALUE_REQUIRED,
                'Number of parraled jobs to run (default: 5)'
+            )
+            ->addOption(
+               'configuration',
+               'c',
+               InputOption::VALUE_REQUIRED,
+               'Read configuration from config file (default: .phplint.yml).'
+            )
+            ->addOption(
+               'no-configuration',
+               null,
+               InputOption::VALUE_NONE,
+               'Ignore default configuration file (default: .phplint.yml).'
+            )
+            ->addOption(
+               'no-cache',
+               null,
+               InputOption::VALUE_NONE,
+               'Ignore cached data.'
             );
     }
 
+    /**
+     * Initializes the command just after the input has been validated.
+     *
+     * This is mainly useful when a lot of commands extends one main command
+     * where some things need to be initialized based on the input arguments and options.
+     *
+     * @param InputInterface  $input  An InputInterface instance
+     * @param OutputInterface $output An OutputInterface instance
+     */
+    public function initialize(InputInterface $input, OutputInterface $output)
+    {
+        $this->input = $input;
+        $this->output = $output;
+    }
+
+    /**
+     * Executes the current command.
+     *
+     * This method is not abstract because you can use this class
+     * as a concrete class. In this case, instead of defining the
+     * execute() method, you set the code to execute by passing
+     * a Closure to the setCode() method.
+     *
+     * @param InputInterface  $input  An InputInterface instance
+     * @param OutputInterface $output An OutputInterface instance
+     *
+     * @throws LogicException When this abstract method is not implemented
+     *
+     * @return null|int null or 0 if everything went fine, or an error code
+     *
+     * @see setCode()
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $startTime = microtime(true);
@@ -59,14 +133,9 @@ class LintCommand extends Command
 
         $output->writeln($this->getApplication()->getLongVersion()." by overtrue and contributors.\n");
 
-        $path = $input->getArgument('path');
-        $exclude = $input->getOption('exclude');
-        $extensions = $input->getOption('extensions');
-        $procLimit = $input->getOption('jobs');
+        $options = $this->mergeOptions();
 
-        $extensions = $extensions ? explode(',', $extensions) : ['php'];
-
-        $linter = new Linter($path, $exclude, $extensions);
+        $linter = new Linter($options['path'], $options['exclude'], $options['extensions']);
 
         $files = $linter->getFiles();
         $fileCount = count($files);
@@ -77,11 +146,9 @@ class LintCommand extends Command
             return 0;
         }
 
-        if ($procLimit) {
-            $linter->setProcessLimit($procLimit);
-        }
+        $linter->setProcessLimit($options['jobs']);
 
-        if (file_exists(__DIR__.'/../../.phplint-cache')) {
+        if (!$input->getOption('no-cache') && file_exists(__DIR__.'/../../.phplint-cache')) {
             $linter->setCache(json_decode(file_get_contents(__DIR__.'/../../.phplint-cache'), true));
         }
 
@@ -113,7 +180,7 @@ class LintCommand extends Command
         if ($errCount > 0) {
             $output->writeln('<error>FAILURES!</error>');
             $output->writeln("<error>Files: {$fileCount}, Failures: {$errCount}</error>");
-            $this->showErrors($errors, $output);
+            $this->showErrors($errors);
             $code = 1;
         } else {
             $output->writeln("<info>OK! (Files: {$fileCount}, Success: {$fileCount})</info>");
@@ -125,18 +192,70 @@ class LintCommand extends Command
     /**
      * Show errors detail.
      *
-     * @param array                                             $errors
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @param array $errors
      */
-    protected function showErrors($errors, $output)
+    protected function showErrors($errors)
     {
         $i = 0;
-        $output->writeln("\nThere was ".count($errors).' errors:');
+        $this->output->writeln("\nThere was ".count($errors).' errors:');
 
         foreach ($errors as $filename => $error) {
-            $output->writeln('<comment>'.++$i.". {$filename}:".'</comment>');
+            $this->output->writeln('<comment>'.++$i.". {$filename}:{$error['line']}".'</comment>');
             $error = preg_replace('~in\s+'.preg_quote($filename).'~', '', $error);
-            $output->writeln("<error>{$error}</error>");
+            $this->output->writeln("<error> {$error['error']}</error>");
+        }
+    }
+
+    /**
+     * Merge options.
+     *
+     * @return array
+     */
+    protected function mergeOptions()
+    {
+        $options = $this->input->getOptions();
+        $options['path'] = $this->input->getArgument('path') ?: './';
+
+        $config = [];
+
+        if (!$this->input->getOption('no-configuration')) {
+            $filename = rtrim($options['path'], DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'.phplint.yml';
+
+            if (!$options['configuration'] && file_exists($filename)) {
+                $options['configuration'] = realpath($filename);
+            }
+
+            if (!empty($options['configuration'])) {
+                $this->output->writeln("<comment>Loaded config from \"{$options['configuration']}\"</comment>\n");
+                $config = $this->loadConfiguration($options['configuration']);
+            }
+        }
+
+        $options = array_merge($this->defaults, array_filter($config), array_filter($options));
+
+        is_array($options['extensions']) || $options['extensions'] = explode(',', $options['extensions']);
+
+        return $options;
+    }
+
+    /**
+     * Load configuration from yaml.
+     *
+     * @param string $path
+     *
+     * @return array
+     */
+    protected function loadConfiguration($path)
+    {
+        try {
+            $configuration = Yaml::parse(file_get_contents($path));
+            if (!is_array($configuration)) {
+                throw new ParseException('Invalid content.', 1);
+            }
+
+            return $configuration;
+        } catch (ParseException $e) {
+            $this->output->writeln(sprintf('<error>Unable to parse the YAML string: %s<error>', $e->getMessage()));
         }
     }
 }

@@ -20,14 +20,48 @@ $ composer require overtrue/phplint
 ### CLI
 
 ```shell
+Usage:
+  phplint [options] [--] [<path>]
+
+Arguments:
+  path                               Path to file or directory to lint
+
+Options:
+      --exclude=EXCLUDE              Path to file or directory to exclude from linting (multiple values allowed)
+      --extensions=EXTENSIONS        Check only files with selected extensions (default: php)
+  -j, --jobs=JOBS                    Number of parraled jobs to run (default: 5)
+  -c, --configuration=CONFIGURATION  Read configuration from config file (default: .phplint.yml).
+      --no-configuration             Ignore default configuration file (default: .phplint.yml).
+      --no-cache                     Ignore cached data.
+  -h, --help                         Display this help message
+  -q, --quiet                        Do not output any message
+  -V, --version                      Display this application version
+```
+
+example:
+
+```shell
 $ ./vendor/bin/phplint ./ --exclude=vendor
 ```
 
-more:
+You can also configuration as a file `.phplint.yml`:
+
+```yaml
+path: ./
+jobs: 10
+extensions:
+  - php
+exclude:
+  - vendor
+```
 
 ```shell
-$ ./vendor/bin/phplint --help
+$ ./vendor/bin/phplint
 ```
+
+By default, the command will read configuration from file `.phplint.yml` of path specified, you can custom the filename by option: `--configuration=FILENAME` or `-c=FILENAME`;
+
+if you want do disabled any config file, you can add option `--no-configuration`.
 
 ### Program
 
@@ -45,9 +79,17 @@ $errors = $linter->lint();
 
 //
 // [
-//    '/path/to/foo.php' => 'Parse error: syntax error, unexpected '$key' (T_VARIABLE)  on line 168',
-//    '/path/to/bar.php' => 'Parse error: syntax error, unexpected 'class' (T_CLASS), expecting ',' or ';'  on line 28',
-//]
+//    '/path/to/foo.php' => [
+//          'error' => "unexpected '$key' (T_VARIABLE)",
+//          'line' => 168,
+//          'file' => '/path/to/foo.php',
+//      ],
+//    '/path/to/bar.php' => [
+//          'error' => "unexpected 'class' (T_CLASS), expecting ',' or ';'",
+//          'line' => 28,
+//          'file' => '/path/to/bar.php',
+//      ],
+// ]
 ```
 
 ## License

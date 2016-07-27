@@ -31,9 +31,30 @@ class Lint extends Process
         if ($this->hasSyntaxError()) {
             list(, $out) = explode("\n", $this->getOutput());
 
-            return $out;
+            return $this->parseError($out);
         }
 
         return false;
+    }
+
+    /**
+     * Parse error message.
+     *
+     * @param  string $message
+     *
+     * @return array
+     */
+    public function parseError($message)
+    {
+        $pattern = '/^Parse error:\s*(?:\w+ error,\s*)?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
+
+        preg_match($pattern, $message, $match);
+
+        $match = array_merge(['error' => 'Unknown', 'line' => 0], $match);
+
+        return [
+            'error' => $match['error'],
+            'line' => $match['line'],
+        ];
     }
 }
