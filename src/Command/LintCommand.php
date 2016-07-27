@@ -34,14 +34,14 @@ class LintCommand extends Command
     ];
 
     /**
-     * @var \Symfony\Component\Console\Output\InputInterface
+     * @var \Symfony\Component\Console\Input\InputInterface
      */
     protected $input;
 
     /**
      * @var \Symfony\Component\Console\Output\OutputInterface
      */
-    protected $ouput;
+    protected $output;
 
     /**
      * Configures the current command.
