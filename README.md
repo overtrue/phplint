@@ -12,7 +12,7 @@ PHPLint
 ## Installation
 
 ```shell
-$ composer require overtrue/phplint
+$ composer require overtrue/phplint -vvv
 ```
 
 ## Usage

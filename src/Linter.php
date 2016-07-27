@@ -86,7 +86,7 @@ class Linter
         $newCache = [];
 
         while (!empty($files) || !empty($running)) {
-            for ($i = count($running); $files && $i < $this->procLimit; ++$i) {
+            for ($i = count($running); !empty($files) && $i < $this->procLimit; ++$i) {
                 $file = array_shift($files);
                 $filename = $file->getRealpath();
 
@@ -139,18 +139,18 @@ class Linter
     public function getFiles()
     {
         if (empty($this->files)) {
-            $this->files = new Finder();
-            $this->files->files()->ignoreUnreadableDirs()->in(realpath($this->path));
+            $finder = new Finder();
+            $finder->files()->ignoreUnreadableDirs()->in(realpath($this->path));
 
             foreach ($this->excludes as $exclude) {
-                $this->files->notPath($exclude);
+                $finder->notPath($exclude);
             }
 
             foreach ($this->extensions as $extension) {
-                $this->files->name('*.'.$extension);
+                $finder->name('*.'.$extension);
             }
 
-            $this->files = iterator_to_array($this->files);
+            $this->files = iterator_to_array($finder);
         }
 
         return $this->files;
