@@ -161,7 +161,7 @@ class LintCommand extends Command
         $progress->setFormat("%filename%\n\n%current%/%max% [%bar%] %percent:3s%% %elapsed:6s%\n");
         $progress->start();
 
-        $linter->setProcessCallback(function($status, $filename) use ($progress) {
+        $linter->setProcessCallback(function ($status, $filename) use ($progress) {
             $progress->setMessage("<info>Checking: </info>{$filename}", 'filename');
             $progress->advance();
         });
