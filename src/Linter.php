@@ -93,6 +93,8 @@ class Linter
                 if (!isset($this->cache[$filename]) || $this->cache[$filename] !== md5_file($filename)) {
                     $running[$filename] = new Lint(PHP_BINARY.' -l '.$filename);
                     $running[$filename]->start();
+                } else {
+                    $newCache[$filename] = $this->cache[$filename];
                 }
             }
 
