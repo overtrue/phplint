@@ -11,7 +11,6 @@ namespace Overtrue\PHPLint\Command;
 use Overtrue\PHPLint\Linter;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Helper;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -186,10 +185,10 @@ class LintCommand extends Command
 
             if ($i && $i % $maxColumns === 0) {
                 $percent = floor(($i / $fileCount) * 100);
-                $output->writeln(str_pad(" {$i} / {$fileCount} ({$percent}%)", 18, " ", STR_PAD_LEFT));
+                $output->writeln(str_pad(" {$i} / {$fileCount} ({$percent}%)", 18, ' ', STR_PAD_LEFT));
             }
-            $i++;
-            $output->write($status == 'ok' ? '<info>.</info>' : '<error>E</error>');
+            ++$i;
+            $output->write($status === 'ok' ? '<info>.</info>' : '<error>E</error>');
         });
 
         return $linter->lint();
@@ -272,7 +271,7 @@ class LintCommand extends Command
      */
     protected function getScreenColumns()
     {
-        if (DIRECTORY_SEPARATOR == '\\') {
+        if (DIRECTORY_SEPARATOR === '\\') {
             $columns = 80;
 
             if (preg_match('/^(\d+)x\d+ \(\d+x(\d+)\)$/', trim(getenv('ANSICON')), $matches)) {
@@ -282,7 +281,7 @@ class LintCommand extends Command
                     'mode CON',
                     array(
                         1 => array('pipe', 'w'),
-                        2 => array('pipe', 'w')
+                        2 => array('pipe', 'w'),
                     ),
                     $pipes,
                     null,
