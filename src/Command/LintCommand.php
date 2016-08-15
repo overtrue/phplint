@@ -162,7 +162,7 @@ class LintCommand extends Command
         $progress->start();
 
         $linter->setProcessCallback(function ($status, $filename) use ($progress) {
-            $progress->setMessage("<info>Checking: </info>{$filename}", 'filename');
+            // $progress->setMessage("<info>Checking: </info>{$filename}", 'filename');
             $progress->advance();
         });
 
