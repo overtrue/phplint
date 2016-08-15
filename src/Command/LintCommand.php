@@ -137,14 +137,14 @@ class LintCommand extends Command
 
         $output->writeln($this->getApplication()->getLongVersion()." by overtrue and contributors.\n");
 
-        if (!$input->getOption('no-cache') && file_exists($this->cacheFile)) {
-            $linter->setCache(json_decode(file_get_contents($this->cacheFile), true));
-        }
-
         $options = $this->mergeOptions();
 
         $linter = new Linter($options['path'], $options['exclude'], $options['extensions']);
         $linter->setProcessLimit($options['jobs']);
+
+        if (!$input->getOption('no-cache') && file_exists($this->cacheFile)) {
+            $linter->setCache(json_decode(file_get_contents($this->cacheFile), true));
+        }
 
         $fileCount = count($linter->getFiles());
 
@@ -176,6 +176,11 @@ class LintCommand extends Command
         return $code;
     }
 
+    /**
+     * @param Linter          $linter
+     * @param OutputInterface $output
+     * @param int             $fileCount
+     */
     protected function executeLint($linter, $output, $fileCount)
     {
         $maxColumns = floor($this->getScreenColumns() / 2);
