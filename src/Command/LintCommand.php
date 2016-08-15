@@ -177,6 +177,8 @@ class LintCommand extends Command
     }
 
     /**
+     * Execute lint and return errors.
+     *
      * @param Linter          $linter
      * @param OutputInterface $output
      * @param int             $fileCount
