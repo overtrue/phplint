@@ -45,7 +45,7 @@ class LintCommand extends Command
     /**
      * @var string
      */
-    protected $cacheFile = __DIR__.'/../../.phplint-cache';
+    protected $cacheFile = '../../.phplint-cache';
 
     /**
      * Configures the current command.
@@ -142,8 +142,8 @@ class LintCommand extends Command
         $linter = new Linter($options['path'], $options['exclude'], $options['extensions']);
         $linter->setProcessLimit($options['jobs']);
 
-        if (!$input->getOption('no-cache') && file_exists($this->cacheFile)) {
-            $linter->setCache(json_decode(file_get_contents($this->cacheFile), true));
+        if (!$input->getOption('no-cache') && file_exists(__DIR__.'/'.$this->cacheFile)) {
+            $linter->setCache(json_decode(file_get_contents(__DIR__.'/'.$this->cacheFile), true));
         }
 
         $fileCount = count($linter->getFiles());
@@ -284,14 +284,14 @@ class LintCommand extends Command
             } elseif (function_exists('proc_open')) {
                 $process = proc_open(
                     'mode CON',
-                    array(
-                        1 => array('pipe', 'w'),
-                        2 => array('pipe', 'w'),
-                    ),
+                    [
+                        1 => ['pipe', 'w'],
+                        2 => ['pipe', 'w'],
+                    ],
                     $pipes,
                     null,
                     null,
-                    array('suppress_errors' => true)
+                    ['suppress_errors' => true]
                 );
                 if (is_resource($process)) {
                     $info = stream_get_contents($pipes[1]);
