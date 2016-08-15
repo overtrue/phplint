@@ -177,15 +177,15 @@ class LintCommand extends Command
     }
 
     /**
-     * @param Linter $linter
+     * @param Linter          $linter
      * @param OutputInterface $output
-     * @param integer $fileCount
+     * @param int             $fileCount
      */
     protected function executeLint($linter, $output, $fileCount)
     {
         $maxColumns = floor($this->getScreenColumns() / 2);
 
-        $linter->setProcessCallback(function($status, $filename) use ($output, $fileCount, $maxColumns) {
+        $linter->setProcessCallback(function ($status, $filename) use ($output, $fileCount, $maxColumns) {
             static $i = 0;
 
             if ($i && $i % $maxColumns === 0) {
