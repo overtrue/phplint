@@ -46,7 +46,7 @@ class Lint extends Process
      */
     public function parseError($message)
     {
-        $pattern = '/^Parse error:\s*(?:\w+ error,\s*)?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
+        $pattern = '/^(PHP\s+)?Parse error:\s*(?:\w+ error,\s*)?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
 
         preg_match($pattern, $message, $match);
 

@@ -60,6 +60,7 @@ class Linter
      */
     public function __construct($path, array $excludes = [], array $extensions = ['php'])
     {
+        ini_set('error_reporting', E_ALL);
         $this->path = $path;
         $this->excludes = $excludes;
         $this->extensions = $extensions;
