@@ -69,10 +69,11 @@ class Linter
      * Check the files.
      *
      * @param array $files
+     * @param bool  $cache
      *
      * @return array
      */
-    public function lint($files = [])
+    public function lint($files = [], $cache = true)
     {
         if (empty($files)) {
             $files = $this->getFiles();
@@ -113,7 +114,7 @@ class Linter
                 }
             }
 
-            file_put_contents(__DIR__.'/../.phplint-cache', json_encode($newCache));
+            $cache && Cache::put($newCache);
         }
 
         return $errors;

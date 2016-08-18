@@ -8,6 +8,7 @@
 
 namespace Overtrue\PHPLint\Command;
 
+use Overtrue\PHPLint\Cache;
 use Overtrue\PHPLint\Linter;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Helper;
@@ -41,11 +42,6 @@ class LintCommand extends Command
      * @var \Symfony\Component\Console\Output\OutputInterface
      */
     protected $output;
-
-    /**
-     * @var string
-     */
-    protected $cacheFile = '../../.phplint-cache';
 
     /**
      * Configures the current command.
@@ -142,8 +138,8 @@ class LintCommand extends Command
         $linter = new Linter($options['path'], $options['exclude'], $options['extensions']);
         $linter->setProcessLimit($options['jobs']);
 
-        if (!$input->getOption('no-cache') && file_exists(__DIR__.'/'.$this->cacheFile)) {
-            $linter->setCache(json_decode(file_get_contents(__DIR__.'/'.$this->cacheFile), true));
+        if (!$input->getOption('no-cache') && Cache::isCached()) {
+            $linter->setCache(Cache::get());
         }
 
         $fileCount = count($linter->getFiles());
@@ -154,7 +150,7 @@ class LintCommand extends Command
             return 0;
         }
 
-        $errors = $this->executeLint($linter, $output, $fileCount);
+        $errors = $this->executeLint($linter, $output, $fileCount, !$input->getOption('no-cache'));
 
         $timeUsage = Helper::formatTime(microtime(true) - $startTime);
         $memUsage = Helper::formatMemory(memory_get_usage(true) - $startMemUsage);
@@ -182,8 +178,9 @@ class LintCommand extends Command
      * @param Linter          $linter
      * @param OutputInterface $output
      * @param int             $fileCount
+     * @param bool            $cache
      */
-    protected function executeLint($linter, $output, $fileCount)
+    protected function executeLint($linter, $output, $fileCount, $cache = true)
     {
         $maxColumns = floor($this->getScreenColumns() / 2);
 
@@ -198,7 +195,7 @@ class LintCommand extends Command
             $output->write($status === 'ok' ? '<info>.</info>' : '<error>E</error>');
         });
 
-        return $linter->lint();
+        return $linter->lint([], $cache);
     }
 
     /**
