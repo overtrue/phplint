@@ -22,8 +22,8 @@ class Lint extends Process
     {
         $output = trim($this->getOutput());
 
-        if (defined('HHVM_VERSION')) {
-            return !empty($output);
+        if (defined('HHVM_VERSION') && empty($output)) {
+            return false;
         }
 
         return strpos($output, 'No syntax errors detected') === false;
