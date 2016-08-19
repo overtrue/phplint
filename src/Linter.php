@@ -60,7 +60,7 @@ class Linter
      */
     public function __construct($path, array $excludes = [], array $extensions = ['php'])
     {
-        $this->path = $path;
+        $this->path = is_dir($path) ? $path : dirname($path);
         $this->excludes = $excludes;
         $this->extensions = $extensions;
     }
@@ -92,7 +92,7 @@ class Linter
                 $filename = $file->getRealpath();
 
                 if (!isset($this->cache[$filename]) || $this->cache[$filename] !== md5_file($filename)) {
-                    $running[$filename] = new Lint(PHP_BINARY.' -l -d error_reporting=E_ALL -d display_errors=On '.escapeshellarg($filename));
+                    $running[$filename] = new Lint(PHP_BINARY.' -d error_reporting=E_ALL -d display_errors=On -l '.escapeshellarg($filename));
                     $running[$filename]->start();
                 } else {
                     $newCache[$filename] = $this->cache[$filename];

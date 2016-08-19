@@ -20,7 +20,13 @@ class Lint extends Process
      */
     public function hasSyntaxError()
     {
-        return strpos($this->getOutput(), 'No syntax errors detected') === false;
+        $output = trim($this->getOutput());
+
+        if (defined('HHVM_VERSION')) {
+            return !empty($output);
+        }
+
+        return strpos($output, 'No syntax errors detected') === false;
     }
 
     /**
@@ -29,9 +35,9 @@ class Lint extends Process
     public function getSyntaxError()
     {
         if ($this->hasSyntaxError()) {
-            list(, $out) = explode("\n", $this->getOutput());
+            $out = explode("\n", trim($this->getOutput()));
 
-            return $this->parseError($out);
+            return $this->parseError(array_shift($out));
         }
 
         return false;
@@ -46,15 +52,17 @@ class Lint extends Process
      */
     public function parseError($message)
     {
-        $pattern = '/^(PHP\s+)?Parse error:\s*(?:\w+ error,\s*)?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
+        $pattern = '/^(PHP\s+)?(Parse|Fatal) error:\s*(?:\w+ error,\s*)?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
 
-        preg_match($pattern, $message, $match);
+        $matched = preg_match($pattern, $message, $match);
 
-        $match = array_merge(['error' => 'Unknown', 'line' => 0], $match);
+        if (empty($message)) {
+            $message = 'Unknown';
+        }
 
         return [
-            'error' => $match['error'],
-            'line' => $match['line'],
+            'error' => $matched ? "{$match['error']} in line {$match['line']}" : $message,
+            'line' => $matched ? $match['line'] : 0,
         ];
     }
 }
