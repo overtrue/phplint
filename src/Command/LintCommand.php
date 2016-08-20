@@ -161,12 +161,12 @@ class LintCommand extends Command
         $output->writeln("\n\nTime: {$timeUsage}, Memory: {$memUsage}MB\n");
 
         if ($errCount > 0) {
-            $output->writeln('<error>FAILURES!</error>');
-            $output->writeln("<error>Files: {$fileCount}, Failures: {$errCount}</error>");
+            $output->writeln('<error>FAILURES!</error>', 16);
+            $output->writeln("<error>Files: {$fileCount}, Failures: {$errCount}</error>", 16);
             $this->showErrors($errors);
             $code = 1;
         } else {
-            $output->writeln("<info>OK! (Files: {$fileCount}, Success: {$fileCount})</info>");
+            $output->writeln("<info>OK! (Files: {$fileCount}, Success: {$fileCount})</info>", 16);
         }
 
         return $code;
@@ -179,10 +179,11 @@ class LintCommand extends Command
      * @param OutputInterface $output
      * @param int             $fileCount
      * @param bool            $cache
+     * @return mixed
      */
     protected function executeLint($linter, $output, $fileCount, $cache = true)
     {
-        $maxColumns = floor($this->getScreenColumns() / 2);
+        $maxColumns = floor(LintScreen::getNumberOfColumns() / 2);
 
         $linter->setProcessCallback(function ($status, $filename) use ($output, $fileCount, $maxColumns) {
             static $i = 0;
@@ -206,12 +207,12 @@ class LintCommand extends Command
     protected function showErrors($errors)
     {
         $i = 0;
-        $this->output->writeln("\nThere was ".count($errors).' errors:');
+        $this->output->writeln("\nThere was ".count($errors).' errors:', 16);
 
         foreach ($errors as $filename => $error) {
-            $this->output->writeln('<comment>'.++$i.". {$filename}:{$error['line']}".'</comment>');
+            $this->output->writeln('<comment>'.++$i.". {$filename}:{$error['line']}".'</comment>', 16);
             $error = preg_replace('~in\s+'.preg_quote($filename).'~', '', $error);
-            $this->output->writeln("<error> {$error['error']}</error>");
+            $this->output->writeln("<error> {$error['error']}</error>", 16);
         }
     }
 
@@ -264,64 +265,7 @@ class LintCommand extends Command
 
             return $configuration;
         } catch (ParseException $e) {
-            $this->output->writeln(sprintf('<error>Unable to parse the YAML string: %s</error>', $e->getMessage()));
+            $this->output->writeln(sprintf('<error>Unable to parse the YAML string: %s</error>', $e->getMessage()), 16);
         }
-    }
-
-    /**
-     * Get screen columns.
-     *
-     * @return int
-     */
-    protected function getScreenColumns()
-    {
-        if (DIRECTORY_SEPARATOR === '\\') {
-            $columns = 80;
-
-            if (preg_match('/^(\d+)x\d+ \(\d+x(\d+)\)$/', trim(getenv('ANSICON')), $matches)) {
-                $columns = $matches[1];
-            } elseif (function_exists('proc_open')) {
-                $process = proc_open(
-                    'mode CON',
-                    [
-                        1 => ['pipe', 'w'],
-                        2 => ['pipe', 'w'],
-                    ],
-                    $pipes,
-                    null,
-                    null,
-                    ['suppress_errors' => true]
-                );
-                if (is_resource($process)) {
-                    $info = stream_get_contents($pipes[1]);
-                    fclose($pipes[1]);
-                    fclose($pipes[2]);
-                    proc_close($process);
-                    if (preg_match('/--------+\r?\n.+?(\d+)\r?\n.+?(\d+)\r?\n/', $info, $matches)) {
-                        $columns = $matches[2];
-                    }
-                }
-            }
-
-            return $columns - 1;
-        }
-
-        if (!(function_exists('posix_isatty') && @posix_isatty($fileDescriptor))) {
-            return 80;
-        }
-
-        if (function_exists('shell_exec') && preg_match('#\d+ (\d+)#', shell_exec('stty size'), $match) === 1) {
-            if ((int) $match[1] > 0) {
-                return (int) $match[1];
-            }
-        }
-
-        if (function_exists('shell_exec') && preg_match('#columns = (\d+);#', shell_exec('stty'), $match) === 1) {
-            if ((int) $match[1] > 0) {
-                return (int) $match[1];
-            }
-        }
-
-        return 80;
     }
 }
