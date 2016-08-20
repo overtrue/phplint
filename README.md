@@ -33,9 +33,9 @@ Options:
   -c, --configuration=CONFIGURATION  Read configuration from config file (default: .phplint.yml).
       --no-configuration             Ignore default configuration file (default: .phplint.yml).
       --no-cache                     Ignore cached data.
-  -h, --help                         Display this help message
-  -q, --quiet                        Do not output any message
-  -V, --version                      Display this application version
+  -h, --help                         Display this help message.
+  -q, --quiet                        Quiet model, display result only.
+  -V, --version                      Display this application version.
 ```
 
 example:
