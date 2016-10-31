@@ -11,6 +11,7 @@ namespace Overtrue\PHPLint;
 use Overtrue\PHPLint\Process\Lint;
 use Symfony\Component\Finder\Finder;
 use SplFileInfo;
+use InvalidArgumentException;
 
 /**
  * Class Linter.
@@ -33,7 +34,7 @@ class Linter
     private $cache = [];
 
     /**
-     * @var string
+     * @var string|array
      */
     private $path;
 
@@ -55,19 +56,15 @@ class Linter
     /**
      * Constructor.
      *
-     * @param string $path
-     * @param array  $excludes
-     * @param array  $extensions
+     * @param string|array $path
+     * @param array        $excludes
+     * @param array        $extensions
      */
     public function __construct($path, array $excludes = [], array $extensions = ['php'])
     {
-        $this->path = is_dir($path) ? $path : dirname($path);
+        $this->path = $path;
         $this->excludes = $excludes;
         $this->extensions = $extensions;
-
-        if (is_file($path)) {
-            $this->files = [new SplFileInfo($path)];
-        }
     }
 
     /**
@@ -147,21 +144,65 @@ class Linter
     public function getFiles()
     {
         if (empty($this->files)) {
-            $finder = new Finder();
-            $finder->files()->ignoreUnreadableDirs()->in(realpath($this->path));
-
-            foreach ($this->excludes as $exclude) {
-                $finder->notPath($exclude);
+            foreach ((array) $this->path as $path) {
+                if (is_dir($path)) {
+                    $this->files = array_merge($this->files, $this->getFilesFromDir($path));
+                } else if (is_file($path)) {
+                    $file = new SplFileInfo($path);
+                    $this->files[$file->getRealPath()] = $file;
+                }
             }
-
-            foreach ($this->extensions as $extension) {
-                $finder->name('*.'.$extension);
-            }
-
-            $this->files = iterator_to_array($finder);
         }
 
         return $this->files;
+    }
+
+    /**
+     * Get files from directory.
+     *
+     * @param  string $dir
+     *
+     * @return array
+     */
+    protected function getFilesFromDir($dir)
+    {
+        $finder = new Finder();
+        $finder->files()->ignoreUnreadableDirs()->in(realpath($dir));
+
+        foreach ($this->excludes as $exclude) {
+            $finder->notPath($exclude);
+        }
+
+        foreach ($this->extensions as $extension) {
+            $finder->name('*.'.$extension);
+        }
+
+        return iterator_to_array($finder);
+    }
+
+    /**
+     * Set Files.
+     *
+     * @param array $files
+     *
+     * @return \Overtrue\PHPLint\Linter
+     */
+    public function setFiles(array $files)
+    {
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                $file = new SplFileInfo($file);
+            }
+
+            if (!($file instanceof SplFileInfo)) {
+                throw new InvalidArgumentException("File $file not exists.");
+            }
+
+            $file = new SplFileInfo($path);
+            $this->files[$file->getRealPath()] = $file;
+        }
+
+        return $this;
     }
 
     /**

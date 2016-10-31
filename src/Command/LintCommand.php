@@ -53,8 +53,8 @@ class LintCommand extends Command
             ->setDescription('Lint something')
             ->addArgument(
                 'path',
-                InputArgument::OPTIONAL,
-                'Path to file or directory to lint'
+                InputArgument::REQUIRED | InputArgument::IS_ARRAY,
+                'Path to file or directory to lint.'
             )
             ->addOption(
                 'exclude',
@@ -78,13 +78,13 @@ class LintCommand extends Command
                 'configuration',
                 'c',
                 InputOption::VALUE_REQUIRED,
-                'Read configuration from config file (default: .phplint.yml).'
+                'Read configuration from config file (default: ./.phplint.yml).'
             )
             ->addOption(
                 'no-configuration',
                 null,
                 InputOption::VALUE_NONE,
-                'Ignore default configuration file (default: .phplint.yml).'
+                'Ignore default configuration file (default: ./.phplint.yml).'
             )
             ->addOption(
                 'no-cache',
@@ -133,12 +133,21 @@ class LintCommand extends Command
 
         $output->writeln($this->getApplication()->getLongVersion()." by overtrue and contributors.\n");
 
-        $options = $this->mergeOptions();
+        $path = $this->input->getArgument('path');
 
-        $linter = new Linter($options['path'], $options['exclude'], $options['extensions']);
+        $options = $this->mergeOptions();
+        $verbosity = $output->getVerbosity();
+
+        if ($verbosity >= OutputInterface::VERBOSITY_DEBUG) {
+            $output->writeln('Path: '.json_encode($path));
+            $output->writeln('Options: '.json_encode($options));
+        }
+
+        $linter = new Linter($path, $options['exclude'], $options['extensions']);
         $linter->setProcessLimit($options['jobs']);
 
         if (!$input->getOption('no-cache') && Cache::isCached()) {
+            $output->writeln('Using cache.');
             $linter->setCache(Cache::get());
         }
 
@@ -183,8 +192,9 @@ class LintCommand extends Command
     protected function executeLint($linter, $output, $fileCount, $cache = true)
     {
         $maxColumns = floor($this->getScreenColumns() / 2);
+        $verbosity = $output->getVerbosity();
 
-        $linter->setProcessCallback(function ($status, $filename) use ($output, $fileCount, $maxColumns) {
+        $linter->setProcessCallback(function ($status, $filename) use ($output, $verbosity, $fileCount, $maxColumns) {
             static $i = 0;
 
             if ($i && $i % $maxColumns === 0) {
@@ -192,7 +202,11 @@ class LintCommand extends Command
                 $output->writeln(str_pad(" {$i} / {$fileCount} ({$percent}%)", 18, ' ', STR_PAD_LEFT));
             }
             ++$i;
-            $output->write($status === 'ok' ? '<info>.</info>' : '<error>E</error>');
+            if ($verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
+                $output->writeln('Linting: '.$filename. "\t".($status === 'ok' ? '<info>OK</info>' : '<error>Error</error>'));
+            } else {
+                $output->write($status === 'ok' ? '<info>.</info>' : '<error>E</error>');
+            }
         });
 
         return $linter->lint([], $cache);
@@ -223,15 +237,13 @@ class LintCommand extends Command
     protected function mergeOptions()
     {
         $options = $this->input->getOptions();
-        $options['path'] = $this->input->getArgument('path') ?: './';
-
         $config = [];
 
         if (!$this->input->getOption('no-configuration')) {
-            $filename = rtrim($options['path'], DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'.phplint.yml';
+            $filename = $this->getConfigFile();
 
-            if (!$options['configuration'] && file_exists($filename)) {
-                $options['configuration'] = realpath($filename);
+            if (empty($options['configuration']) && $filename) {
+                $options['configuration'] = $filename;
             }
 
             if (!empty($options['configuration'])) {
@@ -245,6 +257,26 @@ class LintCommand extends Command
         is_array($options['extensions']) || $options['extensions'] = explode(',', $options['extensions']);
 
         return $options;
+    }
+
+    /**
+     * Get configuration file.
+     *
+     * @return string|null
+     */
+    protected function getConfigFile()
+    {
+        $inputPath = $this->input->getArgument('path');
+
+        $dir = './';
+
+        if (count($inputPath) == 1 && $first = reset($inputPath)) {
+            $dir = is_dir($first) ? : dirname($first);
+        }
+
+        $filename = rtrim($dir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'.phplint.yml';
+
+        return realpath($filename);
     }
 
     /**
