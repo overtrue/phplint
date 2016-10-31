@@ -10,6 +10,7 @@ namespace Overtrue\PHPLint;
 
 use Overtrue\PHPLint\Process\Lint;
 use Symfony\Component\Finder\Finder;
+use SplFileInfo;
 
 /**
  * Class Linter.
@@ -63,6 +64,10 @@ class Linter
         $this->path = is_dir($path) ? $path : dirname($path);
         $this->excludes = $excludes;
         $this->extensions = $extensions;
+
+        if (is_file($path)) {
+            $this->files = [new SplFileInfo($path)];
+        }
     }
 
     /**
