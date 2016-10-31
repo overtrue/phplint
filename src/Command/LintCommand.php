@@ -248,7 +248,11 @@ class LintCommand extends Command
             if (!empty($options['configuration'])) {
                 $this->output->writeln("<comment>Loaded config from \"{$options['configuration']}\"</comment>\n");
                 $config = $this->loadConfiguration($options['configuration']);
+            } else {
+                $this->output->writeln("<comment>No config file loaded.</comment>\n");
             }
+        } else {
+            $this->output->writeln("<comment>No config file loaded.</comment>\n");
         }
 
         $options = array_merge($this->defaults, array_filter($config), array_filter($options));
@@ -270,7 +274,7 @@ class LintCommand extends Command
         $dir = './';
 
         if (count($inputPath) == 1 && $first = reset($inputPath)) {
-            $dir = is_dir($first) ? : dirname($first);
+            $dir = is_dir($first) ? $first : dirname($first);
         }
 
         $filename = rtrim($dir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'.phplint.yml';
