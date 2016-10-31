@@ -53,7 +53,7 @@ class LintCommand extends Command
             ->setDescription('Lint something')
             ->addArgument(
                 'path',
-                InputArgument::REQUIRED | InputArgument::IS_ARRAY,
+                InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
                 'Path to file or directory to lint.'
             )
             ->addOption(
@@ -133,17 +133,14 @@ class LintCommand extends Command
 
         $output->writeln($this->getApplication()->getLongVersion()." by overtrue and contributors.\n");
 
-        $path = $this->input->getArgument('path');
-
         $options = $this->mergeOptions();
         $verbosity = $output->getVerbosity();
 
         if ($verbosity >= OutputInterface::VERBOSITY_DEBUG) {
-            $output->writeln('Path: '.json_encode($path));
             $output->writeln('Options: '.json_encode($options));
         }
 
-        $linter = new Linter($path, $options['exclude'], $options['extensions']);
+        $linter = new Linter($options['path'], $options['exclude'], $options['extensions']);
         $linter->setProcessLimit($options['jobs']);
 
         if (!$input->getOption('no-cache') && Cache::isCached()) {
@@ -237,6 +234,8 @@ class LintCommand extends Command
     protected function mergeOptions()
     {
         $options = $this->input->getOptions();
+        $options['path'] = $this->input->getArgument('path');
+
         $config = [];
 
         if (!$this->input->getOption('no-configuration')) {
