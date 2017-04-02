@@ -87,6 +87,7 @@ class Linter
         $errors = [];
         $running = [];
         $newCache = [];
+        $phpbin = PHP_SAPI == 'cli' ? PHP_BINARY : PHP_BINDIR .'/php';
 
         while (!empty($files) || !empty($running)) {
             for ($i = count($running); !empty($files) && $i < $this->procLimit; ++$i) {
@@ -94,7 +95,7 @@ class Linter
                 $filename = $file->getRealpath();
 
                 if (!isset($this->cache[$filename]) || $this->cache[$filename] !== md5_file($filename)) {
-                    $running[$filename] = new Lint(PHP_BINARY.' -d error_reporting=E_ALL -d display_errors=On -l '.escapeshellarg($filename));
+                    $running[$filename] = new Lint($phpbin.' -d error_reporting=E_ALL -d display_errors=On -l '.escapeshellarg($filename));
                     $running[$filename]->start();
                 } else {
                     $newCache[$filename] = $this->cache[$filename];
