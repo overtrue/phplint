@@ -81,13 +81,13 @@ class Linter
             $files = $this->getFiles();
         }
 
-        $processCallback = is_callable($this->processCallback) ? $this->processCallback : function () {
+        $processCallback = is_callable($this->processCallback) ? $this->processCallback : function() {
         };
 
         $errors = [];
         $running = [];
         $newCache = [];
-        $phpbin = PHP_SAPI == 'cli' ? PHP_BINARY : PHP_BINDIR .'/php';
+        $phpbin = PHP_SAPI == 'cli' ? PHP_BINARY : PHP_BINDIR.'/php';
 
         while (!empty($files) || !empty($running)) {
             for ($i = count($running); !empty($files) && $i < $this->procLimit; ++$i) {
