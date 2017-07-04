@@ -3,7 +3,10 @@
 /*
  * This file is part of the overtrue/phplint.
  *
- * (c) 2016 overtrue <i@overtrue.me>
+ * (c) overtrue <i@overtrue.me>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
  */
 
 namespace Overtrue\PHPLint;
@@ -81,7 +84,7 @@ class Linter
             $files = $this->getFiles();
         }
 
-        $processCallback = is_callable($this->processCallback) ? $this->processCallback : function() {
+        $processCallback = is_callable($this->processCallback) ? $this->processCallback : function () {
         };
 
         $errors = [];
@@ -148,7 +151,7 @@ class Linter
             foreach ((array) $this->path as $path) {
                 if (is_dir($path)) {
                     $this->files = array_merge($this->files, $this->getFilesFromDir($path));
-                } else if (is_file($path)) {
+                } elseif (is_file($path)) {
                     $file = new SplFileInfo($path);
                     $this->files[$file->getRealPath()] = $file;
                 }
@@ -161,7 +164,7 @@ class Linter
     /**
      * Get files from directory.
      *
-     * @param  string $dir
+     * @param string $dir
      *
      * @return array
      */
