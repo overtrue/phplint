@@ -94,6 +94,12 @@ class LintCommand extends Command
                 null,
                 InputOption::VALUE_NONE,
                 'Ignore cached data.'
+            )
+            ->addOption(
+                'cache',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Path to the cache file.'
             );
     }
 
@@ -145,6 +151,10 @@ class LintCommand extends Command
 
         $linter = new Linter($options['path'], $options['exclude'], $options['extensions']);
         $linter->setProcessLimit($options['jobs']);
+
+        if ($input->getOption('cache') !== null) {
+            Cache::setFilename($input->getOption('cache'));
+        }
 
         if (!$input->getOption('no-cache') && Cache::isCached()) {
             $output->writeln('Using cache.');

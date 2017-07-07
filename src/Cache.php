@@ -57,10 +57,22 @@ class Cache
      * Set cache.
      *
      * @param mixed $contents
+     *
+     * @return int
      */
     public static function put($contents)
     {
         return file_put_contents(self::getFilename(), json_encode($contents));
+    }
+
+    /**
+     * Set cache filename.
+     *
+     * @param string $filename
+     */
+    public static function setFilename($filename)
+    {
+        self::$filename = $filename;
     }
 
     /**
