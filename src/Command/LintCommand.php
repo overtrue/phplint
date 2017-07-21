@@ -354,10 +354,6 @@ class LintCommand extends Command
             return $columns - 1;
         }
 
-        if (!(function_exists('posix_isatty') && @posix_isatty($fileDescriptor))) {
-            return 80;
-        }
-
         if (function_exists('shell_exec') && preg_match('#\d+ (\d+)#', shell_exec('stty size'), $match) === 1) {
             if ((int) $match[1] > 0) {
                 return (int) $match[1];
