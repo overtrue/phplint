@@ -29,7 +29,7 @@ class Lint extends Process
             return false;
         }
 
-        return strpos($output, 'No syntax errors detected') === false;
+        return false === strpos($output, 'No syntax errors detected');
     }
 
     /**

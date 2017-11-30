@@ -152,7 +152,7 @@ class LintCommand extends Command
         $linter = new Linter($options['path'], $options['exclude'], $options['extensions']);
         $linter->setProcessLimit($options['jobs']);
 
-        if ($input->getOption('cache') !== null) {
+        if (null !== $input->getOption('cache')) {
             Cache::setFilename($input->getOption('cache'));
         }
 
@@ -207,15 +207,15 @@ class LintCommand extends Command
         $linter->setProcessCallback(function ($status, $filename) use ($output, $verbosity, $fileCount, $maxColumns) {
             static $i = 0;
 
-            if ($i && $i % $maxColumns === 0) {
+            if ($i && 0 === $i % $maxColumns) {
                 $percent = floor(($i / $fileCount) * 100);
                 $output->writeln(str_pad(" {$i} / {$fileCount} ({$percent}%)", 18, ' ', STR_PAD_LEFT));
             }
             ++$i;
             if ($verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
-                $output->writeln('Linting: '.$filename."\t".($status === 'ok' ? '<info>OK</info>' : '<error>Error</error>'));
+                $output->writeln('Linting: '.$filename."\t".('ok' === $status ? '<info>OK</info>' : '<error>Error</error>'));
             } else {
-                $output->write($status === 'ok' ? '<info>.</info>' : '<error>E</error>');
+                $output->write('ok' === $status ? '<info>.</info>' : '<error>E</error>');
             }
         });
 
@@ -286,7 +286,7 @@ class LintCommand extends Command
 
         $dir = './';
 
-        if (count($inputPath) == 1 && $first = reset($inputPath)) {
+        if (1 == count($inputPath) && $first = reset($inputPath)) {
             $dir = is_dir($first) ? $first : dirname($first);
         }
 
@@ -354,13 +354,13 @@ class LintCommand extends Command
             return $columns - 1;
         }
 
-        if (function_exists('shell_exec') && preg_match('#\d+ (\d+)#', shell_exec('stty size'), $match) === 1) {
+        if (function_exists('shell_exec') && 1 === preg_match('#\d+ (\d+)#', shell_exec('stty size'), $match)) {
             if ((int) $match[1] > 0) {
                 return (int) $match[1];
             }
         }
 
-        if (function_exists('shell_exec') && preg_match('#columns = (\d+);#', shell_exec('stty'), $match) === 1) {
+        if (function_exists('shell_exec') && 1 === preg_match('#columns = (\d+);#', shell_exec('stty'), $match)) {
             if ((int) $match[1] > 0) {
                 return (int) $match[1];
             }
