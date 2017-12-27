@@ -112,11 +112,11 @@ class Linter
 
                 unset($running[$filename]);
                 if ($lintProcess->hasSyntaxError()) {
-                    $processCallback('error', $filename);
+                    $processCallback('error', $file);
                     $errors[$filename] = array_merge(['file' => $filename], $lintProcess->getSyntaxError());
                 } else {
                     $newCache[$filename] = md5_file($filename);
-                    $processCallback('ok', $filename);
+                    $processCallback('ok', $file);
                 }
             }
 
@@ -227,6 +227,8 @@ class Linter
      * Set process limit.
      *
      * @param int $procLimit
+     *
+     * @return \Overtrue\PHPLint\Linter
      */
     public function setProcessLimit($procLimit)
     {

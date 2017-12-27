@@ -20,7 +20,7 @@ use Symfony\Component\Console\Input\InputInterface;
 class Application extends BaseApplication
 {
     const NAME = 'phplint';
-    const VERSION = '0.2.4';
+    const VERSION = '1.0.0';
 
     /**
      * Constructor.

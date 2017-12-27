@@ -19,6 +19,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Terminal;
+use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
@@ -156,8 +158,9 @@ class LintCommand extends Command
             Cache::setFilename($input->getOption('cache'));
         }
 
+        $usingCache = 'no';
         if (!$input->getOption('no-cache') && Cache::isCached()) {
-            $output->writeln('Using cache.');
+            $usingCache = 'yes';
             $linter->setCache(Cache::get());
         }
 
@@ -169,7 +172,7 @@ class LintCommand extends Command
             return 0;
         }
 
-        $errors = $this->executeLint($linter, $output, $fileCount, !$input->getOption('no-cache'));
+        $errors = $this->executeLint($linter, $input, $output, $fileCount);
 
         $timeUsage = Helper::formatTime(microtime(true) - $startTime);
         $memUsage = Helper::formatMemory(memory_get_usage(true) - $startMemUsage);
@@ -177,7 +180,7 @@ class LintCommand extends Command
         $code = 0;
         $errCount = count($errors);
 
-        $output->writeln("\n\nTime: {$timeUsage}, Memory: {$memUsage}MB\n");
+        $output->writeln("\n\nTime: {$timeUsage}, Memory: {$memUsage}, Using Cache: {$usingCache}.\n");
 
         if ($errCount > 0) {
             $output->writeln('<error>FAILURES!</error>');
@@ -195,28 +198,35 @@ class LintCommand extends Command
      * Execute lint and return errors.
      *
      * @param Linter          $linter
+     * @param InputInterface  $input
      * @param OutputInterface $output
      * @param int             $fileCount
-     * @param bool            $cache
+     *
+     * @return array
      */
-    protected function executeLint($linter, $output, $fileCount, $cache = true)
+    protected function executeLint($linter, $input, $output, $fileCount)
     {
-        $maxColumns = floor($this->getScreenColumns() / 2);
+        $cache = !$input->getOption('no-cache');
+        $maxColumns = floor((new Terminal())->getWidth() / 2);
         $verbosity = $output->getVerbosity();
 
-        $linter->setProcessCallback(function ($status, $filename) use ($output, $verbosity, $fileCount, $maxColumns) {
-            static $i = 0;
+        $linter->setProcessCallback(function ($status, SplFileInfo $file) use ($output, $verbosity, $fileCount, $maxColumns) {
+            static $i = 1;
 
-            if ($i && $i % $maxColumns === 0) {
-                $percent = floor(($i / $fileCount) * 100);
-                $output->writeln(str_pad(" {$i} / {$fileCount} ({$percent}%)", 18, ' ', STR_PAD_LEFT));
-            }
-            ++$i;
+            $percent = floor(($i / $fileCount) * 100);
+            $process = str_pad(" {$i} / {$fileCount} ({$percent}%)", 18, ' ', STR_PAD_LEFT);
+
             if ($verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
-                $output->writeln('Linting: '.$filename."\t".($status === 'ok' ? '<info>OK</info>' : '<error>Error</error>'));
+                $filename = str_pad(" {$i}: ". $file->getRelativePathname(), $maxColumns - 10, ' ', \STR_PAD_RIGHT);
+                $status = \str_pad(($status === 'ok' ? '<info>OK</info>' : '<error>Error</error>'), 20, ' ', \STR_PAD_RIGHT);
+                $output->writeln(\sprintf("%s\t%s\t%s", $filename, $status, $process));
             } else {
+                if ($i && $i % $maxColumns === 0) {
+                    $output->writeln($process);
+                }
                 $output->write($status === 'ok' ? '<info>.</info>' : '<error>E</error>');
             }
+            ++$i;
         });
 
         return $linter->lint([], $cache);
@@ -314,62 +324,5 @@ class LintCommand extends Command
         } catch (ParseException $e) {
             $this->output->writeln(sprintf('<error>Unable to parse the YAML string: %s</error>', $e->getMessage()));
         }
-    }
-
-    /**
-     * Get screen columns.
-     *
-     * @return int
-     */
-    protected function getScreenColumns()
-    {
-        if (DIRECTORY_SEPARATOR === '\\') {
-            $columns = 80;
-
-            if (preg_match('/^(\d+)x\d+ \(\d+x(\d+)\)$/', trim(getenv('ANSICON')), $matches)) {
-                $columns = $matches[1];
-            } elseif (function_exists('proc_open')) {
-                $process = proc_open(
-                    'mode CON',
-                    [
-                        1 => ['pipe', 'w'],
-                        2 => ['pipe', 'w'],
-                    ],
-                    $pipes,
-                    null,
-                    null,
-                    ['suppress_errors' => true]
-                );
-                if (is_resource($process)) {
-                    $info = stream_get_contents($pipes[1]);
-                    fclose($pipes[1]);
-                    fclose($pipes[2]);
-                    proc_close($process);
-                    if (preg_match('/--------+\r?\n.+?(\d+)\r?\n.+?(\d+)\r?\n/', $info, $matches)) {
-                        $columns = $matches[2];
-                    }
-                }
-            }
-
-            return $columns - 1;
-        }
-
-        if (!(function_exists('posix_isatty') && @posix_isatty($fileDescriptor))) {
-            return 80;
-        }
-
-        if (function_exists('shell_exec') && preg_match('#\d+ (\d+)#', shell_exec('stty size'), $match) === 1) {
-            if ((int) $match[1] > 0) {
-                return (int) $match[1];
-            }
-        }
-
-        if (function_exists('shell_exec') && preg_match('#columns = (\d+);#', shell_exec('stty'), $match) === 1) {
-            if ((int) $match[1] > 0) {
-                return (int) $match[1];
-            }
-        }
-
-        return 80;
     }
 }
