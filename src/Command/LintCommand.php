@@ -20,7 +20,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
-use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
@@ -213,7 +212,7 @@ class LintCommand extends Command
         $maxColumns = floor((new Terminal())->getWidth() / 2);
         $verbosity = $output->getVerbosity();
 
-        $linter->setProcessCallback(function ($status, SplFileInfo $file) use ($output, $verbosity, $fileCount, $maxColumns) {
+        $linter->setProcessCallback(function ($status, \SplFileInfo $file) use ($output, $verbosity, $fileCount, $maxColumns) {
             static $i = 1;
 
             $percent = floor(($i / $fileCount) * 100);
