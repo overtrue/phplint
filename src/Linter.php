@@ -13,7 +13,7 @@ namespace Overtrue\PHPLint;
 
 use InvalidArgumentException;
 use Overtrue\PHPLint\Process\Lint;
-use SplFileInfo;
+use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -155,8 +155,7 @@ class Linter
                 if (is_dir($path)) {
                     $this->files = array_merge($this->files, $this->getFilesFromDir($path));
                 } elseif (is_file($path)) {
-                    $file = new SplFileInfo($path);
-                    $this->files[$file->getRealPath()] = $file;
+                    $this->files[$path] = new SplFileInfo($path, $path, $path);
                 }
             }
         }
@@ -198,14 +197,13 @@ class Linter
     {
         foreach ($files as $file) {
             if (is_file($file)) {
-                $file = new SplFileInfo($file);
+                $file = new SplFileInfo($file, $file, $file);
             }
 
             if (!($file instanceof SplFileInfo)) {
                 throw new InvalidArgumentException("File $file not exists.");
             }
 
-            $file = new SplFileInfo($file);
             $this->files[$file->getRealPath()] = $file;
         }
 
