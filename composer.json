@@ -31,6 +31,6 @@
     "bin/phplint"
   ],
   "scripts": {
-    "lint:syntax": "./bin/phplint"
+    "lint:syntax": "./bin/phplint --ansi"
   }
 }

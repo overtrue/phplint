@@ -11,10 +11,10 @@
 
 namespace Overtrue\PHPLint;
 
-use Overtrue\PHPLint\Process\Lint;
-use Symfony\Component\Finder\Finder;
-use SplFileInfo;
 use InvalidArgumentException;
+use Overtrue\PHPLint\Process\Lint;
+use SplFileInfo;
+use Symfony\Component\Finder\Finder;
 
 /**
  * Class Linter.
@@ -54,7 +54,7 @@ class Linter
     /**
      * @var int
      */
-    private $procLimit = 5;
+    private $processLimit = 5;
 
     /**
      * Constructor.
@@ -93,30 +93,33 @@ class Linter
         $phpbin = PHP_SAPI == 'cli' ? PHP_BINARY : PHP_BINDIR.'/php';
 
         while (!empty($files) || !empty($running)) {
-            for ($i = count($running); !empty($files) && $i < $this->procLimit; ++$i) {
+            for ($i = count($running); !empty($files) && $i < $this->processLimit; ++$i) {
                 $file = array_shift($files);
                 $filename = $file->getRealpath();
 
                 if (!isset($this->cache[$filename]) || $this->cache[$filename] !== md5_file($filename)) {
-                    $running[$filename] = new Lint($phpbin.' -d error_reporting=E_ALL -d display_errors=On -l '.escapeshellarg($filename));
-                    $running[$filename]->start();
+                    $running[$filename] = [
+                        'process' => new Lint($phpbin.' -d error_reporting=E_ALL -d display_errors=On -l '.escapeshellarg($filename)),
+                        'file' => $file,
+                    ];
+                    $running[$filename]['process']->start();
                 } else {
                     $newCache[$filename] = $this->cache[$filename];
                 }
             }
 
-            foreach ($running as $filename => $lintProcess) {
-                if ($lintProcess->isRunning()) {
+            foreach ($running as $filename => $item) {
+                if ($item['process']->isRunning()) {
                     continue;
                 }
 
                 unset($running[$filename]);
-                if ($lintProcess->hasSyntaxError()) {
-                    $processCallback('error', $file);
-                    $errors[$filename] = array_merge(['file' => $filename], $lintProcess->getSyntaxError());
+                if ($item['process']->hasSyntaxError()) {
+                    $processCallback('error', $item['file']);
+                    $errors[$filename] = array_merge(['file' => $filename], $item['process']->getSyntaxError());
                 } else {
                     $newCache[$filename] = md5_file($filename);
-                    $processCallback('ok', $file);
+                    $processCallback('ok', $item['file']);
                 }
             }
 
@@ -202,7 +205,7 @@ class Linter
                 throw new InvalidArgumentException("File $file not exists.");
             }
 
-            $file = new SplFileInfo($path);
+            $file = new SplFileInfo($file);
             $this->files[$file->getRealPath()] = $file;
         }
 
@@ -226,13 +229,13 @@ class Linter
     /**
      * Set process limit.
      *
-     * @param int $procLimit
+     * @param int $processLimit
      *
      * @return \Overtrue\PHPLint\Linter
      */
-    public function setProcessLimit($procLimit)
+    public function setProcessLimit($processLimit)
     {
-        $this->procLimit = $procLimit;
+        $this->processLimit = $processLimit;
 
         return $this;
     }

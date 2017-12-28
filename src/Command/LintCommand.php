@@ -148,7 +148,7 @@ class LintCommand extends Command
         $verbosity = $output->getVerbosity();
 
         if ($verbosity >= OutputInterface::VERBOSITY_DEBUG) {
-            $output->writeln('Options: '.json_encode($options));
+            $output->writeln('Options: '.json_encode($options)."\n");
         }
 
         $linter = new Linter($options['path'], $options['exclude'], $options['extensions']);
@@ -158,9 +158,9 @@ class LintCommand extends Command
             Cache::setFilename($input->getOption('cache'));
         }
 
-        $usingCache = 'no';
+        $usingCache = 'No';
         if (!$input->getOption('no-cache') && Cache::isCached()) {
-            $usingCache = 'yes';
+            $usingCache = 'Yes';
             $linter->setCache(Cache::get());
         }
 
@@ -180,7 +180,10 @@ class LintCommand extends Command
         $code = 0;
         $errCount = count($errors);
 
-        $output->writeln("\n\nTime: {$timeUsage}, Memory: {$memUsage}, Using Cache: {$usingCache}.\n");
+        $output->writeln(sprintf(
+            "\n\nTime: <info>%s</info>\tMemory: <info>%s</info>\tCache: <info>%s</info>\n",
+            $timeUsage, $memUsage, $usingCache
+        ));
 
         if ($errCount > 0) {
             $output->writeln('<error>FAILURES!</error>');
@@ -217,7 +220,7 @@ class LintCommand extends Command
             $process = str_pad(" {$i} / {$fileCount} ({$percent}%)", 18, ' ', STR_PAD_LEFT);
 
             if ($verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
-                $filename = str_pad(" {$i}: ". $file->getRelativePathname(), $maxColumns - 10, ' ', \STR_PAD_RIGHT);
+                $filename = str_pad(" {$i}: ".$file->getRelativePathname(), $maxColumns - 10, ' ', \STR_PAD_RIGHT);
                 $status = \str_pad(($status === 'ok' ? '<info>OK</info>' : '<error>Error</error>'), 20, ' ', \STR_PAD_RIGHT);
                 $output->writeln(\sprintf("%s\t%s\t%s", $filename, $status, $process));
             } else {

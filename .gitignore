@@ -1,3 +1,4 @@
 composer.lock
 /vendor/
 .phplint-cache
+.php_cs.cache
