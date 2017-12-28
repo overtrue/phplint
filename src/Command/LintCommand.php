@@ -154,7 +154,7 @@ class LintCommand extends Command
         $linter = new Linter($options['path'], $options['exclude'], $options['extensions']);
         $linter->setProcessLimit($options['jobs']);
 
-        if ($input->getOption('cache') !== null) {
+        if (null !== $input->getOption('cache')) {
             Cache::setFilename($input->getOption('cache'));
         }
 
@@ -221,13 +221,13 @@ class LintCommand extends Command
 
             if ($verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
                 $filename = str_pad(" {$i}: ".$file->getRelativePathname(), $maxColumns - 10, ' ', \STR_PAD_RIGHT);
-                $status = \str_pad(($status === 'ok' ? '<info>OK</info>' : '<error>Error</error>'), 20, ' ', \STR_PAD_RIGHT);
+                $status = \str_pad(('ok' === $status ? '<info>OK</info>' : '<error>Error</error>'), 20, ' ', \STR_PAD_RIGHT);
                 $output->writeln(\sprintf("%s\t%s\t%s", $filename, $status, $process));
             } else {
-                if ($i && $i % $maxColumns === 0) {
+                if ($i && 0 === $i % $maxColumns) {
                     $output->writeln($process);
                 }
-                $output->write($status === 'ok' ? '<info>.</info>' : '<error>E</error>');
+                $output->write('ok' === $status ? '<info>.</info>' : '<error>E</error>');
             }
             ++$i;
         });
@@ -299,7 +299,7 @@ class LintCommand extends Command
 
         $dir = './';
 
-        if (count($inputPath) == 1 && $first = reset($inputPath)) {
+        if (1 == count($inputPath) && $first = reset($inputPath)) {
             $dir = is_dir($first) ? $first : dirname($first);
         }
 
