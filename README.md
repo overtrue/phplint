@@ -33,6 +33,7 @@ Options:
   -c, --configuration=CONFIGURATION  Read configuration from config file (default: ./.phplint.yml).
       --no-configuration             Ignore default configuration file (default: ./.phplint.yml).
       --no-cache                     Ignore cached data.
+      --cache=CACHE                  Path to the cache file.
   -h, --help                         Display this help message
   -q, --quiet                        Do not output any message
   -V, --version                      Display this application version
@@ -56,6 +57,7 @@ You can also define configuration as a file `.phplint.yml`:
 ```yaml
 path: ./
 jobs: 10
+cache: build/phplint.cache
 extensions:
   - php
 exclude:
@@ -102,4 +104,3 @@ $errors = $linter->lint();
 ## License
 
 MIT
-

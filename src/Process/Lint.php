@@ -33,7 +33,7 @@ class Lint extends Process
     }
 
     /**
-     * @return bool|string
+     * @return bool|array
      */
     public function getSyntaxError()
     {
