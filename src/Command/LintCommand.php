@@ -261,6 +261,7 @@ class LintCommand extends Command
     {
         $options = $this->input->getOptions();
         $options['path'] = $this->input->getArgument('path');
+        $options['cache'] = $this->input->getOption('cache');
 
         $config = [];
 
