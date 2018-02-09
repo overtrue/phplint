@@ -57,6 +57,7 @@ You can also define configuration as a file `.phplint.yml`:
 ```yaml
 path: ./
 jobs: 10
+cache: build/phplint.cache
 extensions:
   - php
 exclude:
@@ -103,4 +104,3 @@ $errors = $linter->lint();
 ## License
 
 MIT
-
