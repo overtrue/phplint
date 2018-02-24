@@ -154,7 +154,7 @@ class LintCommand extends Command
         $linter = new Linter($options['path'], $options['exclude'], $options['extensions']);
         $linter->setProcessLimit($options['jobs']);
 
-        if ($options['cache']) {
+        if (!empty($options['cache'])) {
             Cache::setFilename($options['cache']);
         }
 
