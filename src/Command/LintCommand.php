@@ -109,7 +109,7 @@ class LintCommand extends Command
                 'json',
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Output JSON results to a file.'
+                'Path to store JSON results.'
             );
     }
 
