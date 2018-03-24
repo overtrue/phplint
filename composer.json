@@ -22,6 +22,9 @@
     "symfony/process": "^3.0|^4.0",
     "symfony/yaml": "^3.0|^4.0"
   },
+  "require-dev": {
+    "jakub-onderka/php-console-highlighter": "^0.3.2"
+  },
   "autoload": {
     "psr-4": {
       "Overtrue\\PHPLint\\": "src/"

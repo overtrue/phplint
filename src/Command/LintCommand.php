@@ -11,6 +11,8 @@
 
 namespace Overtrue\PHPLint\Command;
 
+use JakubOnderka\PhpConsoleColor\ConsoleColor;
+use JakubOnderka\PhpConsoleHighlighter\Highlighter;
 use Overtrue\PHPLint\Cache;
 use Overtrue\PHPLint\Linter;
 use Symfony\Component\Console\Command\Command;
@@ -102,6 +104,12 @@ class LintCommand extends Command
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Path to the cache file.'
+            )
+            ->addOption(
+                'json',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Output JSON results to a file.'
             );
     }
 
@@ -136,6 +144,7 @@ class LintCommand extends Command
      * @return null|int null or 0 if everything went fine, or an error code
      *
      * @see setCode()
+     * @throws \JakubOnderka\PhpConsoleColor\InvalidStyleException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -194,7 +203,33 @@ class LintCommand extends Command
             $output->writeln("<info>OK! (Files: {$fileCount}, Success: {$fileCount})</info>");
         }
 
+        if (!empty($options['json'])) {
+            $this->dumpResult($options['json'], $errors, $options, [
+                'time_usage' => $timeUsage,
+                'memory_usage' => $memUsage,
+                'using_cache' => $usingCache == 'Yes',
+                'files_count' => $fileCount,
+            ]);
+        }
+
         return $code;
+    }
+
+    /**
+     * @param string $path
+     * @param array  $errors
+     * @param array  $options
+     * @param array  $context
+     */
+    protected function dumpResult($path, array $errors, array $options, array $context = [])
+    {
+        $result = [
+            'status' => 'success',
+            'options' => $options,
+            'errors' => $errors,
+        ];
+
+        \file_put_contents((string) $path, \json_encode(\array_merge($result, $context)));
     }
 
     /**
@@ -239,6 +274,8 @@ class LintCommand extends Command
      * Show errors detail.
      *
      * @param array $errors
+     *
+     * @throws \JakubOnderka\PhpConsoleColor\InvalidStyleException
      */
     protected function showErrors($errors)
     {
@@ -247,9 +284,62 @@ class LintCommand extends Command
 
         foreach ($errors as $filename => $error) {
             $this->output->writeln('<comment>'.++$i.". {$filename}:{$error['line']}".'</comment>');
-            $error = preg_replace('~in\s+'.preg_quote($filename).'~', '', $error);
+
+            $this->output->write($this->getHighlightedCodeSnippet($filename, $error['line']));
+
             $this->output->writeln("<error> {$error['error']}</error>");
         }
+    }
+
+    /**
+     * @param string $filePath
+     * @param int    $lineNumber
+     * @param int    $linesBefore
+     * @param int    $linesAfter
+     *
+     * @return string
+     */
+    protected function getCodeSnippet($filePath, $lineNumber, $linesBefore = 3, $linesAfter = 3)
+    {
+        $lines = file($filePath);
+        $offset = $lineNumber - $linesBefore - 1;
+        $offset = max($offset, 0);
+        $length = $linesAfter + $linesBefore + 1;
+        $lines = array_slice($lines, $offset, $length, $preserveKeys = true);
+        end($lines);
+        $lineStrlen = strlen(key($lines) + 1);
+        $snippet = '';
+
+        foreach ($lines as $i => $line) {
+            $snippet .= (abs($lineNumber) === $i + 1 ? '  > ' : '    ');
+            $snippet .= str_pad($i + 1, $lineStrlen, ' ', STR_PAD_LEFT) . '| ' . rtrim($line) . PHP_EOL;
+        }
+
+        return $snippet;
+    }
+
+    /**
+     * @param string $filePath
+     * @param int    $lineNumber
+     * @param int    $linesBefore
+     * @param int    $linesAfter
+     *
+     * @return string
+     * @throws \JakubOnderka\PhpConsoleColor\InvalidStyleException
+     */
+    public function getHighlightedCodeSnippet($filePath, $lineNumber, $linesBefore = 3, $linesAfter = 3)
+    {
+        if (
+            !class_exists('\JakubOnderka\PhpConsoleHighlighter\Highlighter') ||
+            !class_exists('\JakubOnderka\PhpConsoleColor\ConsoleColor')
+        ) {
+            return $this->getCodeSnippet($filePath, $lineNumber, $linesBefore, $linesAfter);
+        }
+
+        $colors = new ConsoleColor();
+        $highlighter = new Highlighter($colors);
+        $fileContent = file_get_contents($filePath);
+        return $highlighter->getCodeSnippet($fileContent, $lineNumber, $linesBefore, $linesAfter);
     }
 
     /**
