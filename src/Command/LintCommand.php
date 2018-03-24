@@ -144,6 +144,7 @@ class LintCommand extends Command
      * @return null|int null or 0 if everything went fine, or an error code
      *
      * @see setCode()
+     *
      * @throws \JakubOnderka\PhpConsoleColor\InvalidStyleException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -207,7 +208,7 @@ class LintCommand extends Command
             $this->dumpResult($options['json'], $errors, $options, [
                 'time_usage' => $timeUsage,
                 'memory_usage' => $memUsage,
-                'using_cache' => $usingCache == 'Yes',
+                'using_cache' => 'Yes' == $usingCache,
                 'files_count' => $fileCount,
             ]);
         }
@@ -312,7 +313,7 @@ class LintCommand extends Command
 
         foreach ($lines as $i => $line) {
             $snippet .= (abs($lineNumber) === $i + 1 ? '  > ' : '    ');
-            $snippet .= str_pad($i + 1, $lineStrlen, ' ', STR_PAD_LEFT) . '| ' . rtrim($line) . PHP_EOL;
+            $snippet .= str_pad($i + 1, $lineStrlen, ' ', STR_PAD_LEFT).'| '.rtrim($line).PHP_EOL;
         }
 
         return $snippet;
@@ -325,6 +326,7 @@ class LintCommand extends Command
      * @param int    $linesAfter
      *
      * @return string
+     *
      * @throws \JakubOnderka\PhpConsoleColor\InvalidStyleException
      */
     public function getHighlightedCodeSnippet($filePath, $lineNumber, $linesBefore = 3, $linesAfter = 3)
@@ -339,6 +341,7 @@ class LintCommand extends Command
         $colors = new ConsoleColor();
         $highlighter = new Highlighter($colors);
         $fileContent = file_get_contents($filePath);
+
         return $highlighter->getCodeSnippet($fileContent, $lineNumber, $linesBefore, $linesAfter);
     }
 
