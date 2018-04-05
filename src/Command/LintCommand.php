@@ -420,6 +420,8 @@ class LintCommand extends Command
             return $configuration;
         } catch (ParseException $e) {
             $this->output->writeln(sprintf('<error>Unable to parse the YAML string: %s</error>', $e->getMessage()));
+
+            return [];
         }
     }
 }
