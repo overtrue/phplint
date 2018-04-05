@@ -13,8 +13,8 @@ namespace Overtrue\PHPLint;
 
 use InvalidArgumentException;
 use Overtrue\PHPLint\Process\Lint;
-use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
 
 /**
  * Class Linter.
