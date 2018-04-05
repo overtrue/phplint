@@ -205,7 +205,7 @@ class LintCommand extends Command
         }
 
         if (!empty($options['json'])) {
-            $this->dumpResult($options['json'], $errors, $options, [
+            $this->dumpResult((string) $options['json'], $errors, $options, [
                 'time_usage' => $timeUsage,
                 'memory_usage' => $memUsage,
                 'using_cache' => 'Yes' == $usingCache,
@@ -230,7 +230,7 @@ class LintCommand extends Command
             'errors' => $errors,
         ];
 
-        \file_put_contents((string) $path, \json_encode(\array_merge($result, $context)));
+        \file_put_contents($path, \json_encode(\array_merge($result, $context)));
     }
 
     /**
