@@ -17,6 +17,7 @@
   ],
   "require": {
     "php": ">=5.5.9",
+    "ext-json": "*",
     "symfony/console": "^3.0|^4.0",
     "symfony/finder": "^3.0|^4.0",
     "symfony/process": "^3.0|^4.0",
