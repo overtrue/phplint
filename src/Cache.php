@@ -73,6 +73,20 @@ class Cache
     public static function setFilename($filename)
     {
         self::$filename = $filename;
+        self::makeFolderForFilename();
+    }
+
+    /**
+     * Try to create the folder recursively where the cache file is stored.
+     * It depends on current value of static::getFilename().
+     */
+    private static function makeFolderForFilename()
+    {
+        $filename = self::getFilename();
+        $dirname = dirname($filename);
+        if (!file_exists($dirname)) {
+            mkdir($dirname, 0777, true);
+        }
     }
 
     /**
