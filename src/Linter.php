@@ -98,25 +98,28 @@ class Linter
                 $filename = $file->getRealpath();
 
                 if (!isset($this->cache[$filename]) || $this->cache[$filename] !== md5_file($filename)) {
+                    $lint = new Lint($phpbin.' -d error_reporting=E_ALL -d display_errors=On -l '.escapeshellarg($filename));
                     $running[$filename] = [
-                        'process' => new Lint($phpbin.' -d error_reporting=E_ALL -d display_errors=On -l '.escapeshellarg($filename)),
+                        'process' => $lint,
                         'file' => $file,
                     ];
-                    $running[$filename]['process']->start();
+                    $lint->start();
                 } else {
                     $newCache[$filename] = $this->cache[$filename];
                 }
             }
 
             foreach ($running as $filename => $item) {
-                if ($item['process']->isRunning()) {
+                /** @var Lint $lint */
+                $lint = $item['process'];
+                if ($lint->isRunning()) {
                     continue;
                 }
 
                 unset($running[$filename]);
-                if ($item['process']->hasSyntaxError()) {
+                if ($lint->hasSyntaxError()) {
                     $processCallback('error', $item['file']);
-                    $errors[$filename] = array_merge(['file' => $filename], $item['process']->getSyntaxError());
+                    $errors[$filename] = array_merge(['file' => $filename], $lint->getSyntaxError());
                 } else {
                     $newCache[$filename] = md5_file($filename);
                     $processCallback('ok', $item['file']);
