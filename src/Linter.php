@@ -27,7 +27,7 @@ class Linter
     private $processCallback;
 
     /**
-     * @var array
+     * @var SplFileInfo[]
      */
     private $files = [];
 
@@ -73,8 +73,8 @@ class Linter
     /**
      * Check the files.
      *
-     * @param array $files
-     * @param bool  $cache
+     * @param SplFileInfo[] $files
+     * @param bool          $cache
      *
      * @return array
      */
@@ -95,7 +95,7 @@ class Linter
         while (!empty($files) || !empty($running)) {
             for ($i = count($running); !empty($files) && $i < $this->processLimit; ++$i) {
                 $file = array_shift($files);
-                $filename = $file->getRealpath();
+                $filename = $file->getRealPath();
 
                 if (!isset($this->cache[$filename]) || $this->cache[$filename] !== md5_file($filename)) {
                     $lint = new Lint(escapeshellcmd($phpbin).' -d error_reporting=E_ALL -d display_errors=On -l '.escapeshellarg($filename));
@@ -149,7 +149,7 @@ class Linter
     /**
      * Fetch files.
      *
-     * @return array
+     * @return SplFileInfo[]
      */
     public function getFiles()
     {
@@ -171,7 +171,7 @@ class Linter
      *
      * @param string $dir
      *
-     * @return array
+     * @return SplFileInfo[]
      */
     protected function getFilesFromDir($dir)
     {
@@ -192,7 +192,7 @@ class Linter
     /**
      * Set Files.
      *
-     * @param array $files
+     * @param string[] $files
      *
      * @return \Overtrue\PHPLint\Linter
      */
