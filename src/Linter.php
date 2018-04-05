@@ -37,7 +37,7 @@ class Linter
     private $cache = [];
 
     /**
-     * @var string|array
+     * @var array
      */
     private $path;
 
@@ -65,7 +65,7 @@ class Linter
      */
     public function __construct($path, array $excludes = [], array $extensions = ['php'])
     {
-        $this->path = $path;
+        $this->path = (array) $path;
         $this->excludes = $excludes;
         $this->extensions = $extensions;
     }
@@ -154,7 +154,7 @@ class Linter
     public function getFiles()
     {
         if (empty($this->files)) {
-            foreach ((array) $this->path as $path) {
+            foreach ($this->path as $path) {
                 if (is_dir($path)) {
                     $this->files = array_merge($this->files, $this->getFilesFromDir($path));
                 } elseif (is_file($path)) {
