@@ -84,8 +84,7 @@ class Linter
             $files = $this->getFiles();
         }
 
-        $processCallback = is_callable($this->processCallback) ? $this->processCallback : function () {
-        };
+        $processCallback = is_callable($this->processCallback) ? $this->processCallback : function () {};
 
         $errors = [];
         $running = [];
