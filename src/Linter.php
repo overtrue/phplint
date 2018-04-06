@@ -125,9 +125,9 @@ class Linter
                     $processCallback('ok', $item['file']);
                 }
             }
-
-            $cache && Cache::put($newCache);
         }
+
+        $cache && Cache::put($newCache);
 
         return $errors;
     }
