@@ -13,8 +13,8 @@ namespace Overtrue\PHPLint;
 
 use InvalidArgumentException;
 use Overtrue\PHPLint\Process\Lint;
-use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
 
 /**
  * Class Linter.
@@ -27,7 +27,7 @@ class Linter
     private $processCallback;
 
     /**
-     * @var array
+     * @var SplFileInfo[]
      */
     private $files = [];
 
@@ -37,7 +37,7 @@ class Linter
     private $cache = [];
 
     /**
-     * @var string|array
+     * @var array
      */
     private $path;
 
@@ -65,7 +65,7 @@ class Linter
      */
     public function __construct($path, array $excludes = [], array $extensions = ['php'])
     {
-        $this->path = $path;
+        $this->path = (array) $path;
         $this->excludes = $excludes;
         $this->extensions = $extensions;
     }
@@ -73,8 +73,8 @@ class Linter
     /**
      * Check the files.
      *
-     * @param array $files
-     * @param bool  $cache
+     * @param SplFileInfo[] $files
+     * @param bool          $cache
      *
      * @return array
      */
@@ -84,8 +84,7 @@ class Linter
             $files = $this->getFiles();
         }
 
-        $processCallback = is_callable($this->processCallback) ? $this->processCallback : function () {
-        };
+        $processCallback = is_callable($this->processCallback) ? $this->processCallback : function () {};
 
         $errors = [];
         $running = [];
@@ -95,28 +94,31 @@ class Linter
         while (!empty($files) || !empty($running)) {
             for ($i = count($running); !empty($files) && $i < $this->processLimit; ++$i) {
                 $file = array_shift($files);
-                $filename = $file->getRealpath();
+                $filename = $file->getRealPath();
 
                 if (!isset($this->cache[$filename]) || $this->cache[$filename] !== md5_file($filename)) {
+                    $lint = new Lint(escapeshellcmd($phpbin).' -d error_reporting=E_ALL -d display_errors=On -l '.escapeshellarg($filename));
                     $running[$filename] = [
-                        'process' => new Lint($phpbin.' -d error_reporting=E_ALL -d display_errors=On -l '.escapeshellarg($filename)),
+                        'process' => $lint,
                         'file' => $file,
                     ];
-                    $running[$filename]['process']->start();
+                    $lint->start();
                 } else {
                     $newCache[$filename] = $this->cache[$filename];
                 }
             }
 
             foreach ($running as $filename => $item) {
-                if ($item['process']->isRunning()) {
+                /** @var Lint $lint */
+                $lint = $item['process'];
+                if ($lint->isRunning()) {
                     continue;
                 }
 
                 unset($running[$filename]);
-                if ($item['process']->hasSyntaxError()) {
+                if ($lint->hasSyntaxError()) {
                     $processCallback('error', $item['file']);
-                    $errors[$filename] = array_merge(['file' => $filename], $item['process']->getSyntaxError());
+                    $errors[$filename] = array_merge(['file' => $filename], $lint->getSyntaxError());
                 } else {
                     $newCache[$filename] = md5_file($filename);
                     $processCallback('ok', $item['file']);
@@ -146,12 +148,12 @@ class Linter
     /**
      * Fetch files.
      *
-     * @return array
+     * @return SplFileInfo[]
      */
     public function getFiles()
     {
         if (empty($this->files)) {
-            foreach ((array) $this->path as $path) {
+            foreach ($this->path as $path) {
                 if (is_dir($path)) {
                     $this->files = array_merge($this->files, $this->getFilesFromDir($path));
                 } elseif (is_file($path)) {
@@ -168,7 +170,7 @@ class Linter
      *
      * @param string $dir
      *
-     * @return array
+     * @return SplFileInfo[]
      */
     protected function getFilesFromDir($dir)
     {
@@ -189,7 +191,7 @@ class Linter
     /**
      * Set Files.
      *
-     * @param array $files
+     * @param string[] $files
      *
      * @return \Overtrue\PHPLint\Linter
      */

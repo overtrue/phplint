@@ -139,7 +139,7 @@ class LintCommand extends Command
      * @param InputInterface  $input  An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
      *
-     * @throws LogicException When this abstract method is not implemented
+     * @throws \LogicException When this abstract method is not implemented
      *
      * @return null|int null or 0 if everything went fine, or an error code
      *
@@ -205,7 +205,7 @@ class LintCommand extends Command
         }
 
         if (!empty($options['json'])) {
-            $this->dumpResult($options['json'], $errors, $options, [
+            $this->dumpResult((string) $options['json'], $errors, $options, [
                 'time_usage' => $timeUsage,
                 'memory_usage' => $memUsage,
                 'using_cache' => 'Yes' == $usingCache,
@@ -230,7 +230,7 @@ class LintCommand extends Command
             'errors' => $errors,
         ];
 
-        \file_put_contents((string) $path, \json_encode(\array_merge($result, $context)));
+        \file_put_contents($path, \json_encode(\array_merge($result, $context)));
     }
 
     /**
@@ -420,6 +420,8 @@ class LintCommand extends Command
             return $configuration;
         } catch (ParseException $e) {
             $this->output->writeln(sprintf('<error>Unable to parse the YAML string: %s</error>', $e->getMessage()));
+
+            return [];
         }
     }
 }
