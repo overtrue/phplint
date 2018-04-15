@@ -9,6 +9,9 @@ PHPLint
 
 `phplint` is a tool that can speed up linting of php files by running several lint processes at once.
 
+![artboard 1](https://user-images.githubusercontent.com/1472352/38774811-3f780ab6-40a3-11e8-9a0a-a8d06d2c6463.jpg)
+
+
 
 ## Installation
 
