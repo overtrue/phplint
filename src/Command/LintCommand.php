@@ -106,6 +106,12 @@ class LintCommand extends Command
                 'Path to the cache file.'
             )
             ->addOption(
+                'no-progress',
+                null,
+                InputOption::VALUE_NONE,
+                'Hide the progress output.'
+            )
+            ->addOption(
                 'json',
                 null,
                 InputOption::VALUE_OPTIONAL,
@@ -248,8 +254,9 @@ class LintCommand extends Command
         $cache = !$input->getOption('no-cache');
         $maxColumns = floor((new Terminal())->getWidth() / 2);
         $verbosity = $output->getVerbosity();
+        $displayProgress = !$input->getOption('no-progress');
 
-        $linter->setProcessCallback(function ($status, SplFileInfo $file) use ($output, $verbosity, $fileCount, $maxColumns) {
+        $displayProgress && $linter->setProcessCallback(function ($status, SplFileInfo $file) use ($output, $verbosity, $fileCount, $maxColumns) {
             static $i = 1;
 
             $percent = floor(($i / $fileCount) * 100);
@@ -267,6 +274,8 @@ class LintCommand extends Command
             }
             ++$i;
         });
+
+        $displayProgress || $output->write('<info>Checking...</info>');
 
         return $linter->lint([], $cache);
     }
