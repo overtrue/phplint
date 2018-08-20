@@ -14,7 +14,7 @@
 ## Installation
 
 ```shell
-$ composer require overtrue/phplint -vvv
+$ composer require overtrue/phplint --dev -vvv
 ```
 
 ## Usage
