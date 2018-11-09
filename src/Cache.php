@@ -99,7 +99,7 @@ class Cache
         if (\is_dir(\dirname(self::$filename))) {
             return self::$filename;
         }
-        
+
         return (getcwd() ?: './').'/'.self::$filename;
     }
 }
