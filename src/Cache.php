@@ -96,6 +96,10 @@ class Cache
      */
     public static function getFilename()
     {
+        if (file_exists(self::$filename)) {
+            return self::$filename;
+        }
+        
         return (getcwd() ?: './').'/'.self::$filename;
     }
 }
