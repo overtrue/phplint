@@ -96,7 +96,7 @@ class Cache
      */
     public static function getFilename()
     {
-        if (file_exists(self::$filename)) {
+        if (\is_dir(\dirname(self::$filename))) {
             return self::$filename;
         }
         
