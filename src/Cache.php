@@ -99,7 +99,7 @@ class Cache
         if (file_exists(self::$filename)) {
             return self::$filename;
         }
-        
+
         return (getcwd() ?: './').'/'.self::$filename;
     }
 }
