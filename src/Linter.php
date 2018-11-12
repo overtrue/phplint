@@ -96,16 +96,16 @@ class Linter
             for ($i = count($running); !empty($files) && $i < $this->processLimit; ++$i) {
                 $file = array_shift($files);
                 $filename = $file->getRealPath();
-
-                if (!isset($this->cache[$filename]) || $this->cache[$filename] !== md5_file($filename)) {
+                $key = $file->getRelativePathname();
+                if (!isset($this->cache[$key]) || $this->cache[$key] !== md5_file($filename)) {
                     $lint = new Lint(escapeshellcmd($phpbin).' -d error_reporting=E_ALL -d display_errors=On -l '.escapeshellarg($filename));
-                    $running[$filename] = [
+                    $running[$key] = [
                         'process' => $lint,
                         'file' => $file,
                     ];
                     $lint->start();
                 } else {
-                    $newCache[$filename] = $this->cache[$filename];
+                    $newCache[$key] = $this->cache[$key];
                 }
             }
 
