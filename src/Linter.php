@@ -96,16 +96,17 @@ class Linter
             for ($i = count($running); !empty($files) && $i < $this->processLimit; ++$i) {
                 $file = array_shift($files);
                 $filename = $file->getRealPath();
-                $key = $file->getRelativePathname();
-                if (!isset($this->cache[$key]) || $this->cache[$key] !== md5_file($filename)) {
+                $relativePathname = $file->getRelativePathname();
+                if (!isset($this->cache[$relativePathname]) || $this->cache[$relativePathname] !== md5_file($filename)) {
                     $lint = new Lint(escapeshellcmd($phpbin).' -d error_reporting=E_ALL -d display_errors=On -l '.escapeshellarg($filename));
                     $running[$filename] = [
                         'process' => $lint,
                         'file' => $file,
+                        'relativePath' => $relativePathname,
                     ];
                     $lint->start();
                 } else {
-                    $newCache[$key] = $this->cache[$key];
+                    $newCache[$relativePathname] = $this->cache[$relativePathname];
                 }
             }
 
@@ -121,7 +122,7 @@ class Linter
                     $processCallback('error', $item['file']);
                     $errors[$filename] = array_merge(['file' => $filename], $lint->getSyntaxError());
                 } else {
-                    $newCache[$filename] = md5_file($filename);
+                    $newCache[$item['relativePath']] = md5_file($filename);
                     $processCallback('ok', $item['file']);
                 }
             }
