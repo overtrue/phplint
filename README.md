@@ -70,7 +70,7 @@ exclude:
 $ ./vendor/bin/phplint
 ```
 
-By default, the command will read configuration from file `.phplint.yml` of path specified, you can custom the filename by option: `--configuration=FILENAME` or `-c=FILENAME`;
+By default, the command will read configuration from file `.phplint.yml` of path specified, you can custom the filename by option: `--configuration=FILENAME` or `-c FILENAME`;
 
 If you want to disable the config file, you can add option `--no-configuration`.
 
