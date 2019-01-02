@@ -98,7 +98,7 @@ class Linter
                 $filename = $file->getRealPath();
                 $relativePathname = $file->getRelativePathname();
                 if (!isset($this->cache[$relativePathname]) || $this->cache[$relativePathname] !== md5_file($filename)) {
-                    $lint = new Lint(escapeshellcmd($phpbin).' -d error_reporting=E_ALL -d display_errors=On -l '.escapeshellarg($filename));
+                    $lint = Lint::fromShellCommandline(escapeshellcmd($phpbin).' -d error_reporting=E_ALL -d display_errors=On -l '.escapeshellarg($filename));
                     $running[$filename] = [
                         'process' => $lint,
                         'file' => $file,
