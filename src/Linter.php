@@ -90,7 +90,6 @@ class Linter
         $errors = [];
         $running = [];
         $newCache = [];
-        $phpbin = PHP_SAPI == 'cli' ? PHP_BINARY : PHP_BINDIR.'/php';
 
         while (!empty($files) || !empty($running)) {
             for ($i = count($running); !empty($files) && $i < $this->processLimit; ++$i) {
@@ -98,7 +97,7 @@ class Linter
                 $filename = $file->getRealPath();
                 $relativePathname = $file->getRelativePathname();
                 if (!isset($this->cache[$relativePathname]) || $this->cache[$relativePathname] !== md5_file($filename)) {
-                    $lint = Lint::fromShellCommandline(escapeshellcmd($phpbin).' -d error_reporting=E_ALL -d display_errors=On -l '.escapeshellarg($filename));
+                    $lint = $this->createLintProcess($filename);
                     $running[$filename] = [
                         'process' => $lint,
                         'file' => $file,
@@ -240,5 +239,22 @@ class Linter
         $this->processLimit = $processLimit;
 
         return $this;
+    }
+
+    /**
+     * @param string $filename
+     *
+     * @return mixed
+     */
+    protected function createLintProcess($filename)
+    {
+        $command = [
+            PHP_SAPI == 'cli' ? PHP_BINARY : PHP_BINDIR.'/php',
+            '-d error_reporting=E_ALL',
+            '-d display_errors=On',
+            '-l', $filename,
+        ];
+
+        return new Lint($command);
     }
 }
