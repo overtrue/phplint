@@ -24,7 +24,7 @@
     "symfony/yaml": "^3.0|^4.0"
   },
   "require-dev": {
-    "jakub-onderka/php-console-highlighter": "^0.3.2"
+    "jakub-onderka/php-console-highlighter": "^0.3.2 || ^0.4"
   },
   "autoload": {
     "psr-4": {
