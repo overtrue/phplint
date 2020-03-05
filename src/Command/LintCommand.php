@@ -11,8 +11,11 @@
 
 namespace Overtrue\PHPLint\Command;
 
+use DateTime;
+use Exception;
 use JakubOnderka\PhpConsoleColor\ConsoleColor;
 use JakubOnderka\PhpConsoleHighlighter\Highlighter;
+use N98\JUnitXml\Document;
 use Overtrue\PHPLint\Cache;
 use Overtrue\PHPLint\Linter;
 use Symfony\Component\Console\Command\Command;
@@ -116,6 +119,12 @@ class LintCommand extends Command
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'Path to store JSON results.'
+            )
+            ->addOption(
+                'xml',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Path to store JUnit XML results.'
             );
     }
 
@@ -210,13 +219,19 @@ class LintCommand extends Command
             $output->writeln("<info>OK! (Files: {$fileCount}, Success: {$fileCount})</info>");
         }
 
+        $context = [
+            'time_usage' => $timeUsage,
+            'memory_usage' => $memUsage,
+            'using_cache' => 'Yes' == $usingCache,
+            'files_count' => $fileCount,
+        ];
+
         if (!empty($options['json'])) {
-            $this->dumpResult((string) $options['json'], $errors, $options, [
-                'time_usage' => $timeUsage,
-                'memory_usage' => $memUsage,
-                'using_cache' => 'Yes' == $usingCache,
-                'files_count' => $fileCount,
-            ]);
+            $this->dumpJsonResult((string) $options['json'], $errors, $options, $context);
+        }
+
+        if (!empty($options['xml'])) {
+            $this->dumpXmlResult((string) $options['xml'], $errors, $options, $context);
         }
 
         return $code;
@@ -228,7 +243,7 @@ class LintCommand extends Command
      * @param array  $options
      * @param array  $context
      */
-    protected function dumpResult($path, array $errors, array $options, array $context = [])
+    protected function dumpJsonResult($path, array $errors, array $options, array $context = [])
     {
         $result = [
             'status' => 'success',
@@ -237,6 +252,28 @@ class LintCommand extends Command
         ];
 
         \file_put_contents($path, \json_encode(\array_merge($result, $context)));
+    }
+
+    /**
+     * @param string $path
+     * @param array  $errors
+     * @param array  $options
+     * @param array  $context
+     *
+     * @throws Exception
+     */
+    protected function dumpXmlResult($path, array $errors, array $options, array $context = [])
+    {
+        $document = new Document();
+        $suite = $document->addTestSuite();
+        $suite->setName('PHP Linter');
+        $suite->setTimestamp(new DateTime());
+        $suite->setTime($context['time_usage']);
+        $testCase = $suite->addTestCase();
+        foreach ($errors as $errorName => $value) {
+            $testCase->addError($errorName, 'Error', $value['error']);
+        }
+        $document->save($path);
     }
 
     /**
