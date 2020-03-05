@@ -37,6 +37,7 @@ Options:
       --no-cache                     Ignore cached data.
       --cache=CACHE                  Path to the cache file.
       --json[=JSON]                  Output JSON results to a file.
+      --xml[=XML]                    Output JUnit XML results to a file.
   -h, --help                         Display this help message
   -q, --quiet                        Do not output any message
   -V, --version                      Display this application version
