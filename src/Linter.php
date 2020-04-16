@@ -65,9 +65,11 @@ class Linter
      */
     public function __construct($path, array $excludes = [], array $extensions = ['php'])
     {
-        $this->path = (array) $path;
+        $this->path = (array)$path;
         $this->excludes = $excludes;
-        $this->extensions = $extensions;
+        $this->extensions = \array_map(function($extension){
+            return \sprintf('*.%s', \ltrim($extension, '.'));
+        }, $extensions);
     }
 
     /**
@@ -159,7 +161,7 @@ class Linter
             foreach ($this->path as $path) {
                 if (is_dir($path)) {
                     $this->files = array_merge($this->files, $this->getFilesFromDir($path));
-                } elseif (is_file($path)) {
+                } else if (is_file($path)) {
                     $this->files[$path] = new SplFileInfo($path, $path, $path);
                 }
             }
@@ -178,15 +180,15 @@ class Linter
     protected function getFilesFromDir($dir)
     {
         $finder = new Finder();
-        $finder->files()->ignoreUnreadableDirs()->in(realpath($dir));
-
-        foreach ($this->excludes as $exclude) {
-            $finder->notPath($exclude);
-        }
-
-        foreach ($this->extensions as $extension) {
-            $finder->name('*.' . $extension);
-        }
+        $finder->files()
+            ->ignoreUnreadableDirs()
+            ->ignoreVCS(true)
+            ->filter(function (SplFileInfo $file) {
+                return $file->isReadable();
+            })
+            ->name($this->extensions)
+            ->notPath($this->excludes)
+            ->in(realpath($dir));
 
         return iterator_to_array($finder);
     }
