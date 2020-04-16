@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the overtrue/phplint
+ * This file is part of the overtrue/phplint.
  *
  * (c) overtrue <i@overtrue.me>
  *
@@ -185,7 +185,7 @@ class Linter
         }
 
         foreach ($this->extensions as $extension) {
-            $finder->name('*.' . $extension);
+            $finder->name('*.'.$extension);
         }
 
         return iterator_to_array($finder);
@@ -251,7 +251,7 @@ class Linter
     protected function createLintProcess($filename)
     {
         $command = [
-            PHP_SAPI == 'cli' ? PHP_BINARY : PHP_BINDIR . '/php',
+            PHP_SAPI == 'cli' ? PHP_BINARY : PHP_BINDIR.'/php',
             '-d error_reporting=E_ALL',
             '-d display_errors=On',
             '-l', $filename,
