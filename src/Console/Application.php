@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the overtrue/phplint.
+ * This file is part of the overtrue/phplint
  *
  * (c) overtrue <i@overtrue.me>
  *
