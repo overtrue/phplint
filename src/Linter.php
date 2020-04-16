@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the overtrue/phplint.
+ * This file is part of the overtrue/phplint
  *
  * (c) overtrue <i@overtrue.me>
  *
@@ -112,14 +112,16 @@ class Linter
             foreach ($running as $filename => $item) {
                 /** @var Lint $lint */
                 $lint = $item['process'];
+
                 if ($lint->isRunning()) {
                     continue;
                 }
 
                 unset($running[$filename]);
+
                 if ($lint->hasSyntaxError()) {
                     $processCallback('error', $item['file']);
-                    $errors[$filename] = array_merge(['file' => $filename, 'file_name' => $relativePathname], $lint->getSyntaxError());
+                    $errors[$filename] = array_merge(['file' => $filename, 'file_name' => $item['relativePath']], $lint->getSyntaxError());
                 } else {
                     $newCache[$item['relativePath']] = md5_file($filename);
                     $processCallback('ok', $item['file']);
@@ -183,7 +185,7 @@ class Linter
         }
 
         foreach ($this->extensions as $extension) {
-            $finder->name('*.'.$extension);
+            $finder->name('*.' . $extension);
         }
 
         return iterator_to_array($finder);
@@ -249,7 +251,7 @@ class Linter
     protected function createLintProcess($filename)
     {
         $command = [
-            PHP_SAPI == 'cli' ? PHP_BINARY : PHP_BINDIR.'/php',
+            PHP_SAPI == 'cli' ? PHP_BINARY : PHP_BINDIR . '/php',
             '-d error_reporting=E_ALL',
             '-d display_errors=On',
             '-l', $filename,

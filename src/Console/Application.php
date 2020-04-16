@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the overtrue/phplint.
+ * This file is part of the overtrue/phplint
  *
  * (c) overtrue <i@overtrue.me>
  *
@@ -21,7 +21,7 @@ class Application extends BaseApplication
 {
     const NAME = 'phplint';
 
-    const VERSION = '1.1.9';
+    const VERSION = '1.2.2';
 
     /**
      * Constructor.

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the overtrue/phplint.
+ * This file is part of the overtrue/phplint
  *
  * (c) overtrue <i@overtrue.me>
  *
@@ -167,13 +167,13 @@ class LintCommand extends Command
         $startTime = microtime(true);
         $startMemUsage = memory_get_usage(true);
 
-        $output->writeln($this->getApplication()->getLongVersion()." by overtrue and contributors.\n");
+        $output->writeln($this->getApplication()->getLongVersion() . " by overtrue and contributors.\n");
 
         $options = $this->mergeOptions();
         $verbosity = $output->getVerbosity();
 
         if ($verbosity >= OutputInterface::VERBOSITY_DEBUG) {
-            $output->writeln('Options: '.json_encode($options)."\n");
+            $output->writeln('Options: ' . json_encode($options) . "\n");
         }
 
         $linter = new Linter($options['path'], $options['exclude'], $options['extensions']);
@@ -207,7 +207,9 @@ class LintCommand extends Command
 
         $output->writeln(sprintf(
             "\n\nTime: <info>%s</info>\tMemory: <info>%s</info>\tCache: <info>%s</info>\n",
-            $timeUsage, $memUsage, $usingCache
+            $timeUsage,
+            $memUsage,
+            $usingCache
         ));
 
         if ($errCount > 0) {
@@ -300,7 +302,7 @@ class LintCommand extends Command
             $process = str_pad(" {$i} / {$fileCount} ({$percent}%)", 18, ' ', STR_PAD_LEFT);
 
             if ($verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
-                $filename = str_pad(" {$i}: ".$file->getRelativePathname(), $maxColumns - 10, ' ', \STR_PAD_RIGHT);
+                $filename = str_pad(" {$i}: " . $file->getRelativePathname(), $maxColumns - 10, ' ', \STR_PAD_RIGHT);
                 $status = \str_pad(('ok' === $status ? '<info>OK</info>' : '<error>Error</error>'), 20, ' ', \STR_PAD_RIGHT);
                 $output->writeln(\sprintf("%s\t%s\t%s", $filename, $status, $process));
             } else {
@@ -327,10 +329,10 @@ class LintCommand extends Command
     protected function showErrors($errors)
     {
         $i = 0;
-        $this->output->writeln("\nThere was ".count($errors).' errors:');
+        $this->output->writeln("\nThere was " . count($errors) . ' errors:');
 
         foreach ($errors as $filename => $error) {
-            $this->output->writeln('<comment>'.++$i.". {$filename}:{$error['line']}".'</comment>');
+            $this->output->writeln('<comment>' . ++$i . ". {$filename}:{$error['line']}" . '</comment>');
 
             $this->output->write($this->getHighlightedCodeSnippet($filename, $error['line']));
 
@@ -359,7 +361,7 @@ class LintCommand extends Command
 
         foreach ($lines as $i => $line) {
             $snippet .= (abs($lineNumber) === $i + 1 ? '  > ' : '    ');
-            $snippet .= str_pad($i + 1, $lineStrlen, ' ', STR_PAD_LEFT).'| '.rtrim($line).PHP_EOL;
+            $snippet .= str_pad($i + 1, $lineStrlen, ' ', STR_PAD_LEFT) . '| ' . rtrim($line) . PHP_EOL;
         }
 
         return $snippet;
@@ -443,7 +445,7 @@ class LintCommand extends Command
             $dir = is_dir($first) ? $first : dirname($first);
         }
 
-        $filename = rtrim($dir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'.phplint.yml';
+        $filename = rtrim($dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '.phplint.yml';
 
         return realpath($filename);
     }

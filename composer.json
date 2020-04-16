@@ -1,6 +1,6 @@
 {
   "name": "overtrue/phplint",
-  "description": "a php syntax check tool.",
+  "description": "`phplint` is a tool that can speed up linting of php files by running several lint processes at once.",
   "type": "library",
   "keywords": [
     "phplint",
@@ -25,17 +25,48 @@
     "n98/junit-xml": "1.0.0"
   },
   "require-dev": {
-    "jakub-onderka/php-console-highlighter": "^0.3.2 || ^0.4"
+    "jakub-onderka/php-console-highlighter": "^0.3.2 || ^0.4",
+    "brainmaestro/composer-git-hooks": "^2.7",
+    "friendsofphp/php-cs-fixer": "^2.16"
   },
   "autoload": {
     "psr-4": {
       "Overtrue\\PHPLint\\": "src/"
     }
   },
+  "extra": {
+    "hooks": {
+      "pre-commit": [
+        "composer test",
+        "composer fix-style"
+      ],
+      "pre-push": [
+        "composer test",
+        "composer check-style"
+      ]
+    }
+  },
+  "scripts": {
+    "post-update-cmd": [
+      "cghooks update"
+    ],
+    "post-merge": "composer install",
+    "post-install-cmd": [
+      "cghooks add --ignore-lock",
+      "cghooks update"
+    ],
+    "cghooks": "vendor/bin/cghooks",
+    "check-style": "php-cs-fixer fix --using-cache=no --diff --config=.php_cs --dry-run --ansi",
+    "fix-style": "php-cs-fixer fix --using-cache=no --config=.php_cs --ansi",
+    "test": "vendor/bin/phpunit --colors=always",
+    "lint:syntax": "./bin/phplint --ansi"
+  },
+  "scripts-descriptions": {
+    "test": "Run all tests.",
+    "check-style": "Run style checks (only dry run - no fixing!).",
+    "fix-style": "Run style checks and fix violations."
+  },
   "bin": [
     "bin/phplint"
-  ],
-  "scripts": {
-    "lint:syntax": "./bin/phplint --ansi"
-  }
+  ]
 }
