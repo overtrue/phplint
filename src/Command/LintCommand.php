@@ -401,7 +401,7 @@ class LintCommand extends Command
     protected function mergeOptions()
     {
         $options = $this->input->getOptions();
-        $options['path'] = $this->input->getArgument('path');
+        $options['path'] = $this->input->getArgument('path') ?: '.';
         $options['cache'] = $this->input->getOption('cache');
 
         $config = [];
