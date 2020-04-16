@@ -67,7 +67,7 @@ class Linter
     {
         $this->path = (array)$path;
         $this->excludes = $excludes;
-        $this->extensions = \array_map(function($extension){
+        $this->extensions = \array_map(function ($extension) {
             return \sprintf('*.%s', \ltrim($extension, '.'));
         }, $extensions);
     }
@@ -161,7 +161,7 @@ class Linter
             foreach ($this->path as $path) {
                 if (is_dir($path)) {
                     $this->files = array_merge($this->files, $this->getFilesFromDir($path));
-                } else if (is_file($path)) {
+                } elseif (is_file($path)) {
                     $this->files[$path] = new SplFileInfo($path, $path, $path);
                 }
             }
