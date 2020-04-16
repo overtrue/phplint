@@ -37,11 +37,9 @@
   "extra": {
     "hooks": {
       "pre-commit": [
-        "composer test",
         "composer fix-style"
       ],
       "pre-push": [
-        "composer test",
         "composer check-style"
       ]
     }
@@ -58,11 +56,9 @@
     "cghooks": "vendor/bin/cghooks",
     "check-style": "php-cs-fixer fix --using-cache=no --diff --config=.php_cs --dry-run --ansi",
     "fix-style": "php-cs-fixer fix --using-cache=no --config=.php_cs --ansi",
-    "test": "vendor/bin/phpunit --colors=always",
     "lint:syntax": "./bin/phplint --ansi"
   },
   "scripts-descriptions": {
-    "test": "Run all tests.",
     "check-style": "Run style checks (only dry run - no fixing!).",
     "fix-style": "Run style checks and fix violations."
   },
