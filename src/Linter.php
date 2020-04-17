@@ -186,9 +186,10 @@ class Linter
             ->filter(function (SplFileInfo $file) {
                 return $file->isReadable();
             })
-            ->name($this->extensions)
-            ->notPath($this->excludes)
             ->in(realpath($dir));
+
+        array_map([$finder, 'name'], $this->extensions);
+        array_map([$finder, 'notPath'], $this->excludes);
 
         return iterator_to_array($finder);
     }
