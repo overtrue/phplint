@@ -1,0 +1,16 @@
+name: 'PHPLint'
+description: 'Find php syntax errors.'
+inputs:
+  path:
+    description: 'path to check'
+    required: false
+    default: '.'
+  options:
+    description: 'command options.(eg: --no-cache --exclude=*.log)'
+    required: false
+    default: ''
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.who-to-greet }}
