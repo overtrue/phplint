@@ -1,4 +1,4 @@
-name: 'PHPLint'
+name: 'Check PHP syntax errors'
 description: 'Find php syntax errors.'
 inputs:
   path:
