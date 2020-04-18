@@ -104,6 +104,15 @@ $errors = $linter->lint();
 // ]
 ```
 
+### GitHub Actions
+
+```yaml
+uses: overtrue/phplint@master
+with:
+  path: .
+  options: --exclude=*.log
+```
+
 ## PHP 扩展包开发
 
 > 想知道如何从零开始构建 PHP 扩展包？

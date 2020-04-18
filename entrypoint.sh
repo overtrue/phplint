@@ -2,6 +2,4 @@
 
 set -xe
 
-export
-
-phplint ${INPUT_PATH} ${INPUT_OPTIONS}
+/root/.composer/vendor/bin/phplint ${INPUT_PATH} ${INPUT_OPTIONS}

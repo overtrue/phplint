@@ -1,4 +1,4 @@
-ARG VERSION
+ARG VERSION=7.3
 FROM php:${VERSION}-cli
 
 RUN set -xe \
@@ -11,4 +11,8 @@ RUN set -xe \
     && php -r "unlink('composer-setup.php');" \
     # Copy default php.ini
     && cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini \
-    && composer global require overtrue/phplint -vvv
+    && composer global require overtrue/phplint
+
+COPY entrypoint.sh /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
