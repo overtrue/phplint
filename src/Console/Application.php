@@ -21,7 +21,7 @@ class Application extends BaseApplication
 {
     const NAME = 'phplint';
 
-    const VERSION = '1.2.5';
+    const VERSION = '2.0.1';
 
     /**
      * Constructor.
