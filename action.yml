@@ -1,0 +1,17 @@
+name: 'Check PHP syntax errors'
+description: 'Find php syntax errors.'
+inputs:
+  path:
+    description: 'path to check'
+    required: false
+    default: '.'
+  options:
+    description: 'command options.(eg: --no-cache --exclude=*.log)'
+    required: false
+    default: ''
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+branding:
+  icon: 'check'
+  color: 'purple'

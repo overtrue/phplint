@@ -4,7 +4,6 @@
 
 ![artboard 1](https://user-images.githubusercontent.com/1472352/38774811-3f780ab6-40a3-11e8-9a0a-a8d06d2c6463.jpg)
 
-[![StyleCI](https://styleci.io/repos/64124312/shield)](https://styleci.io/repos/64124312)
 [![Build Status](https://travis-ci.org/overtrue/phplint.svg?branch=master)](https://travis-ci.org/overtrue/phplint)
 [![Latest Stable Version](https://poser.pugx.org/overtrue/phplint/v/stable.svg)](https://packagist.org/packages/overtrue/phplint) [![Total Downloads](https://poser.pugx.org/overtrue/phplint/downloads.svg)](https://packagist.org/packages/overtrue/phplint) [![Latest Unstable Version](https://poser.pugx.org/overtrue/phplint/v/unstable.svg)](https://packagist.org/packages/overtrue/phplint) [![License](https://poser.pugx.org/overtrue/phplint/license.svg)](https://packagist.org/packages/overtrue/phplint)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/overtrue/phplint/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/overtrue/phplint/?branch=master)
@@ -102,6 +101,15 @@ $errors = $linter->lint();
 //          'file' => '/path/to/bar.php',
 //      ],
 // ]
+```
+
+### GitHub Actions
+
+```yaml
+uses: overtrue/phplint@master
+with:
+  path: .
+  options: --exclude=*.log
 ```
 
 ## PHP 扩展包开发
