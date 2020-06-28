@@ -12,8 +12,16 @@
 
 ## Installation
 
+### Locally, if you have PHP
+
 ```shell
 $ composer require overtrue/phplint --dev -vvv
+```
+
+### Locally, if you only have Docker
+
+```
+docker pull overtrue/phplint:latest
 ```
 
 ## Usage
@@ -110,6 +118,13 @@ uses: overtrue/phplint@master
 with:
   path: .
   options: --exclude=*.log
+```
+
+### Other CI/CD (f.e. Bitbucket Pipelines, GitLab CI)
+
+Run this command using `overtrue/phplint:latest` Docker image:
+```
+/root/.composer/vendor/bin/phplint ./ --exclude=vendor
 ```
 
 ## PHP 扩展包开发

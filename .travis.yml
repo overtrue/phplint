@@ -9,11 +9,19 @@ php:
   - 7.0
   - 7.1
   - 7.2
+  - 7.3
 
 before_script:
   - composer self-update
   - composer install --prefer-source --no-interaction --dev
 
 script: ./bin/phplint ./ --no-cache
+
 matrix:
   fast_finish: true
+
+deploy:
+  provider: script
+  script: bash docker_push.sh
+  on:
+    branch: master
