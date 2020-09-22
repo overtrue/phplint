@@ -20,7 +20,7 @@
     "ext-json": "*",
     "symfony/console": "^3.2|^4.0|^5.0",
     "symfony/finder": "^3.0|^4.0|^5.0",
-    "symfony/process": "^3.0|^4.0|^5.0",
+    "symfony/process": "^3.3|^4.0|^5.0",
     "symfony/yaml": "^3.0|^4.0|^5.0",
     "n98/junit-xml": "1.0.0"
   },
