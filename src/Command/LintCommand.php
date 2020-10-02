@@ -42,6 +42,7 @@ class LintCommand extends Command
         'path' => '.',
         'exclude' => [],
         'extensions' => ['php'],
+        'warning' => false
     ];
 
     /**
@@ -126,6 +127,12 @@ class LintCommand extends Command
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'Path to store JUnit XML results.'
+            )
+            ->addOption(
+                'warning',
+                'w',
+                InputOption::VALUE_NONE,
+                'Also show warnings'
             );
     }
 
@@ -177,7 +184,7 @@ class LintCommand extends Command
             $output->writeln('Options: ' . json_encode($options) . "\n");
         }
 
-        $linter = new Linter($options['path'], $options['exclude'], $options['extensions']);
+        $linter = new Linter($options['path'], $options['exclude'], $options['extensions'], $options['warning']);
         $linter->setProcessLimit($options['jobs']);
 
         if (!empty($options['cache'])) {
@@ -304,13 +311,29 @@ class LintCommand extends Command
 
             if ($verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
                 $filename = str_pad(" {$i}: " . $file->getRelativePathname(), $maxColumns - 10, ' ', \STR_PAD_RIGHT);
-                $status = \str_pad(('ok' === $status ? '<info>OK</info>' : '<error>Error</error>'), 20, ' ', \STR_PAD_RIGHT);
+                if ($status === 'ok') {
+                    $status = '<info>OK</info>';
+                } elseif ($status === 'error') {
+                    $status = '<error>Error</error>';
+                } else {
+                    $status = '<error>Warning</error>';
+                }
+
+                $status = \str_pad($status, 20, ' ', \STR_PAD_RIGHT);
                 $output->writeln(\sprintf("%s\t%s\t%s", $filename, $status, $process));
             } else {
                 if ($i && 0 === $i % $maxColumns) {
                     $output->writeln($process);
                 }
-                $output->write('ok' === $status ? '<info>.</info>' : '<error>E</error>');
+                if ($status === 'ok') {
+                    $status = '<info>.</info>';
+                } elseif ($status === 'error') {
+                    $status = '<error>E</error>';
+                } else {
+                    $status = '<error>W</error>';
+                }
+
+                $output->write($status);
             }
             ++$i;
         });
@@ -404,6 +427,9 @@ class LintCommand extends Command
         $options = $this->input->getOptions();
         $options['path'] = $this->input->getArgument('path');
         $options['cache'] = $this->input->getOption('cache');
+        if ($options['warning'] === false) {
+            unset($options['warning']);
+        }
 
         $config = [];
 

@@ -68,4 +68,56 @@ class Lint extends Process
             'line' => $matched ? abs($match['line']) : 0,
         ];
     }
+
+    /**
+     * @return bool
+     */
+    public function hasSyntaxWarning()
+    {
+        $output = trim($this->getOutput());
+
+        if (defined('HHVM_VERSION') && empty($output)) {
+            return false;
+        }
+
+
+        return false !== strpos($output, 'Warning: ');
+    }
+
+    /**
+     * @return bool|array
+     */
+    public function getSyntaxWarning()
+    {
+        if ($this->hasSyntaxWarning()) {
+            $out = explode("\n", trim($this->getOutput()));
+
+            return $this->parseWarning(array_shift($out));
+        }
+
+        return false;
+    }
+
+    /**
+     * Parse error message.
+     *
+     * @param string $message
+     *
+     * @return array
+     */
+    public function parseWarning($message)
+    {
+        $pattern = '/^(PHP\s+)?Warning:\s*\s*?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
+
+        $matched = preg_match($pattern, $message, $match);
+
+        if (empty($message)) {
+            $message = 'Unknown';
+        }
+
+        return [
+            'error' => $matched ? "{$match['error']} in line {$match['line']}" : $message,
+            'line' => $matched ? abs($match['line']) : 0,
+        ];
+    }
 }

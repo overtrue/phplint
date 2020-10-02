@@ -45,6 +45,7 @@ Options:
       --cache=CACHE                  Path to the cache file.
       --json[=JSON]                  Output JSON results to a file.
       --xml[=XML]                    Output JUnit XML results to a file.
+  -w, --warning                      Also show warnings
   -h, --help                         Display this help message
   -q, --quiet                        Do not output any message
   -V, --version                      Display this application version
@@ -72,6 +73,7 @@ extensions:
   - php
 exclude:
   - vendor
+warning: false
 ```
 
 ```shell
@@ -82,6 +84,14 @@ By default, the command will read configuration from file `.phplint.yml` of path
 
 If you want to disable the config file, you can add option `--no-configuration`.
 
+### Warnings
+
+Not all linting problems are errors, PHP also has warnings, for example when using a `continue` statement within a 
+`switch` `case`. By default these errors are not reported, but you can turn this on with the `warning` cli flag, or
+by setting the `warning` to true in the configuration. 
+
+
+
 ### Program
 
 ```php
@@ -90,8 +100,9 @@ use Overtrue\PHPLint\Linter;
 $path = __DIR__ .'/app';
 $exclude = ['vendor'];
 $extensions = ['php'];
+$warnings = true;
 
-$linter = new Linter($path, $exclude, $extensions);
+$linter = new Linter($path, $exclude, $extensions, $warnings);
 
 // get errors
 $errors = $linter->lint();

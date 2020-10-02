@@ -57,19 +57,26 @@ class Linter
     private $processLimit = 5;
 
     /**
+     * @var bool
+     */
+    private $warning;
+
+    /**
      * Constructor.
      *
      * @param string|array $path
      * @param array        $excludes
      * @param array        $extensions
+     * @param bool         $warning
      */
-    public function __construct($path, array $excludes = [], array $extensions = ['php'])
+    public function __construct($path, array $excludes = [], array $extensions = ['php'], $warning = false)
     {
         $this->path = (array)$path;
         $this->excludes = $excludes;
         $this->extensions = \array_map(function ($extension) {
             return \sprintf('*.%s', \ltrim($extension, '.'));
         }, $extensions);
+        $this->warning = $warning;
     }
 
     /**
@@ -124,6 +131,9 @@ class Linter
                 if ($lint->hasSyntaxError()) {
                     $processCallback('error', $item['file']);
                     $errors[$filename] = array_merge(['file' => $filename, 'file_name' => $item['relativePath']], $lint->getSyntaxError());
+                } elseif ($this->warning && $lint->hasSyntaxWarning()) {
+                    $processCallback('warning', $item['file']);
+                    $errors[$filename] = array_merge(['file' => $filename, 'file_name' => $item['relativePath']], $lint->getSyntaxWarning());
                 } else {
                     $newCache[$item['relativePath']] = md5_file($filename);
                     $processCallback('ok', $item['file']);
