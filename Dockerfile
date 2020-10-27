@@ -1,4 +1,4 @@
-ARG VERSION=7.3
+ARG VERSION=7.4
 
 FROM composer:1.10 AS build
 RUN composer global require overtrue/phplint
