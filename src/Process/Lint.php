@@ -72,7 +72,7 @@ class Lint extends Process
     /**
      * @return bool
      */
-    public function hasSyntaxWarning()
+    public function hasSyntaxIssue()
     {
         $output = trim($this->getOutput());
 
@@ -81,18 +81,18 @@ class Lint extends Process
         }
 
 
-        return false !== strpos($output, 'Warning: ');
+        return (bool)preg_match('/(Warning:|Deprecated:|Notice:)/', $output);
     }
 
     /**
      * @return bool|array
      */
-    public function getSyntaxWarning()
+    public function getSyntaxIssue()
     {
-        if ($this->hasSyntaxWarning()) {
+        if ($this->hasSyntaxIssue()) {
             $out = explode("\n", trim($this->getOutput()));
 
-            return $this->parseWarning(array_shift($out));
+            return $this->parseIssue(array_shift($out));
         }
 
         return false;
@@ -105,9 +105,9 @@ class Lint extends Process
      *
      * @return array
      */
-    public function parseWarning($message)
+    private function parseIssue($message)
     {
-        $pattern = '/^(PHP\s+)?Warning:\s*\s*?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
+        $pattern = '/^(PHP\s+)?(Warning|Deprecated|Notice):\s*?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
 
         $matched = preg_match($pattern, $message, $match);
 

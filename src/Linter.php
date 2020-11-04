@@ -131,9 +131,9 @@ class Linter
                 if ($lint->hasSyntaxError()) {
                     $processCallback('error', $item['file']);
                     $errors[$filename] = array_merge(['file' => $filename, 'file_name' => $item['relativePath']], $lint->getSyntaxError());
-                } elseif ($this->warning && $lint->hasSyntaxWarning()) {
+                } elseif ($this->warning && $lint->hasSyntaxIssue()) {
                     $processCallback('warning', $item['file']);
-                    $errors[$filename] = array_merge(['file' => $filename, 'file_name' => $item['relativePath']], $lint->getSyntaxWarning());
+                    $errors[$filename] = array_merge(['file' => $filename, 'file_name' => $item['relativePath']], $lint->getSyntaxIssue());
                 } else {
                     $newCache[$item['relativePath']] = md5_file($filename);
                     $processCallback('ok', $item['file']);
