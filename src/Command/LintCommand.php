@@ -132,7 +132,13 @@ class LintCommand extends Command
                 'warning',
                 'w',
                 InputOption::VALUE_NONE,
-                'Also show warnings'
+                'Also show warnings.'
+            )
+            ->addOption(
+                'quiet',
+                'q',
+                InputOption::VALUE_NONE,
+                'Allow to silenty fail.'
             );
     }
 
@@ -224,7 +230,10 @@ class LintCommand extends Command
             $output->writeln('<error>FAILURES!</error>');
             $output->writeln("<error>Files: {$fileCount}, Failures: {$errCount}</error>");
             $this->showErrors($errors);
-            $code = 1;
+
+            if (empty($options['quiet'])) {
+                $code = 1;
+            }
         } else {
             $output->writeln("<info>OK! (Files: {$fileCount}, Success: {$fileCount})</info>");
         }
