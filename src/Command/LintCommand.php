@@ -28,7 +28,6 @@ use Symfony\Component\Console\Terminal;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
-use function array_key_exists;
 
 /**
  * Class LintCommand.
