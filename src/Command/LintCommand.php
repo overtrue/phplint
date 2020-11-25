@@ -28,6 +28,7 @@ use Symfony\Component\Console\Terminal;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
+use function array_key_exists;
 
 /**
  * Class LintCommand.
@@ -224,7 +225,10 @@ class LintCommand extends Command
             $output->writeln('<error>FAILURES!</error>');
             $output->writeln("<error>Files: {$fileCount}, Failures: {$errCount}</error>");
             $this->showErrors($errors);
-            $code = 1;
+
+            if (! array_key_exists('quiet', $options)) {
+                $code = 1;
+            }
         } else {
             $output->writeln("<info>OK! (Files: {$fileCount}, Success: {$fileCount})</info>");
         }
