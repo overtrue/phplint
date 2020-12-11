@@ -1,0 +1,16 @@
+# This is a basic workflow to help you get started with Actions
+
+on:
+  release:
+    types: [published]
+
+name: Release workflow
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: build phar
+      uses: docker://phpdoc/phar-ga:master
+      with:
+        args: box compile
