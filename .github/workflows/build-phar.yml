@@ -9,7 +9,7 @@ on:
 name: Release workflow
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -57,6 +57,7 @@ jobs:
   publish-phar:
         runs-on: ubuntu-latest
         name: Publish the PHAR
+        needs: [build]
         if: github.event_name == 'release'
         steps:
           - uses: actions/download-artifact@v1
