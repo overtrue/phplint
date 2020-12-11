@@ -1,26 +1,75 @@
 # This is a basic workflow to help you get started with Actions
-
 on:
-  release:
-    types: [created]
+    push:
+        branches: [ master ]
+    pull_request:
+    release:
+        types: [ created ]
 
 name: Release workflow
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+          include:
+              - php: 7.4
+                tools: "composer:v2"
+                coverage: "none"
+                git-fetch-depth: 1
     steps:
     - name: Checkout code
       uses: actions/checkout@master
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+          php-version: ${{ matrix.php }}
+          ini-values: "phar.readonly=0"
+          tools: ${{ matrix.tools }}
+          coverage: ${{ matrix.coverage }}
+          extensions: ctype, iconv, xml
+
+    - name: Get composer cache directory
+      id: composercache
+      run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+    - name: Cache composer dependencies
+      uses: actions/cache@v2
+      with:
+          path: ${{ steps.composercache.outputs.dir }}
+          key: composer-${{ runner.os }}-${{ matrix.php-version }}-${{ hashFiles('composer.*') }}
+          restore-keys: |
+              composer-${{ runner.os }}-${{ matrix.php-version }}-
+              composer-${{ runner.os }}-
+              composer-
     - name: Install dependencies
-      uses: php-actions/composer@v4
+      run: composer require humbug/box --dev
+    - name: Build phar
+      run: composer run box compile
+    - uses: actions/upload-artifact@v1
+      name: Publish the PHAR
       with:
-        command: global require humbug/box
-    - name: build 
-      run: box compile
-    - name: Upload the phar
-      uses: skx/github-action-publish-binaries@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        args: '/bin/*.phar'
+          name: phplint.phar
+          path: bin/phplint.phar
+
+  publish-phar:
+        runs-on: ubuntu-latest
+        name: Publish the PHAR
+        if: github.event_name == 'release'
+        steps:
+          - uses: actions/download-artifact@v1
+            with:
+                name: phplint.phar
+                path: .
+
+          - name: Upload phplint.phar
+            uses: actions/upload-release-asset@v1
+            env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            with:
+                upload_url: ${{ github.event.release.upload_url }}
+                asset_path: phplint.phar
+                asset_name: phplint.phar
+                asset_content_type: application/zip
