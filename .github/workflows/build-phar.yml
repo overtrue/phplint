@@ -10,6 +10,8 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout code
+      uses: actions/checkout@master
     - name: build phar
       uses: docker://phpdoc/phar-ga:master
       with:
