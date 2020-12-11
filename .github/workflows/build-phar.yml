@@ -2,7 +2,7 @@
 
 on:
   release:
-    types: [published]
+    types: [created]
 
 name: Release workflow
 
@@ -12,7 +12,15 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@master
-    - name: build phar
-      uses: docker://phpdoc/phar-ga:master
+    - name: Install dependencies
+      uses: php-actions/composer@v4
       with:
-        args: box compile
+        command: composer global require humbug/box
+    - name: build 
+      run: box compile
+    - name: Upload the phar
+      uses: skx/github-action-publish-binaries@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: '/bin/*.phar'
