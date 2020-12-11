@@ -15,7 +15,7 @@ jobs:
     - name: Install dependencies
       uses: php-actions/composer@v4
       with:
-        command: composer global require humbug/box
+        command: global require humbug/box
     - name: build 
       run: box compile
     - name: Upload the phar
