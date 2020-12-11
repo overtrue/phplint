@@ -47,7 +47,7 @@ jobs:
     - name: Install dependencies
       run: composer config minimum-stability dev && composer require humbug/box --dev
     - name: Build phar
-      run: composer run box compile
+      run: ./vendor/bin/box compile
     - uses: actions/upload-artifact@v1
       name: Publish the PHAR
       with:
