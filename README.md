@@ -92,19 +92,11 @@ By default, the command will read configuration from file `.phplint.yml` of path
 
 If you want to disable the config file, you can add option `--no-configuration`.
 
-#### Docker cli
+### Docker cli
 
 ```bash
 $ docker run overtrue/phplint ./  --exclude=vendor
 ```
-
-### Warnings
-
-Not all linting problems are errors, PHP also has warnings, for example when using a `continue` statement within a 
-`switch` `case`. By default these errors are not reported, but you can turn this on with the `warning` cli flag, or
-by setting the `warning` to true in the configuration. 
-
-
 
 ### Program
 
@@ -139,18 +131,29 @@ $errors = $linter->lint();
 ### GitHub Actions
 
 ```yaml
-uses: overtrue/phplint@master
+uses: overtrue/phplint@8.0
 with:
   path: .
   options: --exclude=*.log
 ```
+for PHP 7: 
+```
+uses: overtrue/phplint@7.4
+```
 
 ### Other CI/CD (f.e. Bitbucket Pipelines, GitLab CI)
 
-Run this command using `overtrue/phplint:latest` Docker image:
+Run this command using `overtrue/phplint:8.0` Docker image:
 ```
 /root/.composer/vendor/bin/phplint ./ --exclude=vendor
 ```
+
+### Warnings
+
+Not all linting problems are errors, PHP also has warnings, for example when using a `continue` statement within a
+`switch` `case`. By default these errors are not reported, but you can turn this on with the `warning` cli flag, or
+by setting the `warning` to true in the configuration.
+
 
 ## PHP 扩展包开发
 
