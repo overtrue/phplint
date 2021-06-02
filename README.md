@@ -15,13 +15,21 @@
 ### Locally, if you have PHP
 
 ```shell
+// PHP 8
 $ composer require overtrue/phplint --dev -vvv
+
+// PHP 7
+$ composer require overtrue/phplint:^2.0 --dev -vvv
 ```
 
 ### Locally, if you only have Docker
 
 ```
-docker pull overtrue/phplint:latest
+// PHP 8
+docker pull overtrue/phplint:8.0
+
+// PHP 7
+docker pull overtrue/phplint:7.0
 ```
 
 ## Usage
@@ -83,6 +91,12 @@ $ ./vendor/bin/phplint
 By default, the command will read configuration from file `.phplint.yml` of path specified, you can custom the filename by option: `--configuration=FILENAME` or `-c FILENAME`;
 
 If you want to disable the config file, you can add option `--no-configuration`.
+
+#### Docker cli
+
+```bash
+$ docker run overtrue/phplint ./  --exclude=vendor
+```
 
 ### Warnings
 
