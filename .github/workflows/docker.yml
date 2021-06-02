@@ -2,8 +2,7 @@
 
 name: Docker
 
-on:
-  push:
+on: push
 
 jobs:
   build:
