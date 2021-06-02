@@ -15,13 +15,21 @@
 ### Locally, if you have PHP
 
 ```shell
+// PHP 8
 $ composer require overtrue/phplint --dev -vvv
+
+// PHP 7
+$ composer require overtrue/phplint:^2.0 --dev -vvv
 ```
 
 ### Locally, if you only have Docker
 
 ```
-docker pull overtrue/phplint:latest
+// PHP 8
+docker pull overtrue/phplint:8.0
+
+// PHP 7
+docker pull overtrue/phplint:7.0
 ```
 
 ## Usage
@@ -84,13 +92,11 @@ By default, the command will read configuration from file `.phplint.yml` of path
 
 If you want to disable the config file, you can add option `--no-configuration`.
 
-### Warnings
+### Docker cli
 
-Not all linting problems are errors, PHP also has warnings, for example when using a `continue` statement within a 
-`switch` `case`. By default these errors are not reported, but you can turn this on with the `warning` cli flag, or
-by setting the `warning` to true in the configuration. 
-
-
+```bash
+$ docker run overtrue/phplint ./  --exclude=vendor
+```
 
 ### Program
 
@@ -125,18 +131,29 @@ $errors = $linter->lint();
 ### GitHub Actions
 
 ```yaml
-uses: overtrue/phplint@master
+uses: overtrue/phplint@8.0
 with:
   path: .
   options: --exclude=*.log
 ```
+for PHP 7:
+```
+uses: overtrue/phplint@7.4
+```
 
 ### Other CI/CD (f.e. Bitbucket Pipelines, GitLab CI)
 
-Run this command using `overtrue/phplint:latest` Docker image:
+Run this command using `overtrue/phplint:8.0` Docker image:
 ```
 /root/.composer/vendor/bin/phplint ./ --exclude=vendor
 ```
+
+### Warnings
+
+Not all linting problems are errors, PHP also has warnings, for example when using a `continue` statement within a
+`switch` `case`. By default these errors are not reported, but you can turn this on with the `warning` cli flag, or
+by setting the `warning` to true in the configuration.
+
 
 ## PHP 扩展包开发
 
@@ -147,6 +164,3 @@ Run this command using `overtrue/phplint:latest` Docker image:
 ## License
 
 MIT
-
-
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fovertrue%2Fphplint.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fovertrue%2Fphplint?ref=badge_large)
