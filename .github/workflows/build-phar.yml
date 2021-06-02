@@ -44,7 +44,7 @@ jobs:
               composer-${{ runner.os }}-
               composer-
     - name: Install dependencies
-      run: composer config minimum-stability dev && composer require humbug/box --dev
+      run: composer config minimum-stability dev && composer require humbug/box@^3.0 --dev
     - name: Build phar
       run: ./vendor/bin/box compile
     - uses: actions/upload-artifact@v1
