@@ -1,41 +1,20 @@
 <?php
 
-/*
- * This file is part of the overtrue/phplint
- *
- * (c) overtrue <i@overtrue.me>
- *
- * This source file is subject to the MIT license that is bundled
- * with this source code in the file LICENSE.
- */
-
 namespace Overtrue\PHPLint\Process;
 
+use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\Process\Process;
 
-/**
- * Class Lint.
- */
 class Lint extends Process
 {
-    /**
-     * @return bool
-     */
-    public function hasSyntaxError()
+    public function hasSyntaxError(): bool
     {
         $output = trim($this->getOutput());
 
-        if (defined('HHVM_VERSION') && empty($output)) {
-            return false;
-        }
-
-        return false === strpos($output, 'No syntax errors detected');
+        return !str_contains($output, 'No syntax errors detected');
     }
 
-    /**
-     * @return bool|array
-     */
-    public function getSyntaxError()
+    public function getSyntaxError(): bool|array
     {
         if ($this->hasSyntaxError()) {
             $out = explode("\n", trim($this->getOutput()));
@@ -46,14 +25,8 @@ class Lint extends Process
         return false;
     }
 
-    /**
-     * Parse error message.
-     *
-     * @param string $message
-     *
-     * @return array
-     */
-    public function parseError($message)
+    #[ArrayShape(['error' => "string", 'line' => "float|int"])]
+    public function parseError(string $message): array
     {
         $pattern = '/^(PHP\s+)?(Parse|Fatal) error:\s*(?:\w+ error,\s*)?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
 
@@ -69,25 +42,14 @@ class Lint extends Process
         ];
     }
 
-    /**
-     * @return bool
-     */
-    public function hasSyntaxIssue()
+    public function hasSyntaxIssue(): bool
     {
         $output = trim($this->getOutput());
-
-        if (defined('HHVM_VERSION') && empty($output)) {
-            return false;
-        }
-
 
         return (bool)preg_match('/(Warning:|Deprecated:|Notice:)/', $output);
     }
 
-    /**
-     * @return bool|array
-     */
-    public function getSyntaxIssue()
+    public function getSyntaxIssue(): bool|array
     {
         if ($this->hasSyntaxIssue()) {
             $out = explode("\n", trim($this->getOutput()));
@@ -98,14 +60,8 @@ class Lint extends Process
         return false;
     }
 
-    /**
-     * Parse error message.
-     *
-     * @param string $message
-     *
-     * @return array
-     */
-    private function parseIssue($message)
+    #[ArrayShape(['error' => "string", 'line' => "float|int"])]
+    private function parseIssue($message): array
     {
         $pattern = '/^(PHP\s+)?(Warning|Deprecated|Notice):\s*?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
 

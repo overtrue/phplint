@@ -1,18 +1,8 @@
 <?php
 
-/*
- * This file is part of the overtrue/phplint
- *
- * (c) overtrue <i@overtrue.me>
- *
- * This source file is subject to the MIT license that is bundled
- * with this source code in the file LICENSE.
- */
-
 namespace Overtrue\PHPLint\Command;
 
 use DateTime;
-use Exception;
 use JakubOnderka\PhpConsoleColor\ConsoleColor;
 use JakubOnderka\PhpConsoleHighlighter\Highlighter;
 use N98\JUnitXml\Document;
@@ -29,15 +19,9 @@ use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
-/**
- * Class LintCommand.
- */
 class LintCommand extends Command
 {
-    /**
-     * @var array
-     */
-    protected $defaults = [
+    protected array $defaults = [
         'jobs' => 5,
         'path' => '.',
         'exclude' => [],
@@ -45,19 +29,9 @@ class LintCommand extends Command
         'warning' => false
     ];
 
-    /**
-     * @var \Symfony\Component\Console\Input\InputInterface
-     */
-    protected $input;
+    protected InputInterface $input;
+    protected OutputInterface $output;
 
-    /**
-     * @var \Symfony\Component\Console\Output\OutputInterface
-     */
-    protected $output;
-
-    /**
-     * Configures the current command.
-     */
     protected function configure()
     {
         $this
@@ -138,19 +112,10 @@ class LintCommand extends Command
                 'quiet',
                 'q',
                 InputOption::VALUE_NONE,
-                'Allow to silenty fail.'
+                'Allow to silently fail.'
             );
     }
 
-    /**
-     * Initializes the command just after the input has been validated.
-     *
-     * This is mainly useful when a lot of commands extends one main command
-     * where some things need to be initialized based on the input arguments and options.
-     *
-     * @param InputInterface  $input  An InputInterface instance
-     * @param OutputInterface $output An OutputInterface instance
-     */
     public function initialize(InputInterface $input, OutputInterface $output)
     {
         $this->input = $input;
@@ -158,25 +123,9 @@ class LintCommand extends Command
     }
 
     /**
-     * Executes the current command.
-     *
-     * This method is not abstract because you can use this class
-     * as a concrete class. In this case, instead of defining the
-     * execute() method, you set the code to execute by passing
-     * a Closure to the setCode() method.
-     *
-     * @param InputInterface  $input  An InputInterface instance
-     * @param OutputInterface $output An OutputInterface instance
-     *
-     * @throws \LogicException When this abstract method is not implemented
-     *
-     * @return null|int null or 0 if everything went fine, or an error code
-     *
-     * @see setCode()
-     *
      * @throws \JakubOnderka\PhpConsoleColor\InvalidStyleException
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $startTime = microtime(true);
         $startMemUsage = memory_get_usage(true);
@@ -256,13 +205,7 @@ class LintCommand extends Command
         return $code;
     }
 
-    /**
-     * @param string $path
-     * @param array  $errors
-     * @param array  $options
-     * @param array  $context
-     */
-    protected function dumpJsonResult($path, array $errors, array $options, array $context = [])
+    protected function dumpJsonResult(string $path, array $errors, array $options, array $context = [])
     {
         $result = [
             'status' => 'success',
@@ -273,15 +216,7 @@ class LintCommand extends Command
         \file_put_contents($path, \json_encode(\array_merge($result, $context)));
     }
 
-    /**
-     * @param string $path
-     * @param array  $errors
-     * @param array  $options
-     * @param array  $context
-     *
-     * @throws Exception
-     */
-    protected function dumpXmlResult($path, array $errors, array $options, array $context = [])
+    protected function dumpXmlResult(string $path, array $errors, array $options, array $context = [])
     {
         $document = new Document();
         $suite = $document->addTestSuite();
@@ -295,31 +230,21 @@ class LintCommand extends Command
         $document->save($path);
     }
 
-    /**
-     * Execute lint and return errors.
-     *
-     * @param Linter          $linter
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     * @param int             $fileCount
-     *
-     * @return array
-     */
-    protected function executeLint($linter, $input, $output, $fileCount)
+    protected function executeLint(Linter $linter, InputInterface $input, OutputInterface $output, int $filesCount): array
     {
         $cache = !$input->getOption('no-cache');
         $maxColumns = floor((new Terminal())->getWidth() / 2);
         $verbosity = $output->getVerbosity();
         $displayProgress = !$input->getOption('no-progress');
 
-        $displayProgress && $linter->setProcessCallback(function ($status, SplFileInfo $file) use ($output, $verbosity, $fileCount, $maxColumns) {
+        $displayProgress && $linter->setProcessCallback(function ($status, SplFileInfo $file) use ($output, $verbosity, $filesCount, $maxColumns) {
             static $i = 1;
 
-            $percent = floor(($i / $fileCount) * 100);
-            $process = str_pad(" {$i} / {$fileCount} ({$percent}%)", 18, ' ', STR_PAD_LEFT);
+            $percent = floor(($i / $filesCount) * 100);
+            $process = str_pad(" {$i} / {$filesCount} ({$percent}%)", 18, ' ', STR_PAD_LEFT);
 
             if ($verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
-                $filename = str_pad(" {$i}: " . $file->getRelativePathname(), $maxColumns - 10, ' ', \STR_PAD_RIGHT);
+                $filename = str_pad(" {$i}: " . $file->getRelativePathname(), $maxColumns - 10);
                 if ($status === 'ok') {
                     $status = '<info>OK</info>';
                 } elseif ($status === 'error') {
@@ -328,7 +253,7 @@ class LintCommand extends Command
                     $status = '<error>Warning</error>';
                 }
 
-                $status = \str_pad($status, 20, ' ', \STR_PAD_RIGHT);
+                $status = \str_pad($status, 20);
                 $output->writeln(\sprintf("%s\t%s\t%s", $filename, $status, $process));
             } else {
                 if ($i && 0 === $i % $maxColumns) {
@@ -353,13 +278,9 @@ class LintCommand extends Command
     }
 
     /**
-     * Show errors detail.
-     *
-     * @param array $errors
-     *
      * @throws \JakubOnderka\PhpConsoleColor\InvalidStyleException
      */
-    protected function showErrors($errors)
+    protected function showErrors(array $errors)
     {
         $i = 0;
         $this->output->writeln("\nThere was " . count($errors) . ' errors:');
@@ -373,44 +294,29 @@ class LintCommand extends Command
         }
     }
 
-    /**
-     * @param string $filePath
-     * @param int    $lineNumber
-     * @param int    $linesBefore
-     * @param int    $linesAfter
-     *
-     * @return string
-     */
-    protected function getCodeSnippet($filePath, $lineNumber, $linesBefore = 3, $linesAfter = 3)
+    protected function getCodeSnippet(string $filePath, int $lineNumber, int $linesBefore = 3, int $linesAfter = 3): string
     {
         $lines = file($filePath);
         $offset = $lineNumber - $linesBefore - 1;
         $offset = max($offset, 0);
         $length = $linesAfter + $linesBefore + 1;
-        $lines = array_slice($lines, $offset, $length, $preserveKeys = true);
+        $lines = array_slice($lines, $offset, $length, true);
         end($lines);
-        $lineStrlen = strlen(key($lines) + 1);
+        $lineLength = strlen(key($lines) + 1);
         $snippet = '';
 
         foreach ($lines as $i => $line) {
             $snippet .= (abs($lineNumber) === $i + 1 ? '  > ' : '    ');
-            $snippet .= str_pad($i + 1, $lineStrlen, ' ', STR_PAD_LEFT) . '| ' . rtrim($line) . PHP_EOL;
+            $snippet .= str_pad($i + 1, $lineLength, ' ', STR_PAD_LEFT) . '| ' . rtrim($line) . PHP_EOL;
         }
 
         return $snippet;
     }
 
     /**
-     * @param string $filePath
-     * @param int    $lineNumber
-     * @param int    $linesBefore
-     * @param int    $linesAfter
-     *
-     * @return string
-     *
      * @throws \JakubOnderka\PhpConsoleColor\InvalidStyleException
      */
-    public function getHighlightedCodeSnippet($filePath, $lineNumber, $linesBefore = 3, $linesAfter = 3)
+    public function getHighlightedCodeSnippet(string $filePath, int $lineNumber, int $linesBefore = 3, int $linesAfter = 3): string
     {
         if (
             !class_exists('\JakubOnderka\PhpConsoleHighlighter\Highlighter') ||
@@ -426,12 +332,7 @@ class LintCommand extends Command
         return $highlighter->getCodeSnippet($fileContent, $lineNumber, $linesBefore, $linesAfter);
     }
 
-    /**
-     * Merge options.
-     *
-     * @return array
-     */
-    protected function mergeOptions()
+    protected function mergeOptions(): array
     {
         $options = $this->input->getOptions();
         $options['path'] = $this->input->getArgument('path');
@@ -466,12 +367,7 @@ class LintCommand extends Command
         return $options;
     }
 
-    /**
-     * Get configuration file.
-     *
-     * @return string|null
-     */
-    protected function getConfigFile()
+    protected function getConfigFile(): ?string
     {
         $inputPath = $this->input->getArgument('path');
 
@@ -486,14 +382,7 @@ class LintCommand extends Command
         return realpath($filename);
     }
 
-    /**
-     * Load configuration from yaml.
-     *
-     * @param string $path
-     *
-     * @return array
-     */
-    protected function loadConfiguration($path)
+    protected function loadConfiguration(string $path): array
     {
         try {
             $configuration = Yaml::parse(file_get_contents($path));

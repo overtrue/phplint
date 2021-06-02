@@ -1,18 +1,8 @@
 <?php
 
-$header = <<<EOF
-This file is part of the overtrue/phplint
-
-(c) overtrue <i@overtrue.me>
-
-This source file is subject to the MIT license that is bundled
-with this source code in the file LICENSE.
-EOF;
-
-return PhpCsFixer\Config::create()
+return (new PhpCsFixer\Config())
     ->setRules([
-        '@PSR2' => true,
-        'header_comment' => ['header' => $header],
+        '@PSR12' => true,
         'blank_line_after_opening_tag' => true,
         'braces' => ['allow_single_line_closure' => true],
         'compact_nullable_typehint' => true,

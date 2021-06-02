@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the overtrue/phplint
- *
- * (c) overtrue <i@overtrue.me>
- *
- * This source file is subject to the MIT license that is bundled
- * with this source code in the file LICENSE.
- */
-
 namespace Overtrue\PHPLint;
 
 use InvalidArgumentException;
@@ -16,78 +7,28 @@ use Overtrue\PHPLint\Process\Lint;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
-/**
- * Class Linter.
- */
 class Linter
 {
-    /**
-     * @var callable
-     */
-    private $processCallback;
+    private mixed $processCallback;
+    private array $files = [];
+    private array $cache = [];
+    private array $paths;
+    private array $excludes;
+    private array $extensions;
+    private int $processLimit = 5;
+    private bool $warning;
 
-    /**
-     * @var SplFileInfo[]
-     */
-    private $files = [];
-
-    /**
-     * @var array
-     */
-    private $cache = [];
-
-    /**
-     * @var array
-     */
-    private $path;
-
-    /**
-     * @var array
-     */
-    private $excludes;
-
-    /**
-     * @var array
-     */
-    private $extensions;
-
-    /**
-     * @var int
-     */
-    private $processLimit = 5;
-
-    /**
-     * @var bool
-     */
-    private $warning;
-
-    /**
-     * Constructor.
-     *
-     * @param string|array $path
-     * @param array        $excludes
-     * @param array        $extensions
-     * @param bool         $warning
-     */
-    public function __construct($path, array $excludes = [], array $extensions = ['php'], $warning = false)
+    public function __construct(array|string $paths, array $excludes = [], array $extensions = ['php'], $warning = false)
     {
-        $this->path = (array)$path;
+        $this->paths = (array)$paths;
         $this->excludes = $excludes;
+        $this->warning = $warning;
         $this->extensions = \array_map(function ($extension) {
             return \sprintf('*.%s', \ltrim($extension, '.'));
         }, $extensions);
-        $this->warning = $warning;
     }
 
-    /**
-     * Check the files.
-     *
-     * @param SplFileInfo[] $files
-     * @param bool          $cache
-     *
-     * @return array
-     */
-    public function lint($files = [], $cache = true)
+    public function lint(array $files = [], bool $cache = true): array
     {
         if (empty($files)) {
             $files = $this->getFiles();
@@ -146,12 +87,7 @@ class Linter
         return $errors;
     }
 
-    /**
-     * Cache setter.
-     *
-     * @param array $cache
-     */
-    public function setCache($cache = [])
+    public function setCache(array $cache = [])
     {
         if (is_array($cache)) {
             $this->cache = $cache;
@@ -160,15 +96,10 @@ class Linter
         }
     }
 
-    /**
-     * Fetch files.
-     *
-     * @return SplFileInfo[]
-     */
-    public function getFiles()
+    public function getFiles(): array
     {
         if (empty($this->files)) {
-            foreach ($this->path as $path) {
+            foreach ($this->paths as $path) {
                 if (is_dir($path)) {
                     $this->files = array_merge($this->files, $this->getFilesFromDir($path));
                 } elseif (is_file($path)) {
@@ -180,14 +111,7 @@ class Linter
         return $this->files;
     }
 
-    /**
-     * Get files from directory.
-     *
-     * @param string $dir
-     *
-     * @return SplFileInfo[]
-     */
-    protected function getFilesFromDir($dir)
+    protected function getFilesFromDir(string $dir): array
     {
         $finder = new Finder();
         $finder->files()
@@ -204,14 +128,7 @@ class Linter
         return iterator_to_array($finder);
     }
 
-    /**
-     * Set Files.
-     *
-     * @param string[] $files
-     *
-     * @return \Overtrue\PHPLint\Linter
-     */
-    public function setFiles(array $files)
+    public function setFiles(array $files): static
     {
         foreach ($files as $file) {
             if (is_file($file)) {
@@ -228,40 +145,21 @@ class Linter
         return $this;
     }
 
-    /**
-     * Set process callback.
-     *
-     * @param callable $processCallback
-     *
-     * @return Linter
-     */
-    public function setProcessCallback($processCallback)
+    public function setProcessCallback(callable $processCallback): static
     {
         $this->processCallback = $processCallback;
 
         return $this;
     }
 
-    /**
-     * Set process limit.
-     *
-     * @param int $processLimit
-     *
-     * @return \Overtrue\PHPLint\Linter
-     */
-    public function setProcessLimit($processLimit)
+    public function setProcessLimit(int $processLimit): static
     {
         $this->processLimit = $processLimit;
 
         return $this;
     }
 
-    /**
-     * @param string $filename
-     *
-     * @return mixed
-     */
-    protected function createLintProcess($filename)
+    protected function createLintProcess(string $filename): Lint
     {
         $command = [
             PHP_SAPI == 'cli' ? PHP_BINARY : PHP_BINDIR . '/php',
