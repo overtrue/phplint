@@ -8,9 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@master
+      uses: actions/checkout@8.0
     - name: Checking PHP syntax error
-      uses: overtrue/phplint@master
+      uses: overtrue/phplint@8.0
       with:
         path: .
         options: --exclude=*.log
