@@ -1,8 +1,5 @@
 # This is a basic workflow to help you get started with Actions
 on:
-    push:
-        branches: [ master ]
-    pull_request:
     release:
         types: [ created ]
 
