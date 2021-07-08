@@ -9,7 +9,8 @@ use Symfony\Component\Finder\SplFileInfo;
 
 class Linter
 {
-    private mixed $processCallback = null;
+
+    private ?\Closure $processCallback = null;
     private array $files = [];
     private array $cache = [];
     private array $paths;
@@ -34,8 +35,7 @@ class Linter
             $files = $this->getFiles();
         }
 
-        $processCallback = is_callable($this->processCallback) ? $this->processCallback : function () {
-        };
+        $processCallback = $this->processCallback ?? fn() => null;
 
         $errors = [];
         $running = [];
@@ -147,7 +147,7 @@ class Linter
 
     public function setProcessCallback(callable $processCallback): static
     {
-        $this->processCallback = $processCallback;
+        $this->processCallback = \Closure::fromCallable($processCallback);
 
         return $this;
     }
