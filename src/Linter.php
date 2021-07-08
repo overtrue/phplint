@@ -9,23 +9,28 @@ use Symfony\Component\Finder\SplFileInfo;
 
 class Linter
 {
-    private mixed $processCallback;
-    private array $files = [];
-    private array $cache = [];
-    private array $paths;
-    private array $excludes;
-    private array $extensions;
-    private int $processLimit = 5;
-    private bool $warning;
+    private ?\Closure $processCallback = null;
+    private array     $files           = [];
+    private array     $cache           = [];
+    private array     $paths;
+    private array     $excludes;
+    private array     $extensions;
+    private int       $processLimit    = 5;
+    private bool      $warning;
 
-    public function __construct(array|string $paths, array $excludes = [], array $extensions = ['php'], $warning = false)
-    {
-        $this->paths = (array)$paths;
-        $this->excludes = $excludes;
-        $this->warning = $warning;
+    public function __construct(
+        array|string $paths,
+        array $excludes = [],
+        array $extensions = ['php'],
+        $warning = false
+    ) {
+        $this->paths      = (array)$paths;
+        $this->excludes   = $excludes;
+        $this->warning    = $warning;
         $this->extensions = \array_map(function ($extension) {
             return \sprintf('*.%s', \ltrim($extension, '.'));
-        }, $extensions);
+        },
+            $extensions);
     }
 
     public function lint(array $files = [], bool $cache = true): array
@@ -34,23 +39,23 @@ class Linter
             $files = $this->getFiles();
         }
 
-        $processCallback = is_callable($this->processCallback) ? $this->processCallback : function () {
-        };
+        $processCallback = $this->processCallback ?? fn() => null;
 
-        $errors = [];
-        $running = [];
+        $errors   = [];
+        $running  = [];
         $newCache = [];
 
         while (!empty($files) || !empty($running)) {
             for ($i = count($running); !empty($files) && $i < $this->processLimit; ++$i) {
-                $file = array_shift($files);
-                $filename = $file->getRealPath();
+                $file             = array_shift($files);
+                $filename         = $file->getRealPath();
                 $relativePathname = $file->getRelativePathname();
-                if (!isset($this->cache[$relativePathname]) || $this->cache[$relativePathname] !== md5_file($filename)) {
-                    $lint = $this->createLintProcess($filename);
+                if (!isset($this->cache[$relativePathname]) ||
+                    $this->cache[$relativePathname] !== md5_file($filename)) {
+                    $lint               = $this->createLintProcess($filename);
                     $running[$filename] = [
-                        'process' => $lint,
-                        'file' => $file,
+                        'process'      => $lint,
+                        'file'         => $file,
                         'relativePath' => $relativePathname,
                     ];
                     $lint->start();
@@ -71,10 +76,14 @@ class Linter
 
                 if ($lint->hasSyntaxError()) {
                     $processCallback('error', $item['file']);
-                    $errors[$filename] = array_merge(['file' => $filename, 'file_name' => $item['relativePath']], $lint->getSyntaxError());
+                    $errors[$filename] =
+                        array_merge(['file' => $filename, 'file_name' => $item['relativePath']],
+                                    $lint->getSyntaxError());
                 } elseif ($this->warning && $lint->hasSyntaxIssue()) {
                     $processCallback('warning', $item['file']);
-                    $errors[$filename] = array_merge(['file' => $filename, 'file_name' => $item['relativePath']], $lint->getSyntaxIssue());
+                    $errors[$filename] =
+                        array_merge(['file' => $filename, 'file_name' => $item['relativePath']],
+                                    $lint->getSyntaxIssue());
                 } else {
                     $newCache[$item['relativePath']] = md5_file($filename);
                     $processCallback('ok', $item['file']);
@@ -115,12 +124,12 @@ class Linter
     {
         $finder = new Finder();
         $finder->files()
-            ->ignoreUnreadableDirs()
-            ->ignoreVCS(true)
-            ->filter(function (SplFileInfo $file) {
-                return $file->isReadable();
-            })
-            ->in(realpath($dir));
+               ->ignoreUnreadableDirs()
+               ->ignoreVCS(true)
+               ->filter(function (SplFileInfo $file) {
+                   return $file->isReadable();
+               })
+               ->in(realpath($dir));
 
         array_map([$finder, 'name'], $this->extensions);
         array_map([$finder, 'notPath'], $this->excludes);
@@ -147,7 +156,7 @@ class Linter
 
     public function setProcessCallback(callable $processCallback): static
     {
-        $this->processCallback = $processCallback;
+        $this->processCallback = \Closure::fromCallable($processCallback);
 
         return $this;
     }
@@ -165,7 +174,8 @@ class Linter
             PHP_SAPI == 'cli' ? PHP_BINARY : PHP_BINDIR . '/php',
             '-d error_reporting=E_ALL',
             '-d display_errors=On',
-            '-l', $filename,
+            '-l',
+            $filename,
         ];
 
         return new Lint($command);
