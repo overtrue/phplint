@@ -29,7 +29,7 @@ $ composer require overtrue/phplint:^2.0 --dev -vvv
 docker pull overtrue/phplint:8.0
 
 // PHP 7
-docker pull overtrue/phplint:7.0
+docker pull overtrue/phplint:7.4
 ```
 
 ## Usage
