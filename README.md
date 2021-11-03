@@ -154,6 +154,12 @@ Not all linting problems are errors, PHP also has warnings, for example when usi
 `switch` `case`. By default these errors are not reported, but you can turn this on with the `warning` cli flag, or
 by setting the `warning` to true in the configuration.
 
+## :heart: Sponsor me 
+
+If you like the work I do and want to support it, [you know what to do :heart:](https://github.com/sponsors/overtrue)
+
+如果你喜欢我的项目并想支持它，[点击这里 :heart:](https://github.com/sponsors/overtrue)
+
 
 ## PHP 扩展包开发
 
