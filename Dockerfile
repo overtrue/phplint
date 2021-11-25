@@ -9,4 +9,5 @@ COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 RUN cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
 
+WORKDIR /workdir
 ENTRYPOINT ["/entrypoint.sh"]

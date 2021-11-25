@@ -1,5 +1,5 @@
 #!/bin/sh -l
 
-set -xe
+set -e
 
-/root/.composer/vendor/bin/phplint ${INPUT_PATH} ${INPUT_OPTIONS}
+exec /root/.composer/vendor/bin/phplint "$@"
