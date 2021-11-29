@@ -27,7 +27,9 @@
   "require-dev": {
     "jakub-onderka/php-console-highlighter": "^0.4",
     "brainmaestro/composer-git-hooks": "^2.8.5",
-    "friendsofphp/php-cs-fixer": "^3.3.2"
+    "friendsofphp/php-cs-fixer": "^3.3.2",
+    "jetbrains/phpstorm-stubs": "^2021.3",
+    "bamarni/composer-bin-plugin": "^1.4"
   },
   "autoload": {
     "psr-4": {
@@ -42,19 +44,24 @@
     }
   },
   "scripts": {
+    "bin": "echo 'bin not installed'",
     "post-update-cmd": [
-      "cghooks update"
+      "cghooks update",
+      "@composer bin all update --ansi"
     ],
     "post-merge": "composer install",
     "post-install-cmd": [
       "cghooks add --ignore-lock",
-      "cghooks update"
+      "cghooks update",
+      "@composer bin all install --ansi"
     ],
     "cghooks": "vendor/bin/cghooks",
     "check-style": "php-cs-fixer fix --using-cache=no --diff --dry-run --ansi",
     "fix-style": "php-cs-fixer fix --using-cache=no --ansi",
     "lint:syntax": "./bin/phplint --ansi"
   },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
   "scripts-descriptions": {
     "check-style": "Run style checks (only dry run - no fixing!).",
     "fix-style": "Run style checks and fix violations."
