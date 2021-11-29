@@ -9,7 +9,6 @@ use Symfony\Component\Finder\SplFileInfo;
 
 class Linter
 {
-
     private ?\Closure $processCallback = null;
     private array $files = [];
     private array $cache = [];
@@ -35,7 +34,7 @@ class Linter
             $files = $this->getFiles();
         }
 
-        $processCallback = $this->processCallback ?? fn() => null;
+        $processCallback = $this->processCallback ?? fn () => null;
 
         $errors = [];
         $running = [];
