@@ -4,31 +4,31 @@
 
 ![artboard 1](https://user-images.githubusercontent.com/1472352/38774811-3f780ab6-40a3-11e8-9a0a-a8d06d2c6463.jpg)
 
-[![Build Status](https://travis-ci.org/overtrue/phplint.svg?branch=master)](https://travis-ci.org/overtrue/phplint)
+[![Release Status](https://github.com/overtrue/phplint/actions/workflows/build-phar.yml/badge.svg)](https://github.com/overtrue/phplint/actions/workflows/build-phar.yml)
 [![Latest Stable Version](https://poser.pugx.org/overtrue/phplint/v/stable.svg)](https://packagist.org/packages/overtrue/phplint) [![Total Downloads](https://poser.pugx.org/overtrue/phplint/downloads.svg)](https://packagist.org/packages/overtrue/phplint) [![Latest Unstable Version](https://poser.pugx.org/overtrue/phplint/v/unstable.svg)](https://packagist.org/packages/overtrue/phplint) [![License](https://poser.pugx.org/overtrue/phplint/license.svg)](https://packagist.org/packages/overtrue/phplint)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/overtrue/phplint/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/overtrue/phplint/?branch=master)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fovertrue%2Fphplint.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fovertrue%2Fphplint?ref=badge_shield)
 
+[![Sponsor me](https://raw.githubusercontent.com/overtrue/overtrue/master/sponsor-me-button-s.svg)](https://github.com/sponsors/overtrue)
+
 
 ## Installation
+
+### required
+- PHP >= 5.5.9
+- Composer >= 1.0
+
+> if you are using php 8.0, please refer [the 8.0 branch](https://github.com/overtrue/phplint/tree/8.0). 
 
 ### Locally, if you have PHP
 
 ```shell
-// PHP 8
-$ composer require overtrue/phplint --dev -vvv
-
-// PHP 7
-$ composer require overtrue/phplint:^2.0 --dev -vvv
+$ composer require overtrue/phplint:^3.0 --dev -vvv
 ```
 
 ### Locally, if you only have Docker
 
 ```
-// PHP 8
-docker pull overtrue/phplint:8.0
-
-// PHP 7
 docker pull overtrue/phplint:7.4
 ```
 
@@ -98,6 +98,8 @@ If you want to disable the config file, you can add option `--no-configuration`.
 docker run --rm -t -v "${PWD}":/workdir overtrue/phplint ./  --exclude=vendor
 ```
 
+> Please mount the code directory to `/workdir` in the container.
+
 ### Program
 
 ```php
@@ -131,19 +133,16 @@ $errors = $linter->lint();
 ### GitHub Actions
 
 ```yaml
-uses: overtrue/phplint@8.0
+uses: overtrue/phplint@7.4
 with:
   path: .
   options: --exclude=*.log
-```
-for PHP 7: 
-```
-uses: overtrue/phplint@7.4
 ```
 
 ### Other CI/CD (f.e. Bitbucket Pipelines, GitLab CI)
 
 Run this command using `overtrue/phplint:8.0` Docker image:
+
 ```
 /root/.composer/vendor/bin/phplint ./ --exclude=vendor
 ```
@@ -151,8 +150,20 @@ Run this command using `overtrue/phplint:8.0` Docker image:
 ### Warnings
 
 Not all linting problems are errors, PHP also has warnings, for example when using a `continue` statement within a
-`switch` `case`. By default these errors are not reported, but you can turn this on with the `warning` cli flag, or
+`switch` `case`. By default, these errors are not reported, but you can turn this on with the `warning` cli flag, or
 by setting the `warning` to true in the configuration.
+
+## :heart: Sponsor me 
+
+[![Sponsor me](https://raw.githubusercontent.com/overtrue/overtrue/master/sponsor-me.svg)](https://github.com/sponsors/overtrue)
+
+如果你喜欢我的项目并想支持它，[点击这里 :heart:](https://github.com/sponsors/overtrue)
+
+## Project supported by JetBrains
+
+Many thanks to Jetbrains for kindly providing a license for me to work on this and other open-source projects.
+
+[![](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://www.jetbrains.com/?from=https://github.com/overtrue)
 
 
 ## PHP 扩展包开发
