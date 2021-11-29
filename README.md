@@ -14,24 +14,22 @@
 
 ## Installation
 
+### required
+- PHP >= 8.0
+- Composer >= 2.0
+
+> if you are using php 7.0, please refer [the 7.4 branch](https://github.com/overtrue/phplint/tree/7.4). 
+
 ### Locally, if you have PHP
 
 ```shell
-// PHP 8
 $ composer require overtrue/phplint:^4.0 --dev -vvv
-
-// PHP 7
-$ composer require overtrue/phplint:^3.0 --dev -vvv
 ```
 
 ### Locally, if you only have Docker
 
 ```
-// PHP 8
 docker pull overtrue/phplint:8.0
-
-// PHP 7
-docker pull overtrue/phplint:7.4
 ```
 
 ## Usage
@@ -100,6 +98,8 @@ If you want to disable the config file, you can add option `--no-configuration`.
 docker run --rm -t -v "${PWD}":/workdir overtrue/phplint ./  --exclude=vendor
 ```
 
+> Please mount the code directory to `/workdir` in the container.
+
 ### Program
 
 ```php
@@ -138,14 +138,11 @@ with:
   path: .
   options: --exclude=*.log
 ```
-for PHP 7:
-```
-uses: overtrue/phplint@7.4
-```
 
 ### Other CI/CD (f.e. Bitbucket Pipelines, GitLab CI)
 
 Run this command using `overtrue/phplint:8.0` Docker image:
+
 ```
 /root/.composer/vendor/bin/phplint ./ --exclude=vendor
 ```
