@@ -1,7 +1,7 @@
 ARG VERSION=8.0
 
 FROM composer:2.0 AS build
-RUN composer global require overtrue/phplint
+RUN composer global require overtrue/phplint:^4.0.0
 
 FROM php:${VERSION}-cli-alpine
 COPY --from=build /tmp/vendor /root/.composer/vendor

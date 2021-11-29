@@ -32,18 +32,18 @@ class Cache
         return file_put_contents(self::getFilename(), json_encode($contents));
     }
 
-    public static function setFilename(string $filename)
+    public static function setFilename(string $filename): void
     {
         self::$filename = $filename;
         self::makeFolderForFilename();
     }
 
-    private static function makeFolderForFilename()
+    private static function makeFolderForFilename(): void
     {
-        $filename = self::getFilename();
-        $dirname = dirname($filename);
-        if (!file_exists($dirname)) {
-            mkdir($dirname, 0777, true);
+        $dir = dirname(self::getFilename());
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
         }
     }
 

@@ -32,7 +32,7 @@ class LintCommand extends Command
     protected InputInterface $input;
     protected OutputInterface $output;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('phplint')
@@ -116,7 +116,7 @@ class LintCommand extends Command
             );
     }
 
-    public function initialize(InputInterface $input, OutputInterface $output)
+    public function initialize(InputInterface $input, OutputInterface $output): void
     {
         $this->input = $input;
         $this->output = $output;
@@ -205,7 +205,7 @@ class LintCommand extends Command
         return $code;
     }
 
-    protected function dumpJsonResult(string $path, array $errors, array $options, array $context = [])
+    protected function dumpJsonResult(string $path, array $errors, array $options, array $context = []): void
     {
         $result = [
             'status' => 'success',
@@ -216,7 +216,7 @@ class LintCommand extends Command
         \file_put_contents($path, \json_encode(\array_merge($result, $context)));
     }
 
-    protected function dumpXmlResult(string $path, array $errors, array $options, array $context = [])
+    protected function dumpXmlResult(string $path, array $errors, array $options, array $context = []): void
     {
         $document = new Document();
         $suite = $document->addTestSuite();
@@ -224,9 +224,11 @@ class LintCommand extends Command
         $suite->setTimestamp(new DateTime());
         $suite->setTime($context['time_usage']);
         $testCase = $suite->addTestCase();
+
         foreach ($errors as $errorName => $value) {
             $testCase->addError($errorName, 'Error', $value['error']);
         }
+
         $document->save($path);
     }
 
@@ -280,7 +282,7 @@ class LintCommand extends Command
     /**
      * @throws \JakubOnderka\PhpConsoleColor\InvalidStyleException
      */
-    protected function showErrors(array $errors)
+    protected function showErrors(array $errors): void
     {
         $i = 0;
         $this->output->writeln("\nThere was " . count($errors) . ' errors:');
@@ -367,7 +369,7 @@ class LintCommand extends Command
         return $options;
     }
 
-    protected function getConfigFile(): ?string
+    protected function getConfigFile(): false|string
     {
         $inputPath = $this->input->getArgument('path');
 

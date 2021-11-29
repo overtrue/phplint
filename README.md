@@ -18,10 +18,10 @@
 
 ```shell
 // PHP 8
-$ composer require overtrue/phplint --dev -vvv
+$ composer require overtrue/phplint:^4.0 --dev -vvv
 
 // PHP 7
-$ composer require overtrue/phplint:^2.0 --dev -vvv
+$ composer require overtrue/phplint:^3.0 --dev -vvv
 ```
 
 ### Locally, if you only have Docker
@@ -153,7 +153,7 @@ Run this command using `overtrue/phplint:8.0` Docker image:
 ### Warnings
 
 Not all linting problems are errors, PHP also has warnings, for example when using a `continue` statement within a
-`switch` `case`. By default these errors are not reported, but you can turn this on with the `warning` cli flag, or
+`switch` `case`. By default, these errors are not reported, but you can turn this on with the `warning` cli flag, or
 by setting the `warning` to true in the configuration.
 
 ## :heart: Sponsor me 

@@ -88,11 +88,7 @@ class Linter
 
     public function setCache(array $cache = [])
     {
-        if (is_array($cache)) {
-            $this->cache = $cache;
-        } else {
-            $this->cache = [];
-        }
+        $this->cache = $cache;
     }
 
     public function getFiles(): array
