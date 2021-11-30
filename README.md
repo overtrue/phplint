@@ -133,7 +133,7 @@ $errors = $linter->lint();
 ### GitHub Actions
 
 ```yaml
-uses: overtrue/phplint@3.0
+uses: overtrue/phplint@7.4
 with:
   path: .
   options: --exclude=*.log
