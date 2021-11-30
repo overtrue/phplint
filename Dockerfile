@@ -1,6 +1,6 @@
 ARG VERSION=7.4
 
-FROM composer:2.0 AS build
+FROM composer:1.10 AS build
 RUN composer global require overtrue/phplint:^3.0.0
 
 FROM php:${VERSION}-cli-alpine
