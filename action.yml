@@ -12,6 +12,9 @@ inputs:
 runs:
   using: 'docker'
   image: 'Dockerfile'
+  args:
+    - ${{ inputs.path }}
+    - ${{ inputs.options }}
 branding:
   icon: 'check'
   color: 'purple'
