@@ -1,10 +1,10 @@
 ARG VERSION=7.4
 
-FROM composer:1.10 AS build
-RUN composer global require overtrue/phplint:^3.0.0
+FROM composer:2.1
+FROM php:${VERSION}-cli-alpine as build
 
-FROM php:${VERSION}-cli-alpine
-COPY --from=build /tmp/vendor /root/.composer/vendor
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+RUN composer global require overtrue/phplint:^3.0.0
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 RUN cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
