@@ -1,5 +1,5 @@
 #!/bin/sh -l
 
-set -e
+set -euxo pipefail
 
-exec /root/.composer/vendor/bin/phplint "$@"
+exec /root/.composer/vendor/bin/phplint $@
