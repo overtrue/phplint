@@ -2,4 +2,4 @@
 
 set -euxo pipefail
 
-exec /root/.composer/vendor/bin/phplint $@
+sh -c "/root/.composer/vendor/bin/phplint $*"
