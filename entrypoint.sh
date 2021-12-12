@@ -1,5 +1,9 @@
 #!/bin/sh -l
 
-set -euxo pipefail
+set -ex
 
-sh -c "/root/.composer/vendor/bin/phplint $*"
+if [ ! -z "$INPUT_PATH" ]; then
+  /root/.composer/vendor/bin/phplint $INPUT_PATH $INPUT_OPTIONS
+else
+  sh -c "/root/.composer/vendor/bin/phplint $*"
+fi
