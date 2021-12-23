@@ -18,10 +18,10 @@
   "require": {
     "php": ">=8.0",
     "ext-json": "*",
-    "symfony/console": "^5.3.11",
-    "symfony/finder": "^5.3.7",
-    "symfony/process": "^5.3.12",
-    "symfony/yaml": "^5.3.11",
+    "symfony/console": "^5.3.11|^6.0",
+    "symfony/finder": "^5.3.7|^6.0",
+    "symfony/process": "^5.3.12|^6.0",
+    "symfony/yaml": "^5.3.11|^6.0",
     "n98/junit-xml": "1.1.0"
   },
   "require-dev": {
