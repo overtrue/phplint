@@ -15,7 +15,7 @@ class Cache
         return $content ? json_decode($content, true) : null;
     }
 
-    #[Pure]
+    #[Pure(true)]
     public static function exists(): bool
     {
         return file_exists(self::getFilename());
