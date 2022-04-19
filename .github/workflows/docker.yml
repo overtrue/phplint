@@ -22,5 +22,6 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         repository: overtrue/phplint
+        push: true
         tags: ${{ steps.extract_branch.outputs.branch }}
 
