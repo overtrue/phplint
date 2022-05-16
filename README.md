@@ -2,6 +2,8 @@
 
 <p align="center">`phplint` is a tool that can speed up linting of php files by running several lint processes at once.</p>
 
+>🚨 There are two better packages for syntax detection and static analysis: [Psalm](https://psalm.dev/) and [PHPStan](https://github.com/phpstan/phpstan), recently my work has started to get busier and I won't have much time to maintain this project, if you are interested in maintaining it please raise an issue, Thanks.
+
 ![artboard 1](https://user-images.githubusercontent.com/1472352/38774811-3f780ab6-40a3-11e8-9a0a-a8d06d2c6463.jpg)
 
 [![Release Status](https://github.com/overtrue/phplint/actions/workflows/build-phar.yml/badge.svg)](https://github.com/overtrue/phplint/actions/workflows/build-phar.yml)
