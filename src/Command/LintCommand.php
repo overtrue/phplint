@@ -141,7 +141,7 @@ class LintCommand extends Command
                 'Allow to silenty fail.'
             )
             ->addOption(
-                'no-files',
+                'no-files-exit-code',
                 'nf',
                 InputOption::VALUE_NONE,
                 'Throw error if no files processed.'
@@ -215,7 +215,7 @@ class LintCommand extends Command
         if ($fileCount <= 0) {
             $output->writeln('<info>Could not find files to lint</info>');
             
-            if (!empty($options['no-files'])) {
+            if (!empty($options['no-files-exit-code'])) {
                 $code = 1;
             }
             
