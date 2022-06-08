@@ -113,6 +113,12 @@ class LintCommand extends Command
                 'q',
                 InputOption::VALUE_NONE,
                 'Allow to silently fail.'
+            )
+            ->addOption(
+                'no-files-exit-code',
+                'nf',
+                InputOption::VALUE_NONE,
+                'Throw error if no files processed.'
             );
     }
 
@@ -153,11 +159,16 @@ class LintCommand extends Command
         }
 
         $fileCount = count($linter->getFiles());
+        $code = 0;
 
         if ($fileCount <= 0) {
             $output->writeln('<info>Could not find files to lint</info>');
 
-            return 0;
+            if (!empty($options['no-files-exit-code'])) {
+                $code = 1;
+            }
+
+            return $code;
         }
 
         $errors = $this->executeLint($linter, $input, $output, $fileCount);
@@ -165,7 +176,6 @@ class LintCommand extends Command
         $timeUsage = Helper::formatTime(microtime(true) - $startTime);
         $memUsage = Helper::formatMemory(memory_get_usage(true) - $startMemUsage);
 
-        $code = 0;
         $errCount = count($errors);
 
         $output->writeln(sprintf(
