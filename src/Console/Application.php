@@ -10,7 +10,7 @@ class Application extends BaseApplication
 {
     public const NAME = 'phplint';
 
-    public const VERSION = '5.0';
+    public const VERSION = '5.2.1';
 
     public function __construct()
     {
