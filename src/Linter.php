@@ -17,6 +17,7 @@ class Linter
     private array $extensions;
     private int $processLimit = 5;
     private bool $warning;
+    private string $memoryLimit;
 
     public function __construct(array|string $paths, array $excludes = [], array $extensions = ['php'], $warning = false)
     {
@@ -91,6 +92,11 @@ class Linter
         $this->cache = $cache;
     }
 
+    public function setMemoryLimit(string $limit)
+    {
+        $this->memoryLimit = $limit;
+    }
+
     public function getFiles(): array
     {
         if (empty($this->files)) {
@@ -160,8 +166,14 @@ class Linter
             PHP_SAPI == 'cli' ? PHP_BINARY : PHP_BINDIR . '/php',
             '-d error_reporting=E_ALL',
             '-d display_errors=On',
-            '-l', $filename,
         ];
+
+        if (!empty($this->memoryLimit)) {
+            $command[] = '-d memory_limit=' . $this->memoryLimit;
+        }
+
+        $command[] = '-l';
+        $command[] = $filename;
 
         return new Lint($command);
     }
