@@ -209,16 +209,20 @@ class LintCommand extends Command
             $linter->setCache(Cache::get());
         }
 
+        if (!empty($options['memory_limit'])) {
+            $linter->setMemoryLimit($options['memory_limit']);
+        }
+
         $fileCount = count($linter->getFiles());
         $code = 0;
 
         if ($fileCount <= 0) {
             $output->writeln('<info>Could not find files to lint</info>');
-            
+
             if (!empty($options['no-files-exit-code'])) {
                 $code = 1;
             }
-            
+
             return $code;
         }
 

@@ -57,6 +57,11 @@ class Linter
     private $processLimit = 5;
 
     /**
+     * @var string
+     */
+    private $memoryLimit;
+
+    /**
      * @var bool
      */
     private $warning;
@@ -257,6 +262,20 @@ class Linter
     }
 
     /**
+     * Set memory limit.
+     *
+     * @param string $limit
+     *
+     * @return \Overtrue\PHPLint\Linter
+     */
+    public function setMemoryLimit($limit)
+    {
+        $this->memoryLimit = $limit;
+
+        return $this;
+    }
+
+    /**
      * @param string $filename
      *
      * @return mixed
@@ -267,8 +286,14 @@ class Linter
             PHP_SAPI == 'cli' ? PHP_BINARY : PHP_BINDIR . '/php',
             '-d error_reporting=E_ALL',
             '-d display_errors=On',
-            '-l', $filename,
         ];
+
+        if (!empty($this->memoryLimit)) {
+            $command[] = '-d memory_limit=' . $this->memoryLimit;
+        }
+
+        $command[] = '-l';
+        $command[] = $filename;
 
         return new Lint($command);
     }
