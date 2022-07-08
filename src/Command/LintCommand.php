@@ -158,6 +158,10 @@ class LintCommand extends Command
             $linter->setCache(Cache::get());
         }
 
+        if (!empty($options['memory_limit'])) {
+            $linter->setMemoryLimit($options['memory_limit']);
+        }
+
         $fileCount = count($linter->getFiles());
         $code = 0;
 
