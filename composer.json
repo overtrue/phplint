@@ -68,5 +68,10 @@
   },
   "bin": [
     "bin/phplint"
-  ]
+  ],
+  "config": {
+    "allow-plugins": {
+      "bamarni/composer-bin-plugin": true
+    }
+  }
 }
