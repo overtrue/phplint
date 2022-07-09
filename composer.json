@@ -28,7 +28,7 @@
     "jakub-onderka/php-console-highlighter": "^0.4",
     "brainmaestro/composer-git-hooks": "^2.8.5",
     "friendsofphp/php-cs-fixer": "^3.4.0",
-    "jetbrains/phpstorm-stubs": "^2021.3",
+    "jetbrains/phpstorm-stubs": "^2021.3 || ^2022.0",
     "bamarni/composer-bin-plugin": "^1.4"
   },
   "autoload": {
