@@ -16,7 +16,7 @@
     }
   ],
   "require": {
-    "php": ">=8.1",
+    "php": "^8.1",
     "ext-json": "*",
     "symfony/console": "^5.0 || ^6.0",
     "symfony/finder": "^6.0",
@@ -72,6 +72,9 @@
   "config": {
     "allow-plugins": {
       "bamarni/composer-bin-plugin": true
+    },
+    "platform": {
+      "php": "8.1"
     }
   }
 }
