@@ -1,8 +1,8 @@
 #!/usr/bin/env php
 <?php
 
-if (PHP_SAPI !== 'cli' && PHP_MINOR_VERSION < 5) {
-    echo 'Warning: phplint should be invoked via the CLI minimum version of PHP 5.5.9, not the '.PHP_SAPI.' SAPI'.PHP_EOL;
+if (PHP_SAPI !== 'cli' && version_compare(PHP_VERSION, '8.1', 'lt')) {
+    echo 'Warning: phplint should be invoked via the CLI minimum version of PHP 8.1, not the '.PHP_SAPI.' SAPI'.PHP_EOL;
 }
 
 $loaded = false;
@@ -18,7 +18,7 @@ foreach (array(__DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoloa
 if (!$loaded) {
     die(
         'You need to set up the project dependencies using the following commands:' . PHP_EOL .
-        'wget http://getcomposer.org/composer.phar' . PHP_EOL .
+        'wget https://getcomposer.org/composer.phar' . PHP_EOL .
         'php composer.phar install' . PHP_EOL
     );
 }
