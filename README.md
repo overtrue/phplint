@@ -15,15 +15,16 @@
 ## Installation
 
 ### required
-- PHP >= 5.5.9
-- Composer >= 1.0
+- PHP >= 5.5.9 or PHP 7
+- Composer >= 2.1
 
 > if you are using php 8.0, please refer [the 8.0 branch](https://github.com/overtrue/phplint/tree/8.0). 
+> if you are using php 8.1, please refer [the 8.1 branch](https://github.com/overtrue/phplint/tree/8.1). 
 
 ### Locally, if you have PHP
 
 ```shell
-$ composer require overtrue/phplint:^3.0 --dev -vvv
+$ composer require overtrue/phplint --dev -vvv
 ```
 
 ### Locally, if you only have Docker
@@ -82,13 +83,14 @@ extensions:
 exclude:
   - vendor
 warning: false
+memory_limit: -1
 ```
 
 ```shell
 $ ./vendor/bin/phplint
 ```
 
-By default, the command will read configuration from file `.phplint.yml` of path specified, you can custom the filename by option: `--configuration=FILENAME` or `-c FILENAME`;
+By default, the command will read configuration from file `.phplint.yml` of path specified, you can use another filename by option: `--configuration=FILENAME` or `-c FILENAME`;
 
 If you want to disable the config file, you can add option `--no-configuration`.
 
@@ -141,7 +143,7 @@ with:
 
 ### Other CI/CD (f.e. Bitbucket Pipelines, GitLab CI)
 
-Run this command using `overtrue/phplint:8.0` Docker image:
+Run this command using `overtrue/phplint:7.4` Docker image:
 
 ```
 /root/.composer/vendor/bin/phplint ./ --exclude=vendor
