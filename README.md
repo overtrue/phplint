@@ -18,15 +18,15 @@
 
 ### required
 - PHP >= 8.1
-- Composer >= 2.0
+- Composer >= 2.1
 
-> if you are using php 7.0, please refer [the 7.4 branch](https://github.com/overtrue/phplint/tree/7.4).
+> if you are using php 5.5, php 5.6 or php 7.x, please refer [the 7.4 branch](https://github.com/overtrue/phplint/tree/7.4).
 > if you are using php 8.0, please refer [the 8.0 branch](https://github.com/overtrue/phplint/tree/8.0).
 
 ### Locally, if you have PHP
 
 ```shell
-$ composer require overtrue/phplint:^5.0 --dev -vvv
+$ composer require overtrue/phplint --dev -vvv
 ```
 
 ### Locally, if you only have Docker
@@ -85,13 +85,14 @@ extensions:
 exclude:
   - vendor
 warning: false
+memory_limit: -1
 ```
 
 ```shell
 $ ./vendor/bin/phplint
 ```
 
-By default, the command will read configuration from file `.phplint.yml` of path specified, you can custom the filename by option: `--configuration=FILENAME` or `-c FILENAME`;
+By default, the command will read configuration from file `.phplint.yml` of path specified, you can use another filename by option: `--configuration=FILENAME` or `-c FILENAME`;
 
 If you want to disable the config file, you can add option `--no-configuration`.
 
