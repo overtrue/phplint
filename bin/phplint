@@ -1,8 +1,8 @@
 #!/usr/bin/env php
 <?php
 
-if (PHP_SAPI !== 'cli' && version_compare(PHP_VERSION, '8.1', 'lt')) {
-    echo 'Warning: phplint should be invoked via the CLI minimum version of PHP 8.1, not the '.PHP_SAPI.' SAPI'.PHP_EOL;
+if (PHP_SAPI !== 'cli' && version_compare(PHP_VERSION, '8.2', 'lt')) {
+    echo 'Warning: phplint should be invoked via the CLI minimum version of PHP 8.2, not the '.PHP_SAPI.' SAPI'.PHP_EOL;
 }
 
 $loaded = false;
