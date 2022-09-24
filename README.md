@@ -17,11 +17,12 @@
 ## Installation
 
 ### required
-- PHP >= 8.1
+- PHP >= 8.2
 - Composer >= 2.1
 
 > if you are using php 5.5, php 5.6 or php 7.x, please refer [the 7.4 branch](https://github.com/overtrue/phplint/tree/7.4).
 > if you are using php 8.0, please refer [the 8.0 branch](https://github.com/overtrue/phplint/tree/8.0).
+> if you are using php 8.1, please refer [the 8.1 branch](https://github.com/overtrue/phplint/tree/8.1).
 
 ### Locally, if you have PHP
 
@@ -32,7 +33,7 @@ $ composer require overtrue/phplint --dev -vvv
 ### Locally, if you only have Docker
 
 ```
-docker pull overtrue/phplint:8.1
+docker pull overtrue/phplint:8.2
 ```
 
 ## Usage
@@ -137,7 +138,7 @@ $errors = $linter->lint();
 ### GitHub Actions
 
 ```yaml
-uses: overtrue/phplint@8.1
+uses: overtrue/phplint@8.2
 with:
   path: .
   options: --exclude=*.log
@@ -145,7 +146,7 @@ with:
 
 ### Other CI/CD (f.e. Bitbucket Pipelines, GitLab CI)
 
-Run this command using `overtrue/phplint:8.1` Docker image:
+Run this command using `overtrue/phplint:8.2` Docker image:
 
 ```
 /root/.composer/vendor/bin/phplint ./ --exclude=vendor
