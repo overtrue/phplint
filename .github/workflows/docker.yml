@@ -2,11 +2,14 @@
 
 name: Docker
 
-on: push
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - '8.2'
 
 jobs:
   build:
-    if: ${GITHUB_REF_TYPE} == 'branch'
     runs-on: ubuntu-latest
 
     steps:
