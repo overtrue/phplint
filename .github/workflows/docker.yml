@@ -33,5 +33,5 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: overtrue/phplint:${{ github.base_ref }}
+        tags: overtrue/phplint:${{ github.ref_name }}
 
