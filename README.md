@@ -99,7 +99,7 @@ If you want to disable the config file, you can add option `--no-configuration`.
 ### Docker cli
 
 ```bash
-docker run --rm -t -v "${PWD}":/workdir overtrue/phplint ./  --exclude=vendor
+docker run --rm -t -v "${PWD}":/workdir overtrue/phplint:8.1 ./  --exclude=vendor
 ```
 
 > Please mount the code directory to `/workdir` in the container.
