@@ -3,8 +3,9 @@
 namespace Overtrue\PHPLint\Command;
 
 use DateTime;
-use JakubOnderka\PhpConsoleColor\ConsoleColor;
-use JakubOnderka\PhpConsoleHighlighter\Highlighter;
+use PHP_Parallel_Lint\PhpConsoleColor\ConsoleColor;
+use PHP_Parallel_Lint\PhpConsoleColor\InvalidStyleException;
+use PHP_Parallel_Lint\PhpConsoleHighlighter\Highlighter;
 use N98\JUnitXml\Document;
 use Overtrue\PHPLint\Cache;
 use Overtrue\PHPLint\Linter;
@@ -129,7 +130,7 @@ class LintCommand extends Command
     }
 
     /**
-     * @throws \JakubOnderka\PhpConsoleColor\InvalidStyleException
+     * @throws InvalidStyleException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -294,7 +295,7 @@ class LintCommand extends Command
     }
 
     /**
-     * @throws \JakubOnderka\PhpConsoleColor\InvalidStyleException
+     * @throws InvalidStyleException
      */
     protected function showErrors(array $errors): void
     {
@@ -330,13 +331,13 @@ class LintCommand extends Command
     }
 
     /**
-     * @throws \JakubOnderka\PhpConsoleColor\InvalidStyleException
+     * @throws InvalidStyleException
      */
     public function getHighlightedCodeSnippet(string $filePath, int $lineNumber, int $linesBefore = 3, int $linesAfter = 3): string
     {
         if (
-            !class_exists('\JakubOnderka\PhpConsoleHighlighter\Highlighter') ||
-            !class_exists('\JakubOnderka\PhpConsoleColor\ConsoleColor')
+            !class_exists('\PHP_Parallel_Lint\PhpConsoleHighlighter\Highlighter') ||
+            !class_exists('\PHP_Parallel_Lint\PhpConsoleColor\ConsoleColor')
         ) {
             return $this->getCodeSnippet($filePath, $lineNumber, $linesBefore, $linesAfter);
         }
