@@ -18,7 +18,8 @@ jobs:
                 git-fetch-depth: 1
     steps:
     - name: Checkout code
-      uses: actions/checkout@master
+      uses: actions/checkout@v3
+
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
@@ -33,7 +34,7 @@ jobs:
       run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
     - name: Cache composer dependencies
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
           path: ${{ steps.composercache.outputs.dir }}
           key: composer-${{ runner.os }}-${{ matrix.php-version }}-${{ hashFiles('composer.*') }}
@@ -41,12 +42,15 @@ jobs:
               composer-${{ runner.os }}-${{ matrix.php-version }}-
               composer-${{ runner.os }}-
               composer-
+
     - name: Install dependencies
       run: composer config minimum-stability dev && composer require humbug/box --dev
+
     - name: Build phar
       run: ./vendor/bin/box compile
-    - uses: actions/upload-artifact@v1
-      name: Publish the PHAR
+
+    - name: Publish the PHAR
+      uses: actions/upload-artifact@v3
       with:
           name: phplint.phar
           path: bin/phplint.phar
@@ -57,7 +61,7 @@ jobs:
         needs: [build]
         if: github.event_name == 'release'
         steps:
-          - uses: actions/download-artifact@v1
+          - uses: actions/download-artifact@v3
             with:
                 name: phplint.phar
                 path: .
