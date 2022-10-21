@@ -1,7 +1,7 @@
 # This is a basic workflow to help you get started with Actions
 on:
-    release:
-        types: [ created ]
+  release:
+    types: [ created ]
 
 name: Release workflow
 
@@ -11,63 +11,67 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-          include:
-              - php: 8.1
-                tools: "composer:v2"
-                coverage: "none"
-                git-fetch-depth: 1
+        include:
+          - php: 8.1
+            tools: "composer:v2"
+            coverage: "none"
+            git-fetch-depth: 1
     steps:
-    - name: Checkout code
-      uses: actions/checkout@master
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
           php-version: ${{ matrix.php }}
           ini-values: "phar.readonly=0"
           tools: ${{ matrix.tools }}
           coverage: ${{ matrix.coverage }}
           extensions: ctype, iconv, xml
 
-    - name: Get composer cache directory
-      id: composercache
-      run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+      - name: Get composer cache directory
+        id: composercache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
-    - name: Cache composer dependencies
-      uses: actions/cache@v2
-      with:
+      - name: Cache composer dependencies
+        uses: actions/cache@v3
+        with:
           path: ${{ steps.composercache.outputs.dir }}
           key: composer-${{ runner.os }}-${{ matrix.php-version }}-${{ hashFiles('composer.*') }}
           restore-keys: |
-              composer-${{ runner.os }}-${{ matrix.php-version }}-
-              composer-${{ runner.os }}-
-              composer-
-    - name: Install dependencies
-      run: composer config minimum-stability dev && composer require humbug/box:^3.13 --dev --update-with-all-dependencies
-    - name: Build phar
-      run: ./vendor/bin/box compile
-    - uses: actions/upload-artifact@v1
-      name: Publish the PHAR
-      with:
+            composer-${{ runner.os }}-${{ matrix.php-version }}-
+            composer-${{ runner.os }}-
+            composer-
+
+      - name: Install dependencies
+        run: composer config minimum-stability dev && composer require humbug/box --dev
+
+      - name: Build phar
+        run: ./vendor/bin/box compile
+
+      - name: Publish the PHAR
+        uses: actions/upload-artifact@v3
+        with:
           name: phplint.phar
           path: bin/phplint.phar
 
   publish-phar:
-        runs-on: ubuntu-latest
-        name: Publish the PHAR
-        needs: [build]
-        if: github.event_name == 'release'
-        steps:
-          - uses: actions/download-artifact@v1
-            with:
-                name: phplint.phar
-                path: .
+    runs-on: ubuntu-latest
+    name: Publish the PHAR
+    needs: [build]
+    if: github.event_name == 'release'
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: phplint.phar
+          path: .
 
-          - name: Upload phplint.phar
-            uses: actions/upload-release-asset@v1
-            env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            with:
-                upload_url: ${{ github.event.release.upload_url }}
-                asset_path: phplint.phar
-                asset_name: phplint.phar
-                asset_content_type: application/zip
+      - name: Upload phplint.phar
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: phplint.phar
+          asset_name: phplint.phar
+          asset_content_type: application/zip

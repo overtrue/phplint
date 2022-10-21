@@ -1,14 +1,20 @@
 name: CI
 
-on: push
+on:
+  push:
+    branches: [ "8.1" ]
+  pull_request:
+    branches: [ "8.1" ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@master
-    - name: Checking PHP syntax error
-      uses: overtrue/phplint@8.1
-      with:
-        path: .
-        options: --exclude=*.log
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Checking PHP syntax error
+        uses: overtrue/phplint@7.4
+        with:
+          path: .
+          options: --exclude=*.log
