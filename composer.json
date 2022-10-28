@@ -27,7 +27,7 @@
   "require-dev": {
     "php-parallel-lint/php-console-highlighter": "^1.0",
     "brainmaestro/composer-git-hooks": "^2.7",
-    "friendsofphp/php-cs-fixer": "^2.16"
+    "friendsofphp/php-cs-fixer": "^3.4"
   },
   "autoload": {
     "psr-4": {
@@ -54,8 +54,8 @@
       "cghooks update"
     ],
     "cghooks": "vendor/bin/cghooks",
-    "check-style": "php-cs-fixer fix --using-cache=no --diff --config=.php_cs --dry-run --ansi",
-    "fix-style": "php-cs-fixer fix --using-cache=no --config=.php_cs --ansi",
+    "check-style": "php-cs-fixer fix --using-cache=no --diff --dry-run --ansi",
+    "fix-style": "php-cs-fixer fix --using-cache=no --ansi",
     "lint:syntax": "./bin/phplint --ansi"
   },
   "scripts-descriptions": {
