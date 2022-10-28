@@ -1,8 +1,8 @@
 #!/usr/bin/env php
 <?php
 
-if (PHP_SAPI !== 'cli' && PHP_MINOR_VERSION < 5) {
-    echo 'Warning: phplint should be invoked via the CLI minimum version of PHP 5.5.9, not the '.PHP_SAPI.' SAPI'.PHP_EOL;
+if (PHP_SAPI !== 'cli' && version_compare(PHP_VERSION, '7.4', 'lt')) {
+    echo 'Warning: phplint should be invoked via the CLI minimum version of PHP 7.4, not the '.PHP_SAPI.' SAPI'.PHP_EOL;
 }
 
 $loaded = false;
