@@ -141,7 +141,17 @@ with:
   options: --exclude=*.log
 ```
 
-### Other CI/CD (f.e. Bitbucket Pipelines, GitLab CI)
+### GitLab CI
+```yaml
+code-quality:lint-php:
+  image: overtrue/phplint:7.4
+  variables:
+    INPUT_PATH: "./"
+    INPUT_OPTIONS: "-c .phplint.yml"
+  script: echo '' #prevents ci yml parse error
+```
+
+### Other CI/CD (f.e. Bitbucket Pipelines)
 
 Run this command using `overtrue/phplint:7.4` Docker image:
 
