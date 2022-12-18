@@ -22,11 +22,15 @@ use Symfony\Component\Yaml\Yaml;
 
 class LintCommand extends Command
 {
+    private const DEFAULT_EXTENSIONS = ['php'];
+    private const DEFAULT_JOBS = 5;
+    private const DEFAULT_PATH = '.';
+
     protected array $defaults = [
-        'jobs' => 5,
-        'path' => '.',
+        'jobs' => self::DEFAULT_JOBS,
+        'path' => self::DEFAULT_PATH,
         'exclude' => [],
-        'extensions' => ['php'],
+        'extensions' => self::DEFAULT_EXTENSIONS,
         'warning' => false
     ];
 
@@ -53,25 +57,28 @@ class LintCommand extends Command
                 'extensions',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Check only files with selected extensions (default: php)'
+                'Check only files with selected extensions',
+                self::DEFAULT_EXTENSIONS
             )
             ->addOption(
                 'jobs',
                 'j',
                 InputOption::VALUE_REQUIRED,
-                'Number of parraled jobs to run (default: 5)'
+                'Number of paralleled jobs to run',
+                self::DEFAULT_JOBS
             )
             ->addOption(
                 'configuration',
                 'c',
                 InputOption::VALUE_REQUIRED,
-                'Read configuration from config file (default: ./.phplint.yml).'
+                'Read configuration from config file',
+                $this->getConfigFile([self::DEFAULT_PATH])
             )
             ->addOption(
                 'no-configuration',
                 null,
                 InputOption::VALUE_NONE,
-                'Ignore default configuration file (default: ./.phplint.yml).'
+                'Ignore default configuration file (<comment>.phplint.yml</comment>).'
             )
             ->addOption(
                 'no-cache',
@@ -139,12 +146,19 @@ class LintCommand extends Command
 
         $output->writeln($this->getApplication()->getLongVersion() . " by overtrue and contributors.\n");
 
+        $output->writeln(\sprintf('Runtime       : <comment>%s</comment>', \phpversion()));
+
         $options = $this->mergeOptions();
         $verbosity = $output->getVerbosity();
 
-        if ($verbosity >= OutputInterface::VERBOSITY_DEBUG) {
-            $output->writeln('Options: ' . json_encode($options) . "\n");
+        if (!empty($options['configuration'])) {
+            $output->writeln(\sprintf('Configuration : <comment>%s</comment>', $options['configuration']));
         }
+
+        if ($verbosity >= OutputInterface::VERBOSITY_DEBUG) {
+            $output->writeln('Options       : <comment>' . json_encode($options) . "</comment>\n");
+        }
+        $output->writeln('');
 
         $linter = new Linter($options['path'], $options['exclude'], $options['extensions'], $options['warning']);
         $linter->setProcessLimit($options['jobs']);
@@ -361,20 +375,16 @@ class LintCommand extends Command
         $config = [];
 
         if (!$this->input->getOption('no-configuration')) {
-            $filename = $this->getConfigFile();
+            $inputPath = $this->input->getArgument('path');
+            $filename = $this->getConfigFile($inputPath);
 
             if (empty($options['configuration']) && $filename) {
                 $options['configuration'] = $filename;
             }
 
             if (!empty($options['configuration'])) {
-                $this->output->writeln("<comment>Loaded config from \"{$options['configuration']}\"</comment>\n");
                 $config = $this->loadConfiguration($options['configuration']);
-            } else {
-                $this->output->writeln("<comment>No config file loaded.</comment>\n");
             }
-        } else {
-            $this->output->writeln("<comment>No config file loaded.</comment>\n");
         }
 
         $options = array_merge($this->defaults, array_filter($config), array_filter($options));
@@ -384,14 +394,12 @@ class LintCommand extends Command
         return $options;
     }
 
-    protected function getConfigFile(): false|string
+    protected function getConfigFile(array $inputPath): false|string
     {
-        $inputPath = $this->input->getArgument('path');
-
-        $dir = './';
-
         if (1 == count($inputPath) && $first = reset($inputPath)) {
             $dir = is_dir($first) ? $first : dirname($first);
+        } else {
+            $dir = \getcwd() . DIRECTORY_SEPARATOR;
         }
 
         $filename = rtrim($dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '.phplint.yml';
