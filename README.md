@@ -40,32 +40,34 @@ docker pull overtrue/phplint:8.1
 ### CLI
 
 ```shell
+Description:
+  Lint something
+
 Usage:
-  phplint [options] [--] [<path>]...
+  phplint [options] [--] [<path>...]
 
 Arguments:
   path                               Path to file or directory to lint.
 
 Options:
       --exclude=EXCLUDE              Path to file or directory to exclude from linting (multiple values allowed)
-      --extensions=EXTENSIONS        Check only files with selected extensions (default: php)
-  -j, --jobs=JOBS                    Number of parallel jobs to run (default: 5)
-  -c, --configuration=CONFIGURATION  Read configuration from config file (default: ./.phplint.yml).
-      --no-configuration             Ignore default configuration file (default: ./.phplint.yml).
+      --extensions=EXTENSIONS        Check only files with selected extensions [default: ["php"]]
+  -j, --jobs=JOBS                    Number of paralleled jobs to run [default: 5]
+  -c, --configuration=CONFIGURATION  Read configuration from config file [default: "/path/to/phplint/.phplint.yml"]
+      --no-configuration             Ignore default configuration file (.phplint.yml).
       --no-cache                     Ignore cached data.
       --cache=CACHE                  Path to the cache file.
-      --json[=JSON]                  Output JSON results to a file.
-      --xml[=XML]                    Output JUnit XML results to a file.
-  -w, --warning                      Also show warnings
-  -h, --help                         Display this help message
+      --no-progress                  Hide the progress output.
+      --json[=JSON]                  Path to store JSON results.
+      --xml[=XML]                    Path to store JUnit XML results.
+  -w, --warning                      Also show warnings.
   -q, --quiet                        Do not output any message
+  -h, --help                         Display help for the given command. When no command is given display help for the list command
   -V, --version                      Display this application version
-      --ansi                         Force ANSI output
-      --no-ansi                      Disable ANSI output
+      --ansi|--no-ansi               Force (or disable --no-ansi) ANSI output
   -n, --no-interaction               Do not ask any interactive question
+  -nf, --no-files-exit-code          Throw error if no files processed.
   -v|vv|vvv, --verbose               Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
-Help:
- Lint something
 ```
 
 example:
