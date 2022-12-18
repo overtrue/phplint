@@ -35,26 +35,20 @@ use Symfony\Component\Yaml\Yaml;
  */
 class LintCommand extends Command
 {
-    /**
-     * @var array
-     */
-    protected $defaults = [
-        'jobs' => 5,
-        'path' => '.',
+    private const DEFAULT_EXTENSIONS = ['php'];
+    private const DEFAULT_JOBS = 5;
+    private const DEFAULT_PATH = '.';
+
+    protected array $defaults = [
+        'jobs' => self::DEFAULT_JOBS,
+        'path' => self::DEFAULT_PATH,
         'exclude' => [],
-        'extensions' => ['php'],
+        'extensions' => self::DEFAULT_EXTENSIONS,
         'warning' => false
     ];
 
-    /**
-     * @var \Symfony\Component\Console\Input\InputInterface
-     */
-    protected $input;
-
-    /**
-     * @var \Symfony\Component\Console\Output\OutputInterface
-     */
-    protected $output;
+    protected InputInterface $input;
+    protected OutputInterface $output;
 
     /**
      * Configures the current command.
@@ -79,25 +73,28 @@ class LintCommand extends Command
                 'extensions',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Check only files with selected extensions (default: php)'
+                'Check only files with selected extensions',
+                self::DEFAULT_EXTENSIONS
             )
             ->addOption(
                 'jobs',
                 'j',
                 InputOption::VALUE_REQUIRED,
-                'Number of parraled jobs to run (default: 5)'
+                'Number of paralleled jobs to run',
+                self::DEFAULT_JOBS
             )
             ->addOption(
                 'configuration',
                 'c',
                 InputOption::VALUE_REQUIRED,
-                'Read configuration from config file (default: ./.phplint.yml).'
+                'Read configuration from config file',
+                $this->getConfigFile([self::DEFAULT_PATH])
             )
             ->addOption(
                 'no-configuration',
                 null,
                 InputOption::VALUE_NONE,
-                'Ignore default configuration file (default: ./.phplint.yml).'
+                'Ignore default configuration file (<comment>.phplint.yml</comment>).'
             )
             ->addOption(
                 'no-cache',
@@ -154,11 +151,8 @@ class LintCommand extends Command
      *
      * This is mainly useful when a lot of commands extends one main command
      * where some things need to be initialized based on the input arguments and options.
-     *
-     * @param InputInterface  $input  An InputInterface instance
-     * @param OutputInterface $output An OutputInterface instance
      */
-    public function initialize(InputInterface $input, OutputInterface $output)
+    public function initialize(InputInterface $input, OutputInterface $output): void
     {
         $this->input = $input;
         $this->output = $output;
@@ -172,30 +166,32 @@ class LintCommand extends Command
      * execute() method, you set the code to execute by passing
      * a Closure to the setCode() method.
      *
-     * @param InputInterface  $input  An InputInterface instance
-     * @param OutputInterface $output An OutputInterface instance
-     *
      * @throws \LogicException When this abstract method is not implemented
-     *
-     * @return null|int null or 0 if everything went fine, or an error code
      *
      * @see setCode()
      *
      * @throws InvalidStyleException
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $startTime = microtime(true);
         $startMemUsage = memory_get_usage(true);
 
         $output->writeln($this->getApplication()->getLongVersion() . " by overtrue and contributors.\n");
 
+        $output->writeln(\sprintf('Runtime       : <comment>%s</comment>', \phpversion()));
+
         $options = $this->mergeOptions();
         $verbosity = $output->getVerbosity();
 
-        if ($verbosity >= OutputInterface::VERBOSITY_DEBUG) {
-            $output->writeln('Options: ' . json_encode($options) . "\n");
+        if (!empty($options['configuration'])) {
+            $output->writeln(\sprintf('Configuration : <comment>%s</comment>', $options['configuration']));
         }
+
+        if ($verbosity >= OutputInterface::VERBOSITY_DEBUG) {
+            $output->writeln('Options       : <comment>' . json_encode($options) . "</comment>\n");
+        }
+        $output->writeln('');
 
         $linter = new Linter($options['path'], $options['exclude'], $options['extensions'], $options['warning']);
         $linter->setProcessLimit($options['jobs']);
@@ -271,13 +267,7 @@ class LintCommand extends Command
         return $code;
     }
 
-    /**
-     * @param string $path
-     * @param array  $errors
-     * @param array  $options
-     * @param array  $context
-     */
-    protected function dumpJsonResult($path, array $errors, array $options, array $context = [])
+    protected function dumpJsonResult(string $path, array $errors, array $options, array $context = []): void
     {
         $result = [
             'status' => 'success',
@@ -289,14 +279,9 @@ class LintCommand extends Command
     }
 
     /**
-     * @param string $path
-     * @param array  $errors
-     * @param array  $options
-     * @param array  $context
-     *
      * @throws Exception
      */
-    protected function dumpXmlResult($path, array $errors, array $options, array $context = [])
+    protected function dumpXmlResult(string $path, array $errors, array $options, array $context = []): void
     {
         $document = new Document();
         $suite = $document->addTestSuite();
@@ -312,15 +297,8 @@ class LintCommand extends Command
 
     /**
      * Execute lint and return errors.
-     *
-     * @param Linter          $linter
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     * @param int             $fileCount
-     *
-     * @return array
      */
-    protected function executeLint($linter, $input, $output, $fileCount)
+    protected function executeLint(Linter $linter, InputInterface $input, OutputInterface $output, int $fileCount): array
     {
         $cache = !$input->getOption('no-cache');
         $maxColumns = floor((new Terminal())->getWidth() / 2);
@@ -370,11 +348,9 @@ class LintCommand extends Command
     /**
      * Show errors detail.
      *
-     * @param array $errors
-     *
      * @throws InvalidStyleException
      */
-    protected function showErrors($errors)
+    protected function showErrors(array $errors): void
     {
         $i = 0;
         $this->output->writeln("\nThere was " . count($errors) . ' errors:');
@@ -388,15 +364,7 @@ class LintCommand extends Command
         }
     }
 
-    /**
-     * @param string $filePath
-     * @param int    $lineNumber
-     * @param int    $linesBefore
-     * @param int    $linesAfter
-     *
-     * @return string
-     */
-    protected function getCodeSnippet($filePath, $lineNumber, $linesBefore = 3, $linesAfter = 3)
+    protected function getCodeSnippet(string $filePath, int $lineNumber, int $linesBefore = 3, int $linesAfter = 3): string
     {
         $lines = file($filePath);
         $offset = $lineNumber - $linesBefore - 1;
@@ -416,16 +384,9 @@ class LintCommand extends Command
     }
 
     /**
-     * @param string $filePath
-     * @param int    $lineNumber
-     * @param int    $linesBefore
-     * @param int    $linesAfter
-     *
-     * @return string
-     *
      * @throws InvalidStyleException
      */
-    public function getHighlightedCodeSnippet($filePath, $lineNumber, $linesBefore = 3, $linesAfter = 3)
+    public function getHighlightedCodeSnippet(string $filePath, int $lineNumber, int $linesBefore = 3, int $linesAfter = 3): string
     {
         if (
             !class_exists('\PHP_Parallel_Lint\PhpConsoleHighlighter\Highlighter') ||
@@ -443,10 +404,8 @@ class LintCommand extends Command
 
     /**
      * Merge options.
-     *
-     * @return array
      */
-    protected function mergeOptions()
+    protected function mergeOptions(): array
     {
         $options = $this->input->getOptions();
         $options['path'] = $this->input->getArgument('path');
@@ -458,20 +417,16 @@ class LintCommand extends Command
         $config = [];
 
         if (!$this->input->getOption('no-configuration')) {
-            $filename = $this->getConfigFile();
+            $inputPath = $this->input->getArgument('path');
+            $filename = $this->getConfigFile($inputPath);
 
             if (empty($options['configuration']) && $filename) {
                 $options['configuration'] = $filename;
             }
 
             if (!empty($options['configuration'])) {
-                $this->output->writeln("<comment>Loaded config from \"{$options['configuration']}\"</comment>\n");
                 $config = $this->loadConfiguration($options['configuration']);
-            } else {
-                $this->output->writeln("<comment>No config file loaded.</comment>\n");
             }
-        } else {
-            $this->output->writeln("<comment>No config file loaded.</comment>\n");
         }
 
         $options = array_merge($this->defaults, array_filter($config), array_filter($options));
@@ -484,16 +439,16 @@ class LintCommand extends Command
     /**
      * Get configuration file.
      *
-     * @return string|null
+     * @param array<string> $inputPath
+     *
+     * @return string|false
      */
-    protected function getConfigFile()
+    protected function getConfigFile(array $inputPath)
     {
-        $inputPath = $this->input->getArgument('path');
-
-        $dir = './';
-
         if (1 == count($inputPath) && $first = reset($inputPath)) {
             $dir = is_dir($first) ? $first : dirname($first);
+        } else {
+            $dir = \getcwd() . DIRECTORY_SEPARATOR;
         }
 
         $filename = rtrim($dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '.phplint.yml';
@@ -503,12 +458,8 @@ class LintCommand extends Command
 
     /**
      * Load configuration from yaml.
-     *
-     * @param string $path
-     *
-     * @return array
      */
-    protected function loadConfiguration($path)
+    protected function loadConfiguration(string $path): array
     {
         try {
             $configuration = Yaml::parse(file_get_contents($path));
