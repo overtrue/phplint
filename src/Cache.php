@@ -16,10 +16,7 @@ namespace Overtrue\PHPLint;
  */
 class Cache
 {
-    /**
-     * @var string
-     */
-    protected static $filename = '.phplint-cache';
+    protected static string $filename = '.phplint-cache';
 
     /**
      * Fetch cache.
@@ -35,20 +32,16 @@ class Cache
 
     /**
      * Check cache exists.
-     *
-     * @return bool
      */
-    public static function exists()
+    public static function exists(): bool
     {
         return file_exists(self::getFilename());
     }
 
     /**
      * Alias if exists();.
-     *
-     * @return bool
      */
-    public static function isCached()
+    public static function isCached(): bool
     {
         return self::exists();
     }
@@ -67,10 +60,8 @@ class Cache
 
     /**
      * Set cache filename.
-     *
-     * @param string $filename
      */
-    public static function setFilename($filename)
+    public static function setFilename(string $filename): void
     {
         self::$filename = $filename;
         self::makeFolderForFilename();
@@ -80,7 +71,7 @@ class Cache
      * Try to create the folder recursively where the cache file is stored.
      * It depends on current value of static::getFilename().
      */
-    private static function makeFolderForFilename()
+    private static function makeFolderForFilename(): void
     {
         $filename = self::getFilename();
         $dirname = dirname($filename);
@@ -91,10 +82,8 @@ class Cache
 
     /**
      * Return cache filename.
-     *
-     * @return string
      */
-    public static function getFilename()
+    public static function getFilename(): string
     {
         if (\is_dir(\dirname(self::$filename))) {
             return self::$filename;

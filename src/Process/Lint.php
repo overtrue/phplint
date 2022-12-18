@@ -18,10 +18,7 @@ use Symfony\Component\Process\Process;
  */
 class Lint extends Process
 {
-    /**
-     * @return bool
-     */
-    public function hasSyntaxError()
+    public function hasSyntaxError(): bool
     {
         $output = trim($this->getOutput());
 
@@ -48,12 +45,8 @@ class Lint extends Process
 
     /**
      * Parse error message.
-     *
-     * @param string $message
-     *
-     * @return array
      */
-    public function parseError($message)
+    public function parseError(string $message): array
     {
         $pattern = '/^(PHP\s+)?(Parse|Fatal) error:\s*(?:\w+ error,\s*)?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
 
@@ -69,10 +62,7 @@ class Lint extends Process
         ];
     }
 
-    /**
-     * @return bool
-     */
-    public function hasSyntaxIssue()
+    public function hasSyntaxIssue(): bool
     {
         $output = trim($this->getOutput());
 
@@ -100,12 +90,8 @@ class Lint extends Process
 
     /**
      * Parse error message.
-     *
-     * @param string $message
-     *
-     * @return array
      */
-    private function parseIssue($message)
+    private function parseIssue(string $message): array
     {
         $pattern = '/^(PHP\s+)?(Warning|Deprecated|Notice):\s*?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
 
