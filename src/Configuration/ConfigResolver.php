@@ -9,6 +9,7 @@ use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
 use Throwable;
+
 use function array_keys;
 use function count;
 use function dirname;
@@ -21,6 +22,7 @@ use function realpath;
 use function reset;
 use function rtrim;
 use function sprintf;
+
 use const DIRECTORY_SEPARATOR;
 
 /**
@@ -148,7 +150,7 @@ final class ConfigResolver
         $resolver->setAllowedTypes(self::OPTION_CONFIG_FILE, 'string');
         $resolver->setAllowedTypes(self::OPTION_MEMORY_LIMIT, ['int', 'string']);
 
-        $resolver->setNormalizer(self::OPTION_PATH, function(Options $options, $value) {
+        $resolver->setNormalizer(self::OPTION_PATH, function (Options $options, $value) {
             if (is_string($value)) {
                 $value = [$value];
             }
