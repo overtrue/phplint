@@ -92,6 +92,9 @@ final class ConfigResolver
     {
         if (!empty($this->options[self::OPTION_CONFIG_FILE])) {
             $conf = $this->loadConfiguration($this->options[self::OPTION_CONFIG_FILE]);
+            if ($conf[self::OPTION_PATH] !== $this->options[self::OPTION_PATH]) {
+                $conf[self::OPTION_PATH] = $this->options[self::OPTION_PATH];
+            }
             $config = $this->getOptions()->resolve($conf);
         } else {
             $config = $this->options;
