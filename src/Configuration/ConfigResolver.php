@@ -30,6 +30,7 @@ use const DIRECTORY_SEPARATOR;
  */
 final class ConfigResolver
 {
+    public const OPTION_QUIET = 'quiet';
     public const OPTION_JOBS = 'jobs';
     public const OPTION_PATH = 'path';
     public const OPTION_EXCLUDE = 'exclude';
@@ -50,6 +51,7 @@ final class ConfigResolver
     public const DEFAULT_CONFIG_FILE = '.phplint.yml';
 
     private array $options = [
+        self::OPTION_QUIET => false,
         self::OPTION_JOBS => self::DEFAULT_JOBS,
         self::OPTION_PATH => self::DEFAULT_PATH,
         self::OPTION_EXCLUDE => [],
@@ -146,6 +148,7 @@ final class ConfigResolver
 
         $resolver->setRequired(self::OPTION_PATH);
 
+        $resolver->setAllowedTypes(self::OPTION_QUIET, 'bool');
         $resolver->setAllowedTypes(self::OPTION_JOBS, 'int');
         $resolver->setAllowedTypes(self::OPTION_PATH, ['string', 'string[]']);
         $resolver->setAllowedTypes(self::OPTION_EXCLUDE, ['string[]']);

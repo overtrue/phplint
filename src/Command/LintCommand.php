@@ -206,7 +206,7 @@ class LintCommand extends Command
             $output->writeln("<error>Files: {$fileCount}, Failures: {$errCount}</error>");
             $this->showErrors($errors);
 
-            if (empty($options['quiet'])) {
+            if (empty($options[ConfigResolver::OPTION_QUIET])) {
                 $code = 1;
             }
         } else {
