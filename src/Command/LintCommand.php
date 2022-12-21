@@ -140,8 +140,8 @@ class LintCommand extends Command
         $options = $this->mergeOptions();
         $verbosity = $output->getVerbosity();
 
-        if (!empty($options['configuration'])) {
-            $output->writeln(\sprintf('Configuration : <comment>%s</comment>', $options['configuration']));
+        if (!empty($options[ConfigResolver::OPTION_CONFIG_FILE])) {
+            $output->writeln(\sprintf('Configuration : <comment>%s</comment>', $options[ConfigResolver::OPTION_CONFIG_FILE]));
         }
 
         if ($verbosity >= OutputInterface::VERBOSITY_DEBUG) {
@@ -152,21 +152,26 @@ class LintCommand extends Command
         }
         $output->writeln('');
 
-        $linter = new Linter($options['path'], $options['exclude'], $options['extensions'], $options['warning']);
-        $linter->setProcessLimit($options['jobs']);
+        $linter = new Linter(
+            $options[ConfigResolver::OPTION_PATH],
+            $options[ConfigResolver::OPTION_EXCLUDE],
+            $options[ConfigResolver::OPTION_EXTENSIONS],
+            $options[ConfigResolver::OPTION_WARNING]
+        );
+        $linter->setProcessLimit($options[ConfigResolver::OPTION_JOBS]);
 
-        if (!empty($options['cache'])) {
-            Cache::setFilename($options['cache']);
+        if (!empty($options[ConfigResolver::OPTION_CACHE_FILE])) {
+            Cache::setFilename($options[ConfigResolver::OPTION_CACHE_FILE]);
         }
 
         $usingCache = 'No';
-        if (!$options['no-cache'] && Cache::isCached()) {
+        if (!$options[ConfigResolver::OPTION_NO_CACHE] && Cache::isCached()) {
             $usingCache = 'Yes';
             $linter->setCache(Cache::get());
         }
 
-        if (!empty($options['memory-limit'])) {
-            $linter->setMemoryLimit($options['memory-limit']);
+        if (!empty($options[ConfigResolver::OPTION_MEMORY_LIMIT])) {
+            $linter->setMemoryLimit($options[ConfigResolver::OPTION_MEMORY_LIMIT]);
         }
 
         $fileCount = count($linter->getFiles());
@@ -215,12 +220,12 @@ class LintCommand extends Command
             'files_count' => $fileCount,
         ];
 
-        if (!empty($options['json'])) {
-            $this->dumpJsonResult((string) $options['json'], $errors, $options, $context);
+        if (!empty($options[ConfigResolver::OPTION_JSON_FILE])) {
+            $this->dumpJsonResult((string) $options[ConfigResolver::OPTION_JSON_FILE], $errors, $options, $context);
         }
 
-        if (!empty($options['xml'])) {
-            $this->dumpXmlResult((string) $options['xml'], $errors, $options, $context);
+        if (!empty($options[ConfigResolver::OPTION_XML_FILE])) {
+            $this->dumpXmlResult((string) $options[ConfigResolver::OPTION_XML_FILE], $errors, $options, $context);
         }
 
         return $code;

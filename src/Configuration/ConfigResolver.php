@@ -30,17 +30,17 @@ use const DIRECTORY_SEPARATOR;
  */
 final class ConfigResolver
 {
-    private const OPTION_JOBS = 'jobs';
-    private const OPTION_PATH = 'path';
-    private const OPTION_EXCLUDE = 'exclude';
-    private const OPTION_EXTENSIONS = 'extensions';
-    private const OPTION_WARNING = 'warning';
-    private const OPTION_CACHE_FILE = 'cache';
-    private const OPTION_NO_CACHE = 'no-cache';
-    private const OPTION_CONFIG_FILE = 'configuration';
-    private const OPTION_MEMORY_LIMIT = 'memory-limit';
-    private const OPTION_JSON_FILE = 'json';
-    private const OPTION_XML_FILE = 'xml';
+    public const OPTION_JOBS = 'jobs';
+    public const OPTION_PATH = 'path';
+    public const OPTION_EXCLUDE = 'exclude';
+    public const OPTION_EXTENSIONS = 'extensions';
+    public const OPTION_WARNING = 'warning';
+    public const OPTION_CACHE_FILE = 'cache';
+    public const OPTION_NO_CACHE = 'no-cache';
+    public const OPTION_CONFIG_FILE = 'configuration';
+    public const OPTION_MEMORY_LIMIT = 'memory-limit';
+    public const OPTION_JSON_FILE = 'json';
+    public const OPTION_XML_FILE = 'xml';
 
     public const DEFAULT_JOBS = 5;
     public const DEFAULT_PATH = '.';
