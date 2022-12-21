@@ -41,6 +41,7 @@ final class ConfigResolver
     public const OPTION_MEMORY_LIMIT = 'memory-limit';
     public const OPTION_JSON_FILE = 'json';
     public const OPTION_XML_FILE = 'xml';
+    public const OPTION_NO_FILES_EXIT_CODE = 'no-files-exit-code';
 
     public const DEFAULT_JOBS = 5;
     public const DEFAULT_PATH = '.';
@@ -60,6 +61,7 @@ final class ConfigResolver
         self::OPTION_MEMORY_LIMIT => false,
         self::OPTION_JSON_FILE => false,
         self::OPTION_XML_FILE => false,
+        self::OPTION_NO_FILES_EXIT_CODE => false,
     ];
 
     /**

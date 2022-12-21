@@ -147,7 +147,7 @@ class LintCommand extends Command
         if ($verbosity >= OutputInterface::VERBOSITY_DEBUG) {
             $output->writeln('Options       :');
             foreach ($options as $name => $value) {
-                $output->writeln(\sprintf("<comment>%13s</comment> > <info>%s</info>", $name, \json_encode($value, \JSON_UNESCAPED_SLASHES)));
+                $output->writeln(\sprintf("<comment>%18s</comment> > <info>%s</info>", $name, \json_encode($value, \JSON_UNESCAPED_SLASHES)));
             }
         }
         $output->writeln('');
@@ -180,7 +180,7 @@ class LintCommand extends Command
         if ($fileCount <= 0) {
             $output->writeln('<info>Could not find files to lint</info>');
 
-            if (!empty($options['no-files-exit-code'])) {
+            if (!empty($options[ConfigResolver::OPTION_NO_FILES_EXIT_CODE])) {
                 $code = 1;
             }
 
