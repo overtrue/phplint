@@ -20,6 +20,7 @@
     "ext-json": "*",
     "symfony/console": "^5.4",
     "symfony/finder": "^5.4",
+    "symfony/options-resolver": "^5.4",
     "symfony/process": "^5.4",
     "symfony/yaml": "^5.4",
     "n98/junit-xml": "1.1.0"
