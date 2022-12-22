@@ -85,12 +85,13 @@ You can also define configuration as a file `.phplint.yml`:
 path: ./
 jobs: 10
 cache: build/phplint.cache
+no-cache: false
 extensions:
   - php
 exclude:
   - vendor
 warning: false
-memory_limit: -1
+memory-limit: -1
 ```
 
 ```shell
