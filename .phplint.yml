@@ -5,4 +5,5 @@ extensions:
 exclude:
   - vendor
 warning: true
-#memory_limit: -1
+#memory-limit: -1
+no-cache: false
