@@ -11,6 +11,7 @@ use Symfony\Component\Yaml\Yaml;
 use Throwable;
 
 use function array_keys;
+use function array_replace_recursive;
 use function count;
 use function dirname;
 use function getcwd;
@@ -92,9 +93,7 @@ final class ConfigResolver
     {
         if (!empty($this->options[self::OPTION_CONFIG_FILE])) {
             $conf = $this->loadConfiguration($this->options[self::OPTION_CONFIG_FILE]);
-            if ($conf[self::OPTION_PATH] !== $this->options[self::OPTION_PATH]) {
-                $conf[self::OPTION_PATH] = $this->options[self::OPTION_PATH];
-            }
+            $conf = array_replace_recursive($conf, $this->options);
             $config = $this->getOptions()->resolve($conf);
         } else {
             $config = $this->options;
@@ -131,6 +130,9 @@ final class ConfigResolver
         try {
             $configuration = Yaml::parseFile($path);
             if (is_array($configuration)) {
+                if (!is_array($configuration[self::OPTION_PATH])) {
+                    $configuration[self::OPTION_PATH] = [$configuration[self::OPTION_PATH]];
+                }
                 return $configuration;
             }
             $this->exceptions[] = new ParseException(

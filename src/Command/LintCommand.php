@@ -32,8 +32,7 @@ class LintCommand extends Command
             ->addArgument(
                 'path',
                 InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
-                'Path to file or directory to lint',
-                [ConfigResolver::DEFAULT_PATH]
+                'Path to file or directory to lint'
             )
             ->addOption(
                 'exclude',
@@ -66,56 +65,56 @@ class LintCommand extends Command
                 'no-configuration',
                 null,
                 InputOption::VALUE_NONE,
-                'Ignore default configuration file (<comment>.phplint.yml</comment>).'
+                'Ignore default configuration file (<comment>.phplint.yml</comment>)'
             )
             ->addOption(
                 'no-cache',
                 null,
                 InputOption::VALUE_NONE,
-                'Ignore cached data.'
+                'Ignore cached data'
             )
             ->addOption(
                 'cache',
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Path to the cache file.',
+                'Path to the cache file',
                 ConfigResolver::DEFAULT_CACHE_FILE
             )
             ->addOption(
                 'no-progress',
                 null,
                 InputOption::VALUE_NONE,
-                'Hide the progress output.'
+                'Hide the progress output'
             )
             ->addOption(
                 'json',
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Path to store JSON results.'
+                'Path to store JSON results'
             )
             ->addOption(
                 'xml',
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Path to store JUnit XML results.'
+                'Path to store JUnit XML results'
             )
             ->addOption(
                 'warning',
                 'w',
                 InputOption::VALUE_NONE,
-                'Also show warnings.'
+                'Also show warnings'
             )
             ->addOption(
                 'quiet',
                 'q',
                 InputOption::VALUE_NONE,
-                'Allow to silently fail.'
+                'Allow to silently fail'
             )
             ->addOption(
                 'no-files-exit-code',
                 null,
                 InputOption::VALUE_NONE,
-                'Throw error if no files processed.'
+                'Throw error if no files processed'
             );
     }
 
@@ -316,7 +315,7 @@ class LintCommand extends Command
         foreach ($errors as $filename => $error) {
             $this->output->writeln('<comment>' . ++$i . ". {$filename}:{$error['line']}" . '</comment>');
 
-            $this->output->write($this->getHighlightedCodeSnippet($filename, $error['line']));
+            $this->output->writeln($this->getHighlightedCodeSnippet($filename, $error['line']));
 
             $this->output->writeln("<error> {$error['error']}</error>");
         }
