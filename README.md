@@ -4,7 +4,7 @@
 
 >🚨 There are two better packages for syntax detection and static analysis: [Psalm](https://psalm.dev/) and [PHPStan](https://github.com/phpstan/phpstan), recently my work has started to get busier and I won't have much time to maintain this project, if you are interested in maintaining it please raise an issue, Thanks.
 
-![artboard 1](https://user-images.githubusercontent.com/1472352/38774811-3f780ab6-40a3-11e8-9a0a-a8d06d2c6463.jpg)
+![artboard](https://github.com/overtrue/phplint/blob/8.1/artboard.png)
 
 [![Release Status](https://github.com/overtrue/phplint/actions/workflows/build-phar.yml/badge.svg)](https://github.com/overtrue/phplint/actions/workflows/build-phar.yml)
 [![Latest Stable Version](https://poser.pugx.org/overtrue/phplint/v/stable.svg)](https://packagist.org/packages/overtrue/phplint) [![Total Downloads](https://poser.pugx.org/overtrue/phplint/downloads.svg)](https://packagist.org/packages/overtrue/phplint) [![Latest Unstable Version](https://poser.pugx.org/overtrue/phplint/v/unstable.svg)](https://packagist.org/packages/overtrue/phplint) [![License](https://poser.pugx.org/overtrue/phplint/license.svg)](https://packagist.org/packages/overtrue/phplint)
@@ -20,18 +20,21 @@
 - PHP >= 8.1
 - Composer >= 2.1
 
-> if you are using php 5.5, php 5.6 or php 7.x, please refer [the 7.4 branch](https://github.com/overtrue/phplint/tree/7.4).
+> if you are using php 7.4, please refer [the 7.4 branch](https://github.com/overtrue/phplint/tree/7.4).
+
 > if you are using php 8.0, please refer [the 8.0 branch](https://github.com/overtrue/phplint/tree/8.0).
+
+> if you are using php 8.2, please refer [the 8.2 branch](https://github.com/overtrue/phplint/tree/8.2).
 
 ### Locally, if you have PHP
 
 ```shell
-$ composer require overtrue/phplint --dev -vvv
+composer require overtrue/phplint --dev -vvv
 ```
 
 ### Locally, if you only have Docker
 
-```
+```shell
 docker pull overtrue/phplint:8.1
 ```
 
@@ -39,7 +42,7 @@ docker pull overtrue/phplint:8.1
 
 ### CLI
 
-```shell
+```text
 Description:
   Lint something
 
@@ -73,7 +76,7 @@ Options:
 example:
 
 ```shell
-$ ./vendor/bin/phplint ./ --exclude=vendor
+./vendor/bin/phplint ./ --exclude=vendor
 ```
 
 You can also define configuration as a file `.phplint.yml`:
@@ -91,7 +94,7 @@ memory_limit: -1
 ```
 
 ```shell
-$ ./vendor/bin/phplint
+./vendor/bin/phplint
 ```
 
 By default, the command will read configuration from file `.phplint.yml` of path specified, you can use another filename by option: `--configuration=FILENAME` or `-c FILENAME`;
@@ -144,7 +147,9 @@ with:
   path: .
   options: --exclude=*.log
 ```
+
 ### GitLab CI
+
 ```yaml
 code-quality:lint-php:
   image: overtrue/phplint:8.1
@@ -158,7 +163,7 @@ code-quality:lint-php:
 
 Run this command using `overtrue/phplint:8.1` Docker image:
 
-```
+```shell
 /root/.composer/vendor/bin/phplint ./ --exclude=vendor
 ```
 
