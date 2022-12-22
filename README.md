@@ -19,18 +19,20 @@
 - Composer >= 2.1
 
 > if you are using php 8.0, please refer [the 8.0 branch](https://github.com/overtrue/phplint/tree/8.0). 
+
 > if you are using php 8.1, please refer [the 8.1 branch](https://github.com/overtrue/phplint/tree/8.1). 
+
 > if you are using php 8.2, please refer [the 8.2 branch](https://github.com/overtrue/phplint/tree/8.2). 
 
 ### Locally, if you have PHP
 
 ```shell
-$ composer require overtrue/phplint --dev -vvv
+composer require overtrue/phplint --dev -vvv
 ```
 
 ### Locally, if you only have Docker
 
-```
+```shell
 docker pull overtrue/phplint:7.4
 ```
 
@@ -38,7 +40,7 @@ docker pull overtrue/phplint:7.4
 
 ### CLI
 
-```shell
+```text
 Description:
   Lint something
 
@@ -72,7 +74,7 @@ Options:
 example:
 
 ```shell
-$ ./vendor/bin/phplint ./ --exclude=vendor
+./vendor/bin/phplint ./ --exclude=vendor
 ```
 
 You can also define configuration as a file `.phplint.yml`:
@@ -90,7 +92,7 @@ memory_limit: -1
 ```
 
 ```shell
-$ ./vendor/bin/phplint
+./vendor/bin/phplint
 ```
 
 By default, the command will read configuration from file `.phplint.yml` of path specified, you can use another filename by option: `--configuration=FILENAME` or `-c FILENAME`;
