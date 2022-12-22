@@ -1,24 +1,15 @@
 <?php
 
-/*
- * This file is part of the overtrue/phplint
- *
- * (c) overtrue <i@overtrue.me>
- *
- * This source file is subject to the MIT license that is bundled
- * with this source code in the file LICENSE.
- */
-
 namespace Overtrue\PHPLint\Command;
 
 use DateTime;
-use Exception;
+use Overtrue\PHPLint\Configuration\ConfigResolver;
+use Overtrue\PHPLint\Cache;
+use Overtrue\PHPLint\Linter;
 use PHP_Parallel_Lint\PhpConsoleColor\ConsoleColor;
 use PHP_Parallel_Lint\PhpConsoleColor\InvalidStyleException;
 use PHP_Parallel_Lint\PhpConsoleHighlighter\Highlighter;
 use N98\JUnitXml\Document;
-use Overtrue\PHPLint\Cache;
-use Overtrue\PHPLint\Linter;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Helper;
 use Symfony\Component\Console\Input\InputArgument;
@@ -27,33 +18,13 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\Finder\SplFileInfo;
-use Symfony\Component\Yaml\Exception\ParseException;
-use Symfony\Component\Yaml\Yaml;
 
-/**
- * Class LintCommand.
- */
 class LintCommand extends Command
 {
-    private const DEFAULT_EXTENSIONS = ['php'];
-    private const DEFAULT_JOBS = 5;
-    private const DEFAULT_PATH = '.';
-
-    protected array $defaults = [
-        'jobs' => self::DEFAULT_JOBS,
-        'path' => self::DEFAULT_PATH,
-        'exclude' => [],
-        'extensions' => self::DEFAULT_EXTENSIONS,
-        'warning' => false
-    ];
-
     protected InputInterface $input;
     protected OutputInterface $output;
 
-    /**
-     * Configures the current command.
-     */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('phplint')
@@ -61,7 +32,7 @@ class LintCommand extends Command
             ->addArgument(
                 'path',
                 InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
-                'Path to file or directory to lint.'
+                'Path to file or directory to lint'
             )
             ->addOption(
                 'exclude',
@@ -74,84 +45,79 @@ class LintCommand extends Command
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Check only files with selected extensions',
-                self::DEFAULT_EXTENSIONS
+                ConfigResolver::DEFAULT_EXTENSIONS
             )
             ->addOption(
                 'jobs',
                 'j',
                 InputOption::VALUE_REQUIRED,
                 'Number of paralleled jobs to run',
-                self::DEFAULT_JOBS
+                ConfigResolver::DEFAULT_JOBS
             )
             ->addOption(
                 'configuration',
                 'c',
                 InputOption::VALUE_REQUIRED,
                 'Read configuration from config file',
-                $this->getConfigFile([self::DEFAULT_PATH])
+                ConfigResolver::DEFAULT_CONFIG_FILE
             )
             ->addOption(
                 'no-configuration',
                 null,
                 InputOption::VALUE_NONE,
-                'Ignore default configuration file (<comment>.phplint.yml</comment>).'
+                'Ignore default configuration file (<comment>.phplint.yml</comment>)'
             )
             ->addOption(
                 'no-cache',
                 null,
                 InputOption::VALUE_NONE,
-                'Ignore cached data.'
+                'Ignore cached data'
             )
             ->addOption(
                 'cache',
                 null,
-                InputOption::VALUE_REQUIRED,
-                'Path to the cache file.'
+                InputOption::VALUE_OPTIONAL,
+                'Path to the cache file',
+                ConfigResolver::DEFAULT_CACHE_FILE
             )
             ->addOption(
                 'no-progress',
                 null,
                 InputOption::VALUE_NONE,
-                'Hide the progress output.'
+                'Hide the progress output'
             )
             ->addOption(
                 'json',
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Path to store JSON results.'
+                'Path to store JSON results'
             )
             ->addOption(
                 'xml',
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Path to store JUnit XML results.'
+                'Path to store JUnit XML results'
             )
             ->addOption(
                 'warning',
                 'w',
                 InputOption::VALUE_NONE,
-                'Also show warnings.'
+                'Also show warnings'
             )
             ->addOption(
                 'quiet',
                 'q',
                 InputOption::VALUE_NONE,
-                'Allow to silenty fail.'
+                'Allow to silently fail'
             )
             ->addOption(
                 'no-files-exit-code',
-                'nf',
+                null,
                 InputOption::VALUE_NONE,
-                'Throw error if no files processed.'
+                'Throw error if no files processed'
             );
     }
 
-    /**
-     * Initializes the command just after the input has been validated.
-     *
-     * This is mainly useful when a lot of commands extends one main command
-     * where some things need to be initialized based on the input arguments and options.
-     */
     public function initialize(InputInterface $input, OutputInterface $output): void
     {
         $this->input = $input;
@@ -159,18 +125,7 @@ class LintCommand extends Command
     }
 
     /**
-     * Executes the current command.
-     *
-     * This method is not abstract because you can use this class
-     * as a concrete class. In this case, instead of defining the
-     * execute() method, you set the code to execute by passing
-     * a Closure to the setCode() method.
-     *
-     * @throws \LogicException When this abstract method is not implemented
-     *
-     * @see setCode()
-     *
-     * @throws InvalidStyleException
+     * @throws InvalidStyleException|\Throwable
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -184,30 +139,38 @@ class LintCommand extends Command
         $options = $this->mergeOptions();
         $verbosity = $output->getVerbosity();
 
-        if (!empty($options['configuration'])) {
-            $output->writeln(\sprintf('Configuration : <comment>%s</comment>', $options['configuration']));
+        if (!empty($options[ConfigResolver::OPTION_CONFIG_FILE])) {
+            $output->writeln(\sprintf('Configuration : <comment>%s</comment>', $options[ConfigResolver::OPTION_CONFIG_FILE]));
         }
 
         if ($verbosity >= OutputInterface::VERBOSITY_DEBUG) {
-            $output->writeln('Options       : <comment>' . json_encode($options) . "</comment>\n");
+            $output->writeln('Options       :');
+            foreach ($options as $name => $value) {
+                $output->writeln(\sprintf("<comment>%18s</comment> > <info>%s</info>", $name, \json_encode($value, \JSON_UNESCAPED_SLASHES)));
+            }
         }
         $output->writeln('');
 
-        $linter = new Linter($options['path'], $options['exclude'], $options['extensions'], $options['warning']);
-        $linter->setProcessLimit($options['jobs']);
+        $linter = new Linter(
+            $options[ConfigResolver::OPTION_PATH],
+            $options[ConfigResolver::OPTION_EXCLUDE],
+            $options[ConfigResolver::OPTION_EXTENSIONS],
+            $options[ConfigResolver::OPTION_WARNING]
+        );
+        $linter->setProcessLimit($options[ConfigResolver::OPTION_JOBS]);
 
-        if (!empty($options['cache'])) {
-            Cache::setFilename($options['cache']);
+        if (!empty($options[ConfigResolver::OPTION_CACHE_FILE])) {
+            Cache::setFilename($options[ConfigResolver::OPTION_CACHE_FILE]);
         }
 
         $usingCache = 'No';
-        if (!$input->getOption('no-cache') && Cache::isCached()) {
+        if (!$options[ConfigResolver::OPTION_NO_CACHE] && Cache::isCached()) {
             $usingCache = 'Yes';
             $linter->setCache(Cache::get());
         }
 
-        if (!empty($options['memory_limit'])) {
-            $linter->setMemoryLimit($options['memory_limit']);
+        if (!empty($options[ConfigResolver::OPTION_MEMORY_LIMIT])) {
+            $linter->setMemoryLimit($options[ConfigResolver::OPTION_MEMORY_LIMIT]);
         }
 
         $fileCount = count($linter->getFiles());
@@ -216,7 +179,7 @@ class LintCommand extends Command
         if ($fileCount <= 0) {
             $output->writeln('<info>Could not find files to lint</info>');
 
-            if (!empty($options['no-files-exit-code'])) {
+            if (!empty($options[ConfigResolver::OPTION_NO_FILES_EXIT_CODE])) {
                 $code = 1;
             }
 
@@ -242,7 +205,7 @@ class LintCommand extends Command
             $output->writeln("<error>Files: {$fileCount}, Failures: {$errCount}</error>");
             $this->showErrors($errors);
 
-            if (empty($options['quiet'])) {
+            if (empty($options[ConfigResolver::OPTION_QUIET])) {
                 $code = 1;
             }
         } else {
@@ -256,12 +219,12 @@ class LintCommand extends Command
             'files_count' => $fileCount,
         ];
 
-        if (!empty($options['json'])) {
-            $this->dumpJsonResult((string) $options['json'], $errors, $options, $context);
+        if (!empty($options[ConfigResolver::OPTION_JSON_FILE])) {
+            $this->dumpJsonResult((string) $options[ConfigResolver::OPTION_JSON_FILE], $errors, $options, $context);
         }
 
-        if (!empty($options['xml'])) {
-            $this->dumpXmlResult((string) $options['xml'], $errors, $options, $context);
+        if (!empty($options[ConfigResolver::OPTION_XML_FILE])) {
+            $this->dumpXmlResult((string) $options[ConfigResolver::OPTION_XML_FILE], $errors, $options, $context);
         }
 
         return $code;
@@ -278,9 +241,6 @@ class LintCommand extends Command
         \file_put_contents($path, \json_encode(\array_merge($result, $context)));
     }
 
-    /**
-     * @throws Exception
-     */
     protected function dumpXmlResult(string $path, array $errors, array $options, array $context = []): void
     {
         $document = new Document();
@@ -289,30 +249,29 @@ class LintCommand extends Command
         $suite->setTimestamp(new DateTime());
         $suite->setTime($context['time_usage']);
         $testCase = $suite->addTestCase();
+
         foreach ($errors as $errorName => $value) {
             $testCase->addError($errorName, 'Error', $value['error']);
         }
+
         $document->save($path);
     }
 
-    /**
-     * Execute lint and return errors.
-     */
-    protected function executeLint(Linter $linter, InputInterface $input, OutputInterface $output, int $fileCount): array
+    protected function executeLint(Linter $linter, InputInterface $input, OutputInterface $output, int $filesCount): array
     {
         $cache = !$input->getOption('no-cache');
         $maxColumns = floor((new Terminal())->getWidth() / 2);
         $verbosity = $output->getVerbosity();
         $displayProgress = !$input->getOption('no-progress');
 
-        $displayProgress && $linter->setProcessCallback(function ($status, SplFileInfo $file) use ($output, $verbosity, $fileCount, $maxColumns) {
+        $displayProgress && $linter->setProcessCallback(function ($status, SplFileInfo $file) use ($output, $verbosity, $filesCount, $maxColumns) {
             static $i = 1;
 
-            $percent = floor(($i / $fileCount) * 100);
-            $process = str_pad(" {$i} / {$fileCount} ({$percent}%)", 18, ' ', STR_PAD_LEFT);
+            $percent = floor(($i / $filesCount) * 100);
+            $process = str_pad(" {$i} / {$filesCount} ({$percent}%)", 18, ' ', STR_PAD_LEFT);
 
             if ($verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
-                $filename = str_pad(" {$i}: " . $file->getRelativePathname(), $maxColumns - 10, ' ', \STR_PAD_RIGHT);
+                $filename = str_pad(" {$i}: " . $file->getRelativePathname(), $maxColumns - 10);
                 if ($status === 'ok') {
                     $status = '<info>OK</info>';
                 } elseif ($status === 'error') {
@@ -321,7 +280,7 @@ class LintCommand extends Command
                     $status = '<error>Warning</error>';
                 }
 
-                $status = \str_pad($status, 20, ' ', \STR_PAD_RIGHT);
+                $status = \str_pad($status, 20);
                 $output->writeln(\sprintf("%s\t%s\t%s", $filename, $status, $process));
             } else {
                 if ($i && 0 === $i % $maxColumns) {
@@ -346,8 +305,6 @@ class LintCommand extends Command
     }
 
     /**
-     * Show errors detail.
-     *
      * @throws InvalidStyleException
      */
     protected function showErrors(array $errors): void
@@ -358,7 +315,7 @@ class LintCommand extends Command
         foreach ($errors as $filename => $error) {
             $this->output->writeln('<comment>' . ++$i . ". {$filename}:{$error['line']}" . '</comment>');
 
-            $this->output->write($this->getHighlightedCodeSnippet($filename, $error['line']));
+            $this->output->writeln($this->getHighlightedCodeSnippet($filename, $error['line']));
 
             $this->output->writeln("<error> {$error['error']}</error>");
         }
@@ -370,14 +327,14 @@ class LintCommand extends Command
         $offset = $lineNumber - $linesBefore - 1;
         $offset = max($offset, 0);
         $length = $linesAfter + $linesBefore + 1;
-        $lines = array_slice($lines, $offset, $length, $preserveKeys = true);
+        $lines = array_slice($lines, $offset, $length, true);
         end($lines);
-        $lineStrlen = strlen(key($lines) + 1);
+        $lineLength = strlen(key($lines) + 1);
         $snippet = '';
 
         foreach ($lines as $i => $line) {
             $snippet .= (abs($lineNumber) === $i + 1 ? '  > ' : '    ');
-            $snippet .= str_pad($i + 1, $lineStrlen, ' ', STR_PAD_LEFT) . '| ' . rtrim($line) . PHP_EOL;
+            $snippet .= str_pad($i + 1, $lineLength, ' ', STR_PAD_LEFT) . '| ' . rtrim($line) . PHP_EOL;
         }
 
         return $snippet;
@@ -402,76 +359,16 @@ class LintCommand extends Command
         return $highlighter->getCodeSnippet($fileContent, $lineNumber, $linesBefore, $linesAfter);
     }
 
-    /**
-     * Merge options.
-     */
     protected function mergeOptions(): array
     {
-        $options = $this->input->getOptions();
-        $options['path'] = $this->input->getArgument('path');
-        $options['cache'] = $this->input->getOption('cache');
-        if ($options['warning'] === false) {
-            unset($options['warning']);
+        $configResolver = new ConfigResolver($this->input);
+        $options = $configResolver->resolve();
+        $failures = $configResolver->getNestedExceptions();
+
+        if (!empty($failures)) {
+            throw $failures[0];
         }
-
-        $config = [];
-
-        if (!$this->input->getOption('no-configuration')) {
-            $inputPath = $this->input->getArgument('path');
-            $filename = $this->getConfigFile($inputPath);
-
-            if (empty($options['configuration']) && $filename) {
-                $options['configuration'] = $filename;
-            }
-
-            if (!empty($options['configuration'])) {
-                $config = $this->loadConfiguration($options['configuration']);
-            }
-        }
-
-        $options = array_merge($this->defaults, array_filter($config), array_filter($options));
-
-        is_array($options['extensions']) || $options['extensions'] = explode(',', $options['extensions']);
 
         return $options;
-    }
-
-    /**
-     * Get configuration file.
-     *
-     * @param array<string> $inputPath
-     *
-     * @return string|false
-     */
-    protected function getConfigFile(array $inputPath)
-    {
-        if (1 == count($inputPath) && $first = reset($inputPath)) {
-            $dir = is_dir($first) ? $first : dirname($first);
-        } else {
-            $dir = \getcwd() . DIRECTORY_SEPARATOR;
-        }
-
-        $filename = rtrim($dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '.phplint.yml';
-
-        return realpath($filename);
-    }
-
-    /**
-     * Load configuration from yaml.
-     */
-    protected function loadConfiguration(string $path): array
-    {
-        try {
-            $configuration = Yaml::parse(file_get_contents($path));
-            if (!is_array($configuration)) {
-                throw new ParseException('Invalid content.', 1);
-            }
-
-            return $configuration;
-        } catch (ParseException $e) {
-            $this->output->writeln(sprintf('<error>Unable to parse the YAML string: %s</error>', $e->getMessage()));
-
-            return [];
-        }
     }
 }
