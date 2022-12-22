@@ -1,4 +1,4 @@
-ARG VERSION=8.2.0
+ARG VERSION=8.2
 
 FROM php:${VERSION}-cli-alpine AS build
 COPY --from=composer /usr/bin/composer /usr/bin/composer
