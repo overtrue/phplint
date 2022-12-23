@@ -18,6 +18,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\Finder\SplFileInfo;
+use Symfony\Component\Yaml\Exception\ParseException;
 
 class LintCommand extends Command
 {
@@ -365,7 +366,7 @@ class LintCommand extends Command
         $options = $configResolver->resolve();
         $failures = $configResolver->getNestedExceptions();
 
-        if (!empty($failures)) {
+        if (!empty($failures) && !$failures[0] instanceof ParseException) {
             throw $failures[0];
         }
 
