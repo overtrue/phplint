@@ -143,7 +143,7 @@ class LintCommand extends Command
             )
             ->addOption(
                 'no-files-exit-code',
-                'nf',
+                null,
                 InputOption::VALUE_NONE,
                 'Throw error if no files processed.'
             );
