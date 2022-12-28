@@ -65,11 +65,11 @@ Options:
       --xml[=XML]                    Path to store JUnit XML results.
   -w, --warning                      Also show warnings.
   -q, --quiet                        Do not output any message
+      --no-files-exit-code           Throw error if no files processed.
   -h, --help                         Display help for the given command. When no command is given display help for the list command
   -V, --version                      Display this application version
       --ansi|--no-ansi               Force (or disable --no-ansi) ANSI output
   -n, --no-interaction               Do not ask any interactive question
-  -nf, --no-files-exit-code          Throw error if no files processed.
   -v|vv|vvv, --verbose               Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
 ```
 
