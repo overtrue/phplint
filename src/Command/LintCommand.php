@@ -382,7 +382,7 @@ class LintCommand extends Command
         foreach ($errors as $filename => $error) {
             $this->output->writeln('<comment>' . ++$i . ". {$filename}:{$error['line']}" . '</comment>');
 
-            $this->output->write($this->getHighlightedCodeSnippet($filename, $error['line']));
+            $this->output->writeln($this->getHighlightedCodeSnippet($filename, $error['line']));
 
             $this->output->writeln("<error> {$error['error']}</error>");
         }
