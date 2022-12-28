@@ -12,7 +12,6 @@
 namespace Overtrue\PHPLint\Console;
 
 use Symfony\Component\Console\Application as BaseApplication;
-use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 
 /**
@@ -22,7 +21,7 @@ class Application extends BaseApplication
 {
     public const NAME = 'phplint';
 
-    public const VERSION = '3.3';
+    public const VERSION = '3.4';
 
     /**
      * Constructor.
@@ -36,7 +35,7 @@ class Application extends BaseApplication
      * Overridden so that the application doesn't expect the command
      * name to be the first argument.
      */
-    public function getDefinition(): InputDefinition
+    public function getDefinition()
     {
         $inputDefinition = parent::getDefinition();
         // clear out the normal first argument, which is the command name
@@ -47,9 +46,13 @@ class Application extends BaseApplication
 
     /**
      * Gets the name of the command based on input.
+     *
+     * @param InputInterface $input The input interface
+     *
+     * @return string The command name
      */
-    protected function getCommandName(InputInterface $input): string
+    protected function getCommandName(InputInterface $input)
     {
-        return self::NAME;
+        return 'phplint';
     }
 }

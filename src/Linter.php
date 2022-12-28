@@ -26,21 +26,55 @@ class Linter
      */
     private $processCallback;
 
-    private array $files = [];
-    private array $cache = [];
-    private array $path;
-    private array $excludes;
-    private array $extensions;
-    private int $processLimit = 5;
-    private string $memoryLimit;
-    private bool $warning;
+    /**
+     * @var SplFileInfo[]
+     */
+    private $files = [];
+
+    /**
+     * @var array
+     */
+    private $cache = [];
+
+    /**
+     * @var array
+     */
+    private $path;
+
+    /**
+     * @var array
+     */
+    private $excludes;
+
+    /**
+     * @var array
+     */
+    private $extensions;
+
+    /**
+     * @var int
+     */
+    private $processLimit = 5;
+
+    /**
+     * @var string
+     */
+    private $memoryLimit;
+
+    /**
+     * @var bool
+     */
+    private $warning;
 
     /**
      * Constructor.
      *
      * @param string|array $path
+     * @param array        $excludes
+     * @param array        $extensions
+     * @param bool         $warning
      */
-    public function __construct($path, array $excludes = [], array $extensions = ['php'], bool $warning = false)
+    public function __construct($path, array $excludes = [], array $extensions = ['php'], $warning = false)
     {
         $this->path = (array)$path;
         $this->excludes = $excludes;
@@ -52,8 +86,13 @@ class Linter
 
     /**
      * Check the files.
+     *
+     * @param SplFileInfo[] $files
+     * @param bool          $cache
+     *
+     * @return array
      */
-    public function lint(array $files = [], bool $cache = true): array
+    public function lint($files = [], $cache = true)
     {
         if (empty($files)) {
             $files = $this->getFiles();
@@ -114,8 +153,10 @@ class Linter
 
     /**
      * Cache setter.
+     *
+     * @param array $cache
      */
-    public function setCache(array $cache = []): void
+    public function setCache($cache = [])
     {
         if (is_array($cache)) {
             $this->cache = $cache;
@@ -129,7 +170,7 @@ class Linter
      *
      * @return SplFileInfo[]
      */
-    public function getFiles(): array
+    public function getFiles()
     {
         if (empty($this->files)) {
             foreach ($this->path as $path) {
@@ -147,9 +188,11 @@ class Linter
     /**
      * Get files from directory.
      *
+     * @param string $dir
+     *
      * @return SplFileInfo[]
      */
-    protected function getFilesFromDir(string $dir): array
+    protected function getFilesFromDir($dir)
     {
         $finder = new Finder();
         $finder->files()
@@ -170,8 +213,10 @@ class Linter
      * Set Files.
      *
      * @param string[] $files
+     *
+     * @return \Overtrue\PHPLint\Linter
      */
-    public function setFiles(array $files): Linter
+    public function setFiles(array $files)
     {
         foreach ($files as $file) {
             if (is_file($file)) {
@@ -190,8 +235,12 @@ class Linter
 
     /**
      * Set process callback.
+     *
+     * @param callable $processCallback
+     *
+     * @return Linter
      */
-    public function setProcessCallback(callable $processCallback): Linter
+    public function setProcessCallback($processCallback)
     {
         $this->processCallback = $processCallback;
 
@@ -200,8 +249,12 @@ class Linter
 
     /**
      * Set process limit.
+     *
+     * @param int $processLimit
+     *
+     * @return \Overtrue\PHPLint\Linter
      */
-    public function setProcessLimit(int $processLimit): Linter
+    public function setProcessLimit($processLimit)
     {
         $this->processLimit = $processLimit;
 
@@ -210,15 +263,24 @@ class Linter
 
     /**
      * Set memory limit.
+     *
+     * @param string $limit
+     *
+     * @return \Overtrue\PHPLint\Linter
      */
-    public function setMemoryLimit(string $limit): Linter
+    public function setMemoryLimit($limit)
     {
         $this->memoryLimit = $limit;
 
         return $this;
     }
 
-    protected function createLintProcess(string $filename): Lint
+    /**
+     * @param string $filename
+     *
+     * @return mixed
+     */
+    protected function createLintProcess($filename)
     {
         $command = [
             PHP_SAPI == 'cli' ? PHP_BINARY : PHP_BINDIR . '/php',
