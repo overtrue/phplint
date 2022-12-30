@@ -1,0 +1,3 @@
+kind: Removed
+body: remove platform emulation by Composer [config/platform directive](https://getcomposer.org/doc/06-config.md#platform)
+time: 2022-12-30T08:47:47.8919356Z
