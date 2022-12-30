@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Overtrue\PHPLint\Process;
 
 use JetBrains\PhpStorm\ArrayShape;

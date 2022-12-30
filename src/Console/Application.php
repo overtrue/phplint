@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Overtrue\PHPLint\Console;
 
 use Symfony\Component\Console\Application as BaseApplication;
@@ -10,7 +12,7 @@ class Application extends BaseApplication
 {
     public const NAME = 'phplint';
 
-    public const VERSION = '4.4';
+    public const VERSION = '7.0-dev';
 
     public function __construct()
     {

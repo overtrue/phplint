@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Overtrue\PHPLint;
 
 use JetBrains\PhpStorm\Pure;
