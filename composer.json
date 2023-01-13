@@ -23,8 +23,7 @@
     "symfony/finder": "^5.4 || ^6.0",
     "symfony/options-resolver": "^5.4 || ^6.0",
     "symfony/process": "^5.4 || ^6.0",
-    "symfony/yaml": "^5.4 || ^6.0",
-    "n98/junit-xml": "1.1.0"
+    "symfony/yaml": "^5.4 || ^6.0"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5",
