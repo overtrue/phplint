@@ -7,7 +7,7 @@ namespace Overtrue\PHPLint\Process;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\Process\Process;
 
-class Lint extends Process
+class LintProcess extends Process
 {
     public function hasSyntaxError(): bool
     {
@@ -27,7 +27,7 @@ class Lint extends Process
         return false;
     }
 
-    #[ArrayShape(['error' => "string", 'line' => "float|int"])]
+    #[ArrayShape(['error' => "string", 'line' => "int"])]
     public function parseError(string $message): array
     {
         $pattern = '/^(PHP\s+)?(Parse|Fatal) error:\s*(?:\w+ error,\s*)?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
@@ -40,7 +40,7 @@ class Lint extends Process
 
         return [
             'error' => $matched ? "{$match['error']} in line {$match['line']}" : $message,
-            'line' => $matched ? abs($match['line']) : 0,
+            'line' => $matched ? (int) $match['line'] : 0,
         ];
     }
 
@@ -62,7 +62,7 @@ class Lint extends Process
         return false;
     }
 
-    #[ArrayShape(['error' => "string", 'line' => "float|int"])]
+    #[ArrayShape(['error' => "string", 'line' => "int"])]
     private function parseIssue($message): array
     {
         $pattern = '/^(PHP\s+)?(Warning|Deprecated|Notice):\s*?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
@@ -75,7 +75,7 @@ class Lint extends Process
 
         return [
             'error' => $matched ? "{$match['error']} in line {$match['line']}" : $message,
-            'line' => $matched ? abs($match['line']) : 0,
+            'line' => $matched ? (int) $match['line'] : 0,
         ];
     }
 }
