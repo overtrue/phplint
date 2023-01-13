@@ -9,27 +9,18 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
-
 use Throwable;
 
 use function array_keys;
-use function array_replace_recursive;
-use function count;
-use function dirname;
-use function getcwd;
 use function ini_get;
 use function is_array;
-use function is_dir;
 use function is_string;
 use function realpath;
-use function reset;
-use function rtrim;
 use function sprintf;
-
-use const DIRECTORY_SEPARATOR;
 
 /**
  * @author Laurent Laville
+ * @since Release 7.0.0
  */
 final class ConfigResolver
 {
@@ -39,7 +30,7 @@ final class ConfigResolver
     public const OPTION_EXCLUDE = 'exclude';
     public const OPTION_EXTENSIONS = 'extensions';
     public const OPTION_WARNING = 'warning';
-    public const OPTION_CACHE_FILE = 'cache';
+    public const OPTION_CACHE = 'cache';
     public const OPTION_NO_CACHE = 'no-cache';
     public const OPTION_CONFIG_FILE = 'configuration';
     public const OPTION_MEMORY_LIMIT = 'memory-limit';
@@ -50,17 +41,18 @@ final class ConfigResolver
     public const DEFAULT_JOBS = 5;
     public const DEFAULT_PATH = '.';
     public const DEFAULT_EXTENSIONS = ['php'];
-    public const DEFAULT_CACHE_FILE = '.phplint-cache';
+    public const DEFAULT_CACHE_DIR = '.phplint.cache';
     public const DEFAULT_CONFIG_FILE = '.phplint.yml';
+    public const DEFAULT_STANDARD_OUTPUT = 'standard output';
 
     private array $options = [
         self::OPTION_QUIET => false,
         self::OPTION_JOBS => self::DEFAULT_JOBS,
-        self::OPTION_PATH => self::DEFAULT_PATH,
+        self::OPTION_PATH => [self::DEFAULT_PATH],
         self::OPTION_EXCLUDE => [],
         self::OPTION_EXTENSIONS => self::DEFAULT_EXTENSIONS,
         self::OPTION_WARNING => false,
-        self::OPTION_CACHE_FILE => self::DEFAULT_CACHE_FILE,
+        self::OPTION_CACHE => self::DEFAULT_CACHE_DIR,
         self::OPTION_NO_CACHE => false,
         self::OPTION_CONFIG_FILE => self::DEFAULT_CONFIG_FILE,
         self::OPTION_MEMORY_LIMIT => false,
@@ -91,16 +83,17 @@ final class ConfigResolver
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function resolve(): array
     {
         if (!empty($this->options[self::OPTION_CONFIG_FILE])) {
             $conf = $this->loadConfiguration($this->options[self::OPTION_CONFIG_FILE]);
-            $conf = array_replace_recursive($conf, $this->options);
-            $config = $this->getOptions()->resolve($conf);
         } else {
-            $config = $this->options;
+            $conf = [];
         }
-        return $config;
+        return $this->getOptions()->resolve($conf);
     }
 
     /**
@@ -109,22 +102,6 @@ final class ConfigResolver
     public function getNestedExceptions(): array
     {
         return $this->exceptions;
-    }
-
-    /**
-     * @param string[] $inputPath
-     */
-    private function getConfigFile(array $inputPath): false|string
-    {
-        if (1 == count($inputPath) && $first = reset($inputPath)) {
-            $dir = is_dir($first) ? $first : dirname($first);
-        } else {
-            $dir = getcwd() . DIRECTORY_SEPARATOR;
-        }
-
-        $filename = rtrim($dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . self::DEFAULT_CONFIG_FILE;
-
-        return realpath($filename);
     }
 
     private function loadConfiguration(string $path): array
@@ -155,19 +132,28 @@ final class ConfigResolver
 
         $resolver->setRequired(self::OPTION_PATH);
 
+        $resolver->setDefined(array_keys($this->options));
+
         $resolver->setAllowedTypes(self::OPTION_QUIET, 'bool');
-        $resolver->setAllowedTypes(self::OPTION_JOBS, 'int');
+        $resolver->setAllowedTypes(self::OPTION_JOBS, ['int', 'string']);
         $resolver->setAllowedTypes(self::OPTION_PATH, ['string', 'string[]']);
         $resolver->setAllowedTypes(self::OPTION_EXCLUDE, ['string[]']);
         $resolver->setAllowedTypes(self::OPTION_EXTENSIONS, ['string[]']);
         $resolver->setAllowedTypes(self::OPTION_WARNING, 'bool');
-        $resolver->setAllowedTypes(self::OPTION_CACHE_FILE, ['null', 'string']);
+        $resolver->setAllowedTypes(self::OPTION_CACHE, ['null', 'string']);
         $resolver->setAllowedTypes(self::OPTION_NO_CACHE, 'bool');
         $resolver->setAllowedTypes(self::OPTION_CONFIG_FILE, 'string');
         $resolver->setAllowedTypes(self::OPTION_MEMORY_LIMIT, ['int', 'string']);
         $resolver->setAllowedTypes(self::OPTION_JSON_FILE, ['null', 'string']);
         $resolver->setAllowedTypes(self::OPTION_XML_FILE, ['null', 'string']);
+        $resolver->setAllowedTypes(self::OPTION_NO_FILES_EXIT_CODE, 'bool');
 
+        $resolver->setNormalizer(self::OPTION_JOBS, function (Options $options, $value) {
+            if (is_string($value)) {
+                $value = (int) $value;
+            }
+            return $value;
+        });
         $resolver->setNormalizer(self::OPTION_PATH, function (Options $options, $value) {
             if (is_string($value)) {
                 $value = [$value];
@@ -175,11 +161,27 @@ final class ConfigResolver
             return $value;
         });
         $resolver->setNormalizer(self::OPTION_CONFIG_FILE, function (Options $options, $value) {
-            $configFile = $this->getConfigFile($this->options[self::OPTION_PATH]);
-            if ($configFile === false) {
+            $canonical =  $value ? realpath($value) : false;
+            if ($canonical === false) {
                 return '';
             }
-            return $configFile;
+            return $canonical;
+        });
+        $resolver->setNormalizer(self::OPTION_JSON_FILE, function (Options $options, $value) {
+            if (null === $value) {
+                $value = 'php://stdout';
+            } elseif (self::DEFAULT_STANDARD_OUTPUT === $value) {
+                $value = false;
+            }
+            return $value;
+        });
+        $resolver->setNormalizer(self::OPTION_XML_FILE, function (Options $options, $value) {
+            if (null === $value) {
+                $value = 'php://stdout';
+            } elseif (self::DEFAULT_STANDARD_OUTPUT === $value) {
+                $value = false;
+            }
+            return $value;
         });
 
         return $resolver;
