@@ -1,0 +1,4 @@
+kind: Changed
+body: JsonReporter extension is specialized to produce JSON output results (see `--json`
+  option)
+time: 2023-01-13T12:11:51.1444567Z
