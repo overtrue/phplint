@@ -48,6 +48,9 @@
       "pre-commit": [
         "composer fix-style"
       ]
+    },
+    "branch-alias": {
+      "dev-main": "9.0.x-dev"
     }
   },
   "scripts": {
