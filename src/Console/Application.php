@@ -18,7 +18,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 final class Application extends BaseApplication
 {
     public const NAME = 'phplint';
-    public const VERSION = '7.0-dev';
+    public const VERSION = '9.0-dev';
 
     private ?EventDispatcherInterface $dispatcher = null;
 
