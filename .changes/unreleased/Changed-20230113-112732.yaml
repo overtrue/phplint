@@ -1,0 +1,3 @@
+kind: Changed
+body: code-rewrites to use Symfony Cache Component
+time: 2023-01-13T11:27:32.01329Z

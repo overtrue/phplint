@@ -1,7 +1,7 @@
 composer.lock
 /vendor/
-.phplint-cache
-.php_cs.cache
+.phpunit.cache/
+.phplint.cache/
 .idea
 .php-cs-fixer.cache
 /vendor-bin/**/vendor

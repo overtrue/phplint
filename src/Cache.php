@@ -4,57 +4,65 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint;
 
-use JetBrains\PhpStorm\Pure;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 
-class Cache
+use function get_debug_type;
+use function md5_file;
+use function str_replace;
+
+/**
+ * @since Release 7.0.0 (code-rewrites by Laurent Laville)
+ */
+final class Cache
 {
-    protected static string $filename = '.phplint-cache';
+    private AdapterInterface $cache;
+    private LoggerInterface $logger;
 
-    public static function get(): mixed
+    public function __construct(AdapterInterface $adapter, LoggerInterface $logger = null)
     {
-        $content = file_get_contents(self::getFilename());
+        if (null === $logger) {
+            $logger = new NullLogger();
+        }
+        $this->logger = $logger;
 
-        return $content ? json_decode($content, true) : null;
-    }
-
-    #[Pure]
-    public static function exists(): bool
-    {
-        return file_exists(self::getFilename());
-    }
-
-    #[Pure]
-    public static function isCached(): bool
-    {
-        return self::exists();
-    }
-
-    public static function put(mixed $contents): int
-    {
-        return file_put_contents(self::getFilename(), json_encode($contents));
-    }
-
-    public static function setFilename(string $filename): void
-    {
-        self::$filename = $filename;
-        self::makeFolderForFilename();
-    }
-
-    private static function makeFolderForFilename(): void
-    {
-        $dir = dirname(self::getFilename());
-
-        if (!is_dir($dir)) {
-            mkdir($dir, 0777, true);
+        $this->cache = $adapter;
+        if ($adapter instanceof LoggerAwareInterface) {
+            $this->cache->setLogger($logger);
         }
     }
 
-    public static function getFilename(): string
+    public function isFresh(string $filename): bool
     {
-        if (\is_dir(\dirname(self::$filename))) {
-            return self::$filename;
+        $currentFingerprint = md5_file($filename);
+
+        $key = str_replace('/', '_', $filename);
+
+        // Try to fetch item from cache
+        $item = $this->cache->getItem($key);
+        $fingerprintSaved = $item->get();
+
+        $exists = $item->isHit();
+
+        if ($currentFingerprint !== $fingerprintSaved && null !== $fingerprintSaved) {
+            $message = "Cache item is not fresh.";
+            $exists = false;    // cache must be revalidate
+        } elseif ($exists) {
+            $message = "Key file found in cache.";
+        } else {
+            $message = "No cache item found for key file.";
         }
 
-        return (getcwd() ?: './') . '/' . self::$filename;
+        if ($exists) {
+            $this->logger->notice($message, ['cache-adapter' => get_debug_type($this->cache), 'key' => $key, 'fingerprint' => $fingerprintSaved]);
+        } else {
+            $item->set($currentFingerprint);
+            $this->cache->save($item);
+            $this->logger->warning($message, ['cache-adapter' => get_debug_type($this->cache), 'key' => $key, 'fingerprint' => $currentFingerprint]);
+        }
+
+        return $exists;
     }
 }
