@@ -2,19 +2,31 @@ name: CI
 
 on:
   push:
-    branches: [ "8.0" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "8.0" ]
+    branches: [ "main" ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      -   # Git Checkout
+        name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Checking PHP syntax error
-      uses: overtrue/phplint@8.0
-      with:
-        path: .
-        options: --exclude=*.log
+      -   # Setup PHP runtime
+        name: Setup PHP runtime
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.0
+          tools: phpunit
+
+      -   # Install Composer dependencies
+        name: Install Composer dependencies
+        uses: ramsey/composer-install@v2
+        with:
+          composer-options: "--prefer-dist --no-scripts"
+
+      -   # Run unit tests
+        name: Unit tests
+        run: phpunit

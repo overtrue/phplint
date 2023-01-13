@@ -1,16 +1,14 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Docker
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - '8.0'
+      - 'main'
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       -
@@ -33,4 +31,4 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: overtrue/phplint:${{ github.ref_name }}
+          tags: overtrue/phplint:latest
