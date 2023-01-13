@@ -2,8 +2,6 @@
 
 <p align="center">`phplint` is a tool that can speed up linting of php files by running several lint processes at once.</p>
 
-![artboard](https://github.com/overtrue/phplint/blob/8.0/artboard.png)
-
 [![Release Status](https://github.com/overtrue/phplint/actions/workflows/build-phar.yml/badge.svg)](https://github.com/overtrue/phplint/actions/workflows/build-phar.yml)
 [![Latest Stable Version](https://poser.pugx.org/overtrue/phplint/v/stable.svg)](https://packagist.org/packages/overtrue/phplint) [![Total Downloads](https://poser.pugx.org/overtrue/phplint/downloads.svg)](https://packagist.org/packages/overtrue/phplint) [![Latest Unstable Version](https://poser.pugx.org/overtrue/phplint/v/unstable.svg)](https://packagist.org/packages/overtrue/phplint) [![License](https://poser.pugx.org/overtrue/phplint/license.svg)](https://packagist.org/packages/overtrue/phplint)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/overtrue/phplint/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/overtrue/phplint/?branch=master)
@@ -20,21 +18,16 @@
 
 > if you are using php 7.4, please refer [the 7.4 branch](https://github.com/overtrue/phplint/tree/7.4). 
 
-> if you are using php 8.1, please refer [the 8.1 branch](https://github.com/overtrue/phplint/tree/8.1).
-
-> if you are using php 8.2, please refer [the 8.2 branch](https://github.com/overtrue/phplint/tree/8.2).
-
-
 ### Locally, if you have PHP
 
 ```shell
-composer require overtrue/phplint: --dev -vvv
+composer require overtrue/phplint --dev -vvv
 ```
 
 ### Locally, if you only have Docker
 
 ```shell
-docker pull overtrue/phplint:8.0
+docker pull overtrue/phplint:latest
 ```
 
 ## Usage
@@ -49,7 +42,7 @@ Usage:
   phplint [options] [--] [<path>...]
 
 Arguments:
-  path                               Path to file or directory to lint
+  path                               Path to file or directory to lint [default: ["."]]
 
 Options:
       --exclude=EXCLUDE              Path to file or directory to exclude from linting (multiple values allowed)
@@ -58,10 +51,11 @@ Options:
   -c, --configuration=CONFIGURATION  Read configuration from config file [default: ".phplint.yml"]
       --no-configuration             Ignore default configuration file (.phplint.yml)
       --no-cache                     Ignore cached data
-      --cache[=CACHE]                Path to the cache file [default: ".phplint-cache"]
+      --cache[=CACHE]                Path to the cache directory [default: ".phplint.cache"]
       --no-progress                  Hide the progress output
-      --json[=JSON]                  Path to store JSON results
-      --xml[=XML]                    Path to store JUnit XML results
+  -p, --progress=PROGRESS            Show the progress output [default: "printer"]
+      --json[=JSON]                  Path to store JSON results [default: "standard output"]
+      --xml[=XML]                    Path to store JUnit XML results [default: "standard output"]
   -w, --warning                      Also show warnings
   -q, --quiet                        Do not output any message
       --no-files-exit-code           Throw error if no files processed
@@ -97,14 +91,15 @@ memory-limit: -1
 ./vendor/bin/phplint
 ```
 
-By default, the command will read configuration from file `.phplint.yml` of path specified, you can use another filename by option: `--configuration=FILENAME` or `-c FILENAME`;
+By default, the command will read configuration from file `.phplint.yml` of current working directory. 
+You can use another filename by option: `--configuration=FILENAME` or `-c FILENAME`;
 
 If you want to disable the config file, you can add option `--no-configuration`.
 
-### Docker cli
+### Docker CLI
 
 ```bash
-docker run --rm -t -v "${PWD}":/workdir overtrue/phplint:8.0 ./  --exclude=vendor
+docker run --rm -t -v "${PWD}":/workdir overtrue/phplint:latest ./  --exclude=vendor
 ```
 
 > Please mount the code directory to `/workdir` in the container.
@@ -122,7 +117,7 @@ $warnings = true;
 $linter = new Linter($path, $exclude, $extensions, $warnings);
 
 // get errors
-$errors = $linter->lint();
+$errors = $linter->lintFiles();
 
 //
 // [
@@ -142,7 +137,7 @@ $errors = $linter->lint();
 ### GitHub Actions
 
 ```yaml
-uses: overtrue/phplint@8.0
+uses: overtrue/phplint@main
 with:
   path: .
   options: --exclude=*.log
@@ -152,7 +147,7 @@ with:
 
 ```yaml
 code-quality:lint-php:
-  image: overtrue/phplint:8.0
+  image: overtrue/phplint:latest
   variables:
     INPUT_PATH: "./"
     INPUT_OPTIONS: "-c .phplint.yml"
@@ -161,7 +156,7 @@ code-quality:lint-php:
 
 ### Other CI/CD (f.e. Bitbucket Pipelines)
 
-Run this command using `overtrue/phplint:8.0` Docker image:
+Run this command using `overtrue/phplint:latest` Docker image:
 
 ```shell
 /root/.composer/vendor/bin/phplint ./ --exclude=vendor
