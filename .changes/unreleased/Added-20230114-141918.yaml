@@ -1,0 +1,4 @@
+kind: Added
+body: '[#173](https://github.com/overtrue/phplint/issues/173) : Improve PHAR build
+  with BOX v4 by adding a manifest'
+time: 2023-01-14T14:19:18.4770759Z
