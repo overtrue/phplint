@@ -1,0 +1,3 @@
+kind: Changed
+body: upgrade `humbug/php-scoper` to allow usage of Box v4 with at least PHP 8.1
+time: 2023-01-14T07:05:44.0521215Z
