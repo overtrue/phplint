@@ -10,6 +10,7 @@ use Overtrue\PHPLint\Extension\Reporter\JsonReporter;
 use Overtrue\PHPLint\Extension\Reporter\JunitXmlReporter;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
+use Phar;
 use PHP_Parallel_Lint\PhpConsoleColor\InvalidStyleException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Helper;
@@ -131,6 +132,15 @@ final class LintCommand extends Command
                 InputOption::VALUE_NONE,
                 'Throw error if no files processed'
             );
+
+        if (Phar::running()) {
+            $this->addOption(
+                'manifest',
+                null,
+                InputOption::VALUE_NONE,
+                'Show which versions of dependencies are bundled'
+            );
+        }
     }
 
     public function initialize(InputInterface $input, OutputInterface $output): void
@@ -144,6 +154,13 @@ final class LintCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        if ($input->hasParameterOption('--manifest')) {
+            $phar = new Phar($_SERVER['argv'][0]);
+            $manifest = $phar->getMetadata();
+            $output->writeln($manifest);
+            return self::SUCCESS;
+        }
+
         $startTime = microtime(true);
         $options = $this->mergeOptions();
         $finder = (new Finder($options))->getFiles();
