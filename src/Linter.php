@@ -19,6 +19,7 @@ use Symfony\Component\Finder\SplFileInfo;
 
 use function array_merge;
 use function count;
+use function md5_file;
 
 final class Linter
 {
@@ -69,7 +70,7 @@ final class Linter
                 $this->dispatcher?->dispatch(new BeforeLintFileEvent($this, ['file' => $fileInfo]));
                 $filename = $fileInfo->getRealPath();
 
-                if ($this->cache->isFresh($filename)) {
+                if ($this->cache->isHit($filename)) {
                     ++$cacheHits;
                 } else {
                     $lintProcess = $this->createLintProcess($filename);
@@ -124,6 +125,10 @@ final class Linter
             $status = 'warning';
         } else {
             $status = 'ok';
+
+            $item = $this->cache->getItem($filename);
+            $item->set(md5_file($filename));
+            $this->cache->saveItem($item);
         }
         return $status;
     }
