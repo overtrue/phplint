@@ -109,7 +109,7 @@ final class ConfigResolver
         try {
             $configuration = Yaml::parseFile($path);
             if (is_array($configuration)) {
-                if (!is_array($configuration[self::OPTION_PATH])) {
+                if (isset($configuration[self::OPTION_PATH]) && !is_array($configuration[self::OPTION_PATH])) {
                     $configuration[self::OPTION_PATH] = [$configuration[self::OPTION_PATH]];
                 }
                 return $configuration;
