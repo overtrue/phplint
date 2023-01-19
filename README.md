@@ -1,172 +1,25 @@
+<!--suppress HtmlDeprecatedAttribute -->
 <h1 align="center">PHPLint</h1>
 
 <p align="center">`phplint` is a tool that can speed up linting of php files by running several lint processes at once.</p>
 
 [![Release Status](https://github.com/overtrue/phplint/actions/workflows/build-phar.yml/badge.svg)](https://github.com/overtrue/phplint/actions/workflows/build-phar.yml)
-[![Latest Stable Version](https://poser.pugx.org/overtrue/phplint/v/stable.svg)](https://packagist.org/packages/overtrue/phplint) [![Total Downloads](https://poser.pugx.org/overtrue/phplint/downloads.svg)](https://packagist.org/packages/overtrue/phplint) [![Latest Unstable Version](https://poser.pugx.org/overtrue/phplint/v/unstable.svg)](https://packagist.org/packages/overtrue/phplint) [![License](https://poser.pugx.org/overtrue/phplint/license.svg)](https://packagist.org/packages/overtrue/phplint)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/overtrue/phplint/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/overtrue/phplint/?branch=master)
+[![Latest Stable Version](https://img.shields.io/packagist/v/overtrue/phplint)](https://packagist.org/packages/overtrue/phplint)
+[![Total Downloads](https://poser.pugx.org/overtrue/phplint/downloads.svg)](https://packagist.org/packages/overtrue/phplint) 
+[![License](https://poser.pugx.org/overtrue/phplint/license.svg)](https://packagist.org/packages/overtrue/phplint)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fovertrue%2Fphplint.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fovertrue%2Fphplint?ref=badge_shield)
 
-[![Sponsor me](https://github.com/overtrue/overtrue/blob/master/sponsor-me-button-s.svg?raw=true)](https://github.com/sponsors/overtrue)
+## Table of Contents
 
-
-## Installation
-
-### required
-- PHP >= 8.0
-- Composer >= 2.0
-
-> if you are using php 7.4, please refer [the 7.4 branch](https://github.com/overtrue/phplint/tree/7.4). 
-
-### Locally, if you have PHP
-
-```shell
-composer require overtrue/phplint --dev -vvv
-```
-
-### Locally, if you only have Docker
-
-```shell
-docker pull overtrue/phplint:latest
-```
-
-## Usage
-
-### CLI
-
-```text
-Description:
-  Lint something
-
-Usage:
-  phplint [options] [--] [<path>...]
-
-Arguments:
-  path                               Path to file or directory to lint [default: ["."]]
-
-Options:
-      --exclude=EXCLUDE              Path to file or directory to exclude from linting (multiple values allowed)
-      --extensions=EXTENSIONS        Check only files with selected extensions [default: ["php"]]
-  -j, --jobs=JOBS                    Number of paralleled jobs to run [default: 5]
-  -c, --configuration=CONFIGURATION  Read configuration from config file [default: ".phplint.yml"]
-      --no-configuration             Ignore default configuration file (.phplint.yml)
-      --no-cache                     Ignore cached data
-      --cache[=CACHE]                Path to the cache directory [default: ".phplint.cache"]
-      --no-progress                  Hide the progress output
-  -p, --progress=PROGRESS            Show the progress output [default: "printer"]
-      --json[=JSON]                  Path to store JSON results [default: "standard output"]
-      --xml[=XML]                    Path to store JUnit XML results [default: "standard output"]
-  -w, --warning                      Also show warnings
-  -q, --quiet                        Do not output any message
-      --no-files-exit-code           Throw error if no files processed
-  -h, --help                         Display help for the given command. When no command is given display help for the list command
-  -V, --version                      Display this application version
-      --ansi|--no-ansi               Force (or disable --no-ansi) ANSI output
-  -n, --no-interaction               Do not ask any interactive question
-  -v|vv|vvv, --verbose               Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
-```
-
-example:
-
-```shell
-./vendor/bin/phplint ./ --exclude=vendor
-```
-
-You can also define configuration as a file `.phplint.yml`:
-
-```yaml
-path: ./
-jobs: 10
-cache: build/phplint.cache
-no-cache: false
-extensions:
-  - php
-exclude:
-  - vendor
-warning: false
-memory-limit: -1
-```
-
-```shell
-./vendor/bin/phplint
-```
-
-By default, the command will read configuration from file `.phplint.yml` of current working directory. 
-You can use another filename by option: `--configuration=FILENAME` or `-c FILENAME`;
-
-If you want to disable the config file, you can add option `--no-configuration`.
-
-### Docker CLI
-
-```bash
-docker run --rm -t -v "${PWD}":/workdir overtrue/phplint:latest ./  --exclude=vendor
-```
-
-> Please mount the code directory to `/workdir` in the container.
-
-### Program
-
-```php
-use Overtrue\PHPLint\Linter;
-
-$path = __DIR__ .'/app';
-$exclude = ['vendor'];
-$extensions = ['php'];
-$warnings = true;
-
-$linter = new Linter($path, $exclude, $extensions, $warnings);
-
-// get errors
-$errors = $linter->lintFiles();
-
-//
-// [
-//    '/path/to/foo.php' => [
-//          'error' => "unexpected '$key' (T_VARIABLE)",
-//          'line' => 168,
-//          'file' => '/path/to/foo.php',
-//      ],
-//    '/path/to/bar.php' => [
-//          'error' => "unexpected 'class' (T_CLASS), expecting ',' or ';'",
-//          'line' => 28,
-//          'file' => '/path/to/bar.php',
-//      ],
-// ]
-```
-
-### GitHub Actions
-
-```yaml
-uses: overtrue/phplint@main
-with:
-  path: .
-  options: --exclude=*.log
-```
-
-### GitLab CI
-
-```yaml
-code-quality:lint-php:
-  image: overtrue/phplint:latest
-  variables:
-    INPUT_PATH: "./"
-    INPUT_OPTIONS: "-c .phplint.yml"
-  script: echo '' #prevents ci yml parse error
-```
-
-### Other CI/CD (f.e. Bitbucket Pipelines)
-
-Run this command using `overtrue/phplint:latest` Docker image:
-
-```shell
-/root/.composer/vendor/bin/phplint ./ --exclude=vendor
-```
-
-### Warnings
-
-Not all linting problems are errors, PHP also has warnings, for example when using a `continue` statement within a
-`switch` `case`. By default, these errors are not reported, but you can turn this on with the `warning` cli flag, or
-by setting the `warning` to true in the configuration.
+1. [Installation](doc/installation.md#installation)
+   1. [Requirements](doc/installation.md#requirements)
+   1. [PHAR](doc/installation.md#phar)
+   1. [Docker](doc/installation.md#docker)
+   1. [Phive](doc/installation.md#phive)
+   1. [Composer](doc/installation.md#composer)
+1. [Usage](doc/index.md#usage)
+1. [Configuration](doc/configuration.md#configuration)
+1. [Contributing](doc/contributing.md#contributing)
 
 ## :heart: Sponsor me 
 
