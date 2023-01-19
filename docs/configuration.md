@@ -114,7 +114,7 @@ For example:
         "configuration": "/shared/backups/github/phplint/.phplint.yml",
         "memory-limit": "512M",
         "log-json": "php://stdout",
-        "xml": false,
+        "log-xml": false,
         "no-files-exit-code": false
     }
 }
