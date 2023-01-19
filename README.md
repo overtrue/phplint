@@ -11,15 +11,15 @@
 
 ## Table of Contents
 
-1. [Installation](doc/installation.md#installation)
-   1. [Requirements](doc/installation.md#requirements)
-   1. [PHAR](doc/installation.md#phar)
-   1. [Docker](doc/installation.md#docker)
-   1. [Phive](doc/installation.md#phive)
-   1. [Composer](doc/installation.md#composer)
-1. [Usage](doc/index.md#usage)
-1. [Configuration](doc/configuration.md#configuration)
-1. [Contributing](doc/contributing.md#contributing)
+1. [Installation](docs/installation.md#installation)
+   1. [Requirements](docs/installation.md#requirements)
+   1. [PHAR](docs/installation.md#phar)
+   1. [Docker](docs/installation.md#docker)
+   1. [Phive](docs/installation.md#phive)
+   1. [Composer](docs/installation.md#composer)
+1. [Usage](docs/index.md#usage)
+1. [Configuration](docs/configuration.md#configuration)
+1. [Contributing](docs/contributing.md#contributing)
 
 ## :heart: Sponsor me 
 
