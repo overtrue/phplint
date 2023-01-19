@@ -1,16 +1,16 @@
 # Configuration
 
-1. [Path](#path--path-)
-1. [Exclude](#exclude--exclude-)
-1. [Extensions](#extensions--extensions-)
-1. [Show Warnings](#show-warnings--warning-)
-1. [Jobs](#jobs--jobs-)
-1. [Cache](#cache--cache-)
-1. [No caching](#no-caching--no-cache-)
-1. [Memory limit](#memory-limit--memory-limit-)
-1. [JSON output](#json-output--log-json-)
-1. [XML output](#xml-output--log-xml-)
-1. [Exit Code](#exit-code--no-files-exit-code-)
+1. [Path][path]
+1. [Exclude][exclude]
+1. [Extensions][extensions]
+1. [Show Warnings][warning]
+1. [Jobs][jobs]
+1. [Cache][cache]
+1. [No caching][no-cache]
+1. [Memory limit][memory-limit]
+1. [JSON output][log-json]
+1. [XML output][log-xml]
+1. [Exit Code][no-files-exit-code]
 
 The `phplint` command relies on a configuration file for loading settings. 
 If a configuration file is not specified through the `--configuration|-c` option, following file will be used : `.phplint.yml`. 
@@ -140,3 +140,15 @@ For example:
 
 The `no-files-exit-code` (`bool` default `false`) setting allow to exit `phplint` command with failure (status code `1`) when no files processed.
 By default, `phplint` exit with success (status code `0`)
+
+[path]: #path-path
+[exclude]: #exclude-exclude
+[extensions]: #extensions-extensions
+[warning]: #show-warnings-warning
+[jobs]: #jobs-jobs
+[cache]: #cache-cache
+[no-cache]: #no-caching-no-cache
+[memory-limit]: #memory-limit-memory-limit
+[log-json]: #json-output-log-json
+[log-xml]: #xml-output-log-xml
+[no-files-exit-code]: #exit-code-no-files-exit-code
