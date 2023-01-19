@@ -8,8 +8,8 @@
 1. [Cache](#cache--cache-)
 1. [No caching](#no-caching--no-cache-)
 1. [Memory limit](#memory-limit--memory-limit-)
-1. [JSON output](#json-output--json-)
-1. [XML output](#xml-output--xml-)
+1. [JSON output](#json-output--log-json-)
+1. [XML output](#xml-output--log-xml-)
 1. [Exit Code](#exit-code--no-files-exit-code-)
 
 The `phplint` command relies on a configuration file for loading settings. 
