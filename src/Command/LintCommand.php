@@ -101,17 +101,17 @@ final class LintCommand extends Command
                 'printer'
             )
             ->addOption(
-                'json',
+                'log-json',
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Path to store JSON results',
+                'Log scan results in JSON format to file',
                 ConfigResolver::DEFAULT_STANDARD_OUTPUT
             )
             ->addOption(
-                'xml',
+                'log-xml',
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Path to store JUnit XML results',
+                'Log scan results in JUnit XML format to file',
                 ConfigResolver::DEFAULT_STANDARD_OUTPUT
             )
             ->addOption(

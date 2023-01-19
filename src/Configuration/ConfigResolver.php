@@ -34,8 +34,8 @@ final class ConfigResolver
     public const OPTION_NO_CACHE = 'no-cache';
     public const OPTION_CONFIG_FILE = 'configuration';
     public const OPTION_MEMORY_LIMIT = 'memory-limit';
-    public const OPTION_JSON_FILE = 'json';
-    public const OPTION_XML_FILE = 'xml';
+    public const OPTION_JSON_FILE = 'log-json';
+    public const OPTION_XML_FILE = 'log-xml';
     public const OPTION_NO_FILES_EXIT_CODE = 'no-files-exit-code';
 
     public const DEFAULT_JOBS = 5;

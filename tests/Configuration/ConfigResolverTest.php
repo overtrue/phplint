@@ -51,8 +51,8 @@ final class ConfigResolverTest extends TestCase
             'no-cache' => true,
             'configuration' => '',
             'memory-limit' => ini_get('memory_limit'),
-            'json' => false,
-            'xml' => false,
+            'log-json' => false,
+            'log-xml' => false,
             'no-files-exit-code' => false,
         ];
         $config = $resolver->resolve();
