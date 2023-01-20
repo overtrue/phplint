@@ -19,6 +19,7 @@
    1. [Composer](docs/installation.md#composer)
 1. [Usage](docs/index.md#usage)
 1. [Configuration](docs/configuration.md#configuration)
+1. [Upgrading](docs/upgrading.md#upgrading) 
 1. [Contributing](docs/contributing.md#contributing)
 
 ## :heart: Sponsor me 

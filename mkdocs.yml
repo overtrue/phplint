@@ -29,5 +29,6 @@ markdown_extensions:
 nav:
     - "Home": index.md
     - "Installation": installation.md
+    - "Upgrading": upgrading.md
     - "Configuration": configuration.md
     - "Contributing": contributing.md
