@@ -68,6 +68,7 @@
     "cghooks": "vendor/bin/cghooks",
     "check-style": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --using-cache=no --verbose --ansi --diff --dry-run",
     "fix-style": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --using-cache=no --verbose --ansi",
+    "update-tools": "composer update --working-dir=tools/php-cs-fixer",
     "lint:syntax": "./bin/phplint --ansi"
   },
   "minimum-stability": "dev",
