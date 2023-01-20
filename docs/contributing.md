@@ -47,6 +47,10 @@ If you only want to check source code standard violation, without apply changes,
 composer check-style
 ```
 
+Here is a preview of what call look like:
+
+![php-cs-fixer_dry-run](./assets/php-cs-fixer_dry-run.png)
+
 ## Running Tests
 
 All tests must PASS before submitting a Pull Request.
