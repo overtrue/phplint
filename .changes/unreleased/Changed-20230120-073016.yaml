@@ -1,0 +1,3 @@
+kind: Changed
+body: Follows PHP CS Fixer installation recommendation (see https://cs.symfony.com/#installation)
+time: 2023-01-20T07:30:16.2287697Z

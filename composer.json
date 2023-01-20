@@ -30,7 +30,6 @@
     "phpunit/phpunit": "^9.5",
     "php-parallel-lint/php-console-highlighter": "^1.0",
     "brainmaestro/composer-git-hooks": "^2.8.5 || 3.0.0-alpha.1",
-    "friendsofphp/php-cs-fixer": "^3.4.0",
     "jetbrains/phpstorm-stubs": "^2021.3 || ^2022.3",
     "bamarni/composer-bin-plugin": "^1.4"
   },
@@ -67,8 +66,8 @@
       "@composer bin all install --ansi"
     ],
     "cghooks": "vendor/bin/cghooks",
-    "check-style": "php-cs-fixer fix --using-cache=no --diff --dry-run --ansi",
-    "fix-style": "php-cs-fixer fix --using-cache=no --ansi",
+    "check-style": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --using-cache=no --verbose --ansi --diff --dry-run",
+    "fix-style": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --using-cache=no --verbose --ansi",
     "lint:syntax": "./bin/phplint --ansi"
   },
   "minimum-stability": "dev",
