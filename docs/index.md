@@ -160,6 +160,9 @@ See [Contributor's Guide](contributing.md#contributing) before you start.
 ## Credits
 
 Project originally created by [@overtrue](https://github.com/overtrue), which is now (since version 9.0) 
-actively supported by [Laurent Laville (@llaville)](https://github.com/llaville)
+actively supported by [Laurent Laville (@llaville)](https://github.com/llaville).
+
+See the list of [all contributors][contributors].
 
 [mkdocs-material]: https://github.com/squidfunk/mkdocs-material
+[contributors]: https://github.com/overtrue/phplint/graphs/contributors
