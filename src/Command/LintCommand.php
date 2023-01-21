@@ -143,7 +143,7 @@ final class LintCommand extends Command
         }
     }
 
-    public function initialize(InputInterface $input, OutputInterface $output): void
+    protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         $this->input = $input;
         $this->output = $output;
