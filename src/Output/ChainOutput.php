@@ -1,0 +1,46 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Overtrue\PHPLint\Output;
+
+use InvalidArgumentException;
+
+use function count;
+use function get_debug_type;
+use function sprintf;
+
+/**
+ * @author Laurent Laville
+ */
+final class ChainOutput implements OutputInterface
+{
+    private array $outputHandlers;
+
+    public function __construct(array $handlers)
+    {
+        $this->outputHandlers = [];
+
+        foreach ($handlers as $handler) {
+            if (!$handler instanceof OutputInterface) {
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'The class "%s" does not implement the "%s" interface.',
+                        get_debug_type($handler),
+                        OutputInterface::class
+                    )
+                );
+            }
+            $this->outputHandlers[] = $handler;
+        }
+    }
+
+    public function format(LinterOutput $results): void
+    {
+        $i = count($this->outputHandlers);
+
+        while ($i--) {
+            $this->outputHandlers[$i]->format($results);
+        }
+    }
+}

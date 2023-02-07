@@ -6,8 +6,13 @@ namespace Overtrue\PHPLint\Tests\EndToEnd;
 
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Console\Application;
+use Overtrue\PHPLint\Event\EventDispatcher;
+use Overtrue\PHPLint\Extension\OutputFormat;
 use Overtrue\PHPLint\Tests\TestCase;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
+
+use function dirname;
 
 /**
  * @author Laurent Laville
@@ -16,15 +21,23 @@ use Symfony\Component\Console\Tester\CommandTester;
 final class LintCommandTest extends TestCase
 {
     private ?CommandTester $commandTester;
+    private Command $command;
 
     protected function setUp(): void
     {
+        // No extensions require for tests.
+        // WARNING: CommandTester is not able to test situation with custom Output
+        //          so display verification is impossible !!!
+        $dispatcher = new EventDispatcher([]);
+
+        $this->command = new LintCommand($dispatcher);
+
         $application = new Application();
-        $application->add(new LintCommand());
+        $application->add($this->command);
+        $application->setDefaultCommand($this->command->getName());
+        $application->setDispatcher($dispatcher);
 
-        $command = $application->find('phplint');
-
-        $this->commandTester = new CommandTester($command);
+        $this->commandTester = new CommandTester($this->command);
     }
 
     protected function tearDown(): void
@@ -42,11 +55,14 @@ final class LintCommandTest extends TestCase
             '--no-configuration' => true,
             '--no-cache' => true,
         ];
+
         $this->commandTester->execute($arguments);
 
         $this->commandTester->assertCommandIsSuccessful();
-        $display = $this->commandTester->getDisplay();
-        $this->assertStringContainsString('Cache: 0 hit, 1 miss', $display);
+        $this->assertCount(
+            1,
+            $this->command->getResults()->getMisses()
+        );
     }
 
     /**
@@ -55,13 +71,16 @@ final class LintCommandTest extends TestCase
     public function testLintSyntaxErrorFileWithoutConfigurationAndCache(): void
     {
         $arguments = [
-            'path' => [\dirname(__DIR__) . '/fixtures/syntax_error.php'],
+            'path' => [dirname(__DIR__) . '/fixtures/syntax_error.php'],
             '--no-configuration' => true,
             '--no-cache' => true,
         ];
+
         $this->commandTester->execute($arguments);
 
-        $display = $this->commandTester->getDisplay();
-        $this->assertStringContainsString('1 file, 1 error', $display);
+        $this->assertCount(
+            1,
+            $this->command->getResults()->getErrors()
+        );
     }
 }

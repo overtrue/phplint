@@ -4,8 +4,7 @@ extensions:
   - php
 exclude:
   - vendor
+  - tests
 warning: true
 memory-limit: -1
-no-cache: false
-log-json: false
-log-junit: false
+no-cache: true

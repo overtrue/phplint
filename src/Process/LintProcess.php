@@ -4,78 +4,83 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Process;
 
-use JetBrains\PhpStorm\ArrayShape;
+use Closure;
 use Symfony\Component\Process\Process;
 
-class LintProcess extends Process
+use function array_shift;
+use function explode;
+use function preg_match;
+use function str_contains;
+use function trim;
+
+final class LintProcess extends Process
 {
-    public function hasSyntaxError(): bool
-    {
-        $output = trim($this->getOutput());
+    private static Closure $createLintProcessItem;
 
-        return !str_contains($output, 'No syntax errors detected');
+    public function __construct(array $command, string $cwd = null, array $env = null, mixed $input = null, ?float $timeout = 60)
+    {
+        parent::__construct($command, $cwd, $env, $input, $timeout);
+
+        self::$createLintProcessItem = Closure::bind(
+            static function (bool $hasError, string $errorString, int $errorLine, bool $hasWarning, string $warningString, int $warningLine) {
+                $item = new LintProcessItem();
+                $item->hasSyntaxError = $hasError;
+                $item->hasSyntaxWarning = $hasWarning;
+                if ($hasError) {
+                    $item->message = $errorString;
+                    $item->line = $errorLine;
+                } elseif ($hasWarning) {
+                    $item->message = $warningString;
+                    $item->line = $warningLine;
+                } else {
+                    $item->message = '';
+                    $item->line = 0;
+                }
+                return $item;
+            },
+            null,
+            LintProcessItem::class
+        );
     }
 
-    public function getSyntaxError(): bool|array
+    public function getItem(string $output): LintProcessItem
     {
-        if ($this->hasSyntaxError()) {
-            $out = explode("\n", trim($this->getOutput()));
+        $hasError = !str_contains($output, 'No syntax errors detected');
+        $hasWarning = (bool) preg_match('/(Warning:|Deprecated:|Notice:)/', $output);
 
-            return $this->parseError(array_shift($out));
+        $out = explode("\n", trim($output));
+        $text = array_shift($out);
+
+        if ($hasError) {
+            $pattern = '/^(PHP\s+)?(Parse|Fatal) error:\s*(?:\w+ error,\s*)?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
+
+            $matched = preg_match($pattern, $text, $match);
+
+            if (empty($message)) {
+                $message = 'Unknown';
+            }
+        } else {
+            $message = '';
+            $matched = false;
         }
+        $errorString = $matched ? "{$match['error']} in line {$match['line']}" : $message;
+        $errorLine = $matched ? (int) $match['line'] : 0;
 
-        return false;
-    }
+        if ($hasWarning) {
+            $pattern = '/^(PHP\s+)?(Warning|Deprecated|Notice):\s*?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
 
-    #[ArrayShape(['error' => "string", 'line' => "int"])]
-    public function parseError(string $message): array
-    {
-        $pattern = '/^(PHP\s+)?(Parse|Fatal) error:\s*(?:\w+ error,\s*)?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
+            $matched = preg_match($pattern, $text, $match);
 
-        $matched = preg_match($pattern, $message, $match);
-
-        if (empty($message)) {
-            $message = 'Unknown';
+            if (empty($message)) {
+                $message = 'Unknown';
+            }
+        } else {
+            $message = '';
+            $matched = false;
         }
+        $warningString = $matched ? "{$match['error']} in line {$match['line']}" : $message;
+        $warningLine = $matched ? (int) $match['line'] : 0;
 
-        return [
-            'error' => $matched ? "{$match['error']} in line {$match['line']}" : $message,
-            'line' => $matched ? (int) $match['line'] : 0,
-        ];
-    }
-
-    public function hasSyntaxIssue(): bool
-    {
-        $output = trim($this->getOutput());
-
-        return (bool)preg_match('/(Warning:|Deprecated:|Notice:)/', $output);
-    }
-
-    public function getSyntaxIssue(): bool|array
-    {
-        if ($this->hasSyntaxIssue()) {
-            $out = explode("\n", trim($this->getOutput()));
-
-            return $this->parseIssue(array_shift($out));
-        }
-
-        return false;
-    }
-
-    #[ArrayShape(['error' => "string", 'line' => "int"])]
-    private function parseIssue($message): array
-    {
-        $pattern = '/^(PHP\s+)?(Warning|Deprecated|Notice):\s*?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
-
-        $matched = preg_match($pattern, $message, $match);
-
-        if (empty($message)) {
-            $message = 'Unknown';
-        }
-
-        return [
-            'error' => $matched ? "{$match['error']} in line {$match['line']}" : $message,
-            'line' => $matched ? (int) $match['line'] : 0,
-        ];
+        return (self::$createLintProcessItem)($hasError, $errorString, $errorLine, $hasWarning, $warningString, $warningLine);
     }
 }

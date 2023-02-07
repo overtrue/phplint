@@ -46,7 +46,7 @@ final class CacheTest extends TestCase
             // considered as hit
             __FILE__ => function ($filename) { return md5_file($filename); },
             // considered as missed (wrong fingerprint)
-            $testsDir . '/Configuration/ConfigResolverTest.php' => function ($filename) { return sha1_file($filename); },
+            $testsDir . '/Configuration/YamlConfigTest.php' => function ($filename) { return sha1_file($filename); },
             // considered as purely missed
             $testsDir . '/End2End/LintCommandTest.php' => null,
         ];

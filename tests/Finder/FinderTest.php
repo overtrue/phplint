@@ -5,9 +5,14 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Tests\Finder;
 
 use Iterator;
-use Overtrue\PHPLint\Configuration\ConfigResolver;
+use Overtrue\PHPLint\Command\LintCommand;
+use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Tests\TestCase;
+use Symfony\Component\Console\Input\ArrayInput;
+
 use function array_keys;
 use function array_map;
 use function dirname;
@@ -25,13 +30,22 @@ final class FinderTest extends TestCase
      */
     public function testAllPhpFilesFoundShouldExists(): void
     {
+        $dispatcher = new EventDispatcher([]);
+
         $basePath = dirname(__DIR__);
 
-        $finder = new Finder([
-            ConfigResolver::OPTION_PATH => [$basePath],
-            ConfigResolver::OPTION_EXCLUDE => [],
-            ConfigResolver::OPTION_EXTENSIONS => ['php']
-        ]);
+        $arguments = [
+            OptionDefinition::OPTION_PATH => [$basePath],
+            '--no-configuration' => true,
+            '--' . OptionDefinition::OPTION_EXCLUDE => [],
+            '--' . OptionDefinition::OPTION_EXTENSIONS => ['php'],
+        ];
+        $definition = (new LintCommand($dispatcher))->getDefinition();
+        $input = new ArrayInput($arguments, $definition);
+
+        $configResolver = new ConsoleOptionsResolver($input, $definition);
+
+        $finder = new Finder($configResolver);
 
         foreach ($finder->getFiles() as $file) {
             $this->assertFileExists($file->getRealPath());
@@ -43,17 +57,28 @@ final class FinderTest extends TestCase
      */
     public function testSearchPhpFilesWithCondition(): void
     {
+        $dispatcher = new EventDispatcher([]);
+
         $basePath = dirname(__DIR__);
-        $finder = new Finder([
-            ConfigResolver::OPTION_PATH => [$basePath],
-            ConfigResolver::OPTION_EXCLUDE => ['fixtures'],
-            ConfigResolver::OPTION_EXTENSIONS => ['php']
-        ]);
+
+        $arguments = [
+            OptionDefinition::OPTION_PATH => [$basePath],
+            '--no-configuration' => true,
+            '--' . OptionDefinition::OPTION_EXCLUDE => ['fixtures'],
+            '--' . OptionDefinition::OPTION_EXTENSIONS => ['php']
+        ];
+        $definition = (new LintCommand($dispatcher))->getDefinition();
+        $input = new ArrayInput($arguments, $definition);
+
+        $configResolver = new ConsoleOptionsResolver($input, $definition);
+
+        $finder = new Finder($configResolver);
 
         $this->assertEqualsCanonicalizing(
             [
                 'Cache/CacheTest.php',
-                'Configuration/ConfigResolverTest.php',
+                'Configuration/ConsoleConfigTest.php',
+                'Configuration/YamlConfigTest.php',
                 'EndToEnd/LintCommandTest.php',
                 'Finder/FinderTest.php',
                 'TestCase.php',

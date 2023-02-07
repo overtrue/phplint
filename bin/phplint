@@ -24,10 +24,38 @@ if (!$loaded) {
 }
 
 use Overtrue\PHPLint\Command\LintCommand;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\Application;
+use Overtrue\PHPLint\Event\EventDispatcher;
+use Overtrue\PHPLint\Extension\OutputFormat;
+use Overtrue\PHPLint\Extension\ProgressBar;
+use Overtrue\PHPLint\Extension\ProgressPrinter;
+use Symfony\Component\Console\Input\ArgvInput;
 
-// run the command application
+$input = new ArgvInput();
+
+$extensions = [new ProgressPrinter()];
+
+if (true === $input->hasParameterOption(['--no-progress'], true)) {
+    $extensions = [];
+} elseif (true === $input->hasParameterOption(['--progress'], true)) {
+    $progress = $input->getParameterOption('--progress', 'printer');
+    if ('bar' === $progress) {
+        $extensions = [new ProgressBar()];
+    }
+}
+
+$extensions[] = new OutputFormat([
+    OptionDefinition::OPTION_JSON_FILE,
+    OptionDefinition::OPTION_JUNIT_FILE,
+]);
+
+$dispatcher = new EventDispatcher($extensions);
+
+$defaultCommand = new LintCommand($dispatcher);
+
 $application = new Application();
-$application->add(new LintCommand);
-$status = $application->run();
-exit($status);
+$application->add($defaultCommand);
+$application->setDefaultCommand($defaultCommand->getName());
+$application->setDispatcher($dispatcher);
+$application->run($input);

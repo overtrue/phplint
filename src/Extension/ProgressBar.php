@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Extension;
 
-use Overtrue\PHPLint\Console\Style;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\AfterCheckingInterface;
 use Overtrue\PHPLint\Event\AfterLintFileEvent;
@@ -15,8 +14,12 @@ use Overtrue\PHPLint\Event\BeforeLintFileEvent;
 use Overtrue\PHPLint\Event\BeforeLintFileInterface;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
-use Symfony\Component\Console\Style\StyleInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+use function mb_strimwidth;
+use function min;
+use function strlen;
 
 /**
  * @author Laurent Laville
@@ -29,8 +32,7 @@ final class ProgressBar implements
     BeforeLintFileInterface,
     AfterLintFileInterface
 {
-    private bool $enabled = false;
-    private StyleInterface $io;
+    private OutputInterface $output;
 
     public static function getSubscribedEvents(): array
     {
@@ -44,41 +46,37 @@ final class ProgressBar implements
      */
     public function initProgress(ConsoleCommandEvent $event): void
     {
-        $input = $event->getInput();
-        $output = $event->getOutput();
-        $this->io = new Style($input, $output);
-
-        if ($input->hasOption('progress') && $input->getOption('progress') == 'bar') {
-            $this->enabled = !$input->getOption('no-progress');
-        }
+        $this->output = $event->getOutput();
     }
 
     public function beforeChecking(BeforeCheckingEvent $event): void
     {
-        if ($this->enabled) {
-            $this->io->headerBlock($event->getArgument('appVersion'), $event->getArgument('options'));
-            $this->io->progressStart($event->getArgument('fileCount'));
-        }
+        $configFile = $event->getArgument('options')['no-configuration']
+            ? ''
+            : $event->getArgument('options')['configuration']
+        ;
+
+        $this->output->headerBlock($event->getArgument('appVersion'), $configFile);
+        $this->output->configBlock($event->getArgument('options'));
+        $this->output->progressStart($event->getArgument('fileCount'));
     }
 
     public function afterChecking(AfterCheckingEvent $event): void
     {
-        if ($this->enabled) {
-            $this->io->progressFinish();
-        }
+        $this->output->progressFinish();
     }
 
     public function beforeLintFile(BeforeLintFileEvent $event): void
     {
-        if ($this->enabled) {
-            $this->io->progressMessage(sprintf('Checking file %s ...', $event->getArgument('file')->getPathname()));
-        }
+        $this->output->progressMessage('Checking file ...');
+
+        $filename = $event->getArgument('file')->getRelativePathname();
+        $width = min(strlen($filename), 70);
+        $this->output->progressMessage(mb_strimwidth($filename, -1 * $width, $width), 'filename');
     }
 
     public function afterLintFile(AfterLintFileEvent $event): void
     {
-        if ($this->enabled) {
-            $this->io->progressAdvance();
-        }
+        $this->output->progressAdvance();
     }
 }

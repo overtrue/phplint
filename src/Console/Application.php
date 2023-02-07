@@ -4,58 +4,75 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Console;
 
-use Overtrue\PHPLint\Command\LintCommand;
-use Overtrue\PHPLint\Event\EventDispatcher;
-use Overtrue\PHPLint\Extension\ProgressBar;
-use Overtrue\PHPLint\Extension\ProgressPrinter;
+use Overtrue\PHPLint\Output\ConsoleOutput;
+use Phar;
 use Symfony\Component\Console\Application as BaseApplication;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Command\HelpCommand;
+use Symfony\Component\Console\Command\ListCommand;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
+use function array_keys;
+use function in_array;
+
+/**
+ * @author Overtrue
+ * @author Laurent Laville (since v9.0)
+ */
 final class Application extends BaseApplication
 {
     public const NAME = 'phplint';
     public const VERSION = '9.0-dev';
-
-    private ?EventDispatcherInterface $dispatcher = null;
 
     public function __construct()
     {
         parent::__construct(self::NAME, self::VERSION);
     }
 
-    public function getDefinition(): InputDefinition
+    public function run(InputInterface $input = null, OutputInterface $output = null): int
     {
-        $inputDefinition = parent::getDefinition();
-        // clear out the normal first argument, which is the command name
-        $inputDefinition->setArguments();
+        $output ??= new ConsoleOutput();
 
-        return $inputDefinition;
+        return parent::run($input, $output);
     }
 
-    public function getDispatcher(): ?EventDispatcherInterface
+    public function doRun(InputInterface $input, OutputInterface $output)
     {
-        return $this->dispatcher;
-    }
-
-    protected function getCommandName(InputInterface $input): string
-    {
-        return self::NAME;
-    }
-
-    protected function doRunCommand(Command $command, InputInterface $input, OutputInterface $output): int
-    {
-        if ($command instanceof LintCommand) {
-            $extensions = [
-                new ProgressPrinter(),
-                new ProgressBar(),
-            ];
-            $this->dispatcher = new EventDispatcher($extensions);
-            $this->setDispatcher($this->dispatcher);
+        if (true === $input->hasParameterOption(['--manifest'], true)) {
+            $phar = new Phar($_SERVER['argv'][0]);
+            $manifest = $phar->getMetadata();
+            $output->writeln($manifest);
+            return Command::SUCCESS;
         }
-        return parent::doRunCommand($command, $input, $output);
+        return parent::doRun($input, $output);
+    }
+
+    protected function configureIO(InputInterface $input, OutputInterface $output)
+    {
+        if (Phar::running()) {
+            $inputDefinition = $this->getDefinition();
+            $inputDefinition->addOption(
+                new InputOption(
+                    'manifest',
+                    null,
+                    InputOption::VALUE_NONE,
+                    'Show which versions of dependencies are bundled'
+                )
+            );
+        }
+        parent::configureIO($input, $output);
+    }
+
+    protected function getDefaultCommands(): array
+    {
+        return [new HelpCommand(), new ListCommand()];
+    }
+
+    protected function getCommandName(InputInterface $input): ?string
+    {
+        $name = parent::getCommandName($input);
+        return in_array($name, array_keys(parent::all())) ? $name : null;
     }
 }

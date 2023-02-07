@@ -18,7 +18,7 @@ If no configuration file is found, PHPLint will proceed with the default setting
 
 ## Path (`path`)
 
-The `path` (`string`|`string[]`) setting is used to specify where all directories and files to scan should resolve to.
+The `path` (`string`|`string[]` default `.`) setting is used to specify where all directories and files to scan should resolve to.
 
 If not specified, the base path used is the current working directory.
 
@@ -29,7 +29,7 @@ All files listed inside these paths won't be scanned by PHPLint.
 
 ## Extensions (`extensions`)
 
-The `extensions` ((`string[]` default `[php]`)) setting will check only files with selected extensions.
+The `extensions` (`string[]` default `[php]`) setting will check only files with selected extensions.
 
 ## Show Warnings (`warning`)
 
@@ -85,8 +85,8 @@ For example:
 {
     "status": "failure",
     "errors": {
-        "/shared/backups/github/phplint/tests/fixtures/syntax_error.php": {
-            "absolute_file": "/shared/backups/github/phplint/tests/fixtures/syntax_error.php",
+        "/absolute/path/to/tests/fixtures/syntax_error.php": {
+            "absolute_file": "/absolute/path/to/tests/fixtures/syntax_error.php",
             "relative_file": "syntax_error.php",
             "error": "unexpected end of file in line 4",
             "line": 4
@@ -111,7 +111,7 @@ For example:
         "warning": true,
         "cache": ".phplint.cache",
         "no-cache": false,
-        "configuration": "/shared/backups/github/phplint/.phplint.yml",
+        "configuration": ".phplint.yml",
         "memory-limit": "512M",
         "log-json": "php://stdout",
         "log-xml": false,
@@ -120,9 +120,9 @@ For example:
 }
 ```
 
-## XML output (`log-xml`)
+## XML output (`log-junit`)
 
-The `log-xml` (`null`|`string` default `null` to print results to standard output) setting allow to write results in a JUnit XML format.
+The `log-junit` (`null`|`string` default `null` to print results to standard output) setting allow to write results in a JUnit XML format.
 For example:
 
 ```xml
@@ -130,7 +130,7 @@ For example:
 <testsuites>
   <testsuite name="PHP Linter" timestamp="2023-01-19T07:52:39+0000" time="&lt; 1 sec" tests="1" errors="1">
     <testcase errors="1" failures="0">
-      <error type="Error" message="unexpected end of file in line 4">/shared/backups/github/phplint/tests/fixtures/syntax_error.php</error>
+      <error type="Error" message="unexpected end of file in line 4">/absolute/path/to/tests/fixtures/syntax_error.php</error>
     </testcase>
   </testsuite>
 </testsuites>

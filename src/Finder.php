@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint;
 
 use ArrayIterator;
-use Overtrue\PHPLint\Configuration\ConfigResolver;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Configuration\Resolver;
 use Symfony\Component\Finder\Finder as SymfonyFinder;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -27,11 +28,11 @@ final class Finder
     private array $excludes;
     private array $extensions;
 
-    public function __construct(array $options)
+    public function __construct(Resolver $configResolver)
     {
-        $this->paths = $options[ConfigResolver::OPTION_PATH];
-        $this->excludes = $options[ConfigResolver::OPTION_EXCLUDE];
-        $this->extensions = $options[ConfigResolver::OPTION_EXTENSIONS];
+        $this->paths = $configResolver->getOption(OptionDefinition::OPTION_PATH);
+        $this->excludes = $configResolver->getOption(OptionDefinition::OPTION_EXCLUDE);
+        $this->extensions = $configResolver->getOption(OptionDefinition::OPTION_EXTENSIONS);
     }
 
     public function getFiles(): SymfonyFinder
