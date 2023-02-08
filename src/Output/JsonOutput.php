@@ -7,6 +7,7 @@ namespace Overtrue\PHPLint\Output;
 use Symfony\Component\Console\Output\StreamOutput;
 
 use function array_merge;
+use function fclose;
 use function json_encode;
 
 use const JSON_PRETTY_PRINT;
@@ -14,6 +15,7 @@ use const JSON_UNESCAPED_SLASHES;
 
 /**
  * @author Laurent Laville
+ * @since Release 9.0.0
  */
 final class JsonOutput extends StreamOutput implements OutputInterface
 {

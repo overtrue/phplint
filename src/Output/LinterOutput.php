@@ -10,9 +10,13 @@ use Symfony\Component\Finder\Finder;
 
 use function array_merge;
 use function count;
+use function memory_get_usage;
+use function microtime;
+use function sprintf;
 
 /**
  * @author Laurent Laville
+ * @since Release 9.0.0
  */
 final class LinterOutput
 {

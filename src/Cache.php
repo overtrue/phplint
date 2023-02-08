@@ -21,7 +21,8 @@ use function str_contains;
 use function str_replace;
 
 /**
- * @since Release 7.0.0 (code-rewrites by Laurent Laville)
+ * @author Overtrue
+ * @author Laurent Laville (code-rewrites since v9.0)
  */
 final class Cache
 {

@@ -44,9 +44,13 @@ use const DIRECTORY_SEPARATOR;
 use const PHP_EOL;
 use const STR_PAD_LEFT;
 
+/**
+ * @author Laurent Laville
+ * @since Release 9.0.0
+ */
 final class ConsoleOutput extends BaseConsoleOutput implements OutputInterface
 {
-    public const MAX_LINE_LENGTH = 120;  // 110
+    public const MAX_LINE_LENGTH = 120;
 
     private ?ProgressBar $progressBar = null;
 

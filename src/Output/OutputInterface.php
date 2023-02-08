@@ -6,6 +6,7 @@ namespace Overtrue\PHPLint\Output;
 
 /**
  * @author Laurent Laville
+ * @since Release 9.0.0
  */
 interface OutputInterface
 {

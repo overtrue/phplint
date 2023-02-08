@@ -8,7 +8,7 @@ use Symfony\Component\EventDispatcher\GenericEvent;
 
 /**
  * @author Laurent Laville
- * @since Release 7.0.0
+ * @since Release 9.0.0
  */
 final class BeforeCheckingEvent extends GenericEvent
 {

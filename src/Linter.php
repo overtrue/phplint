@@ -23,6 +23,10 @@ use function md5_file;
 use function microtime;
 use function trim;
 
+/**
+ * @author Overtrue
+ * @author Laurent Laville (code-rewrites since v9.0)
+ */
 final class Linter
 {
     private Resolver $configResolver;

@@ -6,7 +6,7 @@ namespace Overtrue\PHPLint\Event;
 
 /**
  * @author Laurent Laville
- * @since Release 7.0.0
+ * @since Release 9.0.0
  */
 interface AfterLintFileInterface
 {

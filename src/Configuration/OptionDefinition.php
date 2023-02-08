@@ -6,6 +6,7 @@ namespace Overtrue\PHPLint\Configuration;
 
 /**
  * @author Laurent Laville
+ * @since Release 9.0.0
  */
 interface OptionDefinition
 {

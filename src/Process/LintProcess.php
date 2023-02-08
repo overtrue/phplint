@@ -13,6 +13,10 @@ use function preg_match;
 use function str_contains;
 use function trim;
 
+/**
+ * @author Laurent Laville
+ * @since Release 9.0.0
+ */
 final class LintProcess extends Process
 {
     private static Closure $createLintProcessItem;

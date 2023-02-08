@@ -22,6 +22,10 @@ use Throwable;
 use function count;
 use function microtime;
 
+/**
+ * @author Overtrue
+ * @author Laurent Laville (since v9.0)
+ */
 final class LintCommand extends Command
 {
     use ConfigureCommandTrait;

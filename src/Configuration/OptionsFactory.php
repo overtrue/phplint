@@ -9,6 +9,10 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use function array_keys;
 
+/**
+ * @author Laurent Laville
+ * @since Release 9.0.0
+ */
 class OptionsFactory implements Options
 {
     private array $defaults;

@@ -10,9 +10,11 @@ use DOMElement;
 use Symfony\Component\Console\Output\StreamOutput;
 
 use function count;
+use function fclose;
 
 /**
  * @author Laurent Laville
+ * @since Release 9.0.0
  */
 final class JunitOutput extends StreamOutput implements OutputInterface
 {

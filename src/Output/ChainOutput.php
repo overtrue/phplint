@@ -12,6 +12,7 @@ use function sprintf;
 
 /**
  * @author Laurent Laville
+ * @since Release 9.0.0
  */
 final class ChainOutput implements OutputInterface
 {

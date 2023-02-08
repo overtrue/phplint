@@ -12,6 +12,10 @@ use function array_key_exists;
 use function ini_get;
 use function sprintf;
 
+/**
+ * @author Laurent Laville
+ * @since Release 9.0.0
+ */
 abstract class AbstractOptionsResolver implements Resolver
 {
     protected array $defaults;

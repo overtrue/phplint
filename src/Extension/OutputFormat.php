@@ -20,6 +20,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * @author Laurent Laville
+ * @since Release 9.0.0
  */
 class OutputFormat implements EventSubscriberInterface, AfterCheckingInterface
 {
