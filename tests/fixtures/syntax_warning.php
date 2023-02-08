@@ -1,1 +1,3 @@
-<?php declare(encoding="utf8");
+<?php
+
+declare(encoding="utf8");

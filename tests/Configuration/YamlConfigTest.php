@@ -106,7 +106,7 @@ final class YamlConfigTest extends TestCase
         return $expected;
     }
 
-    protected static function getExpectedValues(Resolver $resolver) : array
+    protected static function getExpectedValues(Resolver $resolver): array
     {
         $factory = $resolver->factory();
         return $factory->resolve();
