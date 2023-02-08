@@ -33,29 +33,28 @@ class OptionsFactory implements Options
     protected function configureOptions(OptionsResolver $resolver): void
     {
         $definitions = [
-            OptionDefinition::OPTION_JOBS => ['int', 'string'],
+            OptionDefinition::OPTION_PATH => ['null', 'string', 'string[]'],
             OptionDefinition::OPTION_EXCLUDE => ['string[]'],
             OptionDefinition::OPTION_EXTENSIONS => ['string[]'],
-            OptionDefinition::OPTION_WARNING => 'bool',
+            OptionDefinition::OPTION_JOBS => ['int', 'string'],
+            OptionDefinition::OPTION_CONFIG_FILE => 'string',
+            OptionDefinition::OPTION_NO_CONFIG_FILE => 'bool',
             OptionDefinition::OPTION_CACHE => ['null', 'string'],
             OptionDefinition::OPTION_NO_CACHE => 'bool',
-            OptionDefinition::OPTION_CONFIG_FILE => 'string',
-            OptionDefinition::OPTION_MEMORY_LIMIT => ['int', 'string'],
+            OptionDefinition::OPTION_PROGRESS => ['null', 'string'],
+            OptionDefinition::OPTION_NO_PROGRESS => 'bool',
             OptionDefinition::OPTION_JSON_FILE => ['bool', 'null', 'string'],
             OptionDefinition::OPTION_JUNIT_FILE => ['bool', 'null', 'string'],
+            OptionDefinition::OPTION_WARNING => 'bool',
+            OptionDefinition::OPTION_MEMORY_LIMIT => ['int', 'string'],
             OptionDefinition::OPTION_IGNORE_EXIT_CODE => 'bool',
-            'progress' => ['null', 'string'],
-            'path' => ['null', 'string', 'string[]'],
 
             'ansi' => ['null', 'bool'],
             'help' => ['null', 'bool'],
-            'no-configuration' => 'bool',
             'no-interaction' => 'bool',
-            'no-progress' => 'bool',
             'quiet' => ['null', 'bool'],
             'verbose' => ['null', 'bool'],
             'version' => ['null', 'bool'],
-
             'command' => ['null', 'string'],
         ];
 
@@ -75,7 +74,7 @@ class OptionsFactory implements Options
 
         $outputFormat = function (SymfonyOptions $options, $value) {
             if (true === $value) {
-                $value = 'php://stdout';
+                $value = OptionDefinition::DEFAULT_STANDARD_OUTPUT;
             }
             return $value;
         };
