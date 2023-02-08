@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Configuration;
 
-use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 
@@ -21,7 +20,7 @@ abstract class AbstractOptionsResolver implements Resolver
     protected array $defaults;
     protected array $options;
 
-    public function __construct(InputInterface $input, InputDefinition $definition, array $configuration = [])
+    public function __construct(InputInterface $input, array $configuration = [])
     {
         $arguments = $input->getArguments();
         $options = $input->getOptions();

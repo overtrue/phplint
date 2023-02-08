@@ -43,7 +43,7 @@ final class FinderTest extends TestCase
         $definition = (new LintCommand($dispatcher))->getDefinition();
         $input = new ArrayInput($arguments, $definition);
 
-        $configResolver = new ConsoleOptionsResolver($input, $definition);
+        $configResolver = new ConsoleOptionsResolver($input);
 
         $finder = new Finder($configResolver);
 
@@ -70,7 +70,7 @@ final class FinderTest extends TestCase
         $definition = (new LintCommand($dispatcher))->getDefinition();
         $input = new ArrayInput($arguments, $definition);
 
-        $configResolver = new ConsoleOptionsResolver($input, $definition);
+        $configResolver = new ConsoleOptionsResolver($input);
 
         $finder = new Finder($configResolver);
 

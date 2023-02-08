@@ -74,9 +74,9 @@ final class LintCommand extends Command
         $startTime = microtime(true);
 
         if (true === $input->hasParameterOption(['--no-configuration'], true)) {
-            $configResolver = new ConsoleOptionsResolver($input, $this->getDefinition());
+            $configResolver = new ConsoleOptionsResolver($input);
         } else {
-            $configResolver = new FileOptionsResolver($input, $this->getDefinition());
+            $configResolver = new FileOptionsResolver($input);
         }
 
         $finder = (new Finder($configResolver))->getFiles();

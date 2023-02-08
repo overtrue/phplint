@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Configuration;
 
-use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\Yaml\Yaml;
@@ -18,7 +17,7 @@ use function sprintf;
  */
 class FileOptionsResolver extends AbstractOptionsResolver
 {
-    public function __construct(InputInterface $input, InputDefinition $definition)
+    public function __construct(InputInterface $input)
     {
         $configFile = $input->getOption(OptionDefinition::OPTION_CONFIG_FILE);
 
@@ -39,7 +38,7 @@ class FileOptionsResolver extends AbstractOptionsResolver
             }
         }
 
-        parent::__construct($input, $definition, $configuration);
+        parent::__construct($input, $configuration);
     }
 
     public function factory(): Options

@@ -27,7 +27,7 @@ final class YamlConfigTest extends TestCase
         $arguments = ['--configuration' => 'tests/Configuration/invalid_format.yaml'];
         $input = new ArrayInput($arguments, $definition);
 
-        new FileOptionsResolver($input, $definition);
+        new FileOptionsResolver($input);
     }
 
     /**
@@ -41,7 +41,7 @@ final class YamlConfigTest extends TestCase
 
         $input = new ArrayInput($arguments, $definition);
 
-        $resolver = new FileOptionsResolver($input, $definition);
+        $resolver = new FileOptionsResolver($input);
 
         $this->assertSame($fetchExpected($resolver, $arguments), $resolver->getOptions());
     }

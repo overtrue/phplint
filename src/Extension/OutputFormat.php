@@ -50,9 +50,9 @@ class OutputFormat implements EventSubscriberInterface, AfterCheckingInterface
         $input = $event->getInput();
 
         if (true === $input->hasParameterOption(['--no-configuration'], true)) {
-            $configResolver = new ConsoleOptionsResolver($input, $command->getDefinition());
+            $configResolver = new ConsoleOptionsResolver($input);
         } else {
-            $configResolver = new FileOptionsResolver($input, $command->getDefinition());
+            $configResolver = new FileOptionsResolver($input);
         }
 
         foreach ($this->outputOptions as $name) {

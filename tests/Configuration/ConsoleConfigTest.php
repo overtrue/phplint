@@ -28,7 +28,7 @@ final class ConsoleConfigTest extends TestCase
 
         $input = new ArrayInput($arguments, $definition);
 
-        $resolver = new ConsoleOptionsResolver($input, $definition);
+        $resolver = new ConsoleOptionsResolver($input);
 
         $this->assertSame($fetchExpected($resolver, $arguments), $resolver->getOptions());
     }
