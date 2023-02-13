@@ -1,4 +1,0 @@
-kind: Changed
-body: Remove [n98/junit-xml](https://packagist.org/packages/n98/junit-xml) dependency
-  and replace it by new JunitXmlReporter extension (about 30 lines of code)
-time: 2023-01-13T12:09:10.0607188Z

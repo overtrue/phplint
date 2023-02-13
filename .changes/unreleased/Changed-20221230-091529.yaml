@@ -1,4 +1,0 @@
-kind: Changed
-body: 'update `brainmaestro/composer-git-hooks` requirement to accept v3.0 alpha1
-  : that will allow to update psr/log to v3 and symfony/console to v6'
-time: 2022-12-30T09:15:29.7868706Z

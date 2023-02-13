@@ -1,4 +1,0 @@
-kind: Added
-body: '`--manifest` option to display contents of manifest of the PHAR version (only)
-  of PHPLinter'
-time: 2023-01-14T14:35:46.9910903Z

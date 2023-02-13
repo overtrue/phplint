@@ -1,4 +1,0 @@
-kind: Changed
-body: raise minimum version constraint on Symfony Components to use the current LTS
-  (5.4)
-time: 2022-12-30T08:52:29.9679797Z
