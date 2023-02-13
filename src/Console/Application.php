@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the overtrue/phplint package
+ *
+ * (c) overtrue
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Overtrue\PHPLint\Console;
 
 use Overtrue\PHPLint\Output\ConsoleOutput;
@@ -24,7 +33,7 @@ use function in_array;
 final class Application extends BaseApplication
 {
     public const NAME = 'phplint';
-    public const VERSION = '9.0-dev';
+    public const VERSION = '9.0.0';
 
     public function __construct()
     {
