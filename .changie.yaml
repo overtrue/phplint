@@ -8,11 +8,17 @@ kindFormat: '### {{.Kind}}'
 changeFormat: '- {{.Body}}'
 kinds:
     - label: Added
+      auto: minor
     - label: Changed
+      auto: minor
     - label: Deprecated
+      auto: patch
     - label: Removed
+      auto: minor
     - label: Fixed
+      auto: patch
     - label: Security
+      auto: patch
 newlines:
     afterHeaderTemplate: 0
     beforeKind: 1
