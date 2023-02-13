@@ -51,30 +51,31 @@ For more information on which options are available, you can run: `phplint --hel
 
 ```text
 Description:
-  Lint something
+  Files syntax check only
 
 Usage:
-  phplint [options] [--] [<path>...]
+  lint [options] [--] [<path>...]
 
 Arguments:
-  path                               Path to file or directory to lint [default: ["."]]
+  path                               Path to file or directory to lint (default: working directory)
 
 Options:
       --exclude=EXCLUDE              Path to file or directory to exclude from linting (multiple values allowed)
-      --extensions=EXTENSIONS        Check only files with selected extensions [default: ["php"]]
-  -j, --jobs=JOBS                    Number of paralleled jobs to run [default: 5]
+      --extensions=EXTENSIONS        Check only files with selected extensions (multiple values allowed)
+  -j, --jobs=JOBS                    Number of paralleled jobs to run
   -c, --configuration=CONFIGURATION  Read configuration from config file [default: ".phplint.yml"]
       --no-configuration             Ignore default configuration file (.phplint.yml)
+      --cache=CACHE                  Path to the cache directory
       --no-cache                     Ignore cached data
-      --cache[=CACHE]                Path to the cache directory [default: ".phplint.cache"]
+  -p, --progress=PROGRESS            Show the progress output
       --no-progress                  Hide the progress output
-  -p, --progress=PROGRESS            Show the progress output [default: "printer"]
-      --log-json[=LOG-JSON]          Log scan results in JSON format to file [default: "standard output"]
-      --log-xml[=LOG-XML]            Log scan results in JUnit XML format to file [default: "standard output"]
+      --log-json[=LOG-JSON]          Log scan results in JSON format to file (default: standard output)
+      --log-junit[=LOG-JUNIT]        Log scan results in JUnit XML format to file (default: standard output)
   -w, --warning                      Also show warnings
+      --memory-limit=MEMORY-LIMIT    Memory limit for analysis
+      --ignore-exit-code             Ignore exit codes so there are no "failure" exit code even when no files processed
+  -h, --help                         Display help for the given command. When no command is given display help for the lint command
   -q, --quiet                        Do not output any message
-      --no-files-exit-code           Throw error if no files processed
-  -h, --help                         Display help for the given command. When no command is given display help for the list command
   -V, --version                      Display this application version
       --ansi|--no-ansi               Force (or disable --no-ansi) ANSI output
   -n, --no-interaction               Do not ask any interactive question
