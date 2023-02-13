@@ -7,7 +7,7 @@ name: Release workflow
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
@@ -29,19 +29,10 @@ jobs:
           coverage: ${{ matrix.coverage }}
           extensions: ctype, iconv, xml
 
-      - name: Get composer cache directory
-        id: composercache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
-
-      - name: Cache composer dependencies
-        uses: actions/cache@v3
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v2
         with:
-          path: ${{ steps.composercache.outputs.dir }}
-          key: composer-${{ runner.os }}-${{ matrix.php-version }}-${{ hashFiles('composer.*') }}
-          restore-keys: |
-            composer-${{ runner.os }}-${{ matrix.php-version }}-
-            composer-${{ runner.os }}-
-            composer-
+          composer-options: "--prefer-dist"
 
       - name: Build phar
         uses: docker://ghcr.io/llaville/box-manifest:latest

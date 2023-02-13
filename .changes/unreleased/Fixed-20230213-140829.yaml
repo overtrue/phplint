@@ -1,0 +1,4 @@
+kind: Fixed
+body: '[#175](https://github.com/overtrue/phplint/issues/175) : Release Workflow was
+  not able to build a PHAR with manifest distribution'
+time: 2023-02-13T14:08:29.114581975Z
