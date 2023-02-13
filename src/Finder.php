@@ -30,9 +30,9 @@ final class Finder
 
     public function __construct(Resolver $configResolver)
     {
-        $this->paths = $configResolver->getOption(OptionDefinition::OPTION_PATH);
-        $this->excludes = $configResolver->getOption(OptionDefinition::OPTION_EXCLUDE);
-        $this->extensions = $configResolver->getOption(OptionDefinition::OPTION_EXTENSIONS);
+        $this->paths = $configResolver->getOption(OptionDefinition::PATH);
+        $this->excludes = $configResolver->getOption(OptionDefinition::EXCLUDE);
+        $this->extensions = $configResolver->getOption(OptionDefinition::EXTENSIONS);
     }
 
     public function getFiles(): SymfonyFinder

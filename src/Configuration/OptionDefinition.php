@@ -10,21 +10,21 @@ namespace Overtrue\PHPLint\Configuration;
  */
 interface OptionDefinition
 {
-    public const OPTION_JOBS = 'jobs';
-    public const OPTION_PATH = 'path';
-    public const OPTION_EXCLUDE = 'exclude';
-    public const OPTION_EXTENSIONS = 'extensions';
-    public const OPTION_WARNING = 'warning';
-    public const OPTION_CACHE = 'cache';
-    public const OPTION_NO_CACHE = 'no-cache';
-    public const OPTION_CONFIG_FILE = 'configuration';
-    public const OPTION_NO_CONFIG_FILE = 'no-configuration';
+    public const JOBS = 'jobs';
+    public const PATH = 'path';
+    public const EXCLUDE = 'exclude';
+    public const EXTENSIONS = 'extensions';
+    public const WARNING = 'warning';
+    public const CACHE = 'cache';
+    public const NO_CACHE = 'no-cache';
+    public const CONFIGURATION = 'configuration';
+    public const NO_CONFIGURATION = 'no-configuration';
     public const OPTION_MEMORY_LIMIT = 'memory-limit';
-    public const OPTION_PROGRESS = 'progress';
-    public const OPTION_NO_PROGRESS = 'no-progress';
-    public const OPTION_JSON_FILE = 'log-json';
-    public const OPTION_JUNIT_FILE = 'log-junit';
-    public const OPTION_IGNORE_EXIT_CODE = 'ignore-exit-code';
+    public const PROGRESS = 'progress';
+    public const NO_PROGRESS = 'no-progress';
+    public const LOG_JSON = 'log-json';
+    public const LOG_JUNIT = 'log-junit';
+    public const IGNORE_EXIT_CODE = 'ignore-exit-code';
 
     public const DEFAULT_JOBS = 5;
     public const DEFAULT_PATH = '.';

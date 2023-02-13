@@ -35,10 +35,10 @@ final class FinderTest extends TestCase
         $basePath = dirname(__DIR__);
 
         $arguments = [
-            OptionDefinition::OPTION_PATH => [$basePath],
+            OptionDefinition::PATH => [$basePath],
             '--no-configuration' => true,
-            '--' . OptionDefinition::OPTION_EXCLUDE => [],
-            '--' . OptionDefinition::OPTION_EXTENSIONS => ['php'],
+            '--' . OptionDefinition::EXCLUDE => [],
+            '--' . OptionDefinition::EXTENSIONS => ['php'],
         ];
         $definition = (new LintCommand($dispatcher))->getDefinition();
         $input = new ArrayInput($arguments, $definition);
@@ -62,10 +62,10 @@ final class FinderTest extends TestCase
         $basePath = dirname(__DIR__);
 
         $arguments = [
-            OptionDefinition::OPTION_PATH => [$basePath],
+            OptionDefinition::PATH => [$basePath],
             '--no-configuration' => true,
-            '--' . OptionDefinition::OPTION_EXCLUDE => ['fixtures'],
-            '--' . OptionDefinition::OPTION_EXTENSIONS => ['php']
+            '--' . OptionDefinition::EXCLUDE => ['fixtures'],
+            '--' . OptionDefinition::EXTENSIONS => ['php']
         ];
         $definition = (new LintCommand($dispatcher))->getDefinition();
         $input = new ArrayInput($arguments, $definition);

@@ -84,7 +84,7 @@ final class ConsoleOutput extends BaseConsoleOutput implements OutputInterface
             if (true === $this->configResolver->getOption("no-configuration")) {
                 $configFile = '';
             } else {
-                $configFile = $this->configResolver->getOption(OptionDefinition::OPTION_CONFIG_FILE);
+                $configFile = $this->configResolver->getOption(OptionDefinition::CONFIGURATION);
             }
 
             $this->headerBlock($this->appVersion, $configFile);

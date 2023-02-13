@@ -45,14 +45,14 @@ final class Linter
         $this->dispatcher = $dispatcher;
         $this->appLongVersion = $appVersion;
         $this->options = $configResolver->getOptions();
-        $this->processLimit = $configResolver->getOption(OptionDefinition::OPTION_JOBS);
+        $this->processLimit = $configResolver->getOption(OptionDefinition::JOBS);
         $this->memoryLimit = (string) $configResolver->getOption(OptionDefinition::OPTION_MEMORY_LIMIT);
-        $this->warning = $configResolver->getOption(OptionDefinition::OPTION_WARNING);
+        $this->warning = $configResolver->getOption(OptionDefinition::WARNING);
 
-        if ($configResolver->getOption(OptionDefinition::OPTION_NO_CACHE)) {
+        if ($configResolver->getOption(OptionDefinition::NO_CACHE)) {
             $adapter = new NullAdapter();
         } else {
-            $adapter = new FilesystemAdapter('paths', 0, $configResolver->getOption(OptionDefinition::OPTION_CACHE));
+            $adapter = new FilesystemAdapter('paths', 0, $configResolver->getOption(OptionDefinition::CACHE));
         }
         //$logger = new Logger();
         $this->cache = new Cache($adapter); //, $logger);

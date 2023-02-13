@@ -57,9 +57,9 @@ class OutputFormat implements EventSubscriberInterface, AfterCheckingInterface
 
         foreach ($this->outputOptions as $name) {
             if ($filename = $configResolver->getOption($name)) {
-                if (OptionDefinition::OPTION_JSON_FILE == $name) {
+                if (OptionDefinition::LOG_JSON == $name) {
                     $this->handlers[] = new JsonOutput(fopen($filename, 'w'));
-                } elseif (OptionDefinition::OPTION_JUNIT_FILE == $name) {
+                } elseif (OptionDefinition::LOG_JUNIT == $name) {
                     $this->handlers[] = new JunitOutput(fopen($filename, 'w'));
                 }
             }

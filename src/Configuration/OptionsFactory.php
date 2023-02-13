@@ -33,21 +33,21 @@ class OptionsFactory implements Options
     protected function configureOptions(OptionsResolver $resolver): void
     {
         $definitions = [
-            OptionDefinition::OPTION_PATH => ['null', 'string', 'string[]'],
-            OptionDefinition::OPTION_EXCLUDE => ['string[]'],
-            OptionDefinition::OPTION_EXTENSIONS => ['string[]'],
-            OptionDefinition::OPTION_JOBS => ['int', 'string'],
-            OptionDefinition::OPTION_CONFIG_FILE => 'string',
-            OptionDefinition::OPTION_NO_CONFIG_FILE => 'bool',
-            OptionDefinition::OPTION_CACHE => ['null', 'string'],
-            OptionDefinition::OPTION_NO_CACHE => 'bool',
-            OptionDefinition::OPTION_PROGRESS => ['null', 'string'],
-            OptionDefinition::OPTION_NO_PROGRESS => 'bool',
-            OptionDefinition::OPTION_JSON_FILE => ['bool', 'null', 'string'],
-            OptionDefinition::OPTION_JUNIT_FILE => ['bool', 'null', 'string'],
-            OptionDefinition::OPTION_WARNING => 'bool',
+            OptionDefinition::PATH => ['null', 'string', 'string[]'],
+            OptionDefinition::EXCLUDE => ['string[]'],
+            OptionDefinition::EXTENSIONS => ['string[]'],
+            OptionDefinition::JOBS => ['int', 'string'],
+            OptionDefinition::CONFIGURATION => 'string',
+            OptionDefinition::NO_CONFIGURATION => 'bool',
+            OptionDefinition::CACHE => ['null', 'string'],
+            OptionDefinition::NO_CACHE => 'bool',
+            OptionDefinition::PROGRESS => ['null', 'string'],
+            OptionDefinition::NO_PROGRESS => 'bool',
+            OptionDefinition::LOG_JSON => ['bool', 'null', 'string'],
+            OptionDefinition::LOG_JUNIT => ['bool', 'null', 'string'],
+            OptionDefinition::WARNING => 'bool',
             OptionDefinition::OPTION_MEMORY_LIMIT => ['int', 'string'],
-            OptionDefinition::OPTION_IGNORE_EXIT_CODE => 'bool',
+            OptionDefinition::IGNORE_EXIT_CODE => 'bool',
 
             'ansi' => ['null', 'bool'],
             'help' => ['null', 'bool'],
@@ -64,11 +64,11 @@ class OptionsFactory implements Options
             $resolver->setAllowedTypes($option, $allowedTypes);
         }
 
-        $resolver->setNormalizer(OptionDefinition::OPTION_PATH, function (SymfonyOptions $options, $value) {
+        $resolver->setNormalizer(OptionDefinition::PATH, function (SymfonyOptions $options, $value) {
             return (array) $value;
         });
 
-        $resolver->setNormalizer(OptionDefinition::OPTION_JOBS, function (SymfonyOptions $options, $value) {
+        $resolver->setNormalizer(OptionDefinition::JOBS, function (SymfonyOptions $options, $value) {
             return (int) $value;
         });
 
@@ -78,7 +78,7 @@ class OptionsFactory implements Options
             }
             return $value;
         };
-        $resolver->setNormalizer(OptionDefinition::OPTION_JSON_FILE, $outputFormat);
-        $resolver->setNormalizer(OptionDefinition::OPTION_JUNIT_FILE, $outputFormat);
+        $resolver->setNormalizer(OptionDefinition::LOG_JSON, $outputFormat);
+        $resolver->setNormalizer(OptionDefinition::LOG_JUNIT, $outputFormat);
     }
 }

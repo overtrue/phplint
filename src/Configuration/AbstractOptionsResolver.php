@@ -26,29 +26,29 @@ abstract class AbstractOptionsResolver implements Resolver
         $options = $input->getOptions();
 
         $optionDefaults = [
-            OptionDefinition::OPTION_PATH => OptionDefinition::DEFAULT_PATH,
-            OptionDefinition::OPTION_CONFIG_FILE => OptionDefinition::DEFAULT_CONFIG_FILE,
-            OptionDefinition::OPTION_NO_CONFIG_FILE => false,
-            OptionDefinition::OPTION_EXCLUDE => OptionDefinition::DEFAULT_EXCLUDES,
-            OptionDefinition::OPTION_EXTENSIONS => OptionDefinition::DEFAULT_EXTENSIONS,
-            OptionDefinition::OPTION_JOBS => OptionDefinition::DEFAULT_JOBS,
-            OptionDefinition::OPTION_CACHE => OptionDefinition::DEFAULT_CACHE_DIR,
-            OptionDefinition::OPTION_NO_CACHE => false,
-            OptionDefinition::OPTION_PROGRESS => OptionDefinition::DEFAULT_PROGRESS_WIDGET,
-            OptionDefinition::OPTION_NO_PROGRESS => false,
-            OptionDefinition::OPTION_JSON_FILE => null,
-            OptionDefinition::OPTION_JUNIT_FILE => null,
-            OptionDefinition::OPTION_WARNING => false,
+            OptionDefinition::PATH => OptionDefinition::DEFAULT_PATH,
+            OptionDefinition::CONFIGURATION => OptionDefinition::DEFAULT_CONFIG_FILE,
+            OptionDefinition::NO_CONFIGURATION => false,
+            OptionDefinition::EXCLUDE => OptionDefinition::DEFAULT_EXCLUDES,
+            OptionDefinition::EXTENSIONS => OptionDefinition::DEFAULT_EXTENSIONS,
+            OptionDefinition::JOBS => OptionDefinition::DEFAULT_JOBS,
+            OptionDefinition::CACHE => OptionDefinition::DEFAULT_CACHE_DIR,
+            OptionDefinition::NO_CACHE => false,
+            OptionDefinition::PROGRESS => OptionDefinition::DEFAULT_PROGRESS_WIDGET,
+            OptionDefinition::NO_PROGRESS => false,
+            OptionDefinition::LOG_JSON => null,
+            OptionDefinition::LOG_JUNIT => null,
+            OptionDefinition::WARNING => false,
             OptionDefinition::OPTION_MEMORY_LIMIT => ini_get('memory_limit'),
-            OptionDefinition::OPTION_IGNORE_EXIT_CODE => false,
+            OptionDefinition::IGNORE_EXIT_CODE => false,
         ];
 
         $defaults = [];
 
         if (empty($arguments['path'])) {
-            $defaults[OptionDefinition::OPTION_PATH] = $configuration[OptionDefinition::OPTION_PATH] ?? $optionDefaults[OptionDefinition::OPTION_PATH];
+            $defaults[OptionDefinition::PATH] = $configuration[OptionDefinition::PATH] ?? $optionDefaults[OptionDefinition::PATH];
         } else {
-            $defaults[OptionDefinition::OPTION_PATH] = $arguments['path'];
+            $defaults[OptionDefinition::PATH] = $arguments['path'];
         }
 
         if (empty($options['exclude'])) {
@@ -69,8 +69,8 @@ abstract class AbstractOptionsResolver implements Resolver
 
         // options that cannot be overridden by YAML config file values
         $names = [
-            OptionDefinition::OPTION_CONFIG_FILE,
-            OptionDefinition::OPTION_NO_CONFIG_FILE
+            OptionDefinition::CONFIGURATION,
+            OptionDefinition::NO_CONFIGURATION
         ];
         foreach ($names as $name) {
             $defaults[$name] = $options[$name] ?? $optionDefaults[$name];
@@ -78,18 +78,18 @@ abstract class AbstractOptionsResolver implements Resolver
 
         // all options that may be overridden by YAML config file values
         $names = [
-            OptionDefinition::OPTION_EXCLUDE,
-            OptionDefinition::OPTION_EXTENSIONS,
-            OptionDefinition::OPTION_JOBS,
-            OptionDefinition::OPTION_NO_CACHE,
-            OptionDefinition::OPTION_CACHE,
-            OptionDefinition::OPTION_NO_PROGRESS,
-            OptionDefinition::OPTION_PROGRESS,
-            OptionDefinition::OPTION_JSON_FILE,
-            OptionDefinition::OPTION_JUNIT_FILE,
-            OptionDefinition::OPTION_WARNING,
+            OptionDefinition::EXCLUDE,
+            OptionDefinition::EXTENSIONS,
+            OptionDefinition::JOBS,
+            OptionDefinition::NO_CACHE,
+            OptionDefinition::CACHE,
+            OptionDefinition::NO_PROGRESS,
+            OptionDefinition::PROGRESS,
+            OptionDefinition::LOG_JSON,
+            OptionDefinition::LOG_JUNIT,
+            OptionDefinition::WARNING,
             OptionDefinition::OPTION_MEMORY_LIMIT,
-            OptionDefinition::OPTION_IGNORE_EXIT_CODE,
+            OptionDefinition::IGNORE_EXIT_CODE,
         ];
         foreach ($names as $name) {
             $defaults[$name] = $options[$name] ?? $configuration[$name] ?? $optionDefaults[$name];

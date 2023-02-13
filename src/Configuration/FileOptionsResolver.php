@@ -19,7 +19,7 @@ class FileOptionsResolver extends AbstractOptionsResolver
 {
     public function __construct(InputInterface $input)
     {
-        $configFile = $input->getOption(OptionDefinition::OPTION_CONFIG_FILE);
+        $configFile = $input->getOption(OptionDefinition::CONFIGURATION);
 
         $configuration = Yaml::parseFile($configFile);
 

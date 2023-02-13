@@ -88,7 +88,7 @@ final class LintCommand extends Command
 
         $data = $this->results->getFailures();
 
-        if ($configResolver->getOption(OptionDefinition::OPTION_IGNORE_EXIT_CODE)) {
+        if ($configResolver->getOption(OptionDefinition::IGNORE_EXIT_CODE)) {
             return self::SUCCESS;
         }
 
