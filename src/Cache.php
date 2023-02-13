@@ -138,6 +138,6 @@ final class Cache
 
     private function getKey(string $filename): string
     {
-        return str_replace('/', '_', $filename);
+        return str_replace(['{', '}', '(', ')', '/', '\\', '@', ':'], '_', $filename);
     }
 }
