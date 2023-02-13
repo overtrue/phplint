@@ -9,6 +9,21 @@
 [![License](https://poser.pugx.org/overtrue/phplint/license.svg)](https://packagist.org/packages/overtrue/phplint)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fovertrue%2Fphplint.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fovertrue%2Fphplint?ref=badge_shield)
 
+
+| Version | Status                                    | Requirements   |
+|:--------|:------------------------------------------|:---------------|
+| **9.x** | **Active development**                    | **PHP >= 8.0** |
+| 6.x     | Active support                            | PHP >= 8.2     |
+| 5.x     | Active support                            | PHP >= 8.1     |
+| 4.x     | Active support                            | PHP >= 8.0     |
+| 3.x     | End Of Life                               | PHP >= 7.4     |
+
+**NOTE** if you have an older version of PHP lower than 8.0, we recommend to use the latest version [3.4.0](https://github.com/overtrue/phplint/releases/tag/3.4.0)
+
+Major version 9.0 is a full code rewrites that have the same source code (`main` branch) for all PHP 8.x versions (`4.x`, `5.x` or `6.x`),
+with lot of improvement, full documentation, and full unit code tested. 
+
+
 ## Table of Contents
 
 1. [Installation](docs/installation.md#installation)
