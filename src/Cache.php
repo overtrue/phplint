@@ -22,6 +22,7 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\TraceableAdapter;
 
 use Symfony\Contracts\Cache\ItemInterface;
+
 use function class_exists;
 use function get_debug_type;
 use function is_string;
