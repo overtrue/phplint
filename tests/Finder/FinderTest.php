@@ -21,7 +21,7 @@ use function str_replace;
 
 /**
  * @author Laurent Laville
- * @since Release 7.0.0
+ * @since Release 9.0.0
  */
 final class FinderTest extends TestCase
 {
