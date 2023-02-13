@@ -89,6 +89,7 @@ final class FinderTest extends TestCase
                 'Configuration/ConsoleConfigTest.php',
                 'Configuration/YamlConfigTest.php',
                 'EndToEnd/LintCommandTest.php',
+                'EndToEnd/Reserved@Keywords.php',
                 'Finder/FinderTest.php',
                 'TestCase.php',
             ],

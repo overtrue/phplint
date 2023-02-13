@@ -21,6 +21,7 @@ use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\TraceableAdapter;
 
+use Symfony\Contracts\Cache\ItemInterface;
 use function class_exists;
 use function get_debug_type;
 use function is_string;
@@ -28,6 +29,7 @@ use function md5_file;
 use function sprintf;
 use function str_contains;
 use function str_replace;
+use function str_split;
 
 /**
  * @author Overtrue
@@ -138,6 +140,6 @@ final class Cache
 
     private function getKey(string $filename): string
     {
-        return str_replace('/', '_', $filename);
+        return str_replace(str_split(ItemInterface::RESERVED_CHARACTERS), '_', $filename);
     }
 }

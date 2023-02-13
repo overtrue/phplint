@@ -69,7 +69,7 @@ final class LintCommandTest extends TestCase
 
         $this->commandTester->assertCommandIsSuccessful();
         $this->assertCount(
-            1,
+            2,
             $this->command->getResults()->getMisses()
         );
     }

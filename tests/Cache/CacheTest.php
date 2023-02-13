@@ -153,6 +153,22 @@ final class CacheTest extends TestCase
         $this->assertCount(3, self::$cache->getCalls());
     }
 
+    /**
+     * @covers \Overtrue\PHPLint\Cache::saveItem
+     */
+    public function testFilenameHasReservedCharacters(): void
+    {
+        $filename = dirname(__DIR__) . '/EndToEnd/Reserved@Keywords.php';
+        $fingerprint = md5_file($filename);
+
+        $cacheItem = self::$cache->getItem($filename);
+        $cacheItem->set($fingerprint);
+        $saved = self::$cache->saveItem($cacheItem);
+
+        $this->assertTrue($saved);
+        $this->assertEquals($fingerprint, self::$cache->getItem($filename)->get());
+    }
+
     private function generateItems(array $values): Generator
     {
         foreach ($values as $filename => $processor) {
