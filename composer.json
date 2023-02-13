@@ -13,6 +13,10 @@
     {
       "name": "overtrue",
       "email": "anzhengchao@gmail.com"
+    },
+    {
+      "name": "Laurent Laville",
+      "homepage": "https://github.com/llaville"
     }
   ],
   "require": {
