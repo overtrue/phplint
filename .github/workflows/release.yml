@@ -1,0 +1,106 @@
+---
+name: Release
+
+on:
+  push:
+    branches:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+  workflow_dispatch:
+    # https://github.blog/changelog/2020-07-06-github-actions-manual-triggers-with-workflow_dispatch/
+    inputs:
+      box-output:
+        description: "Path to the PHP Archive made by the BOX"
+        required: true
+        type: string
+      release-tag:
+        description: "Tag that identify version to be released"
+        required: true
+        type: string
+      release-draft:
+        description: "Indicator of whether or not this release is a draft"
+        required: false
+        default: false
+        type: boolean
+      changie-changesDir:
+        description: "Directory for change files, header file and unreleased files. Relative to project root"
+        required: false
+        default: ".changes"
+        type: string
+      changie-version:
+        description: "Version for Changie"
+        required: false
+        default: v1.11.1
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-20.04
+        php:
+          - 8.1
+
+    steps:
+      -   # Git Checkout
+        name: Checkout
+        uses: actions/checkout@v3
+
+      -   # Setup PHP runtime
+        name: Setup PHP runtime
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+
+      -   # Install Composer dependencies
+        name: Install Composer dependencies
+        uses: ramsey/composer-install@v2
+        with:
+          composer-options: "--prefer-dist"
+
+      -   # Build the current change fragments
+        name: Build Release Notes 1/2
+        uses: miniscruff/changie-action@v1
+        with:
+          version: ${{ github.event.inputs.changie-version }}
+          args: batch ${{ github.event.inputs.release-tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      -   # Build the current release changelog
+        name: Build Release Notes 2/2
+        uses: miniscruff/changie-action@v1
+        with:
+          version: ${{ github.event.inputs.changie-version }}
+          args: merge
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      -   # Build the current release with artifacts (php archive)
+        name: Build Release Artifacts (without bootstrap file)
+        if: endsWith(github.event.inputs.box-output, '.phar')
+        run: |
+          cd ${{ github.workspace }}
+          curl -Ls https://github.com/llaville/box-manifest/releases/latest/download/box-manifest.phar -o /usr/local/bin/box-manifest
+          chmod +x /usr/local/bin/box-manifest
+          /usr/local/bin/box-manifest compile 
+
+      -   # Create a new Release (from a tag)
+        name: Create Release from current tag
+        uses: softprops/action-gh-release@v1
+        with:  # https://github.com/softprops/action-gh-release#-customizing
+          prerelease: false
+          draft: ${{ github.event.inputs.release-draft }}
+          body_path: ${{ github.workspace }}/${{ github.event.inputs.changie-changesDir }}/${{ github.event.inputs.release-tag }}.md
+          # https://github.com/softprops/action-gh-release#%EF%B8%8F-uploading-release-assets
+          files:
+            ${{ github.workspace }}/${{ github.event.inputs.box-output }}
+          fail_on_unmatched_files: true
+          tag_name: ${{ github.event.inputs.release-tag }}
