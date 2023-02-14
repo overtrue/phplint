@@ -15,17 +15,33 @@ namespace Overtrue\PHPLint\Tests\Configuration;
 
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
 use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Tests\TestCase;
 use Symfony\Component\Console\Input\ArrayInput;
 
-use function array_merge;
 use function dirname;
 use function is_string;
+use function realpath;
 
 final class ConsoleConfigTest extends TestCase
 {
+    /**
+     * @covers \Overtrue\PHPLint\Configuration\ConsoleOptionsResolver::getOption
+     */
+    public function testConfigFileNotReadable(): void
+    {
+        $dispatcher = new EventDispatcher([]);
+        $definition = (new LintCommand($dispatcher))->getDefinition();
+
+        $input = new ArrayInput(['--configuration' => 'does-not-exists.yaml'], $definition);
+
+        $resolver = new ConsoleOptionsResolver($input);
+
+        $this->assertFalse(realpath($resolver->getOption(OptionDefinition::CONFIGURATION)));
+    }
+
     /**
      * @covers \Overtrue\PHPLint\Configuration\ConsoleOptionsResolver::getOptions
      * @dataProvider commandInputProvider
@@ -48,7 +64,6 @@ final class ConsoleConfigTest extends TestCase
             'only default values' => [[], __CLASS__ . '::expectedOnlyDefaults'],
             'only path modified' => [['path' => dirname(__DIR__)], __CLASS__ . '::expectedPathModified'],
             'without external configuration' => [['--no-configuration' => true], __CLASS__ . '::expectedExternalConfigNotFetched'],
-            'with external unreadable configuration' => [['--configuration' => 'does-not-exists.yaml'], __CLASS__ . '::expectedExternalConfigNotReadable'],
             'with external empty configuration' => [['--configuration' => 'tests/Configuration/empty.yaml'], __CLASS__ . '::expectedExternalEmptyConfig'],
             'output to JSON format on Stdout' => [['--log-json' => null], __CLASS__ . '::expectedJsonOutputFormat'],
             'output to JSON format on File' => [['--log-json' => '/tmp/phplint.json'], __CLASS__ . '::expectedJsonOutputFormat'],
@@ -70,11 +85,6 @@ final class ConsoleConfigTest extends TestCase
     }
 
     protected static function expectedExternalConfigNotFetched(Resolver $resolver): array
-    {
-        return self::getExpectedValues($resolver);  // expected only default arguments/options from command line
-    }
-
-    protected static function expectedExternalConfigNotReadable(Resolver $resolver, array $arguments): array
     {
         return self::getExpectedValues($resolver);  // expected only default arguments/options from command line
     }

@@ -227,7 +227,7 @@ final class ConsoleOutput extends BaseConsoleOutput implements OutputInterface
 
         $this->writeln(sprintf(
             'Configuration : <comment>%s</comment>',
-            empty($configFile) ? 'No config file loaded' : realpath($configFile)
+            (!realpath($configFile) || empty($configFile)) ? 'No config file loaded' : realpath($configFile)
         ));
 
         $this->newLine();

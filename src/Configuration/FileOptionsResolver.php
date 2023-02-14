@@ -15,6 +15,7 @@ namespace Overtrue\PHPLint\Configuration;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
+use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
 use function is_array;
@@ -30,7 +31,12 @@ class FileOptionsResolver extends AbstractOptionsResolver
     {
         $configFile = $input->getOption(OptionDefinition::CONFIGURATION);
 
-        $configuration = Yaml::parseFile($configFile);
+        try {
+            $configuration = Yaml::parseFile($configFile);
+        } catch (ParseException $e) {
+            // If the file could not be read or the YAML is not valid
+            $configuration = [];
+        }
 
         if (null === $configuration) {
             // YAML file is empty (but may contain comments)
