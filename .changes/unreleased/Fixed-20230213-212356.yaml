@@ -1,4 +1,0 @@
-kind: Fixed
-body: '[#178](https://github.com/overtrue/phplint/issues/178) : "no configuration
-  file is found" message without --no-configuration flag'
-time: 2023-02-13T21:23:56.495710512Z
