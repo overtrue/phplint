@@ -36,6 +36,7 @@ with lot of improvement, full documentation, and full unit code tested.
 1. [Configuration](docs/configuration.md#configuration)
 1. [Upgrading](docs/upgrading.md#upgrading) 
 1. [Contributing](docs/contributing.md#contributing)
+1. [Architecture](docs/architecture/README.md#architecture)
 
 ## :heart: Sponsor me 
 
