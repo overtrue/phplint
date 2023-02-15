@@ -71,8 +71,8 @@ use Overtrue\PHPLint\Extension\OutputFormat;
 
 $extensions = [
     new OutputFormat([
-        OptionDefinition::OPTION_JSON_FILE,
-        OptionDefinition::OPTION_JUNIT_FILE,
+        OptionDefinition::LOG_JSON,
+        OptionDefinition::LOG_JUNIT,
     ])
 ];
 

@@ -13,6 +13,12 @@ with following command:
 
 The PHPLint is a command line tool that can speed up linting of php files by running several lint processes at once.
 
+## Architecture
+
+> As a developer you want to learn more about PHPLint architecture!.
+
+See [Architecture's Guide](architecture/README.md)
+
 ## Usage
 
 1. [Console CLI](#console-cli)
