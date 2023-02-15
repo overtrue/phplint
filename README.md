@@ -3,7 +3,7 @@
 
 <p align="center">`phplint` is a tool that can speed up linting of php files by running several lint processes at once.</p>
 
-[![Release Status](https://github.com/overtrue/phplint/actions/workflows/build-phar.yml/badge.svg)](https://github.com/overtrue/phplint/actions/workflows/build-phar.yml)
+[![Release Status](https://github.com/overtrue/phplint/actions/workflows/release.yml/badge.svg)](https://github.com/overtrue/phplint/actions/workflows/release.yml)
 [![Latest Stable Version](https://img.shields.io/packagist/v/overtrue/phplint)](https://packagist.org/packages/overtrue/phplint)
 [![Total Downloads](https://poser.pugx.org/overtrue/phplint/downloads.svg)](https://packagist.org/packages/overtrue/phplint) 
 [![License](https://poser.pugx.org/overtrue/phplint/license.svg)](https://packagist.org/packages/overtrue/phplint)
