@@ -32,6 +32,6 @@ return (new PhpCsFixer\Config())
         PhpCsFixer\Finder::create()
             ->exclude('vendor')
             ->notPath('fixtures/syntax_error.php')
-            ->in([__DIR__.'/src/', __DIR__.'/tests/'])
+            ->in([__DIR__.'/src/', __DIR__.'/examples', __DIR__.'/tests/'])
     )
 ;
