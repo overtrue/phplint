@@ -32,7 +32,7 @@ with lot of improvement, full documentation, and full unit code tested.
    1. [Docker](docs/installation.md#docker)
    1. [Phive](docs/installation.md#phive)
    1. [Composer](docs/installation.md#composer)
-1. [Usage](docs/index.md#usage)
+1. [Usage](docs/README.md#usage)
 1. [Configuration](docs/configuration.md#configuration)
 1. [Upgrading](docs/upgrading.md#upgrading) 
 1. [Contributing](docs/contributing.md#contributing)
