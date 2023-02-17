@@ -1,6 +1,7 @@
 #!/bin/sh -l
 
-set -ex
+[ "$APP_DEBUG" == 'true' ] && set -x
+set -e
 
 if [ ! -z "$INPUT_PATH" ]; then
   /root/.composer/vendor/bin/phplint $INPUT_PATH $INPUT_OPTIONS
