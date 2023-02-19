@@ -1,10 +1,13 @@
-#!/bin/sh -l
+#!/bin/sh
 
 [ "$APP_DEBUG" == 'true' ] && set -x
 set -e
 
-if [ ! -z "$INPUT_PATH" ]; then
-  /root/.composer/vendor/bin/phplint $INPUT_PATH $INPUT_OPTIONS
-else
-  sh -c "/root/.composer/vendor/bin/phplint $*"
+if [ "$APP_DEBUG" == 'true' ]
+then
+  echo "> You will act as user: $(id -u -n)"
+  echo "$(composer config --global --list)"
+  /bin/sh -c "ls -l $(composer config --global home)"
 fi
+
+"$(composer config --global home)/vendor/bin/phplint" $@
