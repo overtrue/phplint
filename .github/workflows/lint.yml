@@ -52,7 +52,7 @@ jobs:
 
       -   # Run unit tests
         name: Unit tests with PHPUnit 9
-        run: phpunit --configuration phpunit-9.xml --testdox --do-not-cache-result
+        run: phpunit --configuration ./phpunit-9.xml --testdox --do-not-cache-result
       -
         name: Unit tests with PHPUnit 10
         run: phpunit --testdox --do-not-cache-result
