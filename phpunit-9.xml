@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd"
          bootstrap="vendor/autoload.php"
+         cacheResultFile=".phpunit.cache/test-results"
          executionOrder="depends,defects"
+         forceCoversAnnotation="true"
+         beStrictAboutCoversAnnotation="true"
          beStrictAboutOutputDuringTests="true"
+         beStrictAboutTodoAnnotatedTests="true"
+         convertDeprecationsToExceptions="true"
          failOnRisky="true"
          failOnWarning="true"
          colors="true"
-         cacheDirectory=".phpunit.cache"
-         requireCoverageMetadata="true"
-         beStrictAboutCoverageMetadata="true"
->
+         verbose="true">
     <testsuites>
         <testsuite name="cache">
             <directory>tests/Cache</directory>
@@ -25,7 +27,9 @@
             <directory>tests/Finder</directory>
         </testsuite>
     </testsuites>
-    <coverage>
+
+    <coverage cacheDirectory=".phpunit.cache/code-coverage"
+              processUncoveredFiles="true">
         <include>
             <directory suffix=".php">src</directory>
         </include>
