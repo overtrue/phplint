@@ -52,7 +52,9 @@ jobs:
 
       -   # Run unit tests
         name: Unit tests with PHPUnit 9
+        if: ${{ matrix.php-version == '8.0' }}
         run: phpunit --configuration ./phpunit-9.xml --testdox --do-not-cache-result
       -
         name: Unit tests with PHPUnit 10
+        if: ${{ matrix.php-version != '8.0' }}
         run: phpunit --testdox --do-not-cache-result
