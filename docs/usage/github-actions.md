@@ -1,6 +1,8 @@
 # GitHub Actions
 
-Quick start, if you PHP runtime set up is not important for you.
+## Use case 1
+
+Quick start, if your PHP runtime set up is not important for you.
 
 ```yaml
 jobs:
@@ -17,6 +19,8 @@ jobs:
           path: .
           options: --exclude=vendor
 ```
+
+## Use case 2
 
 Otherwise, if you want to detect specific PHP features used by scripts depending of your PHP runtime, then use this case.
 
