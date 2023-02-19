@@ -29,6 +29,7 @@ markdown_extensions:
 nav:
     - "Home": README.md
     - "Installation": installation.md
+    - "Usage": usage/README.md
     - "Upgrading": upgrading.md
     - "Configuration": configuration.md
     - "Architecture": architecture/README.md
