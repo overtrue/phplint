@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint;
 
 use ArrayIterator;
+use JsonSerializable;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
 use Symfony\Component\Finder\Finder as SymfonyFinder;
@@ -31,7 +32,7 @@ use function sprintf;
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-final class Finder
+final class Finder implements JsonSerializable
 {
     private array $paths;
     private array $excludes;
@@ -42,6 +43,15 @@ final class Finder
         $this->paths = $configResolver->getOption(OptionDefinition::PATH);
         $this->excludes = $configResolver->getOption(OptionDefinition::EXCLUDE);
         $this->extensions = $configResolver->getOption(OptionDefinition::EXTENSIONS);
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'paths' => $this->paths,
+            'excludes' => $this->excludes,
+            'extensions' => $this->extensions,
+        ];
     }
 
     public function getFiles(): SymfonyFinder
