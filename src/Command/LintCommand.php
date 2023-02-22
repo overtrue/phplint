@@ -28,6 +28,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder as SymfonyFinder;
 use Throwable;
 
+use function array_unshift;
 use function count;
 use function microtime;
 
@@ -64,13 +65,10 @@ final class LintCommand extends Command
     {
         // initializes correctly command and path arguments when lint is set as default command
         $cmd = $input->getArgument('command');
-
-        if ($cmd === $this->getName()) {
-            $paths = $input->getArgument('path');
-        } else {
-            $paths = [$cmd];
+        $paths = $input->getArgument('path');
+        if ($cmd !== $this->getName()) {
+            array_unshift($paths, $cmd);
         }
-
         $input->setArgument('path', $paths);
         $input->setArgument('command', $this->getName());
     }

@@ -63,6 +63,7 @@ final class ConsoleConfigTest extends TestCase
         return [
             'only default values' => [[], __CLASS__ . '::expectedOnlyDefaults'],
             'only path modified' => [['path' => dirname(__DIR__)], __CLASS__ . '::expectedPathModified'],
+            'multiple path modified' => [['path' => [dirname(__DIR__) . '/Cache', __DIR__]], __CLASS__ . '::expectedPathModified'],
             'without external configuration' => [['--no-configuration' => true], __CLASS__ . '::expectedExternalConfigNotFetched'],
             'with external empty configuration' => [['--configuration' => 'tests/Configuration/empty.yaml'], __CLASS__ . '::expectedExternalEmptyConfig'],
             'output to JSON format on Stdout' => [['--log-json' => null], __CLASS__ . '::expectedJsonOutputFormat'],
@@ -80,7 +81,7 @@ final class ConsoleConfigTest extends TestCase
     protected static function expectedPathModified(Resolver $resolver, array $arguments): array
     {
         $expected = self::getExpectedValues($resolver);
-        $expected['path'] = [$arguments['path']];
+        $expected['path'] = (array) $arguments['path'];
         return $expected;
     }
 
