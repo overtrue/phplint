@@ -57,9 +57,11 @@ use const STR_PAD_LEFT;
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-final class ConsoleOutput extends BaseConsoleOutput implements OutputInterface
+class ConsoleOutput extends BaseConsoleOutput implements OutputInterface
 {
     public const MAX_LINE_LENGTH = 120;
+
+    public const NO_FILE_TO_LINT = 'Could not find any files to lint';
 
     private ?ProgressBar $progressBar = null;
 
@@ -335,7 +337,7 @@ final class ConsoleOutput extends BaseConsoleOutput implements OutputInterface
         $style->success($message);
     }
 
-    public function warningBlock(string $message = 'Could not find files to lint'): void
+    public function warningBlock(string $message = self::NO_FILE_TO_LINT): void
     {
         $style = new SymfonyStyle(new ArrayInput([]), $this);
         $style->warning($message);
