@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Output;
 
+use Countable;
+use LogicException;
 use Overtrue\PHPLint\Configuration\Resolver;
 use Symfony\Component\Console\Helper\Helper;
 use Symfony\Component\Finder\Finder;
@@ -27,7 +29,7 @@ use function sprintf;
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-final class LinterOutput
+final class LinterOutput implements Countable
 {
     private Finder $finder;
     private array $context;
@@ -43,6 +45,11 @@ final class LinterOutput
         $this->warnings = $results['warnings'] ?? [];
         $this->hits = $results['hits'] ?? [];
         $this->misses = $results['misses'] ?? [];
+    }
+
+    public function count(): int
+    {
+        return count($this->hits) + count($this->misses);
     }
 
     public function getContext(): array
@@ -65,11 +72,17 @@ final class LinterOutput
             $cacheMisses > 1 ? 'es' : ''
         );
 
+        try {
+            $fileCount = count($this->finder);
+        } catch (LogicException) {
+            $fileCount = 0;
+        }
+
         $this->context = [
             'time_usage' => $timeUsage,
             'memory_usage' => $memUsage,
             'cache_usage' => $cacheUsage,
-            'files_count' => count($this->finder),
+            'files_count' => $fileCount,
             'options_used' => $configResolver->getOptions(),
         ];
     }
