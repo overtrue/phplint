@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint;
 
+use LogicException;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
@@ -80,61 +81,72 @@ final class Linter
             $startTime = microtime(true);
         }
 
+        try {
+            $fileCount = count($finder);
+        } catch (LogicException) {
+            $fileCount = 0;
+        }
+
         $this->dispatcher->dispatch(
             new BeforeCheckingEvent(
                 $this,
-                ['fileCount' => count($finder), 'appVersion' => $this->appLongVersion, 'options' => $this->options]
+                ['fileCount' => $fileCount, 'appVersion' => $this->appLongVersion, 'options' => $this->options]
             )
         );
 
-        $pid = 0;
-        $processRunning = [];
-        $iterator = $finder->getIterator();
+        if ($fileCount > 0) {
+            $pid = 0;
+            $processRunning = [];
+            $iterator = $finder->getIterator();
 
-        while ($iterator->valid() || !empty($processRunning)) {
-            for ($i = count($processRunning); $iterator->valid() && $i < $this->processLimit; ++$i) {
-                $fileInfo = $iterator->current();
-                $this->dispatcher->dispatch(new BeforeLintFileEvent($this, ['file' => $fileInfo]));
-                $filename = $fileInfo->getRealPath();
+            while ($iterator->valid() || !empty($processRunning)) {
+                for ($i = count($processRunning); $iterator->valid() && $i < $this->processLimit; ++$i) {
+                    $fileInfo = $iterator->current();
+                    $this->dispatcher->dispatch(new BeforeLintFileEvent($this, ['file' => $fileInfo]));
+                    $filename = $fileInfo->getRealPath();
 
-                if ($this->cache->isHit($filename)) {
-                    $this->results['hits'][] = $filename;
-                } else {
-                    $lintProcess = $this->createLintProcess($filename);
-                    $lintProcess->start();
+                    if ($this->cache->isHit($filename)) {
+                        $this->results['hits'][] = $filename;
+                    } else {
+                        $lintProcess = $this->createLintProcess($filename);
+                        $lintProcess->start();
 
-                    ++$pid;
-                    $processRunning[$pid] = [
-                        'process' => $lintProcess,
-                        'file' => $fileInfo,
-                    ];
-                    $this->results['misses'][] = $filename;
+                        ++$pid;
+                        $processRunning[$pid] = [
+                            'process' => $lintProcess,
+                            'file' => $fileInfo,
+                        ];
+                        $this->results['misses'][] = $filename;
+                    }
+
+                    $iterator->next();
                 }
 
-                $iterator->next();
-            }
+                foreach ($processRunning as $pid => $item) {
+                    /** @var LintProcess $lintProcess */
+                    $lintProcess = $item['process'];
+                    if ($lintProcess->isRunning()) {
+                        continue;
+                    }
+                    /** @var SplFileInfo $fileInfo */
+                    $fileInfo = $item['file'];
+                    $status = $this->processFile($fileInfo, $lintProcess);
 
-            foreach ($processRunning as $pid => $item) {
-                /** @var LintProcess $lintProcess */
-                $lintProcess = $item['process'];
-                if ($lintProcess->isRunning()) {
-                    continue;
+                    unset($processRunning[$pid]);
+                    $this->dispatcher->dispatch(new AfterLintFileEvent($this, ['file' => $fileInfo, 'status' => $status]));
                 }
-                /** @var SplFileInfo $fileInfo */
-                $fileInfo = $item['file'];
-                $status = $this->processFile($fileInfo, $lintProcess);
-
-                unset($processRunning[$pid]);
-                $this->dispatcher->dispatch(new AfterLintFileEvent($this, ['file' => $fileInfo, 'status' => $status]));
             }
+
+            $results = $this->results;
+        } else {
+            $results = [];
         }
+        $finalResults = new LinterOutput($results, $finder);
+        $finalResults->setContext($this->configResolver, $startTime);
 
-        $results = new LinterOutput($this->results, $finder);
-        $results->setContext($this->configResolver, $startTime);
+        $this->dispatcher->dispatch(new AfterCheckingEvent($this, ['results' => $finalResults]));
 
-        $this->dispatcher->dispatch(new AfterCheckingEvent($this, ['results' => $results]));
-
-        return $results;
+        return $finalResults;
     }
 
     private function processFile(SplFileInfo $fileInfo, LintProcess $lintProcess): string

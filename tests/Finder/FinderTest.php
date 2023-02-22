@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Tests\Finder;
 
 use Iterator;
+use LogicException;
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
@@ -59,6 +60,30 @@ final class FinderTest extends TestCase
         foreach ($finder->getFiles() as $file) {
             $this->assertFileExists($file->getRealPath());
         }
+    }
+
+    /**
+     * @covers \Overtrue\PHPLint\Finder::getFiles
+     */
+    public function testAllPathShouldExistsAndReadable(): void
+    {
+        $this->expectException(LogicException::class);
+
+        $dispatcher = new EventDispatcher([]);
+
+        $basePath = dirname(__DIR__) . '/fixtures/missing_dir';
+
+        $arguments = [
+            OptionDefinition::PATH => [$basePath],
+            '--no-configuration' => true,
+        ];
+        $definition = (new LintCommand($dispatcher))->getDefinition();
+        $input = new ArrayInput($arguments, $definition);
+
+        $configResolver = new ConsoleOptionsResolver($input);
+
+        $finder = new Finder($configResolver);
+        count($finder->getFiles());
     }
 
     /**

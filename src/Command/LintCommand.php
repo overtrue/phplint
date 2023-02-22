@@ -89,7 +89,6 @@ final class LintCommand extends Command
         }
 
         $finder = (new Finder($configResolver))->getFiles();
-        $fileCount = count($finder);
         /** @var Application $app */
         $app = $this->getApplication();
         $linter = new Linter($configResolver, $this->dispatcher, $app->getLongVersion());
@@ -101,7 +100,7 @@ final class LintCommand extends Command
             return self::SUCCESS;
         }
 
-        if ($fileCount === 0 || count($data)) {
+        if (count($this->results) === 0 || count($data)) {
             return self::FAILURE;
         }
 
