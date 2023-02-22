@@ -34,11 +34,11 @@ $input = new ArrayInput($arguments, $definition);
 
 $configResolver = new ConsoleOptionsResolver($input);
 
-$finder = new Finder($configResolver);
-
+$finder = (new Finder($configResolver))->getFiles();
 $linter = new Linter($configResolver, $dispatcher);
+$results = $linter->lintFiles($finder);
 
-$results = $linter->lintFiles($finder->getFiles());
+var_dump("Files checked :", count($results));
 
 var_dump("Errors detected :", $results->getErrors());
 
