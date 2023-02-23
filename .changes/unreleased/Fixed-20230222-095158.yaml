@@ -1,4 +1,0 @@
-kind: Fixed
-body: '[#183](https://github.com/overtrue/phplint/issues/183) : Error is unintuitive
-  when there are no files to lint'
-time: 2023-02-22T09:51:58.768580209Z

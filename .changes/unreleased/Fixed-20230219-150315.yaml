@@ -1,4 +1,0 @@
-kind: Fixed
-body: '[#182](https://github.com/overtrue/phplint/issues/182) : Docker usage may raise
-  a permission denied'
-time: 2023-02-19T15:03:15.555779829Z
