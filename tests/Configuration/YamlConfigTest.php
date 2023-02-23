@@ -15,6 +15,8 @@ namespace Overtrue\PHPLint\Tests\Configuration;
 
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Configuration\OptionsFactory;
 use Overtrue\PHPLint\Configuration\Resolver;
 use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Tests\TestCase;
@@ -88,17 +90,17 @@ final class YamlConfigTest extends TestCase
         return $expected;
     }
 
-    protected static function expectedJsonOutputFormat(Resolver $resolver): array
+    protected static function expectedJsonOutputFormat(Resolver $resolver, array $arguments): array
     {
         $expected = self::getExpectedValues($resolver);
-        $expected['log-json'] = 'php://stdout';     // see 'log-json.yaml' contents
+        $expected['log-json'] = OptionDefinition::DEFAULT_STANDARD_OUTPUT;  // see 'log-json.yaml' contents
         return $expected;
     }
 
-    protected static function expectedXmlOutputFormat(Resolver $resolver): array
+    protected static function expectedXmlOutputFormat(Resolver $resolver, array $arguments): array
     {
         $expected = self::getExpectedValues($resolver);
-        $expected['log-junit'] = '/tmp/phplint-results.xml';  // see 'log-junit.yaml' contents
+        $expected['log-junit'] = '/tmp/phplint-results.xml';    // see 'log-junit.yaml' contents
         return $expected;
     }
 

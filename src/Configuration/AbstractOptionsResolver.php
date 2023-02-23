@@ -45,8 +45,8 @@ abstract class AbstractOptionsResolver implements Resolver
             OptionDefinition::NO_CACHE => false,
             OptionDefinition::PROGRESS => OptionDefinition::DEFAULT_PROGRESS_WIDGET,
             OptionDefinition::NO_PROGRESS => false,
-            OptionDefinition::LOG_JSON => null,
-            OptionDefinition::LOG_JUNIT => null,
+            OptionDefinition::LOG_JSON => false,
+            OptionDefinition::LOG_JUNIT => false,
             OptionDefinition::WARNING => false,
             OptionDefinition::OPTION_MEMORY_LIMIT => ini_get('memory_limit'),
             OptionDefinition::IGNORE_EXIT_CODE => false,
@@ -74,6 +74,21 @@ abstract class AbstractOptionsResolver implements Resolver
         }
         if (empty($options['warning'])) {
             unset($options['warning']);
+        }
+
+        // log options that accept :
+        // - NULL or empty string are values considered to enable output format for standard output
+        // - a string to identify stream
+        $names = [
+            OptionDefinition::LOG_JSON,
+            OptionDefinition::LOG_JUNIT,
+        ];
+        foreach ($names as $name) {
+            if ('' === $options[$name]) {
+                $options[$name] = true;
+            } elseif (null === $options[$name] && (true === $input->hasParameterOption(['--' . $name], true))) {
+                $options[$name] = true;
+            }
         }
 
         // options that cannot be overridden by YAML config file values
