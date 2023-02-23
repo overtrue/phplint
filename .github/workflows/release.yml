@@ -38,15 +38,6 @@ jobs:
         with:
           composer-options: "--prefer-dist"
 
-      -   # Build the current release changelog
-        name: Build Release Notes
-        uses: miniscruff/changie-action@v1
-        with:
-          version: latest
-          args: merge
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       -   # Build the current release with artifacts (php archive)
         name: Build Release Artifacts
         run: |
