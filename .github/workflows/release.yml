@@ -42,7 +42,7 @@ jobs:
         name: Build Release Artifacts
         run: |
           cd ${{ github.workspace }}
-          curl -Ls https://github.com/llaville/box-manifest/releases/latest/download/box-manifest.phar -o /usr/local/bin/box-manifest
+          curl -Ls https://github.com/llaville/box-manifest/releases/download/2.3.1/box-manifest.phar -o /usr/local/bin/box-manifest
           chmod +x /usr/local/bin/box-manifest
           /usr/local/bin/box-manifest compile 
 
