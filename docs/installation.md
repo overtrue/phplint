@@ -31,16 +31,29 @@ docker pull overtrue/phplint:latest
 
 ## Phive
 
-You can install `phplint` with [Phive][phive]
+You can install `phplint` globally with [Phive][phive]
 
 ```shell
 phive install overtrue/phplint --force-accept-unsigned
 ```
 
-To upgrade `phplint` use the following command:
+To upgrade global `phplint` use the following command:
 
 ```shell
 phive update overtrue/phplint --force-accept-unsigned
+```
+
+You can also install `phplint` locally to your project with [Phive][phive] and configuration file `.phive/phars.xml`
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<phive xmlns="https://phar.io/phive">
+    <phar name="overtrue/phplint" version="^9.0" copy="false" />
+</phive>
+```
+
+```shell
+phive install --force-accept-unsigned
 ```
 
 ## Composer
