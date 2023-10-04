@@ -41,6 +41,7 @@ use function in_array;
 use function json_encode;
 use function key;
 use function max;
+use function mb_strimwidth;
 use function min;
 use function realpath;
 use function rtrim;
