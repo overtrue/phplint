@@ -2,6 +2,13 @@ name: Docker
 
 on:
   workflow_dispatch:
+    # https://github.blog/changelog/2020-07-06-github-actions-manual-triggers-with-workflow_dispatch/
+    inputs:
+      tag:
+        description: "The Docker Image Tag"
+        required: false
+        default: "latest"
+        type: string
   push:
     branches:
       - 'main'
@@ -31,4 +38,4 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: overtrue/phplint:latest
+          tags: overtrue/phplint:${{ github.event.inputs.tag }}
