@@ -50,7 +50,7 @@ class OutputFormat implements EventSubscriberInterface, AfterCheckingInterface
 
     public function initFormat(ConsoleCommandEvent $event): void
     {
-        $command= $event->getCommand();
+        $command = $event->getCommand();
         if (!$command instanceof LintCommand) {
             // this extension must be only available for lint command
             return;
