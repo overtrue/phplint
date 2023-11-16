@@ -22,7 +22,7 @@ no-cache: true
 
 > If you want to ignore the configuration file directives, you should specify option `--no-configuration`.
 
-You can then find more advanced configuration settings in [the configuration documentation](configuration.md).
+You can then find more advanced configuration settings in [the configuration documentation](../configuration.md).
 For more information on which options are available, you can run: `phplint --help`
 
 ```text
