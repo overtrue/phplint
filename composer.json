@@ -24,13 +24,13 @@
     "php": "^8.0",
     "ext-json": "*",
     "ext-mbstring": "*",
-    "symfony/cache": "^5.4 || ^6.0",
-    "symfony/console": "^5.4 || ^6.0",
-    "symfony/event-dispatcher": "^5.4 || ^6.0",
-    "symfony/finder": "^5.4 || ^6.0",
-    "symfony/options-resolver": "^5.4 || ^6.0",
-    "symfony/process": "^5.4 || ^6.0",
-    "symfony/yaml": "^5.4 || ^6.0"
+    "symfony/cache": "^5.4 || ^6.0 || ^7.0",
+    "symfony/console": "^5.4 || ^6.0 || ^7.0",
+    "symfony/event-dispatcher": "^5.4 || ^6.0 || ^7.0",
+    "symfony/finder": "^5.4 || ^6.0 || ^7.0",
+    "symfony/options-resolver": "^5.4 || ^6.0 || ^7.0",
+    "symfony/process": "^5.4 || ^6.0 || ^7.0",
+    "symfony/yaml": "^5.4 || ^6.0 || ^7.0"
   },
   "require-dev": {
     "php-parallel-lint/php-console-highlighter": "^1.0",
