@@ -1,6 +1,7 @@
 composer.lock
 /vendor/
 .phpunit.cache/
+.phpunit.result.cache
 .phplint.cache/
 .idea
 .php-cs-fixer.cache
