@@ -29,7 +29,7 @@ jobs:
         name: Checkout code
         uses: actions/checkout@v4
 
-      -   # Setup PHP runtime for PHPUnit 9 tool support
+      -   # https://github.com/shivammathur/setup-php
         name: Setup PHP runtime for PHPUnit 9
         uses: shivammathur/setup-php@v2
         if: ${{ matrix.php-version == '8.0' }}
@@ -37,7 +37,7 @@ jobs:
           php-version: "${{ matrix.php-version }}"
           tools: phpunit:9.6
 
-      -   # Setup PHP runtime for PHPUnit 10 tool support
+      -   # https://github.com/shivammathur/setup-php
         name: Setup PHP runtime for PHPUnit 10
         if: ${{ matrix.php-version != '8.0' }}
         uses: shivammathur/setup-php@v2
@@ -45,17 +45,17 @@ jobs:
           php-version: "${{ matrix.php-version }}"
           tools: phpunit
 
-      -   # Install Composer dependencies
+      -   # https://github.com/ramsey/composer-install
         name: Install Composer dependencies
         uses: ramsey/composer-install@v2
         with:
           composer-options: "--prefer-dist --no-scripts"
 
-      -   # Run unit tests
+      -   # https://github.com/sebastianbergmann/phpunit/tree/9.6
         name: Unit tests with PHPUnit 9
         if: ${{ matrix.php-version == '8.0' }}
         run: phpunit --configuration ./phpunit-9.xml --testdox --do-not-cache-result
-      -
+      -   # https://github.com/sebastianbergmann/phpunit/tree/10.5
         name: Unit tests with PHPUnit 10
         if: ${{ matrix.php-version != '8.0' }}
-        run: phpunit --testdox --do-not-cache-result
+        run: phpunit --no-progress --testdox --do-not-cache-result
