@@ -21,33 +21,33 @@ jobs:
           - ubuntu-22.04
         php:
           - 8.1
+        tools:
+          - box:4.5  # available since https://github.com/shivammathur/setup-php/releases/tag/2.27.0
 
     steps:
-      -   # Git Checkout
+      -   # https://github.com/actions/checkout
         name: Checkout
         uses: actions/checkout@v3
 
-      -   # Setup PHP runtime
+      -   # https://github.com/shivammathur/setup-php
         name: Setup PHP runtime
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
+          tools: ${{ matrix.tools }}
 
-      -   # Install Composer dependencies
+      -   # https://github.com/box-project/box
+        name: Build Release Artifacts
+        run: | 
+          box compile
+
+      -   # https://github.com/ramsey/composer-install
         name: Install Composer dependencies
         uses: ramsey/composer-install@v2
         with:
           composer-options: "--prefer-dist"
 
-      -   # Build the current release with artifacts (php archive)
-        name: Build Release Artifacts
-        run: |
-          cd ${{ github.workspace }}
-          curl -Ls https://github.com/llaville/box-manifest/releases/download/2.3.1/box-manifest.phar -o /usr/local/bin/box-manifest
-          chmod +x /usr/local/bin/box-manifest
-          /usr/local/bin/box-manifest compile 
-
-      -   # Create a new Release (from a tag)
+      -   # https://github.com/softprops/action-gh-release
         name: Create Release from current tag
         if: github.ref_type == 'tag'
         uses: softprops/action-gh-release@v1

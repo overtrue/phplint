@@ -10,6 +10,5 @@
   ],
   "compactors": [
     "KevinGH\\Box\\Compactor\\PhpScoper"
-  ],
-  "metadata": "Bartlett\\BoxManifest\\Composer\\ManifestFactory::toHighlight"
+  ]
 }
