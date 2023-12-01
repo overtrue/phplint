@@ -46,6 +46,7 @@ jobs:
         name: Build Release Artifacts
         run: |
           box compile
+          box info ${{ github.workspace }}/bin/phplint.phar
 
       -   # https://github.com/softprops/action-gh-release
         name: Create Release from current tag
