@@ -25,9 +25,9 @@ jobs:
           - "8.2"
 
     steps:
-      -   # Git Checkout
+      -   # https://github.com/actions/checkout
         name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       -   # Setup PHP runtime for PHPUnit 9 tool support
         name: Setup PHP runtime for PHPUnit 9
