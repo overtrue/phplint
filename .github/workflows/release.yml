@@ -36,16 +36,16 @@ jobs:
           php-version: ${{ matrix.php }}
           tools: ${{ matrix.tools }}
 
-      -   # https://github.com/box-project/box
-        name: Build Release Artifacts
-        run: | 
-          box compile
-
       -   # https://github.com/ramsey/composer-install
         name: Install Composer dependencies
         uses: ramsey/composer-install@v2
         with:
           composer-options: "--prefer-dist"
+
+      -   # https://github.com/box-project/box
+        name: Build Release Artifacts
+        run: |
+          box compile
 
       -   # https://github.com/softprops/action-gh-release
         name: Create Release from current tag
