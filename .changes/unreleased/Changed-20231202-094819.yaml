@@ -1,0 +1,4 @@
+kind: Changed
+body: Replaces Symfony components constraint to new LTS (6.4), and drop support to
+  old one (5.4)
+time: 2023-12-02T09:48:19.920649128Z
