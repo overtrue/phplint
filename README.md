@@ -12,13 +12,16 @@
 
 | Version | Status                                    | Requirements   |
 |:--------|:------------------------------------------|:---------------|
-| **9.x** | **Active development**                    | **PHP >= 8.0** |
+| **9.1** | **Active development**                    | **PHP >= 8.1** |
+| 9.0     | Active support                            | PHP >= 8.0     |
 | 6.x     | Active support                            | PHP >= 8.2     |
 | 5.x     | Active support                            | PHP >= 8.1     |
-| 4.x     | Active support                            | PHP >= 8.0     |
+| 4.x     | End Of Life                               | PHP >= 8.0     |
 | 3.x     | End Of Life                               | PHP >= 7.4     |
 
 **NOTE** if you have an older version of PHP lower than 8.0, we recommend to use the latest version [3.4.0](https://github.com/overtrue/phplint/releases/tag/3.4.0)
+
+Version 9.1 is based on 9.0 code but did not support anymore PHP 8.0 that reached End-Of-Life.
 
 Major version 9.0 is a full code rewrites that have the same source code (`main` branch) for all PHP 8.x versions (`4.x`, `5.x` or `6.x`),
 with lot of improvement, full documentation, and full unit code tested. 
