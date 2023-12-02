@@ -21,7 +21,7 @@
     }
   ],
   "require": {
-    "php": "^8.0",
+    "php": "^8.1",
     "ext-json": "*",
     "ext-mbstring": "*",
     "symfony/cache": "^5.4 || ^6.0 || ^7.0",
@@ -55,7 +55,7 @@
       ]
     },
     "branch-alias": {
-      "dev-main": "9.0.x-dev"
+      "dev-main": "9.1.x-dev"
     }
   },
   "scripts": {

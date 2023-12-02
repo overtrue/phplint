@@ -20,7 +20,6 @@ jobs:
           - "ubuntu-22.04"
 
         php-version:
-          - "8.0"
           - "8.1"
           - "8.2"
           - "8.3"
@@ -31,16 +30,7 @@ jobs:
         uses: actions/checkout@v4
 
       -   # https://github.com/shivammathur/setup-php
-        name: Setup PHP runtime for PHPUnit 9
-        uses: shivammathur/setup-php@v2
-        if: ${{ matrix.php-version == '8.0' }}
-        with:
-          php-version: "${{ matrix.php-version }}"
-          tools: phpunit:9.6
-
-      -   # https://github.com/shivammathur/setup-php
         name: Setup PHP runtime for PHPUnit 10
-        if: ${{ matrix.php-version != '8.0' }}
         uses: shivammathur/setup-php@v2
         with:
           php-version: "${{ matrix.php-version }}"
@@ -52,11 +42,6 @@ jobs:
         with:
           composer-options: "--prefer-dist --no-scripts"
 
-      -   # https://github.com/sebastianbergmann/phpunit/tree/9.6
-        name: Unit tests with PHPUnit 9
-        if: ${{ matrix.php-version == '8.0' }}
-        run: phpunit --configuration ./phpunit-9.xml --testdox --do-not-cache-result
       -   # https://github.com/sebastianbergmann/phpunit/tree/10.5
         name: Unit tests with PHPUnit 10
-        if: ${{ matrix.php-version != '8.0' }}
         run: phpunit --no-progress --testdox --do-not-cache-result

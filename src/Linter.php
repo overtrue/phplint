@@ -49,7 +49,7 @@ final class Linter
     private array $options;
     private string $appLongVersion;
 
-    public function __construct(Resolver $configResolver, EventDispatcherInterface $dispatcher, string $appVersion = '9.0.x-dev')
+    public function __construct(Resolver $configResolver, EventDispatcherInterface $dispatcher, string $appVersion = '9.1.x-dev')
     {
         $this->configResolver = $configResolver;
         $this->dispatcher = $dispatcher;
