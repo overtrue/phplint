@@ -33,7 +33,7 @@ use function in_array;
 final class Application extends BaseApplication
 {
     public const NAME = 'phplint';
-    public const VERSION = '9.0.5';
+    public const VERSION = '9.0.6';
 
     public function __construct()
     {
@@ -47,7 +47,7 @@ final class Application extends BaseApplication
         return parent::run($input, $output);
     }
 
-    public function doRun(InputInterface $input, OutputInterface $output)
+    public function doRun(InputInterface $input, OutputInterface $output): int
     {
         if (true === $input->hasParameterOption(['--manifest'], true)) {
             $phar = new Phar($_SERVER['argv'][0]);
@@ -58,7 +58,7 @@ final class Application extends BaseApplication
         return parent::doRun($input, $output);
     }
 
-    protected function configureIO(InputInterface $input, OutputInterface $output)
+    protected function configureIO(InputInterface $input, OutputInterface $output): void
     {
         if (Phar::running()) {
             $inputDefinition = $this->getDefinition();

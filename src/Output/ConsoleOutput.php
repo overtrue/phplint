@@ -149,13 +149,13 @@ class ConsoleOutput extends BaseConsoleOutput implements OutputInterface
         return $progressBar;
     }
 
-    public function progressStart(int $max = 0)
+    public function progressStart(int $max = 0): void
     {
         $this->progressBar = $this->createProgressBar($max);
         $this->progressBar->start();
     }
 
-    public function progressAdvance(int $step = 1)
+    public function progressAdvance(int $step = 1): void
     {
         $this->progressBar?->advance($step);
     }
@@ -168,7 +168,7 @@ class ConsoleOutput extends BaseConsoleOutput implements OutputInterface
         unset($this->progressBar);
     }
 
-    public function progressMessage(string $message, string $name = 'message')
+    public function progressMessage(string $message, string $name = 'message'): void
     {
         $this->progressBar?->setMessage($message, $name);
     }
@@ -344,7 +344,7 @@ class ConsoleOutput extends BaseConsoleOutput implements OutputInterface
         $style->warning($message);
     }
 
-    public function newLine(int $count = 1)
+    public function newLine(int $count = 1): void
     {
         $this->write(str_repeat(PHP_EOL, $count));
     }
