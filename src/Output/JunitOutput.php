@@ -16,6 +16,7 @@ namespace Overtrue\PHPLint\Output;
 use DateTime;
 use DOMDocument;
 use DOMElement;
+use DOMException;
 use Symfony\Component\Console\Output\StreamOutput;
 
 use function count;
@@ -27,6 +28,9 @@ use function fclose;
  */
 final class JunitOutput extends StreamOutput implements OutputInterface
 {
+    /**
+     * @throws DOMException
+     */
     public function format(LinterOutput $results): void
     {
         $failures = $results->getFailures();

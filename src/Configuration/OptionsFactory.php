@@ -99,7 +99,7 @@ class OptionsFactory implements Options
     /**
      * Reused by unit tests suite ConsoleConfigTest
      */
-    public static function logNormalizer(SymfonyOptions $options, $value)
+    public static function logNormalizer(SymfonyOptions $options, $value): bool|string
     {
         $bool = static::toBool($value);
         if (is_bool($bool)) {
@@ -110,7 +110,6 @@ class OptionsFactory implements Options
 
     /**
      * Best strategy to convert string to boolean
-     *
      *
      * @link https://stackoverflow.com/questions/7336861/how-to-convert-string-to-boolean-php#answer-15075609
      * @link https://www.php.net/manual/en/function.filter-var

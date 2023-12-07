@@ -16,7 +16,6 @@ namespace Overtrue\PHPLint;
 use LogicException;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\TraceableAdapter;
@@ -42,9 +41,6 @@ final class Cache
     private AdapterInterface $adapter;
     private int $hits = 0;
     private int $misses = 0;
-
-    private AdapterInterface $cache;
-    private LoggerInterface $logger;
 
     public function __construct(string|object $cachePoolAdapter = null)
     {
