@@ -58,11 +58,9 @@ use const STR_PAD_LEFT;
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-class ConsoleOutput extends BaseConsoleOutput implements OutputInterface
+class ConsoleOutput extends BaseConsoleOutput implements ConsoleOutputInterface
 {
     public const MAX_LINE_LENGTH = 120;
-
-    public const NO_FILE_TO_LINT = 'Could not find any files to lint';
 
     private ?ProgressBar $progressBar = null;
 

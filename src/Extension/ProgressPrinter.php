@@ -13,14 +13,17 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Extension;
 
+use LogicException;
 use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\AfterLintFileInterface;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingInterface;
+use Overtrue\PHPLint\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use function get_class;
+use function sprintf;
 
 /**
  * @author Laurent Laville
@@ -31,7 +34,7 @@ final class ProgressPrinter implements
     BeforeCheckingInterface,
     AfterLintFileInterface
 {
-    private OutputInterface $output;
+    private ConsoleOutputInterface $output;
 
     private int $maxSteps = 0;
 
@@ -47,7 +50,19 @@ final class ProgressPrinter implements
      */
     public function initProgress(ConsoleCommandEvent $event): void
     {
-        $this->output = $event->getOutput();
+        $output = $event->getOutput();
+
+        if (!$output instanceof ConsoleOutputInterface) {
+            throw new LogicException(
+                sprintf(
+                    'Extension %s must implement %s',
+                    get_class($this),
+                    ConsoleOutputInterface::class
+                )
+            );
+        }
+
+        $this->output = $output;
     }
 
     public function beforeChecking(BeforeCheckingEvent $event): void
