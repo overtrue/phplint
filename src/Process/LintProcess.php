@@ -64,31 +64,35 @@ final class LintProcess extends Process
         $out = explode("\n", trim($output));
         $text = array_shift($out);
 
+        $match = [];
+        $message = '';
+
         if ($hasError) {
             $pattern = '/^(PHP\s+)?(Parse|Fatal) error:\s*(?:\w+ error,\s*)?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
 
             $matched = preg_match($pattern, $text, $match);
 
-            if (empty($message)) {
+            if (empty($matched)) {
                 $message = 'Unknown';
             }
         } else {
-            $message = '';
             $matched = false;
         }
         $errorString = $matched ? "{$match['error']} in line {$match['line']}" : $message;
         $errorLine = $matched ? (int) $match['line'] : 0;
+
+        $match = [];
+        $message = '';
 
         if ($hasWarning) {
             $pattern = '/^(PHP\s+)?(Warning|Deprecated|Notice):\s*?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
 
             $matched = preg_match($pattern, $text, $match);
 
-            if (empty($message)) {
+            if (empty($matched)) {
                 $message = 'Unknown';
             }
         } else {
-            $message = '';
             $matched = false;
         }
         $warningString = $matched ? "{$match['error']} in line {$match['line']}" : $message;

@@ -64,8 +64,7 @@ final class Linter
         } else {
             $adapter = new FilesystemAdapter('paths', 0, $configResolver->getOption(OptionDefinition::CACHE));
         }
-        //$logger = new Logger();
-        $this->cache = new Cache($adapter); //, $logger);
+        $this->cache = new Cache($adapter);
 
         $this->results = [
             'errors' => [],
