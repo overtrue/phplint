@@ -59,12 +59,12 @@ final class Cache
             $adapter = $cachePoolAdapter;
         }
 
-        if (!$adapter instanceof CacheItemPoolInterface) {
+        if (!$adapter instanceof AdapterInterface) {
             throw new LogicException(
                 sprintf(
                     'Invalid cache pool adapter. "%s" must implement %s.',
                     $cachePoolAdapter,
-                    CacheItemPoolInterface::class
+                    AdapterInterface::class
                 )
             );
         }

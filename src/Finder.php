@@ -62,6 +62,7 @@ final class Finder implements JsonSerializable
                 $finder->append($this->getFilesFromDir($path));
             } elseif (is_file($path)) {
                 $iterator = new ArrayIterator();
+                // @phpstan-ignore-next-line
                 $iterator[$path] = new SplFileInfo($path, $path, $path);
                 $finder->append($iterator);
             }
