@@ -30,7 +30,7 @@ $command = new LintCommand($dispatcher);
 $input = new ArrayInput($arguments, $command->getDefinition());
 $configResolver = new ConsoleOptionsResolver($input);
 
-$finder = (new Finder($configResolver)); //->getFiles();
+$finder = new Finder($configResolver);
 $linter = new Linter($configResolver, $dispatcher);
 $results = $linter->lintFiles($finder->getFiles());
 
