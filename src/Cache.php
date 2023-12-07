@@ -124,7 +124,10 @@ final class Cache
 
     public function getCalls(): array
     {
-        return $this->pool->getCalls();
+        if ($this->pool instanceof TraceableAdapter) {
+            return $this->pool->getCalls();
+        }
+        return [];
     }
 
     public function __debugInfo(): ?array
