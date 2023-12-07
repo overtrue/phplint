@@ -93,8 +93,11 @@ final class Cache
         return $this->pool->save($item);
     }
 
-    public function clear(): bool
+    public function clear(string $prefix = ''): bool
     {
+        if ($this->pool instanceof AdapterInterface) {
+            return $this->pool->clear($prefix);
+        }
         return $this->pool->clear();
     }
 

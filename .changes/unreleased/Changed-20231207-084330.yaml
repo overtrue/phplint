@@ -1,4 +1,0 @@
-kind: Changed
-body: Overtrue\PHPLint\Cache::clear follows Psr\Cache\CacheItemPoolInterface::clear
-  specification
-time: 2023-12-07T08:43:30.059264515Z
