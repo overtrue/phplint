@@ -93,9 +93,9 @@ final class Cache
         return $this->pool->save($item);
     }
 
-    public function clear(string $prefix = ''): bool
+    public function clear(): bool
     {
-        return $this->pool->clear($prefix);
+        return $this->pool->clear();
     }
 
     public function isHit(string $filename): bool
