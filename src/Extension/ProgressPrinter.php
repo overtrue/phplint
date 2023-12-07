@@ -22,6 +22,7 @@ use Overtrue\PHPLint\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
 use function get_class;
 use function sprintf;
 

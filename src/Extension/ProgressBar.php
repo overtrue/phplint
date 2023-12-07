@@ -64,7 +64,7 @@ final class ProgressBar implements
             throw new LogicException(
                 sprintf(
                     'Extension %s must implement %s',
-                     get_class($this),
+                    get_class($this),
                     ConsoleOutputInterface::class
                 )
             );
