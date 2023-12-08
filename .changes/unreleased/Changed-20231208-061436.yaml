@@ -1,0 +1,4 @@
+kind: Changed
+body: Reorganize dev tools under their own composer namespace (check-style begins
+  style:check, and fix-style begins style:fix)
+time: 2023-12-08T06:14:36.107069306Z

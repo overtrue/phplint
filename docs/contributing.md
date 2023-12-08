@@ -35,16 +35,16 @@ All dev tools (`php-cs-fixer`, `phpunit`) are under control of [bamarni/composer
 Coding standards are enforced using [PHP-CS-Fixer][php-cs-fixer]
 
 This project comes with a configuration file (located at `/.php-cs-fixer.dist.php` in the repository) 
-and an executable for PHP CS Fixer (located at `/tools/php-cs-fixer`) that you can use to (re)format your source code for compliance with this project's coding guidelines:
+and an executable for PHP CS Fixer (located at `vendor/bin/php-cs-fixer`) that you can use to (re)format your source code for compliance with this project's coding guidelines:
 
 ```shell
-composer fix-style
+composer style:fix
 ```
 
 If you only want to check source code standard violation, without apply changes, please use instead: 
 
 ```shell
-composer check-style
+composer style:check
 ```
 
 Here is a preview of what call look like:

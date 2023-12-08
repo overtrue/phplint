@@ -52,7 +52,7 @@
   "extra": {
     "hooks": {
       "pre-commit": [
-        "composer fix-style"
+        "composer style:fix"
       ]
     },
     "branch-alias": {
@@ -72,8 +72,8 @@
       "@composer bin all install --ansi"
     ],
     "cghooks": "vendor/bin/cghooks",
-    "check-style": "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --using-cache=no --verbose --ansi --diff --dry-run",
-    "fix-style": "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --using-cache=no --verbose --ansi",
+    "style:check": "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --using-cache=no --verbose --ansi --diff --dry-run",
+    "style:fix": "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --using-cache=no --verbose --ansi",
     "tests:unit": "vendor/bin/phpunit --testsuite=cache,configuration,finder",
     "tests:e2e": "vendor/bin/phpunit --testsuite=e2e",
     "tests:all": "vendor/bin/phpunit",
@@ -82,8 +82,8 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "scripts-descriptions": {
-    "check-style": "Run style checks (only dry run - no fixing!).",
-    "fix-style": "Run style checks and fix violations."
+    "style:check": "Run style checks (only dry run - no fixing!).",
+    "style:fix": "Run style checks and fix violations."
   },
   "bin": [
     "bin/phplint"
