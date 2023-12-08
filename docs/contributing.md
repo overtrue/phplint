@@ -26,9 +26,24 @@ composer update
 ```
 
 In an effort to maintain a homogeneous code base, we strongly encourage contributors to run 
-[PHP-CS-Fixer][php-cs-fixer] and [PHPUnit][phpunit] before submitting a Pull Request.
+[PHPStan][phpstan], [PHP-CS-Fixer][php-cs-fixer] and [PHPUnit][phpunit] before submitting a Pull Request.
 
-All dev tools (`php-cs-fixer`, `phpunit`) are under control of [bamarni/composer-bin-plugin][bamarni/composer-bin-plugin].
+All dev tools (`phpstan`, `php-cs-fixer`, `phpunit`) are under control of [bamarni/composer-bin-plugin][bamarni/composer-bin-plugin].
+
+## Static Code Analysis
+
+Static analysis of source code is provided using [PHPStan][phpstan]
+
+This project comes with a configuration file (located at `/phpstan.neon.dist` in the repository)
+and an executable for PHPStan (located at `vendor/bin/phpstan`) that you can use to analyse your source code for compliance with this project's coding guidelines:
+
+```shell
+composer code:check
+```
+
+Here is a preview of what call look like:
+
+![phpstan_run](./assets/phpstan_run.png)
 
 ## Coding standards
 
@@ -73,5 +88,6 @@ composer tests:all
 Execute all tests (unit and end-to-end)
 
 [bamarni/composer-bin-plugin]: https://github.com/bamarni/composer-bin-plugin
+[phpstan]: https://github.com/phpstan/phpstan
 [php-cs-fixer]: https://github.com/PHP-CS-Fixer/PHP-CS-Fixer
 [phpunit]: https://github.com/sebastianbergmann/phpunit

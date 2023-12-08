@@ -52,7 +52,8 @@
   "extra": {
     "hooks": {
       "pre-commit": [
-        "composer style:fix"
+        "composer style:fix",
+        "composer code:check"
       ]
     },
     "branch-alias": {
@@ -77,7 +78,8 @@
     "tests:unit": "vendor/bin/phpunit --testsuite=cache,configuration,finder",
     "tests:e2e": "vendor/bin/phpunit --testsuite=e2e",
     "tests:all": "vendor/bin/phpunit",
-    "lint:syntax": "./bin/phplint --ansi"
+    "lint:syntax": "./bin/phplint --ansi",
+    "code:check": "vendor/bin/phpstan analyse --configuration phpstan.neon.dist"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
@@ -87,7 +89,8 @@
     "tests:unit": "Run unit tests on following components: cache, configuration, finder",
     "tests:e2e": "Run end to end tests",
     "tests:all": "Run unit and end to end tests",
-    "lint:syntax": "Run PHPLint on it own source code"
+    "lint:syntax": "Run PHPLint on it own source code",
+    "code:check": "Run PHPStan code analysis on PHPLint source code"
   },
   "bin": [
     "bin/phplint"
