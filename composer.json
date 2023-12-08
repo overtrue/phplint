@@ -86,7 +86,8 @@
     "style:fix": "Run style checks and fix violations.",
     "tests:unit": "Run unit tests on following components: cache, configuration, finder",
     "tests:e2e": "Run end to end tests",
-    "tests:all": "Run unit and end to end tests"
+    "tests:all": "Run unit and end to end tests",
+    "lint:syntax": "Run PHPLint on it own source code"
   },
   "bin": [
     "bin/phplint"
