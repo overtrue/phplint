@@ -14,13 +14,15 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Process;
 
 use Closure;
+use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Process\Process;
 
-use function array_shift;
-use function explode;
+use function array_filter;
 use function preg_match;
+use function preg_split;
 use function str_contains;
-use function trim;
+
+use const PREG_SPLIT_NO_EMPTY;
 
 /**
  * @author Laurent Laville
@@ -28,6 +30,8 @@ use function trim;
  */
 final class LintProcess extends Process
 {
+    private array $files;
+
     private static Closure $createLintProcessItem;
 
     public function __construct(array $command, string $cwd = null, array $env = null, mixed $input = null, ?float $timeout = 60)
@@ -35,7 +39,7 @@ final class LintProcess extends Process
         parent::__construct($command, $cwd, $env, $input, $timeout);
 
         self::$createLintProcessItem = Closure::bind(
-            static function (bool $hasError, string $errorString, int $errorLine, bool $hasWarning, string $warningString, int $warningLine) {
+            static function (bool $hasError, string $errorString, int $errorLine, bool $hasWarning, string $warningString, int $warningLine, SplFileInfo $fileInfo) {
                 $item = new LintProcessItem();
                 $item->hasSyntaxError = $hasError;
                 $item->hasSyntaxWarning = $hasWarning;
@@ -49,6 +53,7 @@ final class LintProcess extends Process
                     $item->message = '';
                     $item->line = 0;
                 }
+                $item->fileInfo = $fileInfo;
                 return $item;
             },
             null,
@@ -56,48 +61,74 @@ final class LintProcess extends Process
         );
     }
 
-    public function getItem(string $output): LintProcessItem
+    public function setFiles(array $files): self
     {
-        $hasError = !str_contains($output, 'No syntax errors detected');
-        $hasWarning = (bool) preg_match('/(Warning:|Deprecated:|Notice:)/', $output);
+        $this->files = $files;
+        return $this;
+    }
 
-        $out = explode("\n", trim($output));
-        $text = array_shift($out);
+    public function getFiles(): array
+    {
+        return $this->files;
+    }
+
+    public function getItem(SplFileInfo $fileInfo): LintProcessItem
+    {
+        $filename = $fileInfo->getRelativePathname();
+
+        $messages = preg_split('/\n/', $this->getOutput(), -1, PREG_SPLIT_NO_EMPTY);
+
+        $filtered = array_filter($messages, function ($message) use ($filename) {
+            return str_contains($message, $filename);
+        });
+
+        $output = [$filename => ['hasError' => false, 'hasWarning' => false, 'message' => '']];
+
+        foreach ($filtered as $message) {
+            $hasError = false;
+            $hasWarning = (bool) preg_match('/(Warning:|Deprecated:|Notice:)/', $message);
+            if ($hasWarning) {
+                $output[$filename]['hasWarning'] = true;
+                $output[$filename]['message'] = $message;
+            } elseif (!$output[$filename]['hasError']) {
+                $hasError = !str_contains($message, 'No syntax errors detected');
+                $output[$filename]['hasError'] = $hasError;
+            }
+            if ($hasError) {
+                $output[$filename]['message'] = $message;
+                // stop on first error message returned by the PHP linter
+                break;
+            }
+        }
+
+        $message = $output[$filename]['message'];
+        $hasError = $output[$filename]['hasError'];
+        $hasWarning = $output[$filename]['hasWarning'];
 
         $match = [];
-        $message = '';
 
         if ($hasError) {
             $pattern = '/^(PHP\s+)?(Parse|Fatal) error:\s*(?:\w+ error,\s*)?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
 
-            $matched = preg_match($pattern, $text, $match);
-
-            if (empty($matched)) {
-                $message = 'Unknown';
-            }
+            $matched = preg_match($pattern, $message, $match);
         } else {
             $matched = false;
         }
-        $errorString = $matched ? "{$match['error']} in line {$match['line']}" : $message;
+        $errorString = $matched ? "{$match['error']} in line {$match['line']}" : '';
         $errorLine = $matched ? (int) $match['line'] : 0;
 
         $match = [];
-        $message = '';
 
         if ($hasWarning) {
             $pattern = '/^(PHP\s+)?(Warning|Deprecated|Notice):\s*?(?<error>.+?)\s+in\s+.+?\s*line\s+(?<line>\d+)/';
 
-            $matched = preg_match($pattern, $text, $match);
-
-            if (empty($matched)) {
-                $message = 'Unknown';
-            }
+            $matched = preg_match($pattern, $message, $match);
         } else {
             $matched = false;
         }
-        $warningString = $matched ? "{$match['error']} in line {$match['line']}" : $message;
+        $warningString = $matched ? "{$match['error']} in line {$match['line']}" : '';
         $warningLine = $matched ? (int) $match['line'] : 0;
 
-        return (self::$createLintProcessItem)($hasError, $errorString, $errorLine, $hasWarning, $warningString, $warningLine);
+        return (self::$createLintProcessItem)($hasError, $errorString, $errorLine, $hasWarning, $warningString, $warningLine, $fileInfo);
     }
 }

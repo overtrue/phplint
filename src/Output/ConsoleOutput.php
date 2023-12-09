@@ -108,7 +108,7 @@ class ConsoleOutput extends BaseConsoleOutput implements ConsoleOutputInterface
             return;
         }
 
-        $this->consumeBlock($context['time_usage'], $context['memory_usage'], $context['cache_usage']);
+        $this->consumeBlock($context['time_usage'], $context['memory_usage'], $context['cache_usage'], $context['process_count']);
 
         if ($errCount > 0) {
             $this->errorBlock($context['files_count'], $errCount);
@@ -171,7 +171,7 @@ class ConsoleOutput extends BaseConsoleOutput implements ConsoleOutputInterface
         $this->progressBar?->setMessage($message, $name);
     }
 
-    public function progressPrinterAdvance(int $maxSteps, string $status, SplFileInfo $fileInfo): void
+    public function progressPrinterAdvance(int $maxSteps, string $status, SplFileInfo $fileInfo, int $step = 1): void
     {
         static $i = 1;
 
@@ -216,7 +216,8 @@ class ConsoleOutput extends BaseConsoleOutput implements ConsoleOutputInterface
                 $this->newLine();
             }
         }
-        ++$i;
+
+        $i += $step;
     }
 
     public function headerBlock(string $appVersion, string $configFile): void
@@ -298,13 +299,15 @@ class ConsoleOutput extends BaseConsoleOutput implements ConsoleOutputInterface
         $this->newLine();
     }
 
-    public function consumeBlock(string $timeUsage, string $memUsage, string $cacheUsage): void
+    public function consumeBlock(string $timeUsage, string $memUsage, string $cacheUsage, int $processCount): void
     {
         $message = sprintf(
-            'Time: <info>%s</info>, Memory: <info>%s</info>, Cache: <info>%s</info>',
+            'Time: <info>%s</info>, Memory: <info>%s</info>, Cache: <info>%s</info>, Process%s: <info>%s</info>',
             $timeUsage,
             $memUsage,
-            $cacheUsage
+            $cacheUsage,
+            $processCount > 1 ? 'es' : '',
+            $processCount
         );
         $this->newLine();
         $this->writeln($message);

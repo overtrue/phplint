@@ -39,13 +39,13 @@ interface ConsoleOutputInterface extends OutputInterface
 
     public function progressMessage(string $message, string $name = 'message'): void;
 
-    public function progressPrinterAdvance(int $maxSteps, string $status, SplFileInfo $fileInfo): void;
+    public function progressPrinterAdvance(int $maxSteps, string $status, SplFileInfo $fileInfo, int $step = 1): void;
 
     public function headerBlock(string $appVersion, string $configFile): void;
 
     public function configBlock(array $options): void;
 
-    public function consumeBlock(string $timeUsage, string $memUsage, string $cacheUsage): void;
+    public function consumeBlock(string $timeUsage, string $memUsage, string $cacheUsage, int $processCount): void;
 
     public function errorBlock(int $fileCount, int $errorCount): void;
 

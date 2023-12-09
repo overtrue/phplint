@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint;
 
+use Fiber;
 use LogicException;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
@@ -27,11 +28,15 @@ use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
+use Throwable;
 
+use function array_push;
+use function array_slice;
 use function count;
 use function md5_file;
 use function microtime;
-use function trim;
+use function phpversion;
+use function version_compare;
 
 /**
  * @author Overtrue
@@ -74,6 +79,9 @@ final class Linter
         ];
     }
 
+    /**
+     * @throws Throwable
+     */
     public function lintFiles(Finder $finder, ?float $startTime = null): LinterOutput
     {
         if (null === $startTime) {
@@ -93,46 +101,58 @@ final class Linter
             )
         );
 
+        $processCount = 0;
+
         if ($fileCount > 0) {
-            $pid = 0;
-            $processRunning = [];
             $iterator = $finder->getIterator();
 
-            while ($iterator->valid() || !empty($processRunning)) {
-                for ($i = count($processRunning); $iterator->valid() && $i < $this->processLimit; ++$i) {
+            while ($iterator->valid()) {
+                for ($i = 0; $iterator->valid() && $i < $this->processLimit; ++$i) {
                     $fileInfo = $iterator->current();
                     $this->dispatcher->dispatch(new BeforeLintFileEvent($this, ['file' => $fileInfo]));
                     $filename = $fileInfo->getRealPath();
 
                     if ($this->cache->isHit($filename)) {
-                        $this->results['hits'][] = $filename;
+                        $this->results['hits'][] = $fileInfo;
                     } else {
-                        $lintProcess = $this->createLintProcess($filename);
-                        $lintProcess->start();
-
-                        ++$pid;
-                        $processRunning[$pid] = [
-                            'process' => $lintProcess,
-                            'file' => $fileInfo,
-                        ];
-                        $this->results['misses'][] = $filename;
+                        $this->results['misses'][] = $fileInfo;
                     }
 
                     $iterator->next();
                 }
 
-                foreach ($processRunning as $pid => $item) {
-                    /** @var LintProcess $lintProcess */
-                    $lintProcess = $item['process'];
+                if (version_compare(phpversion(), '8.3', 'ge')) {
+                    $offset = -1 * $i;
+                } else {
+                    $offset = -1;
+                }
+                $files = array_slice($this->results['misses'], $offset, null, false);
+
+                $fiber = new Fiber(function (array $files): void {
+                    $lintProcess = $this->createLintProcess($files);
+                    $lintProcess->start();
+                    Fiber::suspend($lintProcess);
+                });
+
+                $lintProcess = $fiber->start($files);
+                ++$processCount;
+
+                while (!$fiber->isTerminated()) {
                     if ($lintProcess->isRunning()) {
+                        // php lint process is still running in background, wait until it's finished
                         continue;
                     }
-                    /** @var SplFileInfo $fileInfo */
-                    $fileInfo = $item['file'];
-                    $status = $this->processFile($fileInfo, $lintProcess);
 
-                    unset($processRunning[$pid]);
-                    $this->dispatcher->dispatch(new AfterLintFileEvent($this, ['file' => $fileInfo, 'status' => $status]));
+                    // checks status of all files linked at end of the php lint process
+                    foreach ($files as $fileInfo) {
+                        $status = $this->processFile($fileInfo, $lintProcess);
+
+                        $this->dispatcher->dispatch(
+                            new AfterLintFileEvent($this, ['file' => $fileInfo, 'status' => $status])
+                        );
+                    }
+
+                    $fiber->resume();
                 }
             }
 
@@ -141,7 +161,7 @@ final class Linter
             $results = [];
         }
         $finalResults = new LinterOutput($results, $finder);
-        $finalResults->setContext($this->configResolver, $startTime);
+        $finalResults->setContext($this->configResolver, $startTime, $processCount);
 
         $this->dispatcher->dispatch(new AfterCheckingEvent($this, ['results' => $finalResults]));
 
@@ -152,8 +172,7 @@ final class Linter
     {
         $filename = $fileInfo->getRealPath();
 
-        $output = trim($lintProcess->getOutput());
-        $item = $lintProcess->getItem($output);
+        $item = $lintProcess->getItem($fileInfo);
 
         if ($item->hasSyntaxError()) {
             $status = 'error';
@@ -170,7 +189,7 @@ final class Linter
         if ($status !== 'ok') {
             $this->results[$status . 's'][$filename] = [
                 'absolute_file' => $filename,
-                'relative_file' => $fileInfo->getRelativePathname(),
+                'relative_file' => $item->getFileInfo()->getRelativePathname(),
                 'error' => $item->getMessage(),
                 'line' => $item->getLine(),
             ];
@@ -179,7 +198,7 @@ final class Linter
         return $status;
     }
 
-    private function createLintProcess(string $filename): LintProcess
+    private function createLintProcess(array $files): LintProcess
     {
         $command = [
             PHP_SAPI == 'cli' ? PHP_BINARY : PHP_BINDIR . '/php',
@@ -192,8 +211,8 @@ final class Linter
         }
 
         $command[] = '-l';
-        $command[] = $filename;
+        array_push($command, ...$files);
 
-        return new LintProcess($command);
+        return (new LintProcess($command))->setFiles($files);
     }
 }

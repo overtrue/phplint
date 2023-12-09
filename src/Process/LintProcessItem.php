@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Process;
 
+use Symfony\Component\Finder\SplFileInfo;
+
 /**
  * @author Laurent Laville
  * @since Release 9.0.0
@@ -23,6 +25,8 @@ final class LintProcessItem
     protected bool $hasSyntaxWarning = false;
     protected string $message;
     protected int $line;
+    protected SplFileInfo $fileInfo;
+
     public function hasSyntaxError(): bool
     {
         return $this->hasSyntaxError;
@@ -40,5 +44,10 @@ final class LintProcessItem
     public function getLine(): int
     {
         return $this->line;
+    }
+
+    public function getFileInfo(): SplFileInfo
+    {
+        return $this->fileInfo;
     }
 }
