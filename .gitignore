@@ -5,3 +5,4 @@ composer.lock
 .idea
 .php-cs-fixer.cache
 /vendor-bin/**/vendor
+.phpbench/

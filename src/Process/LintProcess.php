@@ -14,6 +14,9 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Process;
 
 use Closure;
+use Overtrue\PHPLint\Helper\ProcessHelper;
+use Symfony\Component\Console\Helper\HelperInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Process\Process;
 
@@ -31,12 +34,19 @@ use const PREG_SPLIT_NO_EMPTY;
 final class LintProcess extends Process
 {
     private array $files;
-
+    private ?HelperInterface $helper;
+    private ?OutputInterface $output;
     private static Closure $createLintProcessItem;
 
-    public function __construct(array $command, string $cwd = null, array $env = null, mixed $input = null, ?float $timeout = 60)
-    {
+    public function __construct(
+        array $command,
+        string $cwd = null,
+        array $env = null,
+        mixed $input = null,
+        ?float $timeout = 60
+    ) {
         parent::__construct($command, $cwd, $env, $input, $timeout);
+        $this->helper = null;
 
         self::$createLintProcessItem = Closure::bind(
             static function (bool $hasError, string $errorString, int $errorLine, bool $hasWarning, string $warningString, int $warningLine, SplFileInfo $fileInfo) {
@@ -59,6 +69,22 @@ final class LintProcess extends Process
             null,
             LintProcessItem::class
         );
+    }
+
+    public function setHelper(?HelperInterface $helper): self
+    {
+        if ($helper instanceof ProcessHelper) {
+            $this->helper = $helper;
+        } else {
+            $this->helper = null;
+        }
+        return $this;
+    }
+
+    public function setOutput(?OutputInterface $output): self
+    {
+        $this->output = $output;
+        return $this;
     }
 
     public function setFiles(array $files): self
@@ -130,5 +156,22 @@ final class LintProcess extends Process
         $warningLine = $matched ? (int) $match['line'] : 0;
 
         return (self::$createLintProcessItem)($hasError, $errorString, $errorLine, $hasWarning, $warningString, $warningLine, $fileInfo);
+    }
+
+    public function begin(callable $callback = null, array $env = []): void
+    {
+        if ($this->helper instanceof ProcessHelper) {
+            $this->helper->start($this->output, $this, $callback, $env);
+            return;
+        }
+        parent::start($callback, $env);
+    }
+
+    public function isFinished(): bool
+    {
+        if ($this->helper instanceof ProcessHelper) {
+            return $this->helper->isTerminated($this->output, $this);
+        }
+        return parent::isTerminated();
     }
 }

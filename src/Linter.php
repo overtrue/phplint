@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint;
 
-use Fiber;
 use LogicException;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
@@ -21,17 +20,21 @@ use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeLintFileEvent;
+use Overtrue\PHPLint\Helper\ProcessHelper;
+use Overtrue\PHPLint\Output\ConsoleOutputInterface;
 use Overtrue\PHPLint\Output\LinterOutput;
 use Overtrue\PHPLint\Process\LintProcess;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\NullAdapter;
+use Symfony\Component\Console\Helper\HelperSet;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 use Throwable;
 
+use function array_chunk;
 use function array_push;
-use function array_slice;
 use function count;
 use function md5_file;
 use function microtime;
@@ -47,6 +50,8 @@ final class Linter
     private Resolver $configResolver;
     private EventDispatcherInterface $dispatcher;
     private Cache $cache;
+    private ?HelperSet $helperSet;
+    private ?OutputInterface $output;
     private array $results;
     private int $processLimit;
     private string $memoryLimit;
@@ -54,8 +59,13 @@ final class Linter
     private array $options;
     private string $appLongVersion;
 
-    public function __construct(Resolver $configResolver, EventDispatcherInterface $dispatcher, string $appVersion = '9.1.x-dev')
-    {
+    public function __construct(
+        Resolver $configResolver,
+        EventDispatcherInterface $dispatcher,
+        string $appVersion = '9.1.x-dev',
+        HelperSet $helperSet = null,
+        OutputInterface $output = null
+    ) {
         $this->configResolver = $configResolver;
         $this->dispatcher = $dispatcher;
         $this->appLongVersion = $appVersion;
@@ -77,6 +87,9 @@ final class Linter
             'hits' => [],
             'misses' => [],
         ];
+
+        $this->helperSet = $helperSet;
+        $this->output = $output;
     }
 
     /**
@@ -94,6 +107,15 @@ final class Linter
             $fileCount = 0;
         }
 
+        if ($this->output instanceof ConsoleOutputInterface) {
+            $configFile = $this->options['no-configuration']
+                ? ''
+                : $this->options['configuration']
+            ;
+            $this->output->headerBlock($this->appLongVersion, $configFile);
+            $this->output->configBlock($this->options);
+        }
+
         $this->dispatcher->dispatch(
             new BeforeCheckingEvent(
                 $this,
@@ -102,70 +124,90 @@ final class Linter
         );
 
         $processCount = 0;
-
         if ($fileCount > 0) {
-            $iterator = $finder->getIterator();
-
-            while ($iterator->valid()) {
-                for ($i = 0; $iterator->valid() && $i < $this->processLimit; ++$i) {
-                    $fileInfo = $iterator->current();
-                    $this->dispatcher->dispatch(new BeforeLintFileEvent($this, ['file' => $fileInfo]));
-                    $filename = $fileInfo->getRealPath();
-
-                    if ($this->cache->isHit($filename)) {
-                        $this->results['hits'][] = $fileInfo;
-                    } else {
-                        $this->results['misses'][] = $fileInfo;
-                    }
-
-                    $iterator->next();
-                }
-
-                if (version_compare(phpversion(), '8.3', 'ge')) {
-                    $offset = -1 * $i;
-                } else {
-                    $offset = -1;
-                }
-                $files = array_slice($this->results['misses'], $offset, null, false);
-
-                $fiber = new Fiber(function (array $files): void {
-                    $lintProcess = $this->createLintProcess($files);
-                    $lintProcess->start();
-                    Fiber::suspend($lintProcess);
-                });
-
-                $lintProcess = $fiber->start($files);
-                ++$processCount;
-
-                while (!$fiber->isTerminated()) {
-                    if ($lintProcess->isRunning()) {
-                        // php lint process is still running in background, wait until it's finished
-                        continue;
-                    }
-
-                    // checks status of all files linked at end of the php lint process
-                    foreach ($files as $fileInfo) {
-                        $status = $this->processFile($fileInfo, $lintProcess);
-
-                        $this->dispatcher->dispatch(
-                            new AfterLintFileEvent($this, ['file' => $fileInfo, 'status' => $status])
-                        );
-                    }
-
-                    $fiber->resume();
-                }
-            }
-
-            $results = $this->results;
+            $results = $this->doLint($finder, $processCount);
         } else {
             $results = [];
         }
+
         $finalResults = new LinterOutput($results, $finder);
         $finalResults->setContext($this->configResolver, $startTime, $processCount);
 
         $this->dispatcher->dispatch(new AfterCheckingEvent($this, ['results' => $finalResults]));
 
         return $finalResults;
+    }
+
+    private function doLint(Finder $finder, int &$processCount): array
+    {
+        $iterator = $finder->getIterator();
+
+        while ($iterator->valid()) {
+            $fileInfo = $iterator->current();
+
+            if ($this->cache->isHit($fileInfo->getRealPath())) {
+                $this->results['hits'][] = $fileInfo;
+            } else {
+                $this->results['misses'][] = $fileInfo;
+            }
+
+            $iterator->next();
+        }
+        unset($iterator);
+
+        if (version_compare(phpversion(), '8.3', 'ge')) {
+            $chunkSize = $this->processLimit;
+        } else {
+            $chunkSize = 1;
+        }
+        $chunks = array_chunk($this->results['misses'], $chunkSize);
+        $processRunning = [];
+
+        /** @var ?ProcessHelper $helper */
+        $helper = $this->helperSet?->has('process') ? $this->helperSet?->get('process') : null;  // @phpstan-ignore-line
+
+        foreach ($chunks as $loop => $files) {
+            $lintProcess = $this->createLintProcess($files)
+                ->setHelper($helper)
+                ->setOutput($this->output)
+            ;
+            $lintProcess->begin();
+
+            // enqueue lint process as much as authorized by --jobs option (number of paralleled jobs to run)
+            ++$processCount;
+            $processRunning[$processCount] = $lintProcess;
+
+            while (count($processRunning) >= $this->processLimit || (!empty($processRunning) && $loop == count($chunks) - 1)) {
+                $this->checkProcessRunning($processRunning);
+            }
+        }
+
+        return $this->results;
+    }
+
+    /**
+     * @param array<int, LintProcess> $processRunning
+     */
+    private function checkProcessRunning(array &$processRunning): void
+    {
+        foreach ($processRunning as $pid => $lintProcess) {
+            if (!$lintProcess->isFinished()) {
+                // php lint process is still running in background, wait until it's finished
+                continue;
+            }
+            unset($processRunning[$pid]);
+
+            // checks status of all files linked at end of the php lint process
+            foreach ($lintProcess->getFiles() as $fileInfo) {
+                $this->dispatcher->dispatch(new BeforeLintFileEvent($this, ['file' => $fileInfo]));
+
+                $status = $this->processFile($fileInfo, $lintProcess);
+
+                $this->dispatcher->dispatch(
+                    new AfterLintFileEvent($this, ['file' => $fileInfo, 'status' => $status])
+                );
+            }
+        }
     }
 
     private function processFile(SplFileInfo $fileInfo, LintProcess $lintProcess): string

@@ -98,7 +98,7 @@ final class FinderTest extends TestCase
         $arguments = [
             OptionDefinition::PATH => [$basePath],
             '--no-configuration' => true,
-            '--' . OptionDefinition::EXCLUDE => ['fixtures'],
+            '--' . OptionDefinition::EXCLUDE => ['fixtures', 'Benchmark'],
             '--' . OptionDefinition::EXTENSIONS => ['php']
         ];
         $definition = (new LintCommand($dispatcher))->getDefinition();

@@ -75,13 +75,6 @@ final class ProgressBar implements
 
     public function beforeChecking(BeforeCheckingEvent $event): void
     {
-        $configFile = $event->getArgument('options')['no-configuration']
-            ? ''
-            : $event->getArgument('options')['configuration']
-        ;
-
-        $this->output->headerBlock($event->getArgument('appVersion'), $configFile);
-        $this->output->configBlock($event->getArgument('options'));
         $this->output->progressStart($event->getArgument('fileCount'));
     }
 

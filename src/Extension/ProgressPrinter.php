@@ -21,6 +21,7 @@ use Overtrue\PHPLint\Event\BeforeCheckingInterface;
 use Overtrue\PHPLint\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use function get_class;
@@ -38,6 +39,7 @@ final class ProgressPrinter implements
     private ConsoleOutputInterface $output;
 
     private int $maxSteps = 0;
+    private bool $hasProcessHelper;
 
     public static function getSubscribedEvents(): array
     {
@@ -51,6 +53,8 @@ final class ProgressPrinter implements
      */
     public function initProgress(ConsoleCommandEvent $event): void
     {
+        $this->hasProcessHelper = $event->getCommand()->getHelperSet()->has('process');
+
         $output = $event->getOutput();
 
         if (!$output instanceof ConsoleOutputInterface) {
@@ -68,19 +72,17 @@ final class ProgressPrinter implements
 
     public function beforeChecking(BeforeCheckingEvent $event): void
     {
-        $configFile = $event->getArgument('options')['no-configuration']
-            ? ''
-            : $event->getArgument('options')['configuration']
-        ;
-
-        $this->output->headerBlock($event->getArgument('appVersion'), $configFile);
-        $this->output->configBlock($event->getArgument('options'));
-
         $this->maxSteps = $event->getArgument('fileCount');
     }
 
     public function afterLintFile(AfterLintFileEvent $event): void
     {
+        // @phpstan-ignore-next-line
+        if ($this->hasProcessHelper && $this->output->getVerbosity() == OutputInterface::VERBOSITY_VERY_VERBOSE) {
+            // ProgressPrinter extension make some noise that break output when ProcessHelper is active in verbose level 2
+            return;
+        }
+
         $this->output->progressPrinterAdvance(
             $this->maxSteps,
             $event->getArgument('status'),

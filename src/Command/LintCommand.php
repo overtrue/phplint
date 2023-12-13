@@ -20,7 +20,6 @@ use Overtrue\PHPLint\Console\Application;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
 use Overtrue\PHPLint\Output\LinterOutput;
-use PHP_Parallel_Lint\PhpConsoleColor\InvalidStyleException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -89,7 +88,7 @@ final class LintCommand extends Command
         $finder = (new Finder($configResolver))->getFiles();
         /** @var Application $app */
         $app = $this->getApplication();
-        $linter = new Linter($configResolver, $this->dispatcher, $app->getLongVersion());
+        $linter = new Linter($configResolver, $this->dispatcher, $app->getLongVersion(), $this->getHelperSet(), $output);
         $this->results = $linter->lintFiles($finder, $startTime);
 
         $data = $this->results->getFailures();

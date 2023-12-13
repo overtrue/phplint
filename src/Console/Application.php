@@ -13,12 +13,15 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Console;
 
+use Overtrue\PHPLint\Helper\DebugFormatterHelper;
+use Overtrue\PHPLint\Helper\ProcessHelper;
 use Overtrue\PHPLint\Output\ConsoleOutput;
 use Phar;
 use Symfony\Component\Console\Application as BaseApplication;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\HelpCommand;
 use Symfony\Component\Console\Command\ListCommand;
+use Symfony\Component\Console\Helper\FormatterHelper;
+use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -47,17 +50,6 @@ final class Application extends BaseApplication
         return parent::run($input, $output);
     }
 
-    public function doRun(InputInterface $input, OutputInterface $output): int
-    {
-        if (true === $input->hasParameterOption(['--manifest'], true)) {
-            $phar = new Phar($_SERVER['argv'][0]);
-            $manifest = $phar->getMetadata();
-            $output->writeln($manifest);
-            return Command::SUCCESS;
-        }
-        return parent::doRun($input, $output);
-    }
-
     protected function configureIO(InputInterface $input, OutputInterface $output): void
     {
         if (Phar::running()) {
@@ -77,6 +69,15 @@ final class Application extends BaseApplication
     protected function getDefaultCommands(): array
     {
         return [new HelpCommand(), new ListCommand()];
+    }
+
+    protected function getDefaultHelperSet(): HelperSet
+    {
+        return new HelperSet([
+            new FormatterHelper(),
+            new DebugFormatterHelper(),
+            new ProcessHelper(),
+        ]);
     }
 
     protected function getCommandName(InputInterface $input): ?string
