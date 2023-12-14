@@ -90,17 +90,6 @@ class ConsoleOutput extends BaseConsoleOutput implements ConsoleOutputInterface
         $data = $results->getFailures();
         $context = $results->getContext();
 
-        if (true === $this->configResolver->getOption("no-progress")) {
-            if (true === $this->configResolver->getOption("no-configuration")) {
-                $configFile = '';
-            } else {
-                $configFile = $this->configResolver->getOption(OptionDefinition::CONFIGURATION);
-            }
-
-            $this->headerBlock($this->appVersion, $configFile);
-            $this->configBlock($this->configResolver->getOptions());
-        }
-
         $errCount = count($data);
 
         if ($context['files_count'] === 0) {
