@@ -16,6 +16,7 @@ namespace Overtrue\PHPLint\Helper;
 use Symfony\Component\Console\Helper\Helper;
 
 use function array_walk;
+use function count;
 use function implode;
 use function preg_split;
 
@@ -45,7 +46,7 @@ final class DebugFormatterHelper extends Helper
      */
     public function start(string $id, string $message, string $prefix = 'RUN'): string
     {
-        $this->started[$id] = ['border' => ++$this->count % \count(self::COLORS)];
+        $this->started[$id] = ['border' => ++$this->count % count(self::COLORS)];
 
         return sprintf("%s<bg=blue;fg=white> %s </> <fg=blue>%s</>\n", $this->getBorder($id), $prefix, $message);
     }
@@ -58,7 +59,7 @@ final class DebugFormatterHelper extends Helper
         $messages = preg_split('/\n/', $buffer, -1, PREG_SPLIT_NO_EMPTY);
 
         if ($error) {
-            $prefixed = sprintf('%s<bg=red;fg=white> %s </> ', $this->getBorder($id), $prefix);
+            $prefixed = sprintf('%s<bg=red;fg=white> %s </> ', $this->getBorder($id), $errorPrefix);
 
             if (!isset($this->started[$id]['err'])) {
                 $this->started[$id]['err'] = true;
