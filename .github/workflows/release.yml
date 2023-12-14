@@ -20,9 +20,9 @@ jobs:
         os:
           - ubuntu-22.04
         php:
-          - 8.1
+          - 8.2
         tools:
-          - box:4.5  # available since https://github.com/shivammathur/setup-php/releases/tag/2.27.0
+          - box:4.6  # available since https://github.com/shivammathur/setup-php/releases/tag/2.27.0
 
     steps:
       -   # https://github.com/actions/checkout
