@@ -24,6 +24,7 @@ use Overtrue\PHPLint\Helper\ProcessHelper;
 use Overtrue\PHPLint\Output\ConsoleOutputInterface;
 use Overtrue\PHPLint\Output\LinterOutput;
 use Overtrue\PHPLint\Process\LintProcess;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Console\Helper\HelperSet;
@@ -138,6 +139,9 @@ final class Linter
         return $finalResults;
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     private function doLint(Finder $finder, int &$processCount): array
     {
         $iterator = $finder->getIterator();
@@ -187,6 +191,7 @@ final class Linter
 
     /**
      * @param array<int, LintProcess> $processRunning
+     * @throws InvalidArgumentException
      */
     private function checkProcessRunning(array &$processRunning): void
     {
@@ -210,6 +215,9 @@ final class Linter
         }
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     private function processFile(SplFileInfo $fileInfo, LintProcess $lintProcess): string
     {
         $filename = $fileInfo->getRealPath();
