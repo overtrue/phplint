@@ -40,6 +40,15 @@ Here is preview of what it will look like :
 
 ![Progress Bar Verbose Max](../assets/progress-bar-verbose-max.png)
 
+## ProgressIndicator
+
+This extension is useful to let users know that the `phplint` command isn't stalled.
+Learn more with the official Symfony documentation on [ProgressIndicator Console Helper][symfony-progressindicator]
+
+![Progress Indicator Running](../assets/progress-indicator-running.png)
+
+![Progress Indicator Finished](../assets/progress-indicator-finished.png)
+
 ## Example(s)
 
 Default progress printer widget:
@@ -62,6 +71,16 @@ $extensions = [new ProgressBar()];
 
 ```
 
+Default progress indicator widget:
+
+```php 
+<?php
+use Overtrue\PHPLint\Extension\ProgressIndicator;
+
+$extensions = [new ProgressIndicator()];
+
+```
+
 Default outputs (console, JSON and Junit formats):
 
 ```php 
@@ -80,3 +99,4 @@ $extensions = [
 
 [bartlett/umlwriter]: https://github.com/llaville/umlwriter
 [symfony-progressbar]: https://symfony.com/doc/current/components/console/helpers/progressbar.html
+[symfony-progressindicator]: https://symfony.com/doc/current/components/console/helpers/progressindicator.html

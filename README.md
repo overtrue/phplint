@@ -24,7 +24,7 @@
 Version 9.1 is based on 9.0 code but did not support anymore PHP 8.0 that reached End-Of-Life.
 
 Major version 9.0 is a full code rewrites that have the same source code (`main` branch) for all PHP 8.x versions (`4.x`, `5.x` or `6.x`),
-with lot of improvement, full documentation, and full unit code tested. 
+with a lot of improvement, full documentation, and full unit code tested. 
 
 
 ## Table of Contents
