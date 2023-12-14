@@ -6,3 +6,4 @@ composer.lock
 .php-cs-fixer.cache
 /vendor-bin/**/vendor
 .phpbench/
+site/
