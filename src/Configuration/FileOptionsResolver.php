@@ -33,7 +33,7 @@ class FileOptionsResolver extends AbstractOptionsResolver
 
         try {
             $configuration = Yaml::parseFile($configFile);
-        } catch (ParseException $e) {
+        } catch (ParseException) {
             // If the file could not be read or the YAML is not valid
             $configuration = [];
         }
