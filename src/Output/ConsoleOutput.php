@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Output;
 
-use Overtrue\PHPLint\Configuration\OptionDefinition;
-use Overtrue\PHPLint\Configuration\Resolver;
 use PHP_Parallel_Lint\PhpConsoleColor\ConsoleColor;
 use PHP_Parallel_Lint\PhpConsoleColor\InvalidStyleException;
 use PHP_Parallel_Lint\PhpConsoleHighlighter\Highlighter;
@@ -65,24 +63,12 @@ class ConsoleOutput extends BaseConsoleOutput implements ConsoleOutputInterface
     private ?ProgressBar $progressBar = null;
 
     private int $lineLength;
-    private Resolver $configResolver;
-    private string $appVersion;
 
     public function __construct(int $verbosity = parent::VERBOSITY_NORMAL, bool $decorated = null, OutputFormatterInterface $formatter = null)
     {
         parent::__construct($verbosity, $decorated, $formatter);
         $width = (new Terminal())->getWidth() ?: self::MAX_LINE_LENGTH;
         $this->lineLength = min($width - (int) (DIRECTORY_SEPARATOR === '\\'), self::MAX_LINE_LENGTH);
-    }
-
-    public function setApplicationVersion(string $version): void
-    {
-        $this->appVersion = $version;
-    }
-
-    public function setConfigResolver(Resolver $resolver): void
-    {
-        $this->configResolver = $resolver;
     }
 
     public function format(LinterOutput $results): void

@@ -74,12 +74,7 @@ class OutputFormat implements EventSubscriberInterface, AfterCheckingInterface
             }
         }
 
-        /** @var ConsoleOutput $consoleOutput */
-        $consoleOutput = $event->getOutput();
-        $consoleOutput->setApplicationVersion($event->getCommand()->getApplication()->getLongVersion());
-        $consoleOutput->setConfigResolver($configResolver);
-
-        $this->handlers[] = $consoleOutput;
+        $this->handlers[] = $event->getOutput();
     }
 
     public function afterChecking(AfterCheckingEvent $event): void

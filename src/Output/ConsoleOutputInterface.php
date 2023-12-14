@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Output;
 
-use Overtrue\PHPLint\Configuration\Resolver;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -24,10 +23,6 @@ use Symfony\Component\Finder\SplFileInfo;
 interface ConsoleOutputInterface extends OutputInterface
 {
     public const NO_FILE_TO_LINT = 'Could not find any files to lint';
-
-    public function setApplicationVersion(string $version): void;
-
-    public function setConfigResolver(Resolver $resolver): void;
 
     public function createProgressBar($max = 0): ProgressBar;
 
