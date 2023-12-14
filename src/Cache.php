@@ -16,6 +16,7 @@ namespace Overtrue\PHPLint;
 use LogicException;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\TraceableAdapter;
@@ -78,11 +79,17 @@ final class Cache
         return new TraceableAdapter($adapter);
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function hasItem(string $filename): bool
     {
         return $this->pool->hasItem($this->getKey($filename));
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function getItem(string $filename): CacheItemInterface
     {
         return $this->pool->getItem($this->getKey($filename));
@@ -101,6 +108,9 @@ final class Cache
         return $this->pool->clear();
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function isHit(string $filename): bool
     {
         // Try to fetch item from cache
