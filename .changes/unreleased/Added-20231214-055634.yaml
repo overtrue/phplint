@@ -1,0 +1,3 @@
+kind: Added
+body: Introduces a new extension to show progression (ProgressIndicator). Uses --progress=indicator
+time: 2023-12-14T05:56:34.231275002Z
