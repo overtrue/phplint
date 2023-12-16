@@ -1,4 +1,5 @@
 {
+  "compression": "GZ",
   "chmod": "0700",
   "banner": [
     "This file is part of the overtrue/phplint package",
