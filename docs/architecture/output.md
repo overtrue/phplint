@@ -35,39 +35,39 @@ This handler is responsible to print PHPLint results on JSON private format. For
             "relative_file": "fixtures/syntax_error.php",
             "error": "unexpected end of file in line 4",
             "line": 4
+        },
+        "/path/to/tests/fixtures/php-8.2_syntax.php": {
+            "absolute_file": "/path/to/tests/fixtures/php-8.2_syntax.php",
+            "relative_file": "fixtures/php-8.2_syntax.php",
+            "error": "False can not be used as a standalone type in line 12",
+            "line": 12
         }
     },
     "time_usage": "< 1 sec",
     "memory_usage": "6.0 MiB",
-    "cache_usage": "0 hit, 8 misses",
-    "files_count": 8,
+    "cache_usage": "0 hit, 12 misses",
+    "process_count": 12,
+    "files_count": 12,
     "options_used": {
-        "command": "lint",
         "path": [
             "tests/"
         ],
+        "configuration": ".phplint.yml",
+        "no-configuration": true,
         "exclude": [],
         "extensions": [
             "php"
         ],
         "jobs": 5,
-        "configuration": ".phplint.yml",
-        "no-configuration": true,
         "no-cache": true,
         "cache": ".phplint.cache",
         "no-progress": false,
-        "progress": "bar",
+        "progress": "printer",
         "log-json": "php://stdout",
-        "log-junit": null,
+        "log-junit": false,
         "warning": false,
         "memory-limit": "512M",
-        "ignore-exit-code": false,
-        "help": false,
-        "quiet": false,
-        "verbose": true,
-        "version": false,
-        "ansi": null,
-        "no-interaction": false
+        "ignore-exit-code": false
     }
 }
 ```
@@ -79,9 +79,10 @@ This handler is responsible to print PHPLint results on Junit XML format. For ex
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="PHP Linter" timestamp="2023-02-06T13:12:22+0000" time="&lt; 1 sec" tests="1" errors="1">
-    <testcase errors="1" failures="0">
-      <error type="Error" message="unexpected end of file in line 4">/path/to/tests/fixtures/syntax_error.php
+  <testsuite name="PHP Linter" timestamp="2023-12-16T08:21:51+0000" time="&lt; 1 sec" tests="1" errors="2">
+    <testcase errors="2" failures="0">
+      <error type="Error" message="unexpected end of file in line 4">/path/to/fixtures/syntax_error.php
+      <error type="Error" message="False can not be used as a standalone type in line 12">/path/to/fixtures/php-8.2_syntax.php
     </testcase>
   </testsuite>
 </testsuites>
