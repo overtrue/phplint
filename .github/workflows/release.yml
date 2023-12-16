@@ -37,6 +37,11 @@ jobs:
           coverage: "none"
           tools: ${{ matrix.tools }}
 
+      -   # https://getcomposer.org/doc/06-config.md#platform
+        name: Setup Composer Platform
+        run: |
+          composer config platform.php 8.1
+
       -   # https://github.com/ramsey/composer-install
         name: Install Composer dependencies
         uses: ramsey/composer-install@v2
