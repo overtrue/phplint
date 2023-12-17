@@ -1,4 +1,0 @@
-kind: Removed
-body: '"setApplicationVersion" and "setConfigResolver" methods were removed from "Overtrue\PHPLint\Output\ConsoleOutputInterface"
-  as there are no more required'
-time: 2023-12-14T09:58:10.457061253Z

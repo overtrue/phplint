@@ -1,3 +1,0 @@
-kind: Changed
-body: Dockerfile bump default PHP version from 8.2 to 8.3 (to produce better perf)
-time: 2023-12-16T06:55:43.932148624Z

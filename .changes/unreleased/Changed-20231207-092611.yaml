@@ -1,4 +1,0 @@
-kind: Changed
-body: ProgressPrinter and ProgressBar extensions must now implement the Overtrue\PHPLint\Output\ConsoleOutputInterface
-  specification
-time: 2023-12-07T09:26:11.396636982Z
