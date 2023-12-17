@@ -7,7 +7,7 @@ Quick start, if your PHP runtime set up is not important for you.
 ```yaml
 jobs:
   php-lint:
-    name: Linting with overtrue/phplint
+    name: "PHPLint v9"
 
     runs-on: ubuntu-latest
 
@@ -22,12 +22,12 @@ jobs:
 
 ## Use case 2
 
-Otherwise, if you want to detect specific PHP features used by scripts depending of your PHP runtime, then use this case.
+Otherwise, if you want to detect specific PHP features used by scripts depending on your PHP runtime, then use this case.
 
 ```yaml
 jobs:
   php-lint:
-    name: "Linting with overtrue/phplint"
+    name: "PHPLint v9"
 
     runs-on: "${{ matrix.operating-system }}"
 
@@ -42,13 +42,14 @@ jobs:
         php-version:
           - "8.1"
           - "8.2"
+          - "8.3"
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          repository: overtrue/phplint
+          repository: sebastianbergmann/phpunit
 
       - name: Setup PHP runtime
         uses: shivammathur/setup-php@v2
@@ -60,7 +61,7 @@ jobs:
         run: |
           curl -Ls https://github.com/overtrue/phplint/releases/latest/download/phplint.phar -o /usr/local/bin/phplint
           chmod +x /usr/local/bin/phplint
-          /usr/local/bin/phplint -vvv --no-cache
+          /usr/local/bin/phplint --no-cache --no-progress -v
 ```
 
 Follows steps: 
