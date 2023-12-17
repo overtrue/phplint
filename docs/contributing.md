@@ -13,7 +13,7 @@ To avoid such check, use the `git push --no-verify` syntax.
 
 This check is only for maintainers of this project to prepare a new release and forgot to bump `Application::VERSION`.
 
-![pre-push git hook](../assets/pre-push-hook.png)
+![pre-push git hook](./assets/pre-push-hook.png)
 
 ## Workflow for Pull Requests
 
