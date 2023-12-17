@@ -1,27 +1,9 @@
 #!/usr/bin/env php
 <?php
 
-if (PHP_SAPI !== 'cli' && PHP_MAJOR_VERSION < 8) {
-    echo 'Warning: phplint should be invoked via the CLI minimum version of PHP 8.0, not the '.PHP_SAPI.' SAPI'.PHP_EOL;
-}
+gc_disable(); // performance boost
 
-$loaded = false;
-
-foreach (array(__DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php') as $file) {
-    if (file_exists($file)) {
-        require $file;
-        $loaded = true;
-        break;
-    }
-}
-
-if (!$loaded) {
-    die(
-        'You need to set up the project dependencies using the following commands:' . PHP_EOL .
-        'wget https://getcomposer.org/composer.phar' . PHP_EOL .
-        'php composer.phar install' . PHP_EOL
-    );
-}
+require_once dirname(__DIR__) . '/config/bootstrap.php';
 
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
