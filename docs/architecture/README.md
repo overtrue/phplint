@@ -10,6 +10,10 @@ To learn how PHPLint is able to improve speed analysis on multiple runs.
 
 To learn how PHPLint options can customize your checks.
 
+## [Console](console.md#console)
+
+To learn more about PHPLint CLI application.
+
 ## [Event-Driven](event.md#event-driven-architecture-on-wikipediaeda) 
 
 To learn more about how to extend PHPLint features.
@@ -21,6 +25,10 @@ To learn more about how to extend PHPLint features.
 ## [Finder](finder.md#finder) 
 
 To learn how PHPLint find files to check.
+
+## [Helper](helper.md#helper)
+
+To learn how PHPLint is able to debug asynchronous processes run in background.
 
 ## [Output](output.md#output-formats) 
 
