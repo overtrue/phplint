@@ -1,6 +1,5 @@
 # syntax=docker/dockerfile:1.4
-ARG PHP_VERSION=8.2
-ARG PHPLINT_VERSION=9.0.7
+ARG PHP_VERSION=8.0
 
 FROM php:${PHP_VERSION}-cli-alpine
 
@@ -17,7 +16,7 @@ USER appuser
 # Install Composer v2 then overtrue/phplint package
 COPY --from=composer/composer:2-bin /composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER 1
-RUN composer global require --no-progress overtrue/phplint ${PHPLINT_VERSION}
+RUN composer global require --no-progress overtrue/phplint 9.0.x-dev
 
 # Following recommendation at https://docs.github.com/en/actions/creating-actions/dockerfile-support-for-github-actions#workdir
 
