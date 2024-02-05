@@ -1,4 +1,0 @@
-kind: Fixed
-body: '[#200](https://github.com/overtrue/phplint/issues/200) : Unable to create file
-  /github/home/.composer/config.json in Github Action'
-time: 2024-02-05T06:30:44.244619077Z
