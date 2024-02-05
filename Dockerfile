@@ -16,7 +16,7 @@ USER appuser
 # Install Composer v2 then overtrue/phplint package
 COPY --from=composer/composer:2-bin /composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER 1
-RUN composer global require --no-progress overtrue/phplint ^9.1
+RUN composer global require --no-progress overtrue/phplint 9.1.x-dev
 
 # Following recommendation at https://docs.github.com/en/actions/creating-actions/dockerfile-support-for-github-actions#workdir
 
