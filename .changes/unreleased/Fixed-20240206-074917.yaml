@@ -1,4 +1,0 @@
-kind: Fixed
-body: '[#203](https://github.com/overtrue/phplint/issues/203) : Uncaught Error: Failed
-  opening required "phar:///usr/local/bin/phplint/config/bootstrap.php"'
-time: 2024-02-06T07:49:17.431082697Z

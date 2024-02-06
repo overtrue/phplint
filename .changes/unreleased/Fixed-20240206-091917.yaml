@@ -1,4 +1,0 @@
-kind: Fixed
-body: '[#202](https://github.com/overtrue/phplint/issues/202) : composer config vendor-dir
-  is ignored'
-time: 2024-02-06T09:19:17.199971457Z

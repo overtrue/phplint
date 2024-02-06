@@ -1,4 +1,0 @@
-kind: Fixed
-body: '[#204](https://github.com/overtrue/phplint/issues/204) : PHPLint 9.1.1 is unable
-  to interpret correctly command arguments/options'
-time: 2024-02-06T08:24:14.292622556Z
