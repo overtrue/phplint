@@ -11,5 +11,7 @@
   ],
   "compactors": [
     "KevinGH\\Box\\Compactor\\PhpScoper"
-  ]
+  ],
+  "force-autodiscovery": true,
+  "files": ["config/bootstrap.php"]
 }
