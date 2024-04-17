@@ -57,7 +57,7 @@ jobs:
       -   # https://github.com/softprops/action-gh-release
         name: Create Release from current tag
         if: github.ref_type == 'tag'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:  # https://github.com/softprops/action-gh-release#-customizing
           prerelease: false
           draft: true
