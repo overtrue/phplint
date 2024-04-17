@@ -36,7 +36,7 @@
   "require-dev": {
     "php-parallel-lint/php-console-highlighter": "^1.0",
     "brainmaestro/composer-git-hooks": "^2.8.5 || 3.0.0-alpha.1",
-    "jetbrains/phpstorm-stubs": "^2021.3 || ^2022.3 || ^2023.3 || ^2024.0",
+    "jetbrains/phpstorm-stubs": "^2021.3 || ^2022.3 || ^2023.3 || ^2024.1",
     "bamarni/composer-bin-plugin": "^1.4"
   },
   "autoload": {
