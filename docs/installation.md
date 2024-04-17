@@ -12,7 +12,7 @@
 |:--------|:------------------------------------------|:---------------|
 | **9.x** | **Active development**                    | **PHP >= 8.0** |
 | 6.x     | Active support                            | PHP >= 8.2     |
-| 5.x     | Active support                            | PHP >= 8.1     |
+| 5.x     | End Of Life                               | PHP >= 8.1     |
 | 4.x     | End Of Life                               | PHP >= 8.0     |
 | 3.x     | End Of Life                               | PHP >= 7.4     |
 
