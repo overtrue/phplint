@@ -50,6 +50,11 @@
     }
   },
   "extra": {
+    "bamarni-bin": {
+      "bin-links": true,
+      "target-directory": "vendor-bin",
+      "forward-command": true
+    },
     "hooks": {
       "pre-commit": [
         "composer style:fix",
@@ -60,7 +65,7 @@
       ]
     },
     "branch-alias": {
-      "dev-main": "9.1.x-dev"
+      "dev-main": "9.2.x-dev"
     }
   },
   "scripts": {
