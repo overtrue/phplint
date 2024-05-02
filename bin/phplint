@@ -3,45 +3,5 @@
 
 gc_disable(); // performance boost
 
-require_once dirname(__DIR__) . '/config/bootstrap.php';
-
-use Overtrue\PHPLint\Command\LintCommand;
-use Overtrue\PHPLint\Configuration\OptionDefinition;
-use Overtrue\PHPLint\Console\Application;
-use Overtrue\PHPLint\Event\EventDispatcher;
-use Overtrue\PHPLint\Extension\OutputFormat;
-use Overtrue\PHPLint\Extension\ProgressBar;
-use Overtrue\PHPLint\Extension\ProgressIndicator;
-use Overtrue\PHPLint\Extension\ProgressPrinter;
-use Symfony\Component\Console\Input\ArgvInput;
-
-$input = new ArgvInput();
-
-$extensions = [new ProgressPrinter()];
-
-if (true === $input->hasParameterOption(['--no-progress'], true)) {
-    $extensions = [];
-} elseif (true === $input->hasParameterOption(['--progress'], true)) {
-    $progress = $input->getParameterOption('--progress', 'printer');
-
-    $extensions = match($progress) {
-        'bar' => [new ProgressBar()],
-        'indicator' => [new ProgressIndicator()],
-        default => [new ProgressPrinter()],
-    };
-}
-
-$extensions[] = new OutputFormat([
-    OptionDefinition::LOG_JSON,
-    OptionDefinition::LOG_JUNIT,
-]);
-
-$dispatcher = new EventDispatcher($extensions);
-
-$defaultCommand = new LintCommand($dispatcher);
-
-$application = new Application();
-$application->add($defaultCommand);
-$application->setDefaultCommand($defaultCommand->getName());
-$application->setDispatcher($dispatcher);
-$application->run($input);
+require_once dirname(__DIR__) . '/autoload.php';
+require_once dirname(__DIR__) . '/phplint.php';
