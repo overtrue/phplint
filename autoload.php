@@ -21,13 +21,45 @@ if (class_exists(__NAMESPACE__ . '\Autoload', false) === false) {
          */
         private static ?\Composer\Autoload\ClassLoader $composerAutoloader = null;
 
-        public static function load(string $class)
+        public static function load(string $class): void
         {
             if (self::$composerAutoloader === null) {
-                self::$composerAutoloader = require __DIR__ . '/vendor/autoload.php';
+                self::$composerAutoloader = require self::getAutoloadFile();
             }
 
             self::$composerAutoloader->loadClass($class);
+        }
+
+        private static function getAutoloadFile(): string
+        {
+            if (isset($_composer_autoload_path)) {
+                $possibleAutoloadPaths = [
+                    dirname($_composer_autoload_path)
+                ];
+                $autoloader = basename($_composer_autoload_path);
+            } else {
+                $possibleAutoloadPaths = [
+                    // local dev repository
+                    __DIR__,
+                    // dependency
+                    dirname(__DIR__, 3),
+                ];
+                $autoloader = 'vendor/autoload.php';
+            }
+
+            foreach ($possibleAutoloadPaths as $possibleAutoloadPath) {
+                if (file_exists($possibleAutoloadPath . DIRECTORY_SEPARATOR . $autoloader)) {
+                    return $possibleAutoloadPath . DIRECTORY_SEPARATOR . $autoloader;
+                }
+            }
+
+            throw new \RuntimeException(
+                sprintf(
+                    'Unable to find "%s" in "%s" paths.',
+                    $autoloader,
+                    implode('", "', $possibleAutoloadPaths)
+                )
+            );
         }
     }
 
