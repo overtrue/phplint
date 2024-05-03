@@ -15,4 +15,3 @@ function dataSource(): Generator
         yield $class;
     }
 }
-
