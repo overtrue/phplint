@@ -30,7 +30,7 @@ if (true === $input->hasParameterOption(['--no-progress'], true)) {
 } elseif (true === $input->hasParameterOption(['--progress'], true)) {
     $progress = $input->getParameterOption('--progress', 'printer');
 
-    $extensions = match($progress) {
+    $extensions = match ($progress) {
         'bar' => [new ProgressBar()],
         'indicator' => [new ProgressIndicator()],
         default => [new ProgressPrinter()],
