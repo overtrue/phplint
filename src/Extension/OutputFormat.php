@@ -28,7 +28,9 @@ use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+use RuntimeException;
 use function class_exists;
+use function sprintf;
 
 /**
  * @author Laurent Laville
@@ -77,12 +79,17 @@ class OutputFormat implements EventSubscriberInterface, AfterCheckingInterface
                     $sarifHandler = new SarifOutput(fopen($filename, 'w'));
 
                     $sarifConverterClass = $configResolver->getOption(OptionDefinition::SARIF_CONVERTER);
-                    if (class_exists($sarifConverterClass)) {
-                        $converter = new $sarifConverterClass();
-                        if ($converter instanceof ConverterInterface) {
-                            $sarifHandler->setConverter($converter);
-                        }
+                    if (!class_exists($sarifConverterClass)) {
+                        throw new RuntimeException(
+                            sprintf('Could not load sarif converter class: "%s"', $sarifConverterClass)
+                        );
                     }
+
+                    $converter = new $sarifConverterClass();
+                    if ($converter instanceof ConverterInterface) {
+                        $sarifHandler->setConverter($converter);
+                    }
+
                     $this->handlers[] = $sarifHandler;
                 }
             }

@@ -40,12 +40,8 @@ if (true === $input->hasParameterOption(['--no-progress'], true)) {
 $formats = [
     OptionDefinition::LOG_JSON,
     OptionDefinition::LOG_JUNIT,
+    OptionDefinition::LOG_SARIF,
 ];
-
-if (\class_exists('\Bartlett\Sarif\SarifLog')) {
-    // only when Composer development dependencies were installed too!
-    $formats[] = OptionDefinition::LOG_SARIF;
-}
 
 $extensions[] = new OutputFormat($formats);
 
