@@ -10,6 +10,7 @@
 1. [Memory limit][memory-limit]
 1. [JSON output][log-json]
 1. [XML output][log-xml]
+1. [SARIF output][log-sarif]
 1. [Exit Code][no-files-exit-code]
 
 The `phplint` command relies on a configuration file for loading settings. 
@@ -136,6 +137,86 @@ For example:
 </testsuites>
 ```
 
+## SARIF output (`log-sarif`)
+
+The `log-sarif` (`null`|`string` default `null` to print results to standard output) setting allow to write results in a SARIF JSON format.
+For example:
+
+```json
+{
+    "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+    "version": "2.1.0",
+    "runs": [
+        {
+            "tool": {
+                "driver": {
+                    "name": "PHPLint",
+                    "shortDescription": {
+                        "text": "Syntax check only (lint) of PHP files"
+                    },
+                    "fullDescription": {
+                        "text": "PHPLint is a tool that can speed up linting of php files by running several lint processes at once."
+                    },
+                    "semanticVersion": "9.2.0.0",
+                    "informationUri": "https://github.com/overtrue/phplint"
+                }
+            },
+            "invocations": [
+                {
+                    "executionSuccessful": true,
+                    "workingDirectory": {
+                        "uri": "file:///shared/backups/github/phplint/"
+                    }
+                }
+            ],
+            "originalUriBaseIds": {
+                "WORKINGDIR": {
+                    "uri": "file:///shared/backups/github/phplint/"
+                }
+            },
+            "results": [
+                {
+                    "message": {
+                        "text": "unexpected end of file in line 4"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "tests/fixtures/syntax_error.php",
+                                    "uriBaseId": "WORKINGDIR"
+                                },
+                                "region": {
+                                    "startLine": 4
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "message": {
+                        "text": " declare(encoding=...) ignored because Zend multibyte feature is turned off by settings in line 12"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "tests/fixtures/syntax_warning.php",
+                                    "uriBaseId": "WORKINGDIR"
+                                },
+                                "region": {
+                                    "startLine": 12
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+```
+
 ## Exit Code (`no-files-exit-code`) 
 
 The `no-files-exit-code` (`bool` default `false`) setting allow to exit `phplint` command with failure (status code `1`) when no files processed.
@@ -150,5 +231,6 @@ By default, `phplint` exit with success (status code `0`)
 [no-cache]: #no-caching-no-cache
 [memory-limit]: #memory-limit-memory-limit
 [log-json]: #json-output-log-json
-[log-xml]: #xml-output-log-xml
+[log-xml]: #xml-output-log-junit
+[log-sarif]: #sarif-output-log-sarif
 [no-files-exit-code]: #exit-code-no-files-exit-code

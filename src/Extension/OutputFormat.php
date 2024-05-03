@@ -29,6 +29,7 @@ use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use RuntimeException;
+
 use function class_exists;
 use function sprintf;
 
