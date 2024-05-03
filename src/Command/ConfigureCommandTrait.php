@@ -100,6 +100,18 @@ trait ConfigureCommandTrait
                 'Log scan results in JUnit XML format to file (<comment>default: ' . OptionDefinition::DEFAULT_STANDARD_OUTPUT_LABEL . '</comment>)'
             )
             ->addOption(
+                'log-sarif',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Log scan results in SARIF format to file (<comment>default: ' . OptionDefinition::DEFAULT_STANDARD_OUTPUT_LABEL . '</comment>)'
+            )
+            ->addOption(
+                'sarif-converter',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'SARIF class converter (<comment>default: ' . OptionDefinition::DEFAULT_SARIF_CONVERTER_CLASS . '</comment>)'
+            )
+            ->addOption(
                 'warning',
                 'w',
                 InputOption::VALUE_NONE,

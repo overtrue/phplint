@@ -47,6 +47,8 @@ abstract class AbstractOptionsResolver implements Resolver
             OptionDefinition::NO_PROGRESS => false,
             OptionDefinition::LOG_JSON => false,
             OptionDefinition::LOG_JUNIT => false,
+            OptionDefinition::LOG_SARIF => false,
+            OptionDefinition::SARIF_CONVERTER => '\Bartlett\Sarif\Converter\PhpLintConverter',
             OptionDefinition::WARNING => false,
             OptionDefinition::OPTION_MEMORY_LIMIT => ini_get('memory_limit'),
             OptionDefinition::IGNORE_EXIT_CODE => false,
@@ -82,6 +84,7 @@ abstract class AbstractOptionsResolver implements Resolver
         $names = [
             OptionDefinition::LOG_JSON,
             OptionDefinition::LOG_JUNIT,
+            OptionDefinition::LOG_SARIF,
         ];
         foreach ($names as $name) {
             if ('' === $options[$name]) {
@@ -111,6 +114,8 @@ abstract class AbstractOptionsResolver implements Resolver
             OptionDefinition::PROGRESS,
             OptionDefinition::LOG_JSON,
             OptionDefinition::LOG_JUNIT,
+            OptionDefinition::LOG_SARIF,
+            OptionDefinition::SARIF_CONVERTER,
             OptionDefinition::WARNING,
             OptionDefinition::OPTION_MEMORY_LIMIT,
             OptionDefinition::IGNORE_EXIT_CODE,

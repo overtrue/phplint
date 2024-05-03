@@ -60,6 +60,8 @@ class OptionsFactory implements Options
             OptionDefinition::NO_PROGRESS => 'bool',
             OptionDefinition::LOG_JSON => ['bool', 'string'],
             OptionDefinition::LOG_JUNIT => ['bool', 'string'],
+            OptionDefinition::LOG_SARIF => ['bool', 'string'],
+            OptionDefinition::SARIF_CONVERTER => ['null', 'string'],
             OptionDefinition::WARNING => 'bool',
             OptionDefinition::OPTION_MEMORY_LIMIT => ['int', 'string'],
             OptionDefinition::IGNORE_EXIT_CODE => 'bool',
@@ -90,6 +92,7 @@ class OptionsFactory implements Options
         $names = [
             OptionDefinition::LOG_JSON,
             OptionDefinition::LOG_JUNIT,
+            OptionDefinition::LOG_SARIF,
         ];
         foreach ($names as $name) {
             $resolver->setNormalizer($name, Closure::fromCallable([$this, 'logNormalizer']));

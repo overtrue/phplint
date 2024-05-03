@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Extension;
 
+use Bartlett\Sarif\Converter\ConverterInterface;
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
@@ -20,12 +21,14 @@ use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\AfterCheckingInterface;
 use Overtrue\PHPLint\Output\ChainOutput;
-use Overtrue\PHPLint\Output\ConsoleOutput;
 use Overtrue\PHPLint\Output\JsonOutput;
 use Overtrue\PHPLint\Output\JunitOutput;
+use Overtrue\PHPLint\Output\SarifOutput;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+use function class_exists;
 
 /**
  * @author Laurent Laville
@@ -70,6 +73,17 @@ class OutputFormat implements EventSubscriberInterface, AfterCheckingInterface
                     $this->handlers[] = new JsonOutput(fopen($filename, 'w'));
                 } elseif (OptionDefinition::LOG_JUNIT == $name) {
                     $this->handlers[] = new JunitOutput(fopen($filename, 'w'));
+                } elseif (OptionDefinition::LOG_SARIF == $name) {
+                    $sarifHandler = new SarifOutput(fopen($filename, 'w'));
+
+                    $sarifConverterClass = $configResolver->getOption(OptionDefinition::SARIF_CONVERTER);
+                    if (class_exists($sarifConverterClass)) {
+                        $converter = new $sarifConverterClass();
+                        if ($converter instanceof ConverterInterface) {
+                            $sarifHandler->setConverter($converter);
+                        }
+                    }
+                    $this->handlers[] = $sarifHandler;
                 }
             }
         }
