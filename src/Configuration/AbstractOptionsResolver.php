@@ -48,7 +48,7 @@ abstract class AbstractOptionsResolver implements Resolver
             OptionDefinition::LOG_JSON => false,
             OptionDefinition::LOG_JUNIT => false,
             OptionDefinition::LOG_SARIF => false,
-            OptionDefinition::SARIF_CONVERTER => '\Bartlett\Sarif\Converter\PhpLintConverter',
+            OptionDefinition::SARIF_CONVERTER => OptionDefinition::DEFAULT_SARIF_CONVERTER_CLASS,
             OptionDefinition::WARNING => false,
             OptionDefinition::OPTION_MEMORY_LIMIT => ini_get('memory_limit'),
             OptionDefinition::IGNORE_EXIT_CODE => false,
