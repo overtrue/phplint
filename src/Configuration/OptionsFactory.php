@@ -65,6 +65,7 @@ class OptionsFactory implements Options
             OptionDefinition::WARNING => 'bool',
             OptionDefinition::OPTION_MEMORY_LIMIT => ['int', 'string'],
             OptionDefinition::IGNORE_EXIT_CODE => 'bool',
+            OptionDefinition::BOOTSTRAP => ['null', 'string'],
 
             'ansi' => ['null', 'bool'],
             'help' => ['null', 'bool'],

@@ -36,6 +36,7 @@ interface OptionDefinition
     public const LOG_SARIF = 'log-sarif';
     public const SARIF_CONVERTER = 'sarif-converter';
     public const IGNORE_EXIT_CODE = 'ignore-exit-code';
+    public const BOOTSTRAP = 'bootstrap';
 
     public const DEFAULT_JOBS = 5;
     public const DEFAULT_PATH = '.';
@@ -47,4 +48,5 @@ interface OptionDefinition
     public const DEFAULT_STANDARD_OUTPUT_LABEL = 'standard output';
     public const DEFAULT_STANDARD_OUTPUT = 'php://stdout';
     public const DEFAULT_SARIF_CONVERTER_CLASS = 'Bartlett\Sarif\Converter\PhpLintConverter';
+    public const DEFAULT_BOOTSTRAP = '';
 }

@@ -52,6 +52,7 @@ abstract class AbstractOptionsResolver implements Resolver
             OptionDefinition::WARNING => false,
             OptionDefinition::OPTION_MEMORY_LIMIT => ini_get('memory_limit'),
             OptionDefinition::IGNORE_EXIT_CODE => false,
+            OptionDefinition::BOOTSTRAP => OptionDefinition::DEFAULT_BOOTSTRAP,
         ];
 
         $defaults = [];
@@ -119,6 +120,7 @@ abstract class AbstractOptionsResolver implements Resolver
             OptionDefinition::WARNING,
             OptionDefinition::OPTION_MEMORY_LIMIT,
             OptionDefinition::IGNORE_EXIT_CODE,
+            OptionDefinition::BOOTSTRAP,
         ];
         foreach ($names as $name) {
             $defaults[$name] = $options[$name] ?? $configuration[$name] ?? $optionDefaults[$name];

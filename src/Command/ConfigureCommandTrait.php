@@ -128,6 +128,12 @@ trait ConfigureCommandTrait
                 null,
                 InputOption::VALUE_NONE,
                 'Ignore exit codes so there are no "failure" exit code even when no files processed'
+            )
+            ->addOption(
+                'bootstrap',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'A PHP script that is included before the linter run'
             );
     }
 }
