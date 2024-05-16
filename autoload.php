@@ -34,11 +34,11 @@ if (class_exists(__NAMESPACE__ . '\Autoload', false) === false) {
 
         private static function getAutoloadFile(): string
         {
-            if (isset($_composer_autoload_path)) {
+            if (isset($GLOBALS['_composer_autoload_path'])) {
                 $possibleAutoloadPaths = [
-                    dirname($_composer_autoload_path)
+                    dirname($GLOBALS['_composer_autoload_path'])
                 ];
-                $autoloader = basename($_composer_autoload_path);
+                $autoloader = basename($GLOBALS['_composer_autoload_path']);
             } else {
                 $possibleAutoloadPaths = [
                     // local dev repository
