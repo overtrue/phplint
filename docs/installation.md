@@ -11,7 +11,7 @@
 | Version | Status                                    | Requirements   |
 |:--------|:------------------------------------------|:---------------|
 | **9.x** | **Active development**                    | **PHP >= 8.0** |
-| 6.x     | Active support                            | PHP >= 8.2     |
+| 6.x     | End Of Life                               | PHP >= 8.2     |
 | 5.x     | End Of Life                               | PHP >= 8.1     |
 | 4.x     | End Of Life                               | PHP >= 8.0     |
 | 3.x     | End Of Life                               | PHP >= 7.4     |
@@ -48,7 +48,7 @@ You can also install `phplint` locally to your project with [Phive][phive] and c
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <phive xmlns="https://phar.io/phive">
-    <phar name="overtrue/phplint" version="^9.2" copy="false" />
+    <phar name="overtrue/phplint" version="^9.3" copy="false" />
 </phive>
 ```
 
