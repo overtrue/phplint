@@ -85,10 +85,6 @@ final class LintCommand extends Command
             $configResolver = new FileOptionsResolver($input);
         }
 
-        if ($bootstrap = $configResolver->getOption(OptionDefinition::BOOTSTRAP)) {
-            require_once $bootstrap;
-        }
-
         $finder = (new Finder($configResolver))->getFiles();
         /** @var Application $app */
         $app = $this->getApplication();

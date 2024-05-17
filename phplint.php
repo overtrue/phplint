@@ -37,6 +37,13 @@ if (true === $input->hasParameterOption(['--no-progress'], true)) {
     };
 }
 
+if (true === $input->hasParameterOption(['--bootstrap'], true)) {
+    $bootstrap = $input->getParameterOption('--bootstrap');
+    if ($bootstrap) {
+        require_once $bootstrap;
+    }
+}
+
 $formats = [
     OptionDefinition::LOG_JSON,
     OptionDefinition::LOG_JUNIT,
