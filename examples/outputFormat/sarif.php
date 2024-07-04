@@ -13,12 +13,10 @@ declare(strict_types=1);
 
 /*
  * @author Laurent Laville
- * @since Release 9.3.0
+ * @since Release 9.4.0
  */
 
-require_once __DIR__ . '/sarif_converter/bootstrap.php';
-
-use Bartlett\Sarif\Converter\PhpLintConverter;
+use Bartlett\Sarif\Contract\ConverterInterface;
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Event\EventDispatcher;
@@ -26,11 +24,34 @@ use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
 use Overtrue\PHPLint\Output\SarifOutput;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\OutputInterface;
+
+if ($argc > 1 && file_exists($argv[1])) {
+    // specify autoloader that should be used to load resources
+    require_once $argv[1];
+}
+
+$outputClass = $argv[2] ?? '';
+
+if (empty($outputClass) || !class_exists($outputClass)) {
+    // fallback to built-in SARIF output class
+    $outputClass = SarifOutput::class;
+}
+
+$converterClass = $argv[3] ?? '';
+
+$isVerbose = array_search('-v', $argv) !== false;
+
+if (empty($converterClass) || !class_exists($converterClass)) {
+    $converter = null;
+} else {
+    $converter = new $converterClass($isVerbose);
+}
 
 $dispatcher = new EventDispatcher([]);
 
 $arguments = [
-    'path' => [__DIR__ . '/../src'],
+    'path' => [__DIR__ . '/../../src', __DIR__ . '/../../tests'],
     '--no-configuration' => true,
 ];
 $command = new LintCommand($dispatcher);
@@ -41,13 +62,7 @@ $finder = new Finder($configResolver);
 $linter = new Linter($configResolver, $dispatcher);
 $results = $linter->lintFiles($finder->getFiles());
 
-// custom serializer factory to make the SARIF output human-readable (see resources into bootstrap.php file)
-$factory = new MySerializerFactory();
-
-$converter = new PhpLintConverter($factory);
-// or alternative
-//$converter = new MyConverter($factory);
-
-$output = new SarifOutput(fopen('php://stdout', 'w'));
-$output->setConverter($converter);
-$output->format($results);
+$output = new $outputClass(STDOUT, OutputInterface::VERBOSITY_VERBOSE, null, null, $converter);
+if ($output instanceof OutputInterface) {
+    $output->format($results);
+}

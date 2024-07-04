@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 /*
  * @author Laurent Laville
- * @since Release 9.3.0
+ * @since Release 9.4.0
  */
 
 require_once dirname(__DIR__, 2) . '/autoload.php';
-require_once __DIR__ . '/MySerializer.php';
-require_once __DIR__ . '/MyConverter.php';
+require_once '/shared/backups/bartlett/sarif-php-converters/' . 'vendor/autoload.php';
+require_once __DIR__ . '/MyPhpLintConverter.php';
