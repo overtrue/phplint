@@ -12,7 +12,6 @@ declare(strict_types=1);
  */
 
 use Overtrue\PHPLint\Command\LintCommand;
-use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\Application;
 use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Extension\OutputFormat;
@@ -23,19 +22,25 @@ use Symfony\Component\Console\Input\ArgvInput;
 
 $input = new ArgvInput();
 
-$extensions = [new ProgressPrinter()];
-
 if (true === $input->hasParameterOption(['--no-progress'], true)) {
-    $extensions = [];
-} elseif (true === $input->hasParameterOption(['--progress'], true)) {
-    $progress = $input->getParameterOption('--progress', 'printer');
-
-    $extensions = match ($progress) {
-        'bar' => [new ProgressBar()],
-        'indicator' => [new ProgressIndicator()],
-        default => [new ProgressPrinter()],
-    };
+    $progress = 'no';
+} else {
+    $progress = 'printer';
 }
+
+if (true === $input->hasParameterOption(['--progress'], true)) {
+    $progress = $input->getParameterOption('--progress');
+}
+if (true === $input->hasParameterOption(['-p'], true)) {
+    $progress = $input->getParameterOption('-p');
+}
+
+$extensions = match ($progress) {
+    'bar' => [new ProgressBar()],
+    'indicator' => [new ProgressIndicator()],
+    'printer' => [new ProgressPrinter()],
+    default => [],
+};
 
 if (true === $input->hasParameterOption(['--bootstrap'], true)) {
     $bootstrap = $input->getParameterOption('--bootstrap');
@@ -44,13 +49,7 @@ if (true === $input->hasParameterOption(['--bootstrap'], true)) {
     }
 }
 
-$formats = [
-    OptionDefinition::LOG_JSON,
-    OptionDefinition::LOG_JUNIT,
-    OptionDefinition::LOG_SARIF,
-];
-
-$extensions[] = new OutputFormat($formats);
+$extensions[] = new OutputFormat();
 
 $dispatcher = new EventDispatcher($extensions);
 
