@@ -16,7 +16,6 @@ namespace Overtrue\PHPLint\Output;
 use Symfony\Component\Console\Output\StreamOutput;
 
 use function array_merge;
-use function fclose;
 use function json_encode;
 
 use const JSON_PRETTY_PRINT;
@@ -28,6 +27,11 @@ use const JSON_UNESCAPED_SLASHES;
  */
 final class JsonOutput extends StreamOutput implements OutputInterface
 {
+    public function getName(): string
+    {
+        return 'json';
+    }
+
     public function format(LinterOutput $results): void
     {
         $failures = $results->getFailures();
@@ -38,12 +42,12 @@ final class JsonOutput extends StreamOutput implements OutputInterface
             'failures' => $failures,
         ];
 
-        $jsonString = json_encode(
-            array_merge($result, $context),
-            JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT
-        );
+        $flags = JSON_UNESCAPED_SLASHES;
+        if ($this->isVerbose()) {
+            $flags |= JSON_PRETTY_PRINT;
+        }
 
+        $jsonString = json_encode(array_merge($result, $context), $flags);
         $this->write($jsonString, true);
-        fclose($this->getStream());
     }
 }
