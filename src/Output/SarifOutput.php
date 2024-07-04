@@ -13,12 +13,15 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Output;
 
-use Bartlett\Sarif\Converter\ConverterInterface;
+use Bartlett\Sarif\Contract\ConverterInterface;
 use Bartlett\Sarif\Converter\PhpLintConverter;
+use Bartlett\Sarif\Converter\Reporter\PhpLintReport;
 
+use Symfony\Component\Console\Formatter\OutputFormatterInterface;
 use Symfony\Component\Console\Output\StreamOutput;
 
-use function fclose;
+use function ob_get_clean;
+use function ob_start;
 
 /**
  * @author Laurent Laville
@@ -26,20 +29,31 @@ use function fclose;
  */
 class SarifOutput extends StreamOutput implements OutputInterface
 {
-    private ConverterInterface $converter;
+    protected ConverterInterface $converter;
 
-    public function setConverter(ConverterInterface $converter): void
+    public function __construct(
+        $stream,
+        int $verbosity = self::VERBOSITY_NORMAL,
+        ?bool $decorated = null,
+        ?OutputFormatterInterface $formatter = null,
+        ?ConverterInterface $converter = null
+    ) {
+        parent::__construct($stream, $verbosity, $decorated, $formatter);
+        $this->converter = $converter ?? new PhpLintConverter(null, $this->isVerbose());
+    }
+
+    public function getName(): string
     {
-        $this->converter = $converter;
+        return 'sarif';
     }
 
     public function format(LinterOutput $results): void
     {
-        $converter = $this->converter ?? new PhpLintConverter();
-
-        $jsonString = $converter->format($results);  // @phpstan-ignore-line
+        $reporter = new PhpLintReport($this->converter);
+        ob_start();
+        $reporter->format($results);
+        $jsonString = ob_get_clean();
 
         $this->write($jsonString, true);
-        fclose($this->getStream());
     }
 }
