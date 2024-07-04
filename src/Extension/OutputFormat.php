@@ -13,39 +13,24 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Extension;
 
-use Bartlett\Sarif\Converter\ConverterInterface;
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
-use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\AfterCheckingInterface;
 use Overtrue\PHPLint\Output\ChainOutput;
-use Overtrue\PHPLint\Output\JsonOutput;
-use Overtrue\PHPLint\Output\JunitOutput;
-use Overtrue\PHPLint\Output\SarifOutput;
+use Overtrue\PHPLint\Output\FormatResolver;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-
-use RuntimeException;
-
-use function class_exists;
-use function sprintf;
 
 /**
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-class OutputFormat implements EventSubscriberInterface, AfterCheckingInterface
+final class OutputFormat implements EventSubscriberInterface, AfterCheckingInterface
 {
-    private array $outputOptions;
     private array $handlers = [];
-
-    public function __construct(array $outputOptions = [])
-    {
-        $this->outputOptions = $outputOptions;
-    }
 
     public static function getSubscribedEvents(): array
     {
@@ -70,33 +55,7 @@ class OutputFormat implements EventSubscriberInterface, AfterCheckingInterface
             $configResolver = new FileOptionsResolver($input);
         }
 
-        foreach ($this->outputOptions as $name) {
-            if ($filename = $configResolver->getOption($name)) {
-                if (OptionDefinition::LOG_JSON == $name) {
-                    $this->handlers[] = new JsonOutput(fopen($filename, 'w'));
-                } elseif (OptionDefinition::LOG_JUNIT == $name) {
-                    $this->handlers[] = new JunitOutput(fopen($filename, 'w'));
-                } elseif (OptionDefinition::LOG_SARIF == $name) {
-                    $sarifHandler = new SarifOutput(fopen($filename, 'w'));
-
-                    $sarifConverterClass = $configResolver->getOption(OptionDefinition::SARIF_CONVERTER);
-                    if (!class_exists($sarifConverterClass)) {
-                        throw new RuntimeException(
-                            sprintf('Could not load sarif converter class: "%s"', $sarifConverterClass)
-                        );
-                    }
-
-                    $converter = new $sarifConverterClass();
-                    if ($converter instanceof ConverterInterface) {
-                        $sarifHandler->setConverter($converter);
-                    }
-
-                    $this->handlers[] = $sarifHandler;
-                }
-            }
-        }
-
-        $this->handlers[] = $event->getOutput();
+        $this->handlers = (new FormatResolver())->resolve($configResolver, $event->getOutput());
     }
 
     public function afterChecking(AfterCheckingEvent $event): void
