@@ -31,10 +31,8 @@ interface OptionDefinition
     public const OPTION_MEMORY_LIMIT = 'memory-limit';
     public const PROGRESS = 'progress';
     public const NO_PROGRESS = 'no-progress';
-    public const LOG_JSON = 'log-json';
-    public const LOG_JUNIT = 'log-junit';
-    public const LOG_SARIF = 'log-sarif';
-    public const SARIF_CONVERTER = 'sarif-converter';
+    public const OUTPUT_FILE = 'output';
+    public const OUTPUT_FORMAT = 'format';
     public const IGNORE_EXIT_CODE = 'ignore-exit-code';
     public const BOOTSTRAP = 'bootstrap';
 
@@ -47,6 +45,6 @@ interface OptionDefinition
     public const DEFAULT_PROGRESS_WIDGET = 'printer';
     public const DEFAULT_STANDARD_OUTPUT_LABEL = 'standard output';
     public const DEFAULT_STANDARD_OUTPUT = 'php://stdout';
-    public const DEFAULT_SARIF_CONVERTER_CLASS = 'Bartlett\Sarif\Converter\PhpLintConverter';
     public const DEFAULT_BOOTSTRAP = '';
+    public const DEFAULT_FORMATS = ['console'];
 }
