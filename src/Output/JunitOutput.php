@@ -20,7 +20,6 @@ use DOMException;
 use Symfony\Component\Console\Output\StreamOutput;
 
 use function count;
-use function fclose;
 
 /**
  * @author Laurent Laville
@@ -28,6 +27,11 @@ use function fclose;
  */
 final class JunitOutput extends StreamOutput implements OutputInterface
 {
+    public function getName(): string
+    {
+        return 'junit';
+    }
+
     /**
      * @throws DOMException
      */
@@ -37,14 +41,14 @@ final class JunitOutput extends StreamOutput implements OutputInterface
         $context = $results->getContext();
 
         $document = new DOMDocument('1.0', 'UTF-8');
-        $document->formatOutput = true;
+        $document->formatOutput = $this->isVerbose();
 
         $rootElement = $document->createElement('testsuites');
         $document->appendChild($rootElement);
 
         $suite = new DOMElement('testsuite');
         $rootElement->appendChild($suite);
-        $suite->setAttribute('name', 'PHP Linter');
+        $suite->setAttribute('name', 'PHP Linter ' . $context['application_version']['short']);
         $suite->setAttribute('timestamp', (new DateTime())->format(DateTime::ISO8601));
         $suite->setAttribute('time', $context['time_usage']);
         $suite->setAttribute('tests', '1');
@@ -63,6 +67,5 @@ final class JunitOutput extends StreamOutput implements OutputInterface
         }
 
         $this->write($document->saveXML());
-        fclose($this->getStream());
     }
 }
