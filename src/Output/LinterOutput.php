@@ -57,7 +57,7 @@ final class LinterOutput implements Countable
         return $this->context;
     }
 
-    public function setContext(Resolver $configResolver, float $startTime, int $processCount): void
+    public function setContext(Resolver $configResolver, float $startTime, int $processCount, array $default = []): void
     {
         $cacheHits = count($this->getHits());
         $cacheMisses = count($this->getMisses());
@@ -78,14 +78,14 @@ final class LinterOutput implements Countable
             $fileCount = 0;
         }
 
-        $this->context = [
+        $this->context = array_merge($default, [
             'time_usage' => $timeUsage,
             'memory_usage' => $memUsage,
             'cache_usage' => $cacheUsage,
             'process_count' => $processCount,
             'files_count' => $fileCount,
             'options_used' => $configResolver->getOptions(),
-        ];
+        ]);
     }
 
     public function hasFailures(): bool

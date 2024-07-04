@@ -19,5 +19,8 @@ namespace Overtrue\PHPLint\Output;
  */
 interface OutputInterface
 {
+    public function getName(): string;
+
     public function format(LinterOutput $results): void;
+
 }

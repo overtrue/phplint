@@ -48,7 +48,7 @@ You can also install `phplint` locally to your project with [Phive][phive] and c
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <phive xmlns="https://phar.io/phive">
-    <phar name="overtrue/phplint" version="^9.3" copy="false" />
+    <phar name="overtrue/phplint" version="^9.4" copy="false" />
 </phive>
 ```
 

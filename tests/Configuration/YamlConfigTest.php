@@ -93,14 +93,16 @@ final class YamlConfigTest extends TestCase
     protected static function expectedJsonOutputFormat(Resolver $resolver, array $arguments): array
     {
         $expected = self::getExpectedValues($resolver);
-        $expected['log-json'] = OptionDefinition::DEFAULT_STANDARD_OUTPUT;  // see 'log-json.yaml' contents
+        $expected['output'] = OptionDefinition::DEFAULT_STANDARD_OUTPUT;  // see 'log-json.yaml' contents
+        $expected['format'] = ['json'];
         return $expected;
     }
 
     protected static function expectedXmlOutputFormat(Resolver $resolver, array $arguments): array
     {
         $expected = self::getExpectedValues($resolver);
-        $expected['log-junit'] = '/tmp/phplint-results.xml';    // see 'log-junit.yaml' contents
+        $expected['output'] = '/tmp/phplint-results.xml';    // see 'log-junit.yaml' contents
+        $expected['format'] = ['junit'];
         return $expected;
     }
 

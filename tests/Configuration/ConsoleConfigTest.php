@@ -68,18 +68,10 @@ final class ConsoleConfigTest extends TestCase
             'multiple path modified' => [['path' => [dirname(__DIR__) . '/Cache', __DIR__]], __CLASS__ . '::expectedPathModified'],
             'without external configuration' => [['--no-configuration' => true], __CLASS__ . '::expectedExternalConfigNotFetched'],
             'with external empty configuration' => [['--configuration' => 'tests/Configuration/empty.yaml'], __CLASS__ . '::expectedExternalEmptyConfig'],
-            'output to JSON format on Stdout 1/3' => [['--log-json' => null], __CLASS__ . '::expectedJsonOutputFormat'],
-            'output to JSON format on Stdout 2/3' => [['--log-json' => ''], __CLASS__ . '::expectedJsonOutputFormat'],
-            'output to JSON format on Stdout 3/3' => [['--log-json' => true], __CLASS__ . '::expectedJsonOutputFormat'],
-            'disable output to JSON format 1/2' => [['--log-json' => false], __CLASS__ . '::expectedJsonOutputFormat'],
-            'disable output to JSON format 2/2' => [['--log-json' => 'off'], __CLASS__ . '::expectedJsonOutputFormat'],
-            'output to JSON format on File' => [['--log-json' => '/tmp/phplint.json'], __CLASS__ . '::expectedJsonOutputFormat'],
-            'output to XML format on Stdout 1/3' => [['--log-junit' => null], __CLASS__ . '::expectedXmlOutputFormat'],
-            'output to XML format on Stdout 2/3' => [['--log-junit' => ''], __CLASS__ . '::expectedXmlOutputFormat'],
-            'output to XML format on Stdout 3/3' => [['--log-junit' => true], __CLASS__ . '::expectedXmlOutputFormat'],
-            'disable output to XML format 1/2' => [['--log-junit' => false], __CLASS__ . '::expectedXmlOutputFormat'],
-            'disable output to XML format 2/2' => [['--log-junit' => 'FALSE'], __CLASS__ . '::expectedXmlOutputFormat'],
-            'output to XML format on File' => [['--log-junit' => '/tmp/phplint.xml'], __CLASS__ . '::expectedXmlOutputFormat'],
+            'output to JSON format on Stdout' => [['--format' => 'json'], __CLASS__ . '::expectedJsonOutputFormat'],
+            'output to JSON format on File' => [['--format' => 'json', '--output' => '/tmp/phplint.json'], __CLASS__ . '::expectedJsonOutputFormat'],
+            'output to XML format on Stdout' => [['--format' => 'junit'], __CLASS__ . '::expectedXmlOutputFormat'],
+            'output to XML format on File' => [['--format' => 'junit', '--output' => '/tmp/phplint.xml'], __CLASS__ . '::expectedXmlOutputFormat'],
         ];
     }
 
@@ -107,18 +99,12 @@ final class ConsoleConfigTest extends TestCase
 
     protected static function expectedJsonOutputFormat(Resolver $resolver, array $arguments): array
     {
-        $expected = self::getExpectedValues($resolver);
-        $logJson = $arguments['--log-json'];
-        $expected['log-json'] = OptionsFactory::logNormalizer(new OptionsResolver(), $logJson);
-        return $expected;
+        return self::getExpectedValues($resolver);  // expected only default arguments/options from command line
     }
 
     protected static function expectedXmlOutputFormat(Resolver $resolver, array $arguments): array
     {
-        $expected = self::getExpectedValues($resolver);
-        $logJunit = $arguments['--log-junit'];
-        $expected['log-junit'] = OptionsFactory::logNormalizer(new OptionsResolver(), $logJunit);
-        return $expected;
+        return self::getExpectedValues($resolver);  // expected only default arguments/options from command line
     }
 
     protected static function getExpectedValues(Resolver $resolver): array

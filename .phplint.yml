@@ -9,6 +9,3 @@ exclude:
 warning: true
 memory-limit: -1
 no-cache: false
-log-json: false
-log-junit: false
-log-sarif: false

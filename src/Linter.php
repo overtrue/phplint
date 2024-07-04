@@ -21,7 +21,6 @@ use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeLintFileEvent;
 use Overtrue\PHPLint\Helper\ProcessHelper;
-use Overtrue\PHPLint\Output\ConsoleOutputInterface;
 use Overtrue\PHPLint\Output\LinterOutput;
 use Overtrue\PHPLint\Process\LintProcess;
 use Psr\Cache\InvalidArgumentException;
@@ -40,6 +39,7 @@ use function count;
 use function md5_file;
 use function microtime;
 use function phpversion;
+use function strip_tags;
 use function version_compare;
 
 /**
@@ -57,20 +57,16 @@ final class Linter
     private int $processLimit;
     private string $memoryLimit;
     private bool $warning;
-    private array $options;
-    private string $appLongVersion;
 
     public function __construct(
         Resolver $configResolver,
         EventDispatcherInterface $dispatcher,
-        string $appVersion = '9.1.x-dev',
-        HelperSet $helperSet = null,
-        OutputInterface $output = null
+        private readonly ?Client $client = null,
+        ?HelperSet $helperSet = null,
+        ?OutputInterface $output = null,
     ) {
         $this->configResolver = $configResolver;
         $this->dispatcher = $dispatcher;
-        $this->appLongVersion = $appVersion;
-        $this->options = $configResolver->getOptions();
         $this->processLimit = $configResolver->getOption(OptionDefinition::JOBS);
         $this->memoryLimit = (string) $configResolver->getOption(OptionDefinition::OPTION_MEMORY_LIMIT);
         $this->warning = $configResolver->getOption(OptionDefinition::WARNING);
@@ -108,21 +104,7 @@ final class Linter
             $fileCount = 0;
         }
 
-        if ($this->output instanceof ConsoleOutputInterface) {
-            $configFile = $this->options['no-configuration']
-                ? ''
-                : $this->options['configuration']
-            ;
-            $this->output->headerBlock($this->appLongVersion, $configFile);
-            $this->output->configBlock($this->options);
-        }
-
-        $this->dispatcher->dispatch(
-            new BeforeCheckingEvent(
-                $this,
-                ['fileCount' => $fileCount, 'appVersion' => $this->appLongVersion, 'options' => $this->options]
-            )
-        );
+        $this->dispatcher->dispatch(new BeforeCheckingEvent($this, ['fileCount' => $fileCount]));
 
         $processCount = 0;
         if ($fileCount > 0) {
@@ -131,8 +113,16 @@ final class Linter
             $results = [];
         }
 
+        if (null !== $this->client) {
+            $default = [
+                'application_version' => [
+                    'long' => $this->client->getApplication()->getLongVersion(),
+                    'short' => $this->client->getApplication()->getVersion(),
+                ]
+            ];
+        }
         $finalResults = new LinterOutput($results, $finder);
-        $finalResults->setContext($this->configResolver, $startTime, $processCount);
+        $finalResults->setContext($this->configResolver, $startTime, $processCount, $default ?? []);
 
         $this->dispatcher->dispatch(new AfterCheckingEvent($this, ['results' => $finalResults]));
 

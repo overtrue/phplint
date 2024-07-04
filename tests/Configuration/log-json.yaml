@@ -1,1 +1,3 @@
-log-json: php://stdout
+output: php://stdout
+format:
+  - json

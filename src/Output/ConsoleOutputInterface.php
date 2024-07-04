@@ -14,13 +14,14 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Output;
 
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Output\OutputInterface as SymfonyOutputInterface;
 use Symfony\Component\Finder\SplFileInfo;
 
 /**
  * @author Laurent Laville
  * @since Release 9.1.0
  */
-interface ConsoleOutputInterface extends OutputInterface
+interface ConsoleOutputInterface extends SymfonyOutputInterface
 {
     public const NO_FILE_TO_LINT = 'Could not find any files to lint';
 

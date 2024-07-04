@@ -16,6 +16,7 @@ namespace Overtrue\PHPLint\Output;
 use InvalidArgumentException;
 
 use function count;
+use function fclose;
 use function get_debug_type;
 use function sprintf;
 
@@ -45,12 +46,24 @@ final class ChainOutput implements OutputInterface
         }
     }
 
+    public function getName(): string
+    {
+        return 'chain';
+    }
+
     public function format(LinterOutput $results): void
     {
         $i = count($this->outputHandlers);
 
+        if ($i === 0) {
+            return;
+        }
+
         while ($i--) {
             $this->outputHandlers[$i]->format($results);
         }
+
+        // close stream only once all formatters do their job
+        fclose($this->outputHandlers[0]->getStream());
     }
 }

@@ -21,7 +21,8 @@ use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\ConsoleOutput as BaseConsoleOutput;
+use Symfony\Component\Console\Output\ConsoleOutput as SymfonyConsoleOutput;
+use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\Finder\SplFileInfo;
@@ -56,7 +57,7 @@ use const STR_PAD_LEFT;
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-class ConsoleOutput extends BaseConsoleOutput implements ConsoleOutputInterface
+final class ConsoleOutput extends StreamOutput implements OutputInterface, ConsoleOutputInterface
 {
     public const MAX_LINE_LENGTH = 120;
 
@@ -64,11 +65,20 @@ class ConsoleOutput extends BaseConsoleOutput implements ConsoleOutputInterface
 
     private int $lineLength;
 
-    public function __construct(int $verbosity = parent::VERBOSITY_NORMAL, bool $decorated = null, OutputFormatterInterface $formatter = null)
-    {
-        parent::__construct($verbosity, $decorated, $formatter);
+    public function __construct(
+        $stream,
+        int $verbosity = parent::VERBOSITY_NORMAL,
+        ?bool $decorated = null,
+        ?OutputFormatterInterface $formatter = null
+    ) {
+        parent::__construct($stream, $verbosity, $decorated, $formatter);
         $width = (new Terminal())->getWidth() ?: self::MAX_LINE_LENGTH;
         $this->lineLength = min($width - (int) (DIRECTORY_SEPARATOR === '\\'), self::MAX_LINE_LENGTH);
+    }
+
+    public function getName(): string
+    {
+        return 'console';
     }
 
     public function format(LinterOutput $results): void
@@ -82,6 +92,11 @@ class ConsoleOutput extends BaseConsoleOutput implements ConsoleOutputInterface
             $this->warningBlock();
             return;
         }
+
+        $options = $context['options_used'] ?? [];
+        $configFile = $options['no-configuration'] ? '' : $options['configuration'];
+        $this->headerBlock($context['application_version']['long'], $configFile);
+        $this->configBlock($options);
 
         $this->consumeBlock($context['time_usage'], $context['memory_usage'], $context['cache_usage'], $context['process_count']);
 
@@ -262,8 +277,7 @@ class ConsoleOutput extends BaseConsoleOutput implements ConsoleOutputInterface
             }
         }
 
-        $section = $this->section();
-        $table = new Table($section);
+        $table = new Table($this);
         $table
             ->setHeaders($headers)
             ->setRows($rows)

@@ -25,7 +25,7 @@ use function sprintf;
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-class FileOptionsResolver extends AbstractOptionsResolver
+final class FileOptionsResolver extends AbstractOptionsResolver
 {
     public function __construct(InputInterface $input)
     {

@@ -88,28 +88,16 @@ trait ConfigureCommandTrait
                 'Hide the progress output'
             )
             ->addOption(
-                'log-json',
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'Log scan results in JSON format to file (<comment>default: ' . OptionDefinition::DEFAULT_STANDARD_OUTPUT_LABEL . '</comment>)'
+                'output',
+                'o',
+                InputOption::VALUE_REQUIRED,
+                'Generate an output to the specified path (<comment>default: ' . OptionDefinition::DEFAULT_STANDARD_OUTPUT_LABEL . '</comment>)'
             )
             ->addOption(
-                'log-junit',
+                'format',
                 null,
-                InputOption::VALUE_OPTIONAL,
-                'Log scan results in JUnit XML format to file (<comment>default: ' . OptionDefinition::DEFAULT_STANDARD_OUTPUT_LABEL . '</comment>)'
-            )
-            ->addOption(
-                'log-sarif',
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'Log scan results in SARIF format to file (<comment>default: ' . OptionDefinition::DEFAULT_STANDARD_OUTPUT_LABEL . '</comment>)'
-            )
-            ->addOption(
-                'sarif-converter',
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'SARIF class converter (<comment>default: ' . OptionDefinition::DEFAULT_SARIF_CONVERTER_CLASS . '</comment>)'
+                InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+                'Format of requested reports'
             )
             ->addOption(
                 'warning',
