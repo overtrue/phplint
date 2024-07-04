@@ -84,7 +84,6 @@ final class ProgressIndicator implements
 
     public function beforeChecking(BeforeCheckingEvent $event): void
     {
-        // @phpstan-ignore-next-line
         if ($this->hasProcessHelper && $this->output->isVeryVerbose()) {
             // ProgressIndicator extension make some noise that break output when ProcessHelper is active
             return;
@@ -100,7 +99,6 @@ final class ProgressIndicator implements
 
     public function afterLintFile(AfterLintFileEvent $event): void
     {
-        // @phpstan-ignore-next-line
         if ($this->hasProcessHelper && $this->output->isVeryVerbose()) {
             // ProgressIndicator extension make some noise that break output when ProcessHelper is active
             return;

@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Extension;
 
 use LogicException;
+use Overtrue\PHPLint\Event\AfterCheckingEvent;
+use Overtrue\PHPLint\Event\AfterCheckingInterface;
 use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\AfterLintFileInterface;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
@@ -34,6 +36,7 @@ use function sprintf;
 final class ProgressPrinter implements
     EventSubscriberInterface,
     BeforeCheckingInterface,
+    AfterCheckingInterface,
     AfterLintFileInterface
 {
     private ConsoleOutputInterface $output;
@@ -75,9 +78,13 @@ final class ProgressPrinter implements
         $this->maxSteps = $event->getArgument('fileCount');
     }
 
+    public function afterChecking(AfterCheckingEvent $event): void
+    {
+        $this->output->writeln('');
+    }
+
     public function afterLintFile(AfterLintFileEvent $event): void
     {
-        // @phpstan-ignore-next-line
         if ($this->hasProcessHelper && $this->output->getVerbosity() == OutputInterface::VERBOSITY_VERY_VERBOSE) {
             // ProgressPrinter extension make some noise that break output when ProcessHelper is active in verbose level 2
             return;
