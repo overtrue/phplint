@@ -69,7 +69,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:  # https://github.com/softprops/action-gh-release#-customizing
           prerelease: false
-          draft: true
+          draft: false
           body_path: ${{ github.workspace }}/.changes/${{ github.ref_name }}.md
           # https://github.com/softprops/action-gh-release#%EF%B8%8F-uploading-release-assets
           files:
