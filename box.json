@@ -11,11 +11,5 @@
   ],
   "force-autodiscovery": true,
   "exclude-dev-files": false,
-  "files": ["autoload.php", "phplint.php"],
-  "stub": "stub.php",
-  "files-bin": ["sbom.json", "console.txt"],
-  "map": [
-    { "console.txt": ".box.manifests/console.txt" },
-    { "sbom.json": ".box.manifests/sbom.json" }
-  ]
+  "files": ["autoload.php", "phplint.php"]
 }

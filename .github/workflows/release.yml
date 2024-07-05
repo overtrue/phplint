@@ -48,11 +48,20 @@ jobs:
         with:
           composer-options: "--prefer-dist"
 
-      -   # https://github.com/box-project/box
-        name: Build Release Artifacts
-        run: |
-          box compile
-          box info ${{ github.workspace }}/bin/phplint.phar
+      -   # https://github.com/llaville/box-manifest
+          name: Download BOX Manifest Artifact
+          run: |
+              curl -Ls https://github.com/llaville/box-manifest/releases/latest/download/box-manifest.phar -o /usr/local/bin/box-manifest
+              chmod +x /usr/local/bin/box-manifest
+
+      -   # https://github.com/llaville/box-manifest
+          name: Build Release Artifact
+          run: |
+              box-manifest manifest:build --ansi -vv -c box.json --output-file=sbom.json
+              box-manifest manifest:build --ansi -vv -c box.json --output-file=console.txt --format console
+              box-manifest manifest:stub  --ansi -vv -c box.json --output-file=stub.php --resource console.txt --resource sbom.json
+              box compile --ansi -vv -c box.json.dist
+              box info ${{ github.workspace }}/bin/phplint.phar
 
       -   # https://github.com/softprops/action-gh-release
         name: Create Release from current tag
