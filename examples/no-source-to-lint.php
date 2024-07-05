@@ -32,12 +32,11 @@ $configResolver = new ConsoleOptionsResolver($input);
 
 $finder = new Finder($configResolver);
 $linter = new Linter($configResolver, $dispatcher);
-$results = $linter->lintFiles($finder->getFiles());
-
-var_dump("Files checked :", count($results));
+try {
+    $results = $linter->lintFiles($finder->getFiles());
+} catch (Throwable $e) {
+}
 
 if (count($results) === 0) {
-    throw new LogicException(
-        sprintf("Could not find any files to lint with this Finder %s", json_encode($finder))
-    );
+    printf("Could not find any files to lint with this Finder %s" . PHP_EOL, json_encode($finder));
 }

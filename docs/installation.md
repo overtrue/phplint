@@ -1,10 +1,10 @@
 # Installation
 
 1. [Requirements](#requirements)
-1. [PHAR](#phar)
-1. [Docker](#docker) 
-1. [Phive](#phive)
-1. [Composer](#composer)
+2. [PHAR](#phar)
+3. [Docker](#docker) 
+4. [Phive](#phive)
+5. [Composer](#composer)
 
 ## Requirements
 

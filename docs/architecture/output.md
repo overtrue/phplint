@@ -9,6 +9,8 @@ via the `Overtrue\PHPLint\Output\ChainOutput` object and its handlers (`Overtrue
 - `ConsoleOutput` print results to the standard output
 - `JsonOutput` print results on JSON format to a file (default to standard output)
 - `JunitOutput` print results on Junit format to a file (default to standard output)
+- `CheckstyleOutput` print results on Checkstyle format to a file (default to standard output)
+- `SarifOutput` print results on SARIF format to a file (default to standard output)
 
 ## UML Diagram
 
@@ -42,6 +44,10 @@ This handler is responsible to print PHPLint results on JSON private format. For
             "error": "False can not be used as a standalone type in line 12",
             "line": 12
         }
+    },
+    "application_version": {
+        "long": "phplint 9.4.0",
+        "short": "9.4.0"
     },
     "time_usage": "< 1 sec",
     "memory_usage": "6.0 MiB",
@@ -79,23 +85,53 @@ This handler is responsible to print PHPLint results on Junit XML format. For ex
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="PHP Linter" timestamp="2023-12-16T08:21:51+0000" time="&lt; 1 sec" tests="1" errors="2">
+  <testsuite name="PHP Linter 9.4.0" timestamp="2024-07-05T08:21:51+0000" time="&lt; 1 sec" tests="1" errors="2">
     <testcase errors="2" failures="0">
-      <error type="Error" message="unexpected end of file in line 4">/path/to/fixtures/syntax_error.php
-      <error type="Error" message="False can not be used as a standalone type in line 12">/path/to/fixtures/php-8.2_syntax.php
+      <error type="Error" message="unexpected end of file in line 4">/path/to/fixtures/syntax_error.php</error>
+      <error type="Error" message="False can not be used as a standalone type in line 12">/path/to/fixtures/php-8.2_syntax.php</error>
     </testcase>
   </testsuite>
 </testsuites>
 ```
 
-[bartlett/graph-uml]: https://packagist.org/packages/bartlett/graph-uml
-[symfony/console]: https://github.com/symfony/console
-[symfony-console-events]: https://symfony.com/doc/current/components/console/events.html
-[chain-of-responsibility-pattern]: https://en.wikipedia.org/wiki/Chain-of-responsibility_pattern
+## `CheckstyleOutput` handler
 
+This handler is responsible to print PHPLint results on Checkstyle XML format. For example:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle>
+  <file name="/path/to/fixtures/syntax_error.php">
+    <error line="4" severity="error" message="unexpected end of file in line 4"/>
+  </file>
+  <file name="/path/to/fixtures/php-8.2_syntax.php">
+    <error line="12" severity="error" message="False can not be used as a standalone type in line 12"/>
+  </file>
+  <file name="/path/to/fixtures/syntax_warning.php">
+    <error line="12" severity="error" message=" declare(encoding=...) ignored because Zend multibyte feature is turned off by settings in line 12"/>
+  </file>
+</checkstyle>
+```
+
+## `SarifOutput` handler
+
+> [!NOTE]
+>
+> Since version 9.4.0, this format is optional and requires an extra package to be installed.
+>
+> ```composer require --dev bartlett/sarif-php-converters```
+
+This handler is responsible to print PHPLint results on SARIF JSON format. 
+Learn more at <https://github.com/llaville/sarif-php-converters/blob/1.0/docs/converter/phplint.md>
 
 ## `LinterOutput` object
 
 This object represent the PHPLint results of all file checked.
 
 It will allow to easily communicate with other extension or output handler. Thanks to the Event-Dispatcher component.
+
+[bartlett/graph-uml]: https://packagist.org/packages/bartlett/graph-uml
+[symfony/console]: https://github.com/symfony/console
+[symfony-console-events]: https://symfony.com/doc/current/components/console/events.html
+[chain-of-responsibility-pattern]: https://en.wikipedia.org/wiki/Chain-of-responsibility_pattern
+

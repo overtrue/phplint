@@ -45,11 +45,12 @@ Options:
       --no-cache                     Ignore cached data
   -p, --progress=PROGRESS            Show the progress output
       --no-progress                  Hide the progress output
-      --log-json[=LOG-JSON]          Log scan results in JSON format to file (default: standard output)
-      --log-junit[=LOG-JUNIT]        Log scan results in JUnit XML format to file (default: standard output)
+  -o, --output=OUTPUT                Generate an output to the specified path (default: standard output)
+      --format=FORMAT                Format of requested reports (multiple values allowed)
   -w, --warning                      Also show warnings
       --memory-limit=MEMORY-LIMIT    Memory limit for analysis
       --ignore-exit-code             Ignore exit codes so there are no "failure" exit code even when no files processed
+      --bootstrap=BOOTSTRAP          A PHP script that is included before the linter run
   -h, --help                         Display help for the given command. When no command is given display help for the lint command
   -q, --quiet                        Do not output any message
   -V, --version                      Display this application version

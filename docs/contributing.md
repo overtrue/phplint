@@ -18,11 +18,11 @@ This check is only for maintainers of this project to prepare a new release and 
 ## Workflow for Pull Requests
 
 1. Fork the repository.
-1. Create your branch from `main` if you plan to implement new functionality or change existing code significantly.
-1. Implement your change and add tests for it.
-1. Ensure the test suite passes.
-1. Ensure the code complies with our coding guidelines.
-1. Send your Pull Request
+2. Create your branch from `main` if you plan to implement new functionality or change existing code significantly.
+3. Implement your change and add tests for it.
+4. Ensure the test suite passes.
+5. Ensure the code complies with our coding guidelines.
+6. Send your Pull Request
 
 ## Fork the PHPLint repository
 

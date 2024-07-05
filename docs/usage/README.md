@@ -1,8 +1,8 @@
 # Usage
 
 1. [Console CLI](console.md)
-1. [Docker CLI](docker.md)
-1. [GitHub Actions](github-actions.md)
-1. [GitLab CI](gitlab-ci.md)
-1. [Other CI Pipelines](other-ci.md)
-1. [Programmatically](programmatically.md)
+2. [Docker CLI](docker.md)
+3. [GitHub Actions](github-actions.md)
+4. [GitLab CI](gitlab-ci.md)
+5. [Other CI Pipelines](other-ci.md)
+6. [Programmatically](programmatically.md)

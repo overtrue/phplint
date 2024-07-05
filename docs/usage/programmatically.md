@@ -1,6 +1,8 @@
 # Programmatically
 
 ```php
+<?php
+
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Event\EventDispatcher;
@@ -11,7 +13,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 $dispatcher = new EventDispatcher([]);
 
 $arguments = [
-    'path' => [__DIR__ . '/src', __DIR__ . '/tests'],
+    'path' => [dirname(__DIR__) . '/src', dirname(__DIR__) . '/tests'],
     '--no-configuration' => true,
     '--no-cache' => true,
     '--exclude' => ['vendor'],
@@ -25,9 +27,7 @@ $input = new ArrayInput($arguments, $definition);
 $configResolver = new ConsoleOptionsResolver($input);
 
 $finder = new Finder($configResolver);
-
 $linter = new Linter($configResolver, $dispatcher);
-
 $results = $linter->lintFiles($finder->getFiles());
 
 var_dump($results->getErrors());
