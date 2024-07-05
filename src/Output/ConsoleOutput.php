@@ -263,15 +263,14 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
             'version',
         ];
 
-        $headers = ['Name', 'Value', 'Help'];
+        $headers = ['Name', 'Value'];
 
         $normalize = fn ($value) => json_encode($value, JSON_UNESCAPED_SLASHES);
 
         $rows = [];
 
         foreach ($filtered as $name => $value) {
-            $origin = in_array($name, $origins) ? 'application' : 'command';
-            $rows[] = [sprintf('<comment>%s</comment>', $name), $normalize($value), $origin];
+            $rows[] = [sprintf('<comment>%s</comment>', $name), $normalize($value)];
             if ('path' == $name) {
                 $rows[] = new TableSeparator();
             }
