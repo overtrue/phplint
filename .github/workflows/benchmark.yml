@@ -107,7 +107,7 @@ jobs:
 
       -   # https://github.com/actions/download-artifact
         name: Retrieve PHPBench baseline results
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4.1.7
         with:
           name: "PHPBench-Baseline"
           path: ".phpbench/"
