@@ -11,11 +11,26 @@
   ],
   "force-autodiscovery": true,
   "exclude-dev-files": false,
-  "files": ["autoload.php", "phplint.php"],
-  "stub": "stub.php",
-  "files-bin": ["sbom.json", "console.txt"],
+  "files": [
+    "autoload.php",
+    "phplint.php"
+  ],
+  "files-bin": [
+    "console-table.txt",
+    "plain.txt",
+    "sbom.json",
+    ".box.manifests.bin"
+  ],
   "map": [
-    { "console.txt": ".box.manifests/console.txt" },
-    { "sbom.json": ".box.manifests/sbom.json" }
-  ]
+    {
+      "console-table.txt": ".box.manifests/console-table.txt"
+    },
+    {
+      "plain.txt": ".box.manifests/plain.txt"
+    },
+    {
+      "sbom.json": ".box.manifests/sbom.json"
+    }
+  ],
+  "stub": "stub.php"
 }

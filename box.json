@@ -11,5 +11,8 @@
   ],
   "force-autodiscovery": true,
   "exclude-dev-files": false,
-  "files": ["autoload.php", "phplint.php"]
+  "files": [
+    "autoload.php",
+    "phplint.php"
+  ]
 }
