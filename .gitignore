@@ -7,3 +7,8 @@ composer.lock
 /vendor-bin/**/vendor
 .phpbench/
 site/
+.box.manifests.bin
+console-table.txt
+plain.txt
+sbom.json
+stub.php
