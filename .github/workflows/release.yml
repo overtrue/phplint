@@ -58,6 +58,8 @@ jobs:
 
       -   # https://github.com/llaville/box-manifest
         name: Build Release Artifact
+        env:
+          TERM_PROGRAM: Hyper
         run: |
           box-manifest make build stub configure -r console-table.txt -r plain.txt -r sbom.json --output-stub stub.php --output-conf box.json.dist -vvv --ansi
           box compile -c box.json.dist -vvv --ansi
