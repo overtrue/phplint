@@ -49,19 +49,19 @@ jobs:
           composer-options: "--prefer-dist"
 
       -   # https://github.com/llaville/box-manifest
-          name: Download BOX Manifest Artifact
-          run: |
-              curl -Ls https://github.com/llaville/box-manifest/releases/latest/download/box-manifest.phar -o /usr/local/bin/box-manifest
-              chmod +x /usr/local/bin/box-manifest
+        name: Download BOX Manifest Artifact
+        env:
+          BOX_MANIFEST_VERSION: "4.0.0-rc.1"
+        run: |
+          curl -Ls "https://github.com/llaville/box-manifest/releases/download/$BOX_MANIFEST_VERSION/box-manifest.phar" -o /usr/local/bin/box-manifest
+          chmod +x /usr/local/bin/box-manifest
 
       -   # https://github.com/llaville/box-manifest
-          name: Build Release Artifact
-          run: |
-              box-manifest manifest:build --ansi -vv -c box.json --output-file=sbom.json
-              box-manifest manifest:build --ansi -vv -c box.json --output-file=console.txt --format console
-              box-manifest manifest:stub  --ansi -vv -c box.json --output-file=stub.php --resource console.txt --resource sbom.json
-              box compile --ansi -vv -c box.json.dist
-              box info --ansi ${{ github.workspace }}/bin/phplint.phar
+        name: Build Release Artifact
+        run: |
+          box-manifest make build stub configure -r console-table.txt -r plain.txt -r sbom.json --output-stub stub.php --output-conf box.json.dist -vvv --ansi
+          box compile -c box.json.dist -vvv --ansi
+          bin/phplint.phar --manifest
 
       -   # https://github.com/softprops/action-gh-release
         name: Create Release from current tag
