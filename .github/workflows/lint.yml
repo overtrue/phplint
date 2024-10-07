@@ -30,12 +30,11 @@ jobs:
         uses: actions/checkout@v4
 
       -   # https://github.com/shivammathur/setup-php
-        name: Setup PHP runtime for PHPUnit 10
+        name: Setup PHP runtime
         uses: shivammathur/setup-php@v2
         with:
           php-version: "${{ matrix.php-version }}"
           coverage: "none"
-          tools: phpunit:10.5
 
       -   # https://github.com/ramsey/composer-install
         name: Install Composer dependencies
@@ -45,4 +44,4 @@ jobs:
 
       -   # https://github.com/sebastianbergmann/phpunit/tree/10.5
         name: Unit tests with PHPUnit 10
-        run: phpunit --no-progress --testdox --do-not-cache-result
+        run: vendor/bin/phpunit --no-progress --testdox --do-not-cache-result
