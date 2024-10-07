@@ -25,6 +25,7 @@
     "ext-dom": "*",
     "ext-json": "*",
     "ext-mbstring": "*",
+    "composer-runtime-api": "^2.0",
     "symfony/cache": "^6.4 || ^7.0",
     "symfony/console": "^6.4 || ^7.0",
     "symfony/event-dispatcher": "^6.4 || ^7.0",
@@ -59,13 +60,10 @@
       "pre-commit": [
         "composer style:fix",
         "composer code:check"
-      ],
-      "pre-push": [
-        "composer qa:check"
       ]
     },
     "branch-alias": {
-      "dev-main": "9.4.x-dev"
+      "dev-main": "9.5.x-dev"
     }
   },
   "scripts": {
@@ -81,8 +79,6 @@
       "@composer bin all install --ansi"
     ],
     "cghooks": "vendor/bin/cghooks",
-    "qa:check": "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.release.php --using-cache=no --verbose --ansi --diff --dry-run",
-    "qa:fix": "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.release.php --using-cache=no --verbose --ansi",
     "style:check": "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --using-cache=no --verbose --ansi --diff --dry-run",
     "style:fix": "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --using-cache=no --verbose --ansi",
     "tests:unit": "vendor/bin/phpunit --testsuite=cache,configuration,finder",
@@ -94,8 +90,6 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "scripts-descriptions": {
-    "qa:check": "Run QA style checks before pushing new tag and releasing a new version (only dry run - no fixing!).",
-    "qa:fix": "Run QA style checks and fix violations.",
     "style:check": "Run style checks (only dry run - no fixing!).",
     "style:fix": "Run style checks and fix violations.",
     "tests:unit": "Run unit tests on following components: cache, configuration, finder",

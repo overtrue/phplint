@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Console;
 
+use Composer\InstalledVersions;
+use OutOfBoundsException;
 use Overtrue\PHPLint\Helper\DebugFormatterHelper;
 use Overtrue\PHPLint\Helper\ProcessHelper;
 use Overtrue\PHPLint\Output\ConsoleOutput;
@@ -26,6 +28,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_keys;
 use function in_array;
+use function sprintf;
 
 use const STDOUT;
 
@@ -36,11 +39,12 @@ use const STDOUT;
 final class Application extends BaseApplication
 {
     public const NAME = 'phplint';
-    public const VERSION = '9.5.0-dev';
+
+    private const PACKAGE_NAME = 'overtrue/phplint';
 
     public function __construct()
     {
-        parent::__construct(self::NAME, self::VERSION);
+        parent::__construct(self::NAME, self::getPrettyVersion());
     }
 
     public function run(InputInterface $input = null, OutputInterface $output = null): int
@@ -68,5 +72,34 @@ final class Application extends BaseApplication
     {
         $name = parent::getCommandName($input);
         return in_array($name, array_keys(parent::all())) ? $name : null;
+    }
+
+    private static function getPrettyVersion(): string
+    {
+        foreach (InstalledVersions::getAllRawData() as $installed) {
+            if (!isset($installed['versions'][self::PACKAGE_NAME])) {
+                continue;
+            }
+
+            $version = $installed['versions'][self::PACKAGE_NAME]['pretty_version']
+                ?? $installed['versions'][self::PACKAGE_NAME]['version']
+                ?? 'dev'
+            ;
+
+            $aliases = $installed['versions'][self::PACKAGE_NAME]['aliases'] ?? [];
+
+            $reference = $installed['versions'][self::PACKAGE_NAME]['reference'];
+            if (null === $reference) {
+                return sprintf('%s', $aliases[0] ?? $version);
+            }
+
+            return sprintf(
+                '%s@%s',
+                $aliases[0] ?? $version,
+                substr($reference, 0, 7)
+            );
+        }
+
+        throw new OutOfBoundsException(sprintf('Package "%s" is not installed', self::PACKAGE_NAME));
     }
 }
