@@ -36,11 +36,9 @@ jobs:
 
       matrix:
         operating-system:
-          - "ubuntu-20.04"
           - "ubuntu-22.04"
 
         php-version:
-          - "8.1"
           - "8.2"
           - "8.3"
 
