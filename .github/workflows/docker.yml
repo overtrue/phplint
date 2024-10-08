@@ -18,12 +18,18 @@ jobs:
     env:
       DOCKER_BUILD_TAG: ${{ github.event.inputs.tag || 'latest' }}
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       -   # https://github.com/actions/checkout
         name: Checkout code
         uses: actions/checkout@v4
+      -   # https://github.com/shivammathur/setup-php
+        name: Setup PHP runtime
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          coverage: "none"
       -   # https://github.com/docker/setup-qemu-action
         name: Set up QEMU
         uses: docker/setup-qemu-action@v3

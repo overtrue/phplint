@@ -18,7 +18,7 @@ jobs:
           - "ubuntu-22.04"
 
         php-version:
-          - "8.1"
+          - "8.2"
 
     steps:
       -   # https://github.com/actions/checkout
