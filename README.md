@@ -13,6 +13,7 @@
 | Version | Status                                    | Requirements   |
 |:--------|:------------------------------------------|:---------------|
 | **9.x** | **Active development**                    | **PHP >= 8.1** |
+| 9.5     | Active support                            | PHP >= 8.2     |
 | 9.4     | Active support                            | PHP >= 8.1     |
 | 9.3     | Active support                            | PHP >= 8.1     |
 | 9.2     | Active support                            | PHP >= 8.1     |
