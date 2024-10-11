@@ -116,6 +116,7 @@ final class FinderTest extends TestCase
                 'EndToEnd/LintCommandTest.php',
                 'EndToEnd/Reserved@Keywords.php',
                 'Finder/FinderTest.php',
+                'Output/OutputTest.php',
                 'TestCase.php',
             ],
             $this->getRelativePathFiles($finder->getFiles()->getIterator(), $basePath)
