@@ -51,7 +51,7 @@ jobs:
       -   # https://github.com/llaville/box-manifest
           name: Download BOX Manifest Artifact
           run: |
-              curl -Ls https://github.com/llaville/box-manifest/releases/latest/download/box-manifest.phar -o /usr/local/bin/box-manifest
+              curl -Ls https://github.com/llaville/box-manifest/releases/download/3.5.1/box-manifest.phar -o /usr/local/bin/box-manifest
               chmod +x /usr/local/bin/box-manifest
 
       -   # https://github.com/llaville/box-manifest
