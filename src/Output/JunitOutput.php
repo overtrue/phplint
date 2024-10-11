@@ -66,6 +66,6 @@ final class JunitOutput extends StreamOutput implements OutputInterface
             $error->setAttribute('message', $value['error']);
         }
 
-        $this->write($document->saveXML());
+        $this->write($document->saveXML(), false, self::OUTPUT_RAW);
     }
 }

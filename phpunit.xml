@@ -24,6 +24,9 @@
         <testsuite name="finder">
             <directory>tests/Finder</directory>
         </testsuite>
+        <testsuite name="output">
+            <directory>tests/Output</directory>
+        </testsuite>
     </testsuites>
     <coverage/>
     <source>
