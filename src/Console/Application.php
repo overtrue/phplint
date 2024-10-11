@@ -36,7 +36,7 @@ use const STDOUT;
 final class Application extends BaseApplication
 {
     public const NAME = 'phplint';
-    public const VERSION = '9.4.1';
+    public const VERSION = '9.4.2';
 
     public function __construct()
     {
