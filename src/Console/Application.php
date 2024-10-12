@@ -36,7 +36,7 @@ use function in_array;
 final class Application extends BaseApplication
 {
     public const NAME = 'phplint';
-    public const VERSION = '9.1.2';
+    public const VERSION = '9.1.3';
 
     public function __construct()
     {
