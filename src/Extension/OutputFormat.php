@@ -87,7 +87,7 @@ class OutputFormat implements EventSubscriberInterface, AfterCheckingInterface
                     }
 
                     $converter = new $sarifConverterClass();
-                    if ($converter instanceof ConverterInterface) {
+                    if ($converter instanceof ConverterInterface) { // @phpstan-ignore class.notFound
                         $sarifHandler->setConverter($converter);
                     }
 
