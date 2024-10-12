@@ -90,7 +90,7 @@
     "tests:e2e": "vendor/bin/phpunit --testsuite=e2e",
     "tests:all": "vendor/bin/phpunit",
     "lint:syntax": "./bin/phplint --ansi",
-    "code:check": "vendor/bin/phpstan analyse --configuration phpstan.neon.dist"
+    "code:check": "vendor/bin/phpstan analyse --configuration phpstan.neon.dist -v"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
