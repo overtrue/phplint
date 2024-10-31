@@ -40,7 +40,7 @@ final class ProcessHelper extends Helper
     public function start(
         OutputInterface $output,
         Process $process,
-        callable $callback = null,
+        ?callable $callback = null,
         array $env = [],
         int $verbosity = OutputInterface::VERBOSITY_VERY_VERBOSE
     ): Process {
@@ -97,7 +97,7 @@ final class ProcessHelper extends Helper
         DebugFormatterHelper $formatter,
         OutputInterface $output,
         Process $process,
-        callable $callback = null
+        ?callable $callback = null
     ): callable {
         return function ($type, $buffer) use ($output, $process, $callback, $formatter) {
             $output->write(

@@ -40,8 +40,8 @@ final class LintProcess extends Process
 
     public function __construct(
         array $command,
-        string $cwd = null,
-        array $env = null,
+        ?string $cwd = null,
+        ?array $env = null,
         mixed $input = null,
         ?float $timeout = 60
     ) {
@@ -158,7 +158,7 @@ final class LintProcess extends Process
         return (self::$createLintProcessItem)($hasError, $errorString, $errorLine, $hasWarning, $warningString, $warningLine, $fileInfo);
     }
 
-    public function begin(callable $callback = null, array $env = []): void
+    public function begin(?callable $callback = null, array $env = []): void
     {
         if ($this->helper instanceof ProcessHelper) {
             $this->helper->start($this->output, $this, $callback, $env);

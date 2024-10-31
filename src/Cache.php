@@ -43,7 +43,7 @@ final class Cache
     private int $hits = 0;
     private int $misses = 0;
 
-    public function __construct(string|object $cachePoolAdapter = null)
+    public function __construct(string|object|null $cachePoolAdapter = null)
     {
         if (null === $cachePoolAdapter) {
             $adapter = new ArrayAdapter();
