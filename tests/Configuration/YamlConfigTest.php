@@ -16,18 +16,18 @@ namespace Overtrue\PHPLint\Tests\Configuration;
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
-use Overtrue\PHPLint\Configuration\OptionsFactory;
 use Overtrue\PHPLint\Configuration\Resolver;
 use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Tests\TestCase;
+use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 
+#[CoversMethod(FileOptionsResolver::class, 'getOption')]
+#[CoversMethod(FileOptionsResolver::class, 'getOptions')]
 final class YamlConfigTest extends TestCase
 {
-    /**
-     * @covers \Overtrue\PHPLint\Configuration\FileOptionsResolver
-     */
     public function testInvalidYamlFile(): void
     {
         $this->expectException(InvalidOptionsException::class);
@@ -41,10 +41,7 @@ final class YamlConfigTest extends TestCase
         new FileOptionsResolver($input);
     }
 
-    /**
-     * @covers \Overtrue\PHPLint\Configuration\FileOptionsResolver::getOptions
-     * @dataProvider commandInputProvider
-     */
+    #[DataProvider('commandInputProvider')]
     public function testYamlConfig(array $arguments, callable $fetchExpected): void
     {
         $dispatcher = new EventDispatcher([]);

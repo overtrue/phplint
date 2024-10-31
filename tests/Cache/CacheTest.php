@@ -17,6 +17,7 @@ use Closure;
 use Generator;
 use Overtrue\PHPLint\Cache;
 use Overtrue\PHPLint\Tests\TestCase;
+use PHPUnit\Framework\Attributes\CoversMethod;
 use Symfony\Component\Cache\CacheItem;
 
 use function dirname;
@@ -28,6 +29,12 @@ use function str_replace;
  * @author Laurent Laville
  * @since Release 9.0.0
  */
+#[CoversMethod(Cache::class, 'hasItem')]
+#[CoversMethod(Cache::class, 'getItem')]
+#[CoversMethod(Cache::class, 'saveItem')]
+#[CoversMethod(Cache::class, 'clear')]
+#[CoversMethod(Cache::class, 'isHit')]
+#[CoversMethod(Cache::class, 'getCalls')]
 final class CacheTest extends TestCase
 {
     private static Cache $cache;
@@ -65,17 +72,11 @@ final class CacheTest extends TestCase
         self::$cache = $cache;
     }
 
-    /**
-     * @covers \Overtrue\PHPLint\Cache::hasItem
-     */
     public function testHasItem(): void
     {
         $this->assertTrue(self::$cache->hasItem(__FILE__));
     }
 
-    /**
-     * @covers \Overtrue\PHPLint\Cache::getItem
-     */
     public function testGetItem(): void
     {
         // expected
@@ -87,9 +88,6 @@ final class CacheTest extends TestCase
         $this->assertSame($item->get(), $cacheItem->get());
     }
 
-    /**
-     * @covers \Overtrue\PHPLint\Cache::saveItem
-     */
     public function testSaveItem(): void
     {
         $filename = dirname(__DIR__) . '/EndToEnd/LintCommandTest.php';
@@ -103,59 +101,38 @@ final class CacheTest extends TestCase
         $this->assertEquals($fingerprint, self::$cache->getItem($filename)->get());
     }
 
-    /**
-     * @covers \Overtrue\PHPLint\Cache::clear
-     */
     public function testClearPool(): void
     {
         $cleared = self::$cache->clear();
         $this->assertTrue($cleared);
     }
 
-    /**
-     * @covers \Overtrue\PHPLint\Cache::isHit
-     */
     public function testCacheHit(): void
     {
         $this->assertTrue(self::$cache->isHit(__FILE__));
     }
 
-    /**
-     * @covers \Overtrue\PHPLint\Cache::isHit
-     */
     public function testCacheMiss(): void
     {
         $this->assertFalse(self::$cache->isHit(dirname(__DIR__) . '/EndToEnd/LintCommandTest.php'));
     }
 
-    /**
-     * @covers \Overtrue\PHPLint\Cache::isHit
-     */
     public function testCacheMissWithFileUnknown(): void
     {
         $this->assertFalse(self::$cache->isHit(dirname(__DIR__) . '/Finder/FinderTest.php'));
     }
 
-    /**
-     * @covers \Overtrue\PHPLint\Cache::isHit
-     */
     public function testCacheMissWithWrongFileFingerprint(): void
     {
         $this->assertFalse(self::$cache->isHit(dirname(__DIR__) . '/Configuration/ConfigResolverTest.php'));
     }
 
-    /**
-     * @covers \Overtrue\PHPLint\Cache::getCalls
-     */
     public function testGetCalls(): void
     {
         // cache init calls count
         $this->assertCount(3, self::$cache->getCalls());
     }
 
-    /**
-     * @covers \Overtrue\PHPLint\Cache::saveItem
-     */
     public function testFilenameHasReservedCharacters(): void
     {
         $filename = dirname(__DIR__) . '/EndToEnd/Reserved@Keywords.php';

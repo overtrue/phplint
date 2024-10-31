@@ -16,22 +16,20 @@ namespace Overtrue\PHPLint\Tests\Configuration;
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
-use Overtrue\PHPLint\Configuration\OptionsFactory;
 use Overtrue\PHPLint\Configuration\Resolver;
 use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Tests\TestCase;
+use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Console\Input\ArrayInput;
-
-use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use function dirname;
 use function realpath;
 
+#[CoversMethod(ConsoleOptionsResolver::class, 'getOption')]
+#[CoversMethod(ConsoleOptionsResolver::class, 'getOptions')]
 final class ConsoleConfigTest extends TestCase
 {
-    /**
-     * @covers \Overtrue\PHPLint\Configuration\ConsoleOptionsResolver::getOption
-     */
     public function testConfigFileNotReadable(): void
     {
         $dispatcher = new EventDispatcher([]);
@@ -44,10 +42,7 @@ final class ConsoleConfigTest extends TestCase
         $this->assertFalse(realpath($resolver->getOption(OptionDefinition::CONFIGURATION)));
     }
 
-    /**
-     * @covers \Overtrue\PHPLint\Configuration\ConsoleOptionsResolver::getOptions
-     * @dataProvider commandInputProvider
-     */
+    #[DataProvider('commandInputProvider')]
     public function testCommandConfig(array $arguments, callable $fetchExpected): void
     {
         $dispatcher = new EventDispatcher([]);
