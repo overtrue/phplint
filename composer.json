@@ -81,7 +81,7 @@
     "cghooks": "vendor/bin/cghooks",
     "style:check": "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --using-cache=no --verbose --ansi --diff --dry-run",
     "style:fix": "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --using-cache=no --verbose --ansi",
-    "tests:unit": "vendor/bin/phpunit --testsuite=cache,configuration,finder",
+    "tests:unit": "vendor/bin/phpunit --testsuite=cache,configuration,finder,output",
     "tests:e2e": "vendor/bin/phpunit --testsuite=e2e",
     "tests:all": "vendor/bin/phpunit",
     "lint:syntax": "./bin/phplint --ansi",
@@ -92,7 +92,7 @@
   "scripts-descriptions": {
     "style:check": "Run style checks (only dry run - no fixing!).",
     "style:fix": "Run style checks and fix violations.",
-    "tests:unit": "Run unit tests on following components: cache, configuration, finder",
+    "tests:unit": "Run unit tests on following components: cache, configuration, finder, output",
     "tests:e2e": "Run end to end tests",
     "tests:all": "Run unit and end to end tests",
     "lint:syntax": "Run PHPLint on it own source code",
