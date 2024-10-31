@@ -6,6 +6,7 @@
          beStrictAboutOutputDuringTests="true"
          failOnRisky="true"
          failOnWarning="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
          colors="true"
          cacheDirectory=".phpunit.cache"
          requireCoverageMetadata="true"
