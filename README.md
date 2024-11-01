@@ -10,19 +10,19 @@
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fovertrue%2Fphplint.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fovertrue%2Fphplint?ref=badge_shield)
 
 
-| Version | Status                                    | Requirements   |
-|:--------|:------------------------------------------|:---------------|
-| **9.x** | **Active development**                    | **PHP >= 8.1** |
-| 9.5     | Active support                            | PHP >= 8.2     |
-| 9.4     | Active support                            | PHP >= 8.1     |
-| 9.3     | Active support                            | PHP >= 8.1     |
-| 9.2     | Active support                            | PHP >= 8.1     |
-| 9.1     | Active support                            | PHP >= 8.1     |
-| 9.0     | End Of Life                               | PHP >= 8.0     |
-| 6.x     | End Of Life                               | PHP >= 8.2     |
-| 5.x     | End Of Life                               | PHP >= 8.1     |
-| 4.x     | End Of Life                               | PHP >= 8.0     |
-| 3.x     | End Of Life                               | PHP >= 7.4     |
+| Version | Status                 | Requirements   |
+|:--------|:-----------------------|:---------------|
+| **9.x** | **Active development** | **PHP >= 8.2** |
+| 9.5     | Active support         | PHP >= 8.2     |
+| 9.4     | End Of Life            | PHP >= 8.1     |
+| 9.3     | End Of Life            | PHP >= 8.1     |
+| 9.2     | End Of Life            | PHP >= 8.1     |
+| 9.1     | End Of Life            | PHP >= 8.1     |
+| 9.0     | End Of Life            | PHP >= 8.0     |
+| 6.x     | End Of Life            | PHP >= 8.2     |
+| 5.x     | End Of Life            | PHP >= 8.1     |
+| 4.x     | End Of Life            | PHP >= 8.0     |
+| 3.x     | End Of Life            | PHP >= 7.4     |
 
 **NOTE** if you have an older version of PHP lower than 8.0, we recommend to use the latest version [3.4.0](https://github.com/overtrue/phplint/releases/tag/3.4.0)
 
