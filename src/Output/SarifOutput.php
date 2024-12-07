@@ -20,6 +20,8 @@ use Bartlett\Sarif\Converter\Reporter\PhpLintReport;
 use Symfony\Component\Console\Formatter\OutputFormatterInterface;
 use Symfony\Component\Console\Output\StreamOutput;
 
+use function class_exists;
+use function dirname;
 use function ob_get_clean;
 use function ob_start;
 
@@ -38,8 +40,12 @@ class SarifOutput extends StreamOutput implements OutputInterface
         ?OutputFormatterInterface $formatter = null,
         ?ConverterInterface $converter = null
     ) {
+        if (!class_exists(PhpLintConverter::class)) {
+            // use default Composer-Bin-Plugin autoloader to load Sarif-Php-Converters components
+            require_once dirname(__DIR__, 2) . '/vendor-bin/sarif/vendor/autoload.php';
+        }
         parent::__construct($stream, $verbosity, $decorated, $formatter);
-        $this->converter = $converter ?? new PhpLintConverter(null, $this->isVerbose());
+        $this->converter = $converter ?? new PhpLintConverter(['format_output' => $this->isVerbose()]);
     }
 
     public function getName(): string
