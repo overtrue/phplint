@@ -1,3 +1,0 @@
-kind: Changed
-body: upgrade SARIF output to support [PhpLintConverter](https://llaville.github.io/sarif-php-converters/1.0/converter/phplint/) of bartlett/sarif-php-converters package
-time: 2024-12-07T09:00:52.188093881Z
