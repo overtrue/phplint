@@ -10,7 +10,7 @@
 
 | Version | Status                                    | Requirements   |
 |:--------|:------------------------------------------|:---------------|
-| **9.x** | **Active development**                    | **PHP >= 8.2** |
+| **9.x** | **Active development**                    | **PHP >= 8.1** |
 | 6.x     | End Of Life                               | PHP >= 8.2     |
 | 5.x     | End Of Life                               | PHP >= 8.1     |
 | 4.x     | End Of Life                               | PHP >= 8.0     |
@@ -20,6 +20,8 @@
 
 The preferred method of installation is to use the PHPLint PHAR which can be downloaded from the most recent
 [Github Release][releases]. This method ensures you will not have any dependency conflict issue.
+
+**IMPORTANT** : Embedded with Composer dependencies that are PHP 8.2 compatible !
 
 ## Docker
 
