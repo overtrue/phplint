@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-ARG PHP_VERSION=8.3
+ARG PHP_VERSION=8.4
 
 FROM php:${PHP_VERSION}-cli-alpine
 
