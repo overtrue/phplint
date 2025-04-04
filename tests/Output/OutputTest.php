@@ -22,7 +22,7 @@ use Overtrue\PHPLint\Linter;
 use Overtrue\PHPLint\Output\JunitOutput;
 use Overtrue\PHPLint\Output\LinterOutput;
 use Overtrue\PHPLint\Tests\TestCase;
-use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -38,7 +38,7 @@ use const DIRECTORY_SEPARATOR;
  * @author Laurent Laville
  * @since Release 9.5.3
  */
-#[CoversMethod(JunitOutput::class, 'format')]
+#[CoversClass(JunitOutput::class)]
 final class OutputTest extends TestCase
 {
     private LinterOutput $linterOutput;

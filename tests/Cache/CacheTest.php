@@ -17,7 +17,7 @@ use Closure;
 use Generator;
 use Overtrue\PHPLint\Cache;
 use Overtrue\PHPLint\Tests\TestCase;
-use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\Cache\CacheItem;
 
 use function dirname;
@@ -29,12 +29,7 @@ use function str_replace;
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-#[CoversMethod(Cache::class, 'hasItem')]
-#[CoversMethod(Cache::class, 'getItem')]
-#[CoversMethod(Cache::class, 'saveItem')]
-#[CoversMethod(Cache::class, 'clear')]
-#[CoversMethod(Cache::class, 'isHit')]
-#[CoversMethod(Cache::class, 'getCalls')]
+#[CoversClass(Cache::class)]
 final class CacheTest extends TestCase
 {
     private static Cache $cache;

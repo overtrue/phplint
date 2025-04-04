@@ -19,13 +19,12 @@ use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
 use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Tests\TestCase;
-use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 
-#[CoversMethod(FileOptionsResolver::class, 'getOption')]
-#[CoversMethod(FileOptionsResolver::class, 'getOptions')]
+#[CoversClass(FileOptionsResolver::class)]
 final class YamlConfigTest extends TestCase
 {
     public function testInvalidYamlFile(): void

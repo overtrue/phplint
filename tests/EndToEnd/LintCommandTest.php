@@ -17,7 +17,7 @@ use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Console\Application;
 use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Tests\TestCase;
-use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -27,7 +27,7 @@ use function dirname;
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-#[CoversMethod(LintCommand::class, '')]
+#[CoversClass(LintCommand::class)]
 final class LintCommandTest extends TestCase
 {
     private ?CommandTester $commandTester;

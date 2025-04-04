@@ -21,7 +21,7 @@ use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Tests\TestCase;
-use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\Console\Input\ArrayInput;
 
 use function array_keys;
@@ -34,7 +34,7 @@ use function str_replace;
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-#[CoversMethod(Finder::class, 'getFiles')]
+#[CoversClass(Finder::class)]
 final class FinderTest extends TestCase
 {
     public function testAllPhpFilesFoundShouldExists(): void

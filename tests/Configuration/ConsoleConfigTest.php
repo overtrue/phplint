@@ -19,15 +19,14 @@ use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
 use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Tests\TestCase;
-use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Console\Input\ArrayInput;
 
 use function dirname;
 use function realpath;
 
-#[CoversMethod(ConsoleOptionsResolver::class, 'getOption')]
-#[CoversMethod(ConsoleOptionsResolver::class, 'getOptions')]
+#[CoversClass(ConsoleOptionsResolver::class)]
 final class ConsoleConfigTest extends TestCase
 {
     public function testConfigFileNotReadable(): void
