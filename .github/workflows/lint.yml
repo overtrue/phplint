@@ -43,5 +43,6 @@ jobs:
           composer-options: "--prefer-dist --no-scripts"
 
       -   # https://github.com/sebastianbergmann/phpunit/tree/10.5
-        name: Unit tests with PHPUnit 10
+      -   # https://github.com/sebastianbergmann/phpunit/tree/11.5
+        name: Unit tests with PHPUnit 10/11
         run: vendor/bin/phpunit --no-progress --testdox --do-not-cache-result
