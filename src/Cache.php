@@ -140,7 +140,7 @@ final class Cache
         return [];
     }
 
-    public function __debugInfo(): ?array
+    public function __debugInfo(): array
     {
         return [
             'inner-adapter' => get_debug_type($this->adapter),
