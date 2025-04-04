@@ -254,15 +254,6 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
             ARRAY_FILTER_USE_KEY
         );
 
-        $origins = [
-            'ansi',
-            'help',
-            'no-interaction',
-            'quiet',
-            'verbose',
-            'version',
-        ];
-
         $headers = ['Name', 'Value'];
 
         $normalize = fn ($value) => json_encode($value, JSON_UNESCAPED_SLASHES);
