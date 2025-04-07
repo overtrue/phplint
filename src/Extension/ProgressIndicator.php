@@ -46,6 +46,9 @@ final class ProgressIndicator implements
     {
         return [
             ConsoleEvents::COMMAND => 'initProgress',
+            BeforeCheckingEvent::class => 'beforeChecking',
+            AfterCheckingEvent::class => 'afterChecking',
+            AfterLintFileEvent::class => 'afterLintFile',
         ];
     }
 

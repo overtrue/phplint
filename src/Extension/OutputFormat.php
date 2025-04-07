@@ -36,6 +36,7 @@ final class OutputFormat implements EventSubscriberInterface, AfterCheckingInter
     {
         return [
             ConsoleEvents::COMMAND => 'initFormat',
+            AfterCheckingEvent::class => 'afterChecking',
         ];
     }
 

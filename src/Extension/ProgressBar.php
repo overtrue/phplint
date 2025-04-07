@@ -51,6 +51,10 @@ final class ProgressBar implements
     {
         return [
             ConsoleEvents::COMMAND => 'initProgress',
+            BeforeCheckingEvent::class => 'beforeChecking',
+            AfterCheckingEvent::class => 'afterChecking',
+            BeforeLintFileEvent::class => 'beforeLintFile',
+            AfterLintFileEvent::class => 'afterLintFile',
         ];
     }
 
