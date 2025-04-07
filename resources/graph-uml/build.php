@@ -28,7 +28,7 @@ if (!file_exists($pharAutoloadPath . DIRECTORY_SEPARATOR . $autoloader)) {
 }
 
 require_once $pharAutoloadPath . DIRECTORY_SEPARATOR . $autoloader;
-require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/autoload.php';
 
 use Bartlett\GraphUml\ClassDiagramBuilder;
 use Bartlett\GraphUml\Generator\GraphVizGenerator;
