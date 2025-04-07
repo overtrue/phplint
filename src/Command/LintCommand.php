@@ -17,7 +17,6 @@ use Overtrue\PHPLint\Client;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
-use Overtrue\PHPLint\Console\Application;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
 use Overtrue\PHPLint\Output\LinterOutput;
@@ -40,13 +39,11 @@ final class LintCommand extends Command
 {
     use ConfigureCommandTrait;
 
-    private EventDispatcherInterface $dispatcher;
     private LinterOutput $results;
 
-    public function __construct(EventDispatcherInterface $dispatcher, string $name = 'lint')
+    public function __construct(private readonly EventDispatcherInterface $dispatcher, string $name = 'lint')
     {
         parent::__construct($name);
-        $this->dispatcher = $dispatcher;
         $this->results = new LinterOutput([], new SymfonyFinder());
     }
 
