@@ -36,6 +36,7 @@ use Throwable;
 use function array_chunk;
 use function array_push;
 use function count;
+use function max;
 use function md5_file;
 use function microtime;
 use function phpversion;
@@ -74,7 +75,8 @@ final class Linter
         if ($configResolver->getOption(OptionDefinition::NO_CACHE)) {
             $adapter = new NullAdapter();
         } else {
-            $adapter = new FilesystemAdapter('paths', 0, $configResolver->getOption(OptionDefinition::CACHE));
+            $defaultLifetime = max(0, $configResolver->getOption(OptionDefinition::CACHE_TTL));
+            $adapter = new FilesystemAdapter('paths', $defaultLifetime, $configResolver->getOption(OptionDefinition::CACHE));
         }
         $this->cache = new Cache($adapter);
 
@@ -125,6 +127,8 @@ final class Linter
         $finalResults->setContext($this->configResolver, $startTime, $processCount, $default ?? []);
 
         $this->dispatcher->dispatch(new AfterCheckingEvent($this, ['results' => $finalResults]));
+
+        $this->cache->prune();
 
         return $finalResults;
     }

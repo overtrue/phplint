@@ -49,6 +49,7 @@ class OptionsFactory implements Options
             OptionDefinition::CONFIGURATION => 'string',
             OptionDefinition::NO_CONFIGURATION => 'bool',
             OptionDefinition::CACHE => ['null', 'string'],
+            OptionDefinition::CACHE_TTL => ['int', 'string'],
             OptionDefinition::NO_CACHE => 'bool',
             OptionDefinition::PROGRESS => ['null', 'string'],
             OptionDefinition::NO_PROGRESS => 'bool',
@@ -84,6 +85,10 @@ class OptionsFactory implements Options
 
         $resolver->setNormalizer(OptionDefinition::OUTPUT_FORMAT, function (SymfonyOptions $options, $value) {
             return (array) $value;
+        });
+
+        $resolver->setNormalizer(OptionDefinition::CACHE_TTL, function (SymfonyOptions $options, $value) {
+            return (int) $value;
         });
     }
 }

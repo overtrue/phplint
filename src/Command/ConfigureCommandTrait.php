@@ -70,6 +70,14 @@ trait ConfigureCommandTrait
                 'Path to the cache directory'
             )
             ->addOption(
+                'cache-ttl',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Limit cached data for a period of time'
+                . ' (<info>0: store permanently, >0: time to live in seconds</info>)'
+                . ' <comment>default: ' . OptionDefinition::DEFAULT_CACHE_TTL . '</comment>',
+            )
+            ->addOption(
                 'no-cache',
                 null,
                 InputOption::VALUE_NONE,

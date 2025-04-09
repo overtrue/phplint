@@ -20,7 +20,7 @@ use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\TraceableAdapter;
-
+use Symfony\Component\Cache\PruneableInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
 use function class_exists;
@@ -154,5 +154,13 @@ final class Cache
     private function getKey(string $filename): string
     {
         return str_replace(str_split(ItemInterface::RESERVED_CHARACTERS), '_', $filename);
+    }
+
+    /**
+     * @since Release 9.6.0
+     */
+    public function prune(): bool
+    {
+        return $this->pool instanceof PruneableInterface && $this->pool->prune();
     }
 }
