@@ -73,12 +73,17 @@ final class Linter
         $this->warning = $configResolver->getOption(OptionDefinition::WARNING);
 
         if ($configResolver->getOption(OptionDefinition::NO_CACHE)) {
+            $defaultLifetime = 0;
             $adapter = new NullAdapter();
         } else {
             $defaultLifetime = max(0, $configResolver->getOption(OptionDefinition::CACHE_TTL));
             $adapter = new FilesystemAdapter('paths', $defaultLifetime, $configResolver->getOption(OptionDefinition::CACHE));
         }
         $this->cache = new Cache($adapter);
+
+        if ($defaultLifetime < OptionDefinition::DEFAULT_CACHE_TTL) {
+            $this->cache->clear();
+        }
 
         $this->results = [
             'errors' => [],
