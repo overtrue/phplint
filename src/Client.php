@@ -16,6 +16,7 @@ use Symfony\Component\Console\Application;
 /**
  * @author Laurent Laville
  * @since Release 9.4.0
+ * @deprecated since Release 9.6.0; Will be removed in major version 10.0
  */
 class Client
 {
