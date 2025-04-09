@@ -42,7 +42,7 @@ interface OptionDefinition
     public const DEFAULT_EXCLUDES = [];
     public const DEFAULT_EXTENSIONS = ['php'];
     public const DEFAULT_CACHE_DIR = '.phplint.cache';
-    public const DEFAULT_CACHE_TTL = 0; // 0 => store indefinitely (until the files are deleted)
+    public const DEFAULT_CACHE_TTL = 3600; // 1 hour === 3600 seconds
     public const DEFAULT_CONFIG_FILE = '.phplint.yml';
     public const DEFAULT_PROGRESS_WIDGET = 'printer';
     public const DEFAULT_STANDARD_OUTPUT_LABEL = 'standard output';
