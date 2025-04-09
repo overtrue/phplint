@@ -42,8 +42,9 @@ final class Cache
     private AdapterInterface $adapter;
     private int $hits = 0;
     private int $misses = 0;
+    private ?int $cacheLifetime;
 
-    public function __construct(string|object|null $cachePoolAdapter = null)
+    public function __construct(string|object|null $cachePoolAdapter = null, ?int $cacheLifetime = null)
     {
         if (null === $cachePoolAdapter) {
             $adapter = new ArrayAdapter();
@@ -72,6 +73,7 @@ final class Cache
 
         $this->adapter = $adapter;
         $this->pool = $this->createCachePool($adapter);
+        $this->cacheLifetime = $cacheLifetime;
     }
 
     public function createCachePool(AdapterInterface $adapter): CacheItemPoolInterface
@@ -161,6 +163,10 @@ final class Cache
      */
     public function prune(): bool
     {
+        if ($this->cacheLifetime === null || $this->cacheLifetime === 0) {
+            return true;
+        }
+
         return $this->pool instanceof PruneableInterface && $this->pool->prune();
     }
 }

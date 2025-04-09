@@ -72,13 +72,14 @@ final class Linter
         $this->memoryLimit = (string) $configResolver->getOption(OptionDefinition::OPTION_MEMORY_LIMIT);
         $this->warning = $configResolver->getOption(OptionDefinition::WARNING);
 
+        $cacheLifetime = null;
         if ($configResolver->getOption(OptionDefinition::NO_CACHE)) {
             $adapter = new NullAdapter();
         } else {
-            $defaultLifetime = max(0, $configResolver->getOption(OptionDefinition::CACHE_TTL));
-            $adapter = new FilesystemAdapter('paths', $defaultLifetime, $configResolver->getOption(OptionDefinition::CACHE));
+            $cacheLifetime = max(0, $configResolver->getOption(OptionDefinition::CACHE_TTL));
+            $adapter = new FilesystemAdapter('paths', $cacheLifetime, $configResolver->getOption(OptionDefinition::CACHE));
         }
-        $this->cache = new Cache($adapter);
+        $this->cache = new Cache($adapter, $cacheLifetime);
 
         $this->results = [
             'errors' => [],
