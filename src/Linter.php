@@ -126,9 +126,9 @@ final class Linter
         $finalResults = new LinterOutput($results, $finder);
         $finalResults->setContext($this->configResolver, $startTime, $processCount, $default ?? []);
 
-        $this->dispatcher->dispatch(new AfterCheckingEvent($this, ['results' => $finalResults]));
-
         $this->cache->prune();
+
+        $this->dispatcher->dispatch(new AfterCheckingEvent($this, ['results' => $finalResults]));
 
         return $finalResults;
     }
