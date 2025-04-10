@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Console\Application;
-use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Extension\OutputFormat;
 use Overtrue\PHPLint\Extension\ProgressBar;
 use Overtrue\PHPLint\Extension\ProgressIndicator;
@@ -51,12 +50,9 @@ if (true === $input->hasParameterOption(['--bootstrap'], true)) {
 
 $extensions[] = new OutputFormat();
 
-$dispatcher = new EventDispatcher($extensions);
-
-$defaultCommand = new LintCommand($dispatcher);
+$defaultCommand = new LintCommand();
 
 $application = new Application();
 $application->add($defaultCommand);
 $application->setDefaultCommand($defaultCommand->getName());
-$application->setDispatcher($dispatcher);
 $application->run($input);

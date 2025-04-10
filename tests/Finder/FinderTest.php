@@ -18,7 +18,6 @@ use LogicException;
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
-use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -39,8 +38,6 @@ final class FinderTest extends TestCase
 {
     public function testAllPhpFilesFoundShouldExists(): void
     {
-        $dispatcher = new EventDispatcher([]);
-
         $basePath = dirname(__DIR__);
 
         $arguments = [
@@ -49,7 +46,7 @@ final class FinderTest extends TestCase
             '--' . OptionDefinition::EXCLUDE => [],
             '--' . OptionDefinition::EXTENSIONS => ['php'],
         ];
-        $definition = (new LintCommand($dispatcher))->getDefinition();
+        $definition = (new LintCommand())->getDefinition();
         $input = new ArrayInput($arguments, $definition);
 
         $configResolver = new ConsoleOptionsResolver($input);
@@ -65,15 +62,13 @@ final class FinderTest extends TestCase
     {
         $this->expectException(LogicException::class);
 
-        $dispatcher = new EventDispatcher([]);
-
         $basePath = dirname(__DIR__) . '/fixtures/missing_dir';
 
         $arguments = [
             OptionDefinition::PATH => [$basePath],
             '--no-configuration' => true,
         ];
-        $definition = (new LintCommand($dispatcher))->getDefinition();
+        $definition = (new LintCommand())->getDefinition();
         $input = new ArrayInput($arguments, $definition);
 
         $configResolver = new ConsoleOptionsResolver($input);
@@ -84,8 +79,6 @@ final class FinderTest extends TestCase
 
     public function testSearchPhpFilesWithCondition(): void
     {
-        $dispatcher = new EventDispatcher([]);
-
         $basePath = dirname(__DIR__);
 
         $arguments = [
@@ -94,7 +87,7 @@ final class FinderTest extends TestCase
             '--' . OptionDefinition::EXCLUDE => ['fixtures', 'Benchmark'],
             '--' . OptionDefinition::EXTENSIONS => ['php']
         ];
-        $definition = (new LintCommand($dispatcher))->getDefinition();
+        $definition = (new LintCommand())->getDefinition();
         $input = new ArrayInput($arguments, $definition);
 
         $configResolver = new ConsoleOptionsResolver($input);

@@ -15,7 +15,6 @@ namespace Overtrue\PHPLint\Tests\EndToEnd;
 
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Console\Application;
-use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\Console\Command\Command;
@@ -35,17 +34,11 @@ final class LintCommandTest extends TestCase
 
     protected function setUp(): void
     {
-        // No extensions require for tests.
-        // WARNING: CommandTester is not able to test situation with custom Output
-        //          so display verification is impossible !!!
-        $dispatcher = new EventDispatcher([]);
-
-        $this->command = new LintCommand($dispatcher);
+        $this->command = new LintCommand();
 
         $application = new Application();
         $application->add($this->command);
         $application->setDefaultCommand($this->command->getName());
-        $application->setDispatcher($dispatcher);
 
         $this->commandTester = new CommandTester($this->command);
     }

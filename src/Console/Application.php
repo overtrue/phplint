@@ -19,15 +19,20 @@ use Overtrue\PHPLint\Helper\DebugFormatterHelper;
 use Overtrue\PHPLint\Helper\ProcessHelper;
 use Overtrue\PHPLint\Output\ConsoleOutput;
 use Symfony\Component\Console\Application as BaseApplication;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\HelpCommand;
 use Symfony\Component\Console\Command\ListCommand;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 use function array_keys;
+use function explode;
 use function in_array;
+use function ltrim;
 use function sprintf;
 
 use const STDOUT;
@@ -36,15 +41,26 @@ use const STDOUT;
  * @author Overtrue
  * @author Laurent Laville (since v9.0)
  */
-final class Application extends BaseApplication
+final class Application extends BaseApplication implements ApplicationInterface
 {
     public const NAME = 'phplint';
 
     private const PACKAGE_NAME = 'overtrue/phplint';
 
+    private EventDispatcherInterface $dispatcher;
+
+    private string $defaultCommand;
+
     public function __construct()
     {
         parent::__construct(self::NAME, self::getPrettyVersion());
+        $this->dispatcher = new EventDispatcher();
+        $this->setDispatcher($this->dispatcher);  // mandatory because $dispatcher instance of BaseApplication is private
+    }
+
+    public function getEventDispatcher(): EventDispatcherInterface
+    {
+        return $this->dispatcher;
     }
 
     public function run(?InputInterface $input = null, ?OutputInterface $output = null): int
@@ -52,6 +68,24 @@ final class Application extends BaseApplication
         $output ??= new ConsoleOutput(STDOUT);
 
         return parent::run($input, $output);
+    }
+
+    /**
+     * Mandatory because $defaultCommand instance of BaseApplication is private
+     */
+    public function setDefaultCommand(string $commandName, bool $isSingleCommand = false): static
+    {
+        $this->defaultCommand = explode('|', ltrim($commandName, '|'))[0];
+        parent::setDefaultCommand($commandName, $isSingleCommand);
+        return $this;
+    }
+
+    public function getDefaultCommand(): ?Command
+    {
+        if ('list' === $this->defaultCommand) {
+            return null;
+        }
+        return $this->find($this->defaultCommand);
     }
 
     protected function getDefaultCommands(): array

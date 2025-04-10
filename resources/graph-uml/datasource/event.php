@@ -8,12 +8,10 @@ use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingInterface;
 use Overtrue\PHPLint\Event\BeforeLintFileEvent;
 use Overtrue\PHPLint\Event\BeforeLintFileInterface;
-use Overtrue\PHPLint\Event\EventDispatcher;
 
 function dataSource(): Generator
 {
     $classes = [
-        EventDispatcher::class,
         AfterCheckingEvent::class,
         AfterCheckingInterface::class,
         AfterLintFileEvent::class,

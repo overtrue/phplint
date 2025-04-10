@@ -13,10 +13,10 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Tests\Output;
 
+use DOMException;
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
-use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
 use Overtrue\PHPLint\Output\JunitOutput;
@@ -25,6 +25,7 @@ use Overtrue\PHPLint\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 use Throwable;
 
@@ -48,8 +49,6 @@ final class OutputTest extends TestCase
      */
     protected function setUp(): void
     {
-        $dispatcher = new EventDispatcher([]);
-
         $basePath = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'fixtures';
 
         $arguments = [
@@ -59,14 +58,14 @@ final class OutputTest extends TestCase
             '--' . OptionDefinition::WARNING => true,
             '--' . OptionDefinition::EXTENSIONS => ['php']
         ];
-        $definition = (new LintCommand($dispatcher))->getDefinition();
+        $definition = (new LintCommand())->getDefinition();
         $input = new ArrayInput($arguments, $definition);
 
         $configResolver = new ConsoleOptionsResolver($input);
 
         $finder = new Finder($configResolver);
 
-        $linter = new Linter($configResolver, $dispatcher);
+        $linter = new Linter($configResolver, new EventDispatcher());
 
         $startTime = microtime(true);
         $defaults = ['application_version' => ['short' => '9.x-dev', 'long' => '9.x-dev']];
@@ -75,6 +74,9 @@ final class OutputTest extends TestCase
         $this->linterOutput->setContext($configResolver, $startTime, 2, $defaults);
     }
 
+    /**
+     * @throws DOMException
+     */
     public function testJunitOutput(): void
     {
         $stream = fopen('php://memory', 'w+');

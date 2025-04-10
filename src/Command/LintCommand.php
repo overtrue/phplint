@@ -13,17 +13,17 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Command;
 
-use Overtrue\PHPLint\Client;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
 use Overtrue\PHPLint\Output\LinterOutput;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder as SymfonyFinder;
 use Throwable;
 
@@ -35,15 +35,16 @@ use function microtime;
  * @author Overtrue
  * @author Laurent Laville (since v9.0)
  */
+#[AsCommand(name: 'lint', description: 'Files syntax check only')]
 final class LintCommand extends Command
 {
     use ConfigureCommandTrait;
 
     private LinterOutput $results;
 
-    public function __construct(private readonly EventDispatcherInterface $dispatcher, string $name = 'lint')
+    public function __construct()
     {
-        parent::__construct($name);
+        parent::__construct();
         $this->results = new LinterOutput([], new SymfonyFinder());
     }
 
@@ -54,7 +55,6 @@ final class LintCommand extends Command
 
     protected function configure(): void
     {
-        $this->setDescription('Files syntax check only');
         $this->configureCommand($this);
     }
 
@@ -83,11 +83,14 @@ final class LintCommand extends Command
             $configResolver = new FileOptionsResolver($input);
         }
 
+        /** @var ApplicationInterface|null $application */
+        $application = $this->getApplication(); // @phpstan-ignore varTag.nativeType
+
         $finder = (new Finder($configResolver))->getFiles();
         $linter = new Linter(
             $configResolver,
-            $this->dispatcher,
-            new Client($this->getApplication()),
+            $application->getEventDispatcher(),
+            $application,
             $this->getHelperSet(),
             $output
         );

@@ -13,12 +13,10 @@ require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
-use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
 use Symfony\Component\Console\Input\ArrayInput;
-
-$dispatcher = new EventDispatcher([]);
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 $arguments = [
     'path' => [dirname(__DIR__) . '/src', dirname(__DIR__) . '/tests'],
@@ -28,14 +26,14 @@ $arguments = [
     '--extensions' => ['php'],
     '--warning' => true,
 ];
-$command = new LintCommand($dispatcher);
+$command = new LintCommand();
 $definition = $command->getDefinition();
 $input = new ArrayInput($arguments, $definition);
 
 $configResolver = new ConsoleOptionsResolver($input);
 
 $finder = new Finder($configResolver);
-$linter = new Linter($configResolver, $dispatcher);
+$linter = new Linter($configResolver, new EventDispatcher());
 $results = $linter->lintFiles($finder->getFiles());
 
 var_dump("Files checked :", count($results));

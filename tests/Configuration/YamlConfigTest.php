@@ -17,7 +17,6 @@ use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
-use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -31,8 +30,7 @@ final class YamlConfigTest extends TestCase
     {
         $this->expectException(InvalidOptionsException::class);
 
-        $dispatcher = new EventDispatcher([]);
-        $definition = (new LintCommand($dispatcher))->getDefinition();
+        $definition = (new LintCommand())->getDefinition();
 
         $arguments = ['--configuration' => 'tests/Configuration/invalid_format.yaml'];
         $input = new ArrayInput($arguments, $definition);
@@ -43,8 +41,7 @@ final class YamlConfigTest extends TestCase
     #[DataProvider('commandInputProvider')]
     public function testYamlConfig(array $arguments, callable $fetchExpected): void
     {
-        $dispatcher = new EventDispatcher([]);
-        $definition = (new LintCommand($dispatcher))->getDefinition();
+        $definition = (new LintCommand())->getDefinition();
 
         $input = new ArrayInput($arguments, $definition);
 
