@@ -15,6 +15,7 @@ namespace Overtrue\PHPLint\Console;
 
 use Composer\InstalledVersions;
 use OutOfBoundsException;
+use Overtrue\PHPLint\Extension\ExtensionInterface;
 use Overtrue\PHPLint\Helper\DebugFormatterHelper;
 use Overtrue\PHPLint\Helper\ProcessHelper;
 use Overtrue\PHPLint\Output\ConsoleOutput;
@@ -28,6 +29,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use function array_keys;
 use function explode;
@@ -56,6 +58,34 @@ final class Application extends BaseApplication implements ApplicationInterface
         parent::__construct(self::NAME, self::getPrettyVersion());
         $this->dispatcher = new EventDispatcher();
         $this->setDispatcher($this->dispatcher);  // mandatory because $dispatcher instance of BaseApplication is private
+    }
+
+    public function addExtensions(array $extensions): void
+    {
+        foreach ($extensions as $extension) {
+            if (!$extension instanceof ExtensionInterface) {
+                // accepts only valid extension that should implement this interface
+                continue;
+            }
+
+            foreach ($extension->getCommands() as $command) {
+                // adds extra commands if any provided
+                $this->add($command);
+            }
+
+            $extensionDefinition = $extension->getDefinition();
+
+            // adds extra arguments and options if any provided by extension(s)
+            $defaultCommand = $this->getDefaultCommand(); // @see \Overtrue\PHPLint\Command\LintCommand
+            $definition = $defaultCommand->getDefinition();
+            $definition->addArguments($extensionDefinition->getArguments());
+            $definition->addOptions($extensionDefinition->getOptions());
+            $defaultCommand->setDefinition($definition);
+
+            if ($extension instanceof EventSubscriberInterface) {
+                $this->dispatcher->addSubscriber($extension);
+            }
+        }
     }
 
     public function getEventDispatcher(): EventDispatcherInterface

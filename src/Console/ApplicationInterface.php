@@ -13,11 +13,21 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Console;
 
+use Overtrue\PHPLint\Extension\ExtensionInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
+/**
+ * @author Laurent Laville
+ * @since Release 10.0.0
+ */
 interface ApplicationInterface
 {
+    /**
+     * @param ExtensionInterface[] $extensions
+     */
+    public function addExtensions(array $extensions): void;
+
     public function getEventDispatcher(): EventDispatcherInterface;
 
     public function setDefaultCommand(string $commandName, bool $isSingleCommand = false): static;

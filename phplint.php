@@ -55,4 +55,5 @@ $defaultCommand = new LintCommand();
 $application = new Application();
 $application->add($defaultCommand);
 $application->setDefaultCommand($defaultCommand->getName());
+$application->addExtensions($extensions);
 $application->run($input);
