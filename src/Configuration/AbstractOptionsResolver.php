@@ -36,7 +36,7 @@ abstract class AbstractOptionsResolver implements Resolver
 
         if (null !== $options[OptionDefinition::CACHE]) {
             // "cache" option is deprecated since 9.6.2, use instead "cache-dir" automagically
-            $options[OptionDefinition::CACHE_DIR] = OptionDefinition::CACHE;
+            $options[OptionDefinition::CACHE_DIR] = $options[OptionDefinition::CACHE];
         }
 
         $optionDefaults = [
