@@ -9,13 +9,14 @@
 4. [Show Warnings](#show-warnings)
 5. [Jobs](#jobs)
 6. [Cache](#cache)
-7. [No caching](#no-caching)
-8. [Memory limit](#memory-limit)
-9. [JSON output](#json-output)
-10. [Junit output](#junit-output)
-11. [Checkstyle output](#checkstyle-output)
-12. [SARIF output](#sarif-output)
-13. [Exit Code](#exit-code)
+7. [Cache invalidation](#cache-ttl)
+8. [No caching](#no-caching)
+9. [Memory limit](#memory-limit)
+10. [JSON output](#json-output)
+11. [Junit output](#junit-output)
+12. [Checkstyle output](#checkstyle-output)
+13. [SARIF output](#sarif-output)
+14. [Exit Code](#exit-code)
 
 The `phplint` command relies on a configuration file for loading settings. 
 If a configuration file is not specified through the `--configuration|-c` option, following file will be used : `.phplint.yml`. 
@@ -60,7 +61,22 @@ This setting is used only when the `cache-adapter` is set to `Filesystem` value 
 If you don't want to store results in a sub-folder of your working directory, please specify an absolute path. 
 For example: `/tmp/my-phplint-cache`
 
-NOTE: if you give an empty `cache` setting value, default directory used will be `/tmp/symfony-cache` (See [Symfony Cache component][symfony/cache])
+> [!NOTE]
+> 
+> if you give an empty `cache` setting value, default directory used will be `/tmp/symfony-cache` (See [Symfony Cache component][symfony/cache])
+
+> [!IMPORTANT]
+> 
+> The option `cache` is deprecated and will be removed in version 10, use 'cache-dir' instead.
+
+## Cache invalidation
+
+The `cache-ttl` (`int`|`string` default `3600` seconds => 1 hour) setting was introduced on version 9.6
+to limit cache life of files syntax checking results.
+
+> [!CAUTION]
+> 
+> On previous versions, caching results were permanently stored.
 
 ## No caching
 
