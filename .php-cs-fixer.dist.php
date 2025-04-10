@@ -25,6 +25,7 @@ return (new PhpCsFixer\Config())
         'no_extra_blank_lines' => true,
         'no_leading_import_slash' => true,
         'no_leading_namespace_whitespace' => true,
+        'no_unused_imports' => true,
         'no_whitespace_in_blank_line' => true,
         'return_type_declaration' => ['space_before' => 'none'],
         'single_space_around_construct' => true,
