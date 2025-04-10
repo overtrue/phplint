@@ -9,7 +9,7 @@ We look forward to your contributions! Here are some examples how you can contri
 ## Workflow for Pull Requests
 
 1. Fork the repository.
-2. Create your branch from `main` if you plan to implement new functionality or change existing code significantly.
+2. Create your branch from `9.6` if you plan to implement new functionality or change existing code significantly.
 3. Implement your change and add tests for it.
 4. Ensure the test suite passes.
 5. Ensure the code complies with our coding guidelines.
