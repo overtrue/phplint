@@ -34,6 +34,11 @@ abstract class AbstractOptionsResolver implements Resolver
         $arguments = $input->getArguments();
         $options = $input->getOptions();
 
+        if (null !== $options[OptionDefinition::CACHE]) {
+            // "cache" option is deprecated since 9.6.2, use instead "cache-dir" automagically
+            $options[OptionDefinition::CACHE_DIR] = OptionDefinition::CACHE;
+        }
+
         $optionDefaults = [
             OptionDefinition::PATH => OptionDefinition::DEFAULT_PATH,
             OptionDefinition::CONFIGURATION => OptionDefinition::DEFAULT_CONFIG_FILE,
@@ -42,6 +47,7 @@ abstract class AbstractOptionsResolver implements Resolver
             OptionDefinition::EXTENSIONS => OptionDefinition::DEFAULT_EXTENSIONS,
             OptionDefinition::JOBS => OptionDefinition::DEFAULT_JOBS,
             OptionDefinition::CACHE => OptionDefinition::DEFAULT_CACHE_DIR,
+            OptionDefinition::CACHE_DIR => OptionDefinition::DEFAULT_CACHE_DIR,
             OptionDefinition::NO_CACHE => false,
             OptionDefinition::CACHE_TTL => OptionDefinition::DEFAULT_CACHE_TTL,
             OptionDefinition::PROGRESS => OptionDefinition::DEFAULT_PROGRESS_WIDGET,
@@ -97,6 +103,7 @@ abstract class AbstractOptionsResolver implements Resolver
             OptionDefinition::JOBS,
             OptionDefinition::NO_CACHE,
             OptionDefinition::CACHE,
+            OptionDefinition::CACHE_DIR,
             OptionDefinition::CACHE_TTL,
             OptionDefinition::NO_PROGRESS,
             OptionDefinition::PROGRESS,

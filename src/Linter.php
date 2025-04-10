@@ -75,7 +75,7 @@ final class Linter
             $adapter = new NullAdapter();
         } else {
             $defaultLifetime = $configResolver->getOption(OptionDefinition::CACHE_TTL);
-            $adapter = new FilesystemAdapter('paths', $defaultLifetime, $configResolver->getOption(OptionDefinition::CACHE));
+            $adapter = new FilesystemAdapter('paths', $defaultLifetime, $configResolver->getOption(OptionDefinition::CACHE_DIR));
         }
         $this->cache = new Cache($adapter);
 

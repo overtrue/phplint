@@ -67,6 +67,12 @@ trait ConfigureCommandTrait
                 'cache',
                 null,
                 InputOption::VALUE_REQUIRED,
+                'Path to the cache directory (<comment>Deprecated option, use "cache-dir" instead</comment>)'
+            )
+            ->addOption(
+                'cache-dir',
+                null,
+                InputOption::VALUE_REQUIRED,
                 'Path to the cache directory'
             )
             ->addOption(

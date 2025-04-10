@@ -69,6 +69,14 @@ For example: `/tmp/my-phplint-cache`
 > 
 > The option `cache` is deprecated and will be removed in version 10, use 'cache-dir' instead.
 
+## Cache Directory
+
+The `cache-dir` (`string` default `.phplint.cache`) setting identify the local directory where to save lint results.
+
+> [!IMPORTANT]
+>
+> This option replace the `cache` legacy option
+
 ## Cache invalidation
 
 The `cache-ttl` (`int`|`string` default `3600` seconds => 1 hour) setting was introduced on version 9.6

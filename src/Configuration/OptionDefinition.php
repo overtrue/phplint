@@ -24,7 +24,8 @@ interface OptionDefinition
     public const EXCLUDE = 'exclude';
     public const EXTENSIONS = 'extensions';
     public const WARNING = 'warning';
-    public const CACHE = 'cache';
+    public const CACHE = 'cache';   // @deprecated Will be removed in version 10.0, use CACHE_DIR instead
+    public const CACHE_DIR = 'cache-dir';
     public const NO_CACHE = 'no-cache';
     public const CACHE_TTL = 'cache-ttl';
     public const CONFIGURATION = 'configuration';

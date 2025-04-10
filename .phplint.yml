@@ -10,3 +10,4 @@ warning: true
 memory-limit: -1
 no-cache: false
 cache-ttl: 0
+#cache-dir: /tmp/symfony-cache

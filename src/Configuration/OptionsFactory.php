@@ -37,6 +37,12 @@ class OptionsFactory implements Options
         $resolver = new OptionsResolver();
         $this->configureOptions($resolver);
         $resolver->setDefaults($this->defaults);
+        $resolver->setDeprecated(
+            OptionDefinition::CACHE,
+            'overtrue/phplint',
+            '9.6.2',
+            'The option "%name%" is deprecated and will be removed in the future, use "cache-dir" instead'
+        );
         return $resolver->resolve();
     }
 
@@ -50,6 +56,7 @@ class OptionsFactory implements Options
             OptionDefinition::CONFIGURATION => 'string',
             OptionDefinition::NO_CONFIGURATION => 'bool',
             OptionDefinition::CACHE => ['null', 'string'],
+            OptionDefinition::CACHE_DIR => ['null', 'string'],
             OptionDefinition::CACHE_TTL => ['int', 'string'],
             OptionDefinition::NO_CACHE => 'bool',
             OptionDefinition::PROGRESS => ['null', 'string'],
