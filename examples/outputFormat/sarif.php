@@ -16,7 +16,6 @@ declare(strict_types=1);
  * @since Release 9.4.0
  */
 
-use Bartlett\Sarif\Contract\ConverterInterface;
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Event\EventDispatcher;
