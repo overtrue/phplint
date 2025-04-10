@@ -6,15 +6,6 @@ We look forward to your contributions! Here are some examples how you can contri
 - Suggest a new feature
 - Send a pull request
 
-**WARNING** : Since version 9.1.0, PHPLint enforce QA by verify if the Application Version is the last one identified 
-into the `src/Console/Application.php` file.
-This verification is only executed when you try to push code to the remote repository.
-To avoid such check, use the `git push --no-verify` syntax. 
-
-This check is only for maintainers of this project to prepare a new release and forgot to bump `Application::VERSION`.
-
-![pre-push git hook](./assets/pre-push-hook.png)
-
 ## Workflow for Pull Requests
 
 1. Fork the repository.
@@ -29,7 +20,7 @@ This check is only for maintainers of this project to prepare a new release and 
 Before starting to contribute to this project, you first need to install code from GitHub:
 
 ```shell 
-git clone --branch main https://github.com/overtrue/phplint.git
+git clone --branch 9.6 https://github.com/overtrue/phplint.git
 cd phplint 
 composer update
 ```
