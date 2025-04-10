@@ -36,11 +36,9 @@ use Throwable;
 use function array_chunk;
 use function array_push;
 use function count;
-use function max;
 use function md5_file;
 use function microtime;
 use function phpversion;
-use function strip_tags;
 use function version_compare;
 
 /**
@@ -73,10 +71,10 @@ final class Linter
         $this->warning = $configResolver->getOption(OptionDefinition::WARNING);
 
         if ($configResolver->getOption(OptionDefinition::NO_CACHE)) {
-            $defaultLifetime = 0;
+            $defaultLifetime = OptionDefinition::DEFAULT_CACHE_TTL;
             $adapter = new NullAdapter();
         } else {
-            $defaultLifetime = max(0, $configResolver->getOption(OptionDefinition::CACHE_TTL));
+            $defaultLifetime = $configResolver->getOption(OptionDefinition::CACHE_TTL);
             $adapter = new FilesystemAdapter('paths', $defaultLifetime, $configResolver->getOption(OptionDefinition::CACHE));
         }
         $this->cache = new Cache($adapter);

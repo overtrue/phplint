@@ -74,8 +74,8 @@ trait ConfigureCommandTrait
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Limit cached data for a period of time'
-                . ' (<info>0: store permanently, >0: time to live in seconds</info>)'
-                . ' <comment>default: ' . OptionDefinition::DEFAULT_CACHE_TTL . '</comment>',
+                . ' (<info>>0: time to live in seconds</info>)',
+                OptionDefinition::DEFAULT_CACHE_TTL
             )
             ->addOption(
                 'no-cache',

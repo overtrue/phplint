@@ -17,6 +17,7 @@ use Symfony\Component\OptionsResolver\Options as SymfonyOptions;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use function array_keys;
+use function intval;
 
 /**
  * @author Laurent Laville
@@ -89,6 +90,10 @@ class OptionsFactory implements Options
 
         $resolver->setNormalizer(OptionDefinition::CACHE_TTL, function (SymfonyOptions $options, $value) {
             return (int) $value;
+        });
+
+        $resolver->setAllowedValues(OptionDefinition::CACHE_TTL, function (string $value) {
+            return (intval($value) > 0);
         });
     }
 }
