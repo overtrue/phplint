@@ -46,9 +46,15 @@ jobs:
           composer-options: "--prefer-dist"
 
       -   # https://github.com/phpbench/phpbench
+        name: Install PHPBench
+        run: |
+          curl -Ls https://github.com/phpbench/phpbench/releases/download/1.4.1/phpbench.phar -o /usr/local/bin/phpbench
+          chmod +x /usr/local/bin/phpbench
+
+      -   # https://github.com/phpbench/phpbench
         name: Benchmark Baseline
         run: |
-          vendor/bin/phpbench run tests/Benchmark --progress=none --tag=baseline 
+          phpbench run tests/Benchmark --progress=none --tag=baseline 
 
       -   # https://github.com/actions/checkout
         name: Checkout Code
@@ -62,7 +68,7 @@ jobs:
       -   # https://github.com/phpbench/phpbench
         name: Benchmark Report
         run: |
-          vendor/bin/phpbench run tests/Benchmark --progress=none --tag=fixed --ref=baseline --report=benchmark_compare --output=html
+          phpbench run tests/Benchmark --progress=none --tag=fixed --ref=baseline --report=benchmark_compare --output=html
 
       -   # https://github.com/actions/upload-artifact
         name: Upload PHPBench report
