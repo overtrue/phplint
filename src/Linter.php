@@ -258,6 +258,7 @@ final class Linter
         }
 
         $command[] = '-l';
+        $command[] = '-n';
         array_push($command, ...$files);
 
         return (new LintProcess($command))->setFiles($files);
