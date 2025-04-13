@@ -20,6 +20,7 @@ use PhpBench\Attributes as Bench;
 use Symfony\Component\Console\Tester\CommandTester;
 use Throwable;
 
+use function array_merge;
 use function dirname;
 
 /**
@@ -30,21 +31,33 @@ use function dirname;
 #[Bench\Iterations(10)]
 final class LintCommandBench
 {
+    /**
+     * @throws Throwable
+     */
     public function benchDefaultConfiguration(): void
     {
         $this->runCommand([]);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function benchJobs10(): void
     {
         $this->runCommand(['--jobs' => 10]);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function benchJobs100(): void
     {
         $this->runCommand(['--jobs' => 100]);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function benchJobs1000(): void
     {
         $this->runCommand(['--jobs' => 1000]);
@@ -55,7 +68,7 @@ final class LintCommandBench
      */
     private function runCommand(array $arguments): void
     {
-        $arguments = \array_merge([
+        $arguments = array_merge([
             'path' => [dirname(__DIR__, 4) . '/vendor-bin/phpunit/vendor/phpunit/phpunit/src'],
             '--no-cache' => true,
             '--no-configuration' => true,
