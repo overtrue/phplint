@@ -16,21 +16,65 @@ namespace Overtrue\PHPLint\Extension;
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\AfterCheckingInterface;
 use Overtrue\PHPLint\Output\ChainOutput;
 use Overtrue\PHPLint\Output\FormatResolver;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+use function get_class;
+use function ltrim;
+use function preg_replace;
+use function strrchr;
+use function strtolower;
+use function substr;
 
 /**
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-final class OutputFormat implements EventSubscriberInterface, AfterCheckingInterface
+final class OutputManager implements
+    ExtensionInterface,
+    EventSubscriberInterface,
+    AfterCheckingInterface
 {
     private array $handlers = [];
+
+    public function getName(): string
+    {
+        $shortClassName = substr(strrchr(get_class($this), '\\'), 1);
+        // @see https://stackoverflow.com/questions/1993721/how-to-convert-pascalcase-to-snake-case
+        return ltrim(strtolower(preg_replace('/[A-Z]([A-Z](?![a-z]))*/', '_$0', $shortClassName)), '_');
+    }
+
+    public static function getCommands(): array
+    {
+        return [];
+    }
+
+    public static function getDefinition(): InputDefinition
+    {
+        return new InputDefinition([
+            new InputOption(
+                'format',
+                null,
+                InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+                'Format of requested reports'
+            ),
+            new InputOption(
+                'output',
+                'o',
+                InputOption::VALUE_REQUIRED,
+                'Generate an output to the specified path'
+                . ' (<comment>default: ' . OptionDefinition::DEFAULT_STANDARD_OUTPUT_LABEL . '</comment>)'
+            )
+        ]);
+    }
 
     public static function getSubscribedEvents(): array
     {
