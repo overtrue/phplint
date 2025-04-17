@@ -23,6 +23,7 @@ use Symfony\Component\Console\Application as BaseApplication;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\HelpCommand;
 use Symfony\Component\Console\Command\ListCommand;
+use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\InputInterface;
@@ -51,7 +52,7 @@ final class Application extends BaseApplication implements ApplicationInterface
 
     private EventDispatcherInterface $dispatcher;
 
-    private string $defaultCommand;
+    private string $defaultCommand = 'list';
 
     public function __construct()
     {
@@ -73,14 +74,16 @@ final class Application extends BaseApplication implements ApplicationInterface
                 $this->add($command);
             }
 
-            $extensionDefinition = $extension->getDefinition();
-
             // adds extra arguments and options if any provided by extension(s)
-            $defaultCommand = $this->getDefaultCommand(); // @see \Overtrue\PHPLint\Command\LintCommand
-            $definition = $defaultCommand->getDefinition();
-            $definition->addArguments($extensionDefinition->getArguments());
-            $definition->addOptions($extensionDefinition->getOptions());
-            $defaultCommand->setDefinition($definition);
+            $defaultCommand = $this->getDefaultCommand();
+
+            if (null !== $defaultCommand) {
+                $extensionDefinition = $extension->getDefinition();
+                $definition = $defaultCommand->getDefinition();
+                $definition->addArguments($extensionDefinition->getArguments());
+                $definition->addOptions($extensionDefinition->getOptions());
+                $defaultCommand->setDefinition($definition);
+            }
 
             if ($extension instanceof EventSubscriberInterface) {
                 $this->dispatcher->addSubscriber($extension);
@@ -115,7 +118,11 @@ final class Application extends BaseApplication implements ApplicationInterface
         if ('list' === $this->defaultCommand) {
             return null;
         }
-        return $this->find($this->defaultCommand);
+        try {
+            return $this->find($this->defaultCommand);
+        } catch (CommandNotFoundException) {
+            return null;
+        }
     }
 
     protected function getDefaultCommands(): array
