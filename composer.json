@@ -26,13 +26,13 @@
     "ext-json": "*",
     "ext-mbstring": "*",
     "composer-runtime-api": "^2.0",
-    "symfony/cache": "^6.4 || ^7.0",
-    "symfony/console": "^6.4 || ^7.0",
-    "symfony/event-dispatcher": "^6.4 || ^7.0",
-    "symfony/finder": "^6.4 || ^7.0",
-    "symfony/options-resolver": "^6.4 || ^7.0",
-    "symfony/process": "^6.4 || ^7.0",
-    "symfony/yaml": "^6.4 || ^7.0"
+    "symfony/cache": "^6.4 || ^7.0 || ^8.0",
+    "symfony/console": "^6.4 || ^7.0 || ^8.0",
+    "symfony/event-dispatcher": "^6.4 || ^7.0 || ^8.0",
+    "symfony/finder": "^6.4 || ^7.0 || ^8.0",
+    "symfony/options-resolver": "^6.4 || ^7.0 || ^8.0",
+    "symfony/process": "^6.4 || ^7.0 || ^8.0",
+    "symfony/yaml": "^6.4 || ^7.0 || ^8.0"
   },
   "require-dev": {
     "php-parallel-lint/php-console-highlighter": "^1.0",
