@@ -1,0 +1,13 @@
+{
+    "pre-commit": {
+        "enabled": true,
+        "actions": [
+            {
+                "action": "{$ENV|value-of:VENDOR_BIN_DIR|default:./bin/}phplint --configuration=.phplint.yml.dist -v --ansi {$STAGED_FILES|of-type:php|separated-by: }",
+                "config": {
+                    "label": "Lint Files (with PHPLint)"
+                }
+            }
+        ]
+    }
+}

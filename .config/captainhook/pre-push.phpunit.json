@@ -1,0 +1,13 @@
+{
+    "pre-push": {
+        "enabled": true,
+        "actions": [
+            {
+                "action": "{$ENV|value-of:VENDOR_BIN_DIR|default:vendor/bin/}phpunit --configuration phpunit.xml.dist",
+                "config": {
+                    "label": "Unit Tests (with PHPUnit)"
+                }
+            }
+        ]
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "config": {
+        "verbosity": "normal",
+        "allow-failure": false,
+        "ansi-colors": true,
+        "git-directory": ".git",
+        "fail-on-first-error": true,
+        "plugins": [],
+        "includes": [
+            ".config/captainhook/pre-push.phpstan.json",
+            ".config/captainhook/pre-push.phpunit.json",
+            ".config/captainhook/pre-commit.phplint.json",
+            ".config/captainhook/pre-commit.phpcs-fixer.json"
+        ]
+    }
+}

@@ -1,0 +1,5 @@
+{
+    "require-dev": {
+        "captainhook/captainhook": "^5.27"
+    }
+}

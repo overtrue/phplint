@@ -1,0 +1,13 @@
+{
+    "pre-push": {
+        "enabled": true,
+        "actions": [
+            {
+                "action": "{$ENV|value-of:VENDOR_BIN_DIR|default:vendor/bin/}phpstan analyse --configuration phpstan.neon.dist --verbose --ansi",
+                "config": {
+                    "label": "Static Analysis (with PHPStan)"
+                }
+            }
+        ]
+    }
+}

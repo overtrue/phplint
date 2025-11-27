@@ -1,0 +1,13 @@
+{
+    "pre-commit": {
+        "enabled": true,
+        "actions": [
+            {
+                "action": "{$ENV|value-of:VENDOR_BIN_DIR|default:vendor/bin/}php-cs-fixer fix --dry-run --config=.php-cs-fixer.dist.php --using-cache=no --verbose --ansi {$STAGED_FILES|of-type:php|separated-by: }",
+                "config": {
+                    "label": "Checks Coding Standard (with PHP-CS-Fixer)"
+                }
+            }
+        ]
+    }
+}
