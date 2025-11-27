@@ -19,7 +19,6 @@ jobs:
           - "ubuntu-22.04"
 
         php-version:
-          - "8.1"
           - "8.2"
           - "8.3"
           - "8.4"
@@ -43,8 +42,7 @@ jobs:
         with:
           composer-options: "--prefer-dist --no-scripts"
 
-      -   # https://github.com/sebastianbergmann/phpunit/tree/10.5
-          # https://github.com/sebastianbergmann/phpunit/tree/11.5
+      -   # https://github.com/sebastianbergmann/phpunit/tree/11.5
           # https://github.com/sebastianbergmann/phpunit/tree/12.4
         name: Unit tests with PHPUnit
         run: vendor/bin/phpunit --no-progress --testdox --do-not-cache-result

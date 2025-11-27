@@ -18,7 +18,6 @@ jobs:
           - "ubuntu-22.04"
 
         php-version:
-          - "8.1"
           - "8.2"
           - "8.3"
           - "8.4"
@@ -30,7 +29,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: "9.6.2"
+          ref: "9.6.3"
           repository: "overtrue/phplint"
 
       -   # https://github.com/shivammathur/setup-php
@@ -49,7 +48,7 @@ jobs:
       -   # https://github.com/phpbench/phpbench
         name: Install PHPBench
         run: |
-          curl -Ls https://github.com/phpbench/phpbench/releases/download/1.4.1/phpbench.phar -o /usr/local/bin/phpbench
+          curl -Ls https://github.com/phpbench/phpbench/releases/download/1.4.3/phpbench.phar -o /usr/local/bin/phpbench
           chmod +x /usr/local/bin/phpbench
 
       -   # https://github.com/phpbench/phpbench
