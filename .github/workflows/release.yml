@@ -27,7 +27,7 @@ jobs:
     steps:
       -   # https://github.com/actions/checkout
         name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       -   # https://github.com/shivammathur/setup-php
         name: Setup PHP runtime
