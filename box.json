@@ -10,7 +10,7 @@
     "with this source code in the file LICENSE."
   ],
   "force-autodiscovery": true,
-  "dump-autoload": true,
+  "dump-autoload": false,
   "exclude-dev-files": false,
   "files": [
     "autoload.php",
