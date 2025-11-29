@@ -35,6 +35,7 @@ jobs:
         with:
           php-version: "${{ matrix.php-version }}"
           coverage: "none"
+          tools: phpunit:11.5
 
       -   # https://github.com/ramsey/composer-install
         name: Install Composer dependencies
@@ -43,6 +44,5 @@ jobs:
           composer-options: "--prefer-dist --no-scripts"
 
       -   # https://github.com/sebastianbergmann/phpunit/tree/11.5
-          # https://github.com/sebastianbergmann/phpunit/tree/12.4
         name: Unit tests with PHPUnit
-        run: vendor/bin/phpunit --no-progress --testdox --do-not-cache-result
+        run: phpunit --no-progress --testdox --do-not-cache-result
