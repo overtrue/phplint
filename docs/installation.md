@@ -8,13 +8,13 @@
 
 ## Requirements
 
-| Version | Status                                    | Requirements   |
-|:--------|:------------------------------------------|:---------------|
-| **9.x** | **Active development**                    | **PHP >= 8.1** |
-| 6.x     | End Of Life                               | PHP >= 8.2     |
-| 5.x     | End Of Life                               | PHP >= 8.1     |
-| 4.x     | End Of Life                               | PHP >= 8.0     |
-| 3.x     | End Of Life                               | PHP >= 7.4     |
+| Version | Status                 | Requirements   |
+|:--------|:-----------------------|:---------------|
+| **9.x** | **Active development** | **PHP >= 8.1** |
+| 6.x     | End Of Life            | PHP >= 8.2     |
+| 5.x     | End Of Life            | PHP >= 8.1     |
+| 4.x     | End Of Life            | PHP >= 8.0     |
+| 3.x     | End Of Life            | PHP >= 7.4     |
 
 ## PHAR
 
@@ -50,7 +50,7 @@ You can also install `phplint` locally to your project with [Phive][phive] and c
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <phive xmlns="https://phar.io/phive">
-    <phar name="overtrue/phplint" version="^9.6" copy="false" />
+    <phar name="overtrue/phplint" version="^9.7" copy="false" />
 </phive>
 ```
 
@@ -63,7 +63,7 @@ phive install --force-accept-unsigned
 You can install `phplint` with [Composer][composer]
 
 ```shell
-composer global require overtrue/phplint ^9.6
+composer global require overtrue/phplint ^9.7
 ```
 
 If you cannot install it because of a dependency conflict, or you prefer to install it for your project, we recommend

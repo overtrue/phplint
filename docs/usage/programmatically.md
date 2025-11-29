@@ -21,8 +21,7 @@ $arguments = [
     '--warning' => true,
 ];
 $command = new LintCommand($dispatcher);
-$definition = $command->getDefinition();
-$input = new ArrayInput($arguments, $definition);
+$input = new ArrayInput($arguments, $command->getDefinition());
 
 $configResolver = new ConsoleOptionsResolver($input);
 

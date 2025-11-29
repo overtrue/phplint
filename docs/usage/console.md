@@ -41,7 +41,9 @@ Options:
   -j, --jobs=JOBS                    Number of paralleled jobs to run
   -c, --configuration=CONFIGURATION  Read configuration from config file [default: ".phplint.yml"]
       --no-configuration             Ignore default configuration file (.phplint.yml)
-      --cache=CACHE                  Path to the cache directory
+      --cache=CACHE                  Path to the cache directory (Deprecated option, use "cache-dir" instead)
+      --cache-dir=CACHE-DIR          Path to the cache directory
+      --cache-ttl=CACHE-TTL          Limit cached data for a period of time (>0: time to live in seconds) [default: 3600]
       --no-cache                     Ignore cached data
   -p, --progress=PROGRESS            Show the progress output
       --no-progress                  Hide the progress output
@@ -52,7 +54,8 @@ Options:
       --ignore-exit-code             Ignore exit codes so there are no "failure" exit code even when no files processed
       --bootstrap=BOOTSTRAP          A PHP script that is included before the linter run
   -h, --help                         Display help for the given command. When no command is given display help for the lint command
-  -q, --quiet                        Do not output any message
+      --silent                       Do not output any message
+  -q, --quiet                        Only errors are displayed. All other output is suppressed
   -V, --version                      Display this application version
       --ansi|--no-ansi               Force (or disable --no-ansi) ANSI output
   -n, --no-interaction               Do not ask any interactive question
