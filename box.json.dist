@@ -12,6 +12,11 @@
   "force-autodiscovery": true,
   "dump-autoload": false,
   "exclude-dev-files": false,
+  "directories": [
+    "bin",
+    "src",
+    "vendor"
+  ],
   "files": [
     "autoload.php",
     "phplint.php"
