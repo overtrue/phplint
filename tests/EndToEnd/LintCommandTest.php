@@ -43,7 +43,7 @@ final class LintCommandTest extends TestCase
         $this->command = new LintCommand($dispatcher);
 
         $application = new Application();
-        $application->add($this->command);
+        $application->addCommand($this->command);
         $application->setDefaultCommand($this->command->getName());
         $application->setDispatcher($dispatcher);
 
