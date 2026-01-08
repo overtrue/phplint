@@ -1,0 +1,11 @@
+{
+  "require-dev": {
+    "symfony/cache": "^7.4 || ^8.0",
+    "symfony/console": "^7.4 || ^8.0",
+    "symfony/event-dispatcher": "^7.4 || ^8.0",
+    "symfony/finder": "^7.4 || ^8.0",
+    "symfony/options-resolver": "^7.4 || ^8.0",
+    "symfony/process": "^7.4 || ^8.0",
+    "symfony/yaml": "^7.4 || ^8.0"
+  }
+}

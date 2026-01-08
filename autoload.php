@@ -13,49 +13,75 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint;
 
+use RuntimeException;
+
+use function basename;
+use function dirname;
+use function file_exists;
+use function implode;
+use function spl_autoload_register;
+use function sprintf;
+
+use const DIRECTORY_SEPARATOR;
+
 if (class_exists(__NAMESPACE__ . '\Autoload', false) === false) {
     class Autoload
     {
         /**
          * The composer autoloader.
-         *
-         * @var \Composer\Autoload\ClassLoader
          */
-        private static $composerAutoloader = null;
+        private static ?\Composer\Autoload\ClassLoader $composerAutoloader = null;
 
         public static function load(string $class): void
         {
             if (self::$composerAutoloader === null) {
-                self::$composerAutoloader = require self::getAutoloadFile();
+                if (isset($GLOBALS['_composer_autoload_path'])) {
+                    $possibleAutoloadPaths = [
+                        dirname($GLOBALS['_composer_autoload_path'])
+                    ];
+                    $autoloader = basename($GLOBALS['_composer_autoload_path']);
+                } else {
+                    $possibleAutoloadPaths = [
+                        // local dev repository
+                        __DIR__,
+                        // dependency
+                        dirname(__DIR__, 3),
+                    ];
+                    $autoloader = 'vendor/autoload.php';
+                }
+
+                self::$composerAutoloader = require self::getAutoloadFile($possibleAutoloadPaths, $autoloader);
             }
 
-            self::$composerAutoloader->loadClass($class);
+            $classLoaded = self::$composerAutoloader->loadClass($class);
+
+            if ($classLoaded === true) {
+                return;
+            }
+
+            $possibleAutoloadPaths = [
+                // local dependencies for dev
+                __DIR__ . '/vendor-bin/symfony-6.4LTS/',
+                __DIR__ . '/vendor-bin/symfony-7.4LTS/',
+            ];
+            $autoloader = 'vendor/autoload.php';
+            try {
+                $optionalAutoloader = require self::getAutoloadFile($possibleAutoloadPaths, $autoloader);
+                $optionalAutoloader->loadClass($class);
+            } catch (RuntimeException $e) {
+                // unable to find additional/optional dev deps: it's not an error
+            }
         }
 
-        private static function getAutoloadFile(): string
+        private static function getAutoloadFile(array $possibleAutoloadPaths, string $autoloader): string
         {
-            if (isset($GLOBALS['_composer_autoload_path'])) {
-                $possibleAutoloadPaths = [
-                    dirname($GLOBALS['_composer_autoload_path'])
-                ];
-                $autoloader = basename($GLOBALS['_composer_autoload_path']);
-            } else {
-                $possibleAutoloadPaths = [
-                    // local dev repository
-                    __DIR__,
-                    // dependency
-                    dirname(__DIR__, 3),
-                ];
-                $autoloader = 'vendor/autoload.php';
-            }
-
             foreach ($possibleAutoloadPaths as $possibleAutoloadPath) {
                 if (file_exists($possibleAutoloadPath . DIRECTORY_SEPARATOR . $autoloader)) {
                     return $possibleAutoloadPath . DIRECTORY_SEPARATOR . $autoloader;
                 }
             }
 
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 sprintf(
                     'Unable to find "%s" in "%s" paths.',
                     $autoloader,
