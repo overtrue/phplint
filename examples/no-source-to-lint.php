@@ -11,7 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-require_once dirname(__DIR__) . '/vendor/autoload.php';
+require_once dirname(__DIR__) . '/autoload.php';
 
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
