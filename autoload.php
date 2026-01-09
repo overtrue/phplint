@@ -73,7 +73,7 @@ if (class_exists(__NAMESPACE__ . '\Autoload', false) === false) {
                 return;
             }
 
-            self::$optionalAutoloader->loadClass($class);
+            self::$optionalAutoloader?->loadClass($class);
         }
 
         private static function getAutoloadFile(array $possibleAutoloadPaths, string $autoloader): string
