@@ -2,10 +2,45 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - "[0-9]+.[0-9]+.[0-9]+"
   workflow_dispatch:
+    # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#onworkflow_dispatchinputs
+    inputs:
+      operating-system:
+        description: "OS name and version runtime"
+        required: false
+        default: "ubuntu-22.04"
+        type: string
+      php-version:
+        description: "PHP runtime version in format Major.minor"
+        required: false
+        default: "8.2"
+        type: string
+      composer-options:
+        description: "Composer options for ramsey/composer-install GitHub Action"
+        required: false
+        default: "--prefer-dist --no-scripts"
+        type: string
+      box-output:
+        description: "Path to the PHP Archive made by the BOX"
+        required: true
+        default: "bin/phplint.phar"
+        type: string
+      box-manifest-version:
+        # https://github.com/llaville/box-manifest
+        description: "BOX Manifest runtime version in semver format"
+        required: false
+        default: "4.2.0"
+        type: string
+      box-manifest-options:
+        description: "Additional options to pass to BOX Manifest (e.g. `--bootstrap bootstrap.php -r plain.txt -r sbom.json`)"
+        required: false
+        default: "-r console-table.txt -r plain.txt -r sbom.json"
+        type: string
+      tag-name:
+        description: "New Release Tag"
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: write
@@ -18,9 +53,9 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-22.04
+          - ${{ inputs.operating-system }}
         php:
-          - 8.2
+          - ${{ inputs.php-version }}
         tools:
           - box:4.6  # available since https://github.com/shivammathur/setup-php/releases/tag/2.27.0
 
@@ -41,12 +76,12 @@ jobs:
         name: Install Composer dependencies
         uses: ramsey/composer-install@v3
         with:
-          composer-options: "--prefer-dist"
+          composer-options: ${{ inputs.composer-options }}
 
       -   # https://github.com/llaville/box-manifest
         name: Download BOX Manifest Artifact
         env:
-          BOX_MANIFEST_VERSION: ${{ vars.BOX_MANIFEST_VERSION || '4.2.0' }}
+          BOX_MANIFEST_VERSION: ${{ inputs.box-manifest-version }}
         run: |
           curl -Ls "https://github.com/llaville/box-manifest/releases/download/$BOX_MANIFEST_VERSION/box-manifest.phar" -o /usr/local/bin/box-manifest
           chmod +x /usr/local/bin/box-manifest
@@ -54,19 +89,18 @@ jobs:
       -   # https://github.com/llaville/box-manifest
         name: Build Release Artifact
         run: |
-          box-manifest make build stub configure -r console-table.txt -r plain.txt -r sbom.json --output-stub stub.php --output-conf box.json.dist -vvv --ansi
+          box-manifest make build stub configure ${{ inputs.box-manifest-options }} --output-stub stub.php --output-conf box.json.dist -vvv --ansi
           box compile -c box.json.dist -vvv --ansi
 
       -   # https://github.com/softprops/action-gh-release
-        name: Create Release from current tag
-        if: github.ref_type == 'tag'
+        name: Create Release
+        if: inputs.tag-name != ''
         uses: softprops/action-gh-release@v2
         with:  # https://github.com/softprops/action-gh-release#-customizing
           prerelease: false
           draft: false
-          body_path: ${{ github.workspace }}/.changes/${{ github.ref_name }}.md
+          body_path: ${{ github.workspace }}/.changes/${{ inputs.tag-name }}.md
           # https://github.com/softprops/action-gh-release#%EF%B8%8F-uploading-release-assets
-          files:
-            ${{ github.workspace }}/bin/phplint.phar
+          files: ${{ github.workspace }}/${{ inputs.box-output }}
           fail_on_unmatched_files: true
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ inputs.tag-name }}
