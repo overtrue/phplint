@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: "9.6.3"
+          ref: "9.7.1"
           repository: "overtrue/phplint"
 
       -   # https://github.com/shivammathur/setup-php
@@ -61,7 +61,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: "9.6"
+          ref: "9.7"
           repository: "overtrue/phplint"
           clean: false
 
