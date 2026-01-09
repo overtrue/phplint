@@ -31,6 +31,7 @@ if (class_exists(__NAMESPACE__ . '\Autoload', false) === false) {
          * The composer autoloader.
          */
         private static ?\Composer\Autoload\ClassLoader $composerAutoloader = null;
+        private static ?\Composer\Autoload\ClassLoader $optionalAutoloader = null;
 
         public static function load(string $class): void
         {
@@ -51,6 +52,19 @@ if (class_exists(__NAMESPACE__ . '\Autoload', false) === false) {
                 }
 
                 self::$composerAutoloader = require self::getAutoloadFile($possibleAutoloadPaths, $autoloader);
+
+                $possibleAutoloadPaths = [
+                    // local dependencies for dev
+                    __DIR__ . '/vendor-bin/symfony-6.4LTS',
+                    __DIR__ . '/vendor-bin/symfony-7.4LTS',
+                ];
+                $autoloader = 'vendor/autoload.php';
+
+                try {
+                    self::$optionalAutoloader = require self::getAutoloadFile($possibleAutoloadPaths, $autoloader);
+                } catch (RuntimeException $e) {
+                    // unable to find additional/optional dev deps: it's not an error
+                }
             }
 
             $classLoaded = self::$composerAutoloader->loadClass($class);
@@ -59,18 +73,7 @@ if (class_exists(__NAMESPACE__ . '\Autoload', false) === false) {
                 return;
             }
 
-            $possibleAutoloadPaths = [
-                // local dependencies for dev
-                __DIR__ . '/vendor-bin/symfony-6.4LTS/',
-                __DIR__ . '/vendor-bin/symfony-7.4LTS/',
-            ];
-            $autoloader = 'vendor/autoload.php';
-            try {
-                $optionalAutoloader = require self::getAutoloadFile($possibleAutoloadPaths, $autoloader);
-                $optionalAutoloader->loadClass($class);
-            } catch (RuntimeException $e) {
-                // unable to find additional/optional dev deps: it's not an error
-            }
+            self::$optionalAutoloader->loadClass($class);
         }
 
         private static function getAutoloadFile(array $possibleAutoloadPaths, string $autoloader): string
