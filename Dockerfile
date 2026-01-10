@@ -32,7 +32,6 @@ USER appuser
 # Install Composer v2 binary then package
 COPY --from=composer/composer:2-bin /composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER 1
-#RUN composer global require --no-progress overtrue/phplint $PACKAGE_CONSTRAINT
 
 RUN composer global require --no-progress \
   overtrue/phplint "$PACKAGE_CONSTRAINT" \
