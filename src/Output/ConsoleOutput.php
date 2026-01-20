@@ -170,9 +170,7 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
 
         $maxColumn = $this->lineLength - 2 - strlen('[ XX ]') - strlen(' / (XXX%)') - (2 * $maxStepsLen);
 
-        $withColor = function (string $color, string $indicator) {
-            return sprintf('<%s>%s</>', $color, $indicator);
-        };
+        $withColor = fn (string $color, string $indicator) => sprintf('<%s>%s</>', $color, $indicator);
 
         if ($this->isDebug()) {
             $filename = $fileInfo->getRelativePathname();

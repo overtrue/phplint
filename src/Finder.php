@@ -74,9 +74,7 @@ final class Finder implements JsonSerializable
         $finder = new SymfonyFinder();
         $finder->files()
             ->ignoreUnreadableDirs()
-            ->filter(function (SplFileInfo $file) {
-                return $file->isReadable();
-            })
+            ->filter(fn (SplFileInfo $file) => $file->isReadable())
             ->name(sprintf('/\\.(%s)$/', implode('|', $this->extensions)))
             ->notPath($this->excludes)
             ->in(realpath($dir));

@@ -83,24 +83,14 @@ class OptionsFactory implements Options
             $resolver->setAllowedTypes($option, $allowedTypes);
         }
 
-        $resolver->setNormalizer(OptionDefinition::PATH, function (SymfonyOptions $options, $value) {
-            return (array) $value;
-        });
+        $resolver->setNormalizer(OptionDefinition::PATH, fn (SymfonyOptions $options, $value) => (array) $value);
 
-        $resolver->setNormalizer(OptionDefinition::JOBS, function (SymfonyOptions $options, $value) {
-            return (int) $value;
-        });
+        $resolver->setNormalizer(OptionDefinition::JOBS, fn (SymfonyOptions $options, $value) => (int) $value);
 
-        $resolver->setNormalizer(OptionDefinition::OUTPUT_FORMAT, function (SymfonyOptions $options, $value) {
-            return (array) $value;
-        });
+        $resolver->setNormalizer(OptionDefinition::OUTPUT_FORMAT, fn (SymfonyOptions $options, $value) => (array) $value);
 
-        $resolver->setNormalizer(OptionDefinition::CACHE_TTL, function (SymfonyOptions $options, $value) {
-            return (int) $value;
-        });
+        $resolver->setNormalizer(OptionDefinition::CACHE_TTL, fn (SymfonyOptions $options, $value) => (int) $value);
 
-        $resolver->setAllowedValues(OptionDefinition::CACHE_TTL, function (string $value) {
-            return (intval($value) > 0);
-        });
+        $resolver->setAllowedValues(OptionDefinition::CACHE_TTL, fn (string $value) => (intval($value) > 0));
     }
 }
