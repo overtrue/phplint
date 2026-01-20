@@ -83,14 +83,14 @@ class OptionsFactory implements Options
             $resolver->setAllowedTypes($option, $allowedTypes);
         }
 
-        $resolver->setNormalizer(OptionDefinition::PATH, fn (SymfonyOptions $options, $value) => (array) $value);
+        $resolver->setNormalizer(OptionDefinition::PATH, static fn (SymfonyOptions $options, $value) => (array) $value);
 
-        $resolver->setNormalizer(OptionDefinition::JOBS, fn (SymfonyOptions $options, $value) => (int) $value);
+        $resolver->setNormalizer(OptionDefinition::JOBS, static fn (SymfonyOptions $options, $value) => (int) $value);
 
-        $resolver->setNormalizer(OptionDefinition::OUTPUT_FORMAT, fn (SymfonyOptions $options, $value) => (array) $value);
+        $resolver->setNormalizer(OptionDefinition::OUTPUT_FORMAT, static fn (SymfonyOptions $options, $value) => (array) $value);
 
-        $resolver->setNormalizer(OptionDefinition::CACHE_TTL, fn (SymfonyOptions $options, $value) => (int) $value);
+        $resolver->setNormalizer(OptionDefinition::CACHE_TTL, static fn (SymfonyOptions $options, $value) => (int) $value);
 
-        $resolver->setAllowedValues(OptionDefinition::CACHE_TTL, fn (string $value) => (intval($value) > 0));
+        $resolver->setAllowedValues(OptionDefinition::CACHE_TTL, static fn (string $value) => (intval($value) > 0));
     }
 }

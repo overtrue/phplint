@@ -104,7 +104,7 @@ final class LintProcess extends Process
 
         $messages = preg_split('/\n/', $this->getOutput(), -1, PREG_SPLIT_NO_EMPTY);
 
-        $filtered = array_filter($messages, fn ($message) => str_contains($message, $filename));
+        $filtered = array_filter($messages, static fn ($message) => str_contains($message, $filename));
 
         $output = [$filename => ['hasError' => false, 'hasWarning' => false, 'message' => '']];
 

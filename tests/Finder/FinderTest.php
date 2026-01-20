@@ -119,7 +119,7 @@ final class FinderTest extends TestCase
     private function getRelativePathFiles(Iterator $iterator, string $basePath): array
     {
         return array_map(
-            fn (string $filename) => str_replace($basePath . '/', '', $filename),
+            static fn (string $filename) => str_replace($basePath . '/', '', $filename),
             array_keys(iterator_to_array($iterator))
         );
     }

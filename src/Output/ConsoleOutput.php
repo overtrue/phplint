@@ -170,7 +170,7 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
 
         $maxColumn = $this->lineLength - 2 - strlen('[ XX ]') - strlen(' / (XXX%)') - (2 * $maxStepsLen);
 
-        $withColor = fn (string $color, string $indicator) => sprintf('<%s>%s</>', $color, $indicator);
+        $withColor = static fn (string $color, string $indicator) => sprintf('<%s>%s</>', $color, $indicator);
 
         if ($this->isDebug()) {
             $filename = $fileInfo->getRelativePathname();
@@ -253,7 +253,7 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
 
         $headers = ['Name', 'Value'];
 
-        $normalize = fn ($value) => json_encode($value, JSON_UNESCAPED_SLASHES);
+        $normalize = static fn ($value) => json_encode($value, JSON_UNESCAPED_SLASHES);
 
         $rows = [];
 
