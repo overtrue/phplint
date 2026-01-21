@@ -71,7 +71,7 @@ final class Application extends BaseApplication
     protected function getCommandName(InputInterface $input): ?string
     {
         $name = parent::getCommandName($input);
-        return in_array($name, array_keys(parent::all())) ? $name : null;
+        return in_array($name, array_keys(parent::all()), true) ? $name : null;
     }
 
     private static function getPrettyVersion(): string

@@ -247,7 +247,7 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
 
         $filtered = array_filter(
             $options,
-            static fn ($name) => !in_array($name, $forbidden),
+            static fn ($name) => !in_array($name, $forbidden, true),
             ARRAY_FILTER_USE_KEY
         );
 
