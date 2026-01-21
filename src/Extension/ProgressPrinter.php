@@ -88,7 +88,7 @@ final class ProgressPrinter implements
 
     public function afterLintFile(AfterLintFileEvent $event): void
     {
-        if ($this->hasProcessHelper && $this->output->getVerbosity() == OutputInterface::VERBOSITY_VERY_VERBOSE) {
+        if ($this->hasProcessHelper && $this->output->getVerbosity() === OutputInterface::VERBOSITY_VERY_VERBOSE) {
             // ProgressPrinter extension make some noise that break output when ProcessHelper is active in verbose level 2
             return;
         }

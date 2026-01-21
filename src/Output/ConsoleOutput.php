@@ -199,7 +199,7 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
                 $this->write($withColor('fg=yellow', 'W'));
             }
 
-            if ($i == $maxSteps) {
+            if ($i === $maxSteps) {
                 $this->newLine();
             }
         }
@@ -259,7 +259,7 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
 
         foreach ($filtered as $name => $value) {
             $rows[] = [sprintf('<comment>%s</comment>', $name), $normalize($value)];
-            if ('path' == $name) {
+            if ('path' === $name) {
                 $rows[] = new TableSeparator();
             }
         }

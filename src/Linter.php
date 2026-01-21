@@ -178,7 +178,7 @@ final class Linter
             ++$processCount;
             $processRunning[$processCount] = $lintProcess;
 
-            while (count($processRunning) >= $this->processLimit || (!empty($processRunning) && $loop == count($chunks) - 1)) {
+            while (count($processRunning) >= $this->processLimit || (!empty($processRunning) && $loop === count($chunks) - 1)) {
                 $this->checkProcessRunning($processRunning);
             }
         }
@@ -248,7 +248,7 @@ final class Linter
     private function createLintProcess(array $files): LintProcess
     {
         $command = [
-            PHP_SAPI == 'cli' ? PHP_BINARY : PHP_BINDIR . '/php',
+            PHP_SAPI === 'cli' ? PHP_BINARY : PHP_BINDIR . '/php',
             '-d error_reporting=E_ALL',
             '-d display_errors=On',
         ];
