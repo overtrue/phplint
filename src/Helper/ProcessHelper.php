@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Helper;
 
 use Symfony\Component\Console\Helper\Helper;
+use Symfony\Component\Console\Helper\HelperInterface;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
@@ -83,14 +84,12 @@ final class ProcessHelper extends Helper
         return $ended;
     }
 
-    private function getFormatter(): ?DebugFormatterHelper
+    private function getFormatter(): ?HelperInterface
     {
-        /** @var ?DebugFormatterHelper $formatter */
-        $formatter =  $this->getHelperSet()->has('debug_formatter')
+        return $this->getHelperSet()->has('debug_formatter')
             ? $this->getHelperSet()->get('debug_formatter')
             : null
         ;
-        return $formatter;
     }
 
     private function wrapCallback(
