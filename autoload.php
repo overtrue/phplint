@@ -28,7 +28,7 @@ if (class_exists(__NAMESPACE__ . '\Autoload', false) === false) {
     class Autoload
     {
         /**
-         * The composer autoloader.
+         * The composer autoloader(s).
          */
         private static ?\Composer\Autoload\ClassLoader $composerAutoloader = null;
         private static ?\Composer\Autoload\ClassLoader $optionalAutoloader = null;
@@ -54,7 +54,7 @@ if (class_exists(__NAMESPACE__ . '\Autoload', false) === false) {
                 self::$composerAutoloader = require self::getAutoloadFile($possibleAutoloadPaths, $autoloader);
 
                 $possibleAutoloadPaths = [
-                    // local dependencies for dev
+                    // optional dependencies
                     __DIR__ . '/vendor-bin/symfony-6.4LTS',
                     __DIR__ . '/vendor-bin/symfony-7.4LTS',
                 ];
