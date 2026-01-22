@@ -100,7 +100,7 @@ final class ProgressBar implements
 
         $filename = $event->getArgument('file')->getRelativePathname();
         $width = min(strlen($filename), 70);
-        $this->output->progressMessage(mb_strimwidth($filename, -1 * $width, $width), 'filename');
+        $this->output->progressMessage(mb_strimwidth($filename, -$width, $width), 'filename');
     }
 
     public function afterLintFile(AfterLintFileEvent $event): void

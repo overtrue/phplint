@@ -175,7 +175,7 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
         if ($this->isDebug()) {
             $filename = $fileInfo->getRelativePathname();
             $width = min(strlen($filename), $maxColumn);
-            $filename = str_pad(mb_strimwidth($filename, -1 * $width, $width), $maxColumn);
+            $filename = str_pad(mb_strimwidth($filename, -$width, $width), $maxColumn);
 
             if ($status === 'ok') {
                 $st = $withColor('fg=green', ' OK ');
