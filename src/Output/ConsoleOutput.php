@@ -352,7 +352,7 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
         $snippet = '';
 
         foreach ($lines as $i => $line) {
-            $snippet .= (abs($lineNumber) === $i + 1 ? '  > ' : '    ');
+            $snippet .= abs($lineNumber) === $i + 1 ? '  > ' : '    ';
             $snippet .= str_pad((string) ($i + 1), $lineLength, ' ', STR_PAD_LEFT) . '| ' . rtrim($line) . PHP_EOL;
         }
 
