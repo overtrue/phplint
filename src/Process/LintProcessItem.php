@@ -23,8 +23,8 @@ final class LintProcessItem
 {
     private bool $hasSyntaxError = false;
     private bool $hasSyntaxWarning = false;
-    private string $message;
-    private int $line;
+    private string $message = '';
+    private int $line = 0;
     private SplFileInfo $fileInfo;
 
     public function hasSyntaxError(): bool

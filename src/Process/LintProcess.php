@@ -59,9 +59,6 @@ final class LintProcess extends Process
                 } elseif ($hasWarning) {
                     $item->message = $warningString;
                     $item->line = $warningLine;
-                } else {
-                    $item->message = '';
-                    $item->line = 0;
                 }
                 $item->fileInfo = $fileInfo;
                 return $item;
