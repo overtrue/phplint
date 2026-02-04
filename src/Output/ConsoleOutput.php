@@ -335,7 +335,7 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
         $i = 0;
         $this->writeln(PHP_EOL . "There was " . count($errors) . ' errors:');
         foreach ($errors as $filename => $error) {
-            $this->writeln('<comment>' . ++$i . ". $filename:{$error['line']}" . '</comment>');
+            $this->writeln('<comment>' . ++$i . ". {$filename}:{$error['line']}" . '</comment>');
             $this->writeln($this->getHighlightedCodeSnippet($filename, $error['line']));
             $this->writeln("<error> {$error['error']}</error>");
         }
