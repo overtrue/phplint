@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Output;
 
+use Overtrue\PHPLint\Console\Terminal;
 use PHP_Parallel_Lint\PhpConsoleColor\ConsoleColor;
 use PHP_Parallel_Lint\PhpConsoleColor\InvalidStyleException;
 use PHP_Parallel_Lint\PhpConsoleHighlighter\Highlighter;
@@ -23,7 +24,6 @@ use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Console\Terminal;
 use Symfony\Component\Finder\SplFileInfo;
 
 use function abs;
@@ -58,21 +58,22 @@ use const STR_PAD_LEFT;
  */
 final class ConsoleOutput extends StreamOutput implements OutputInterface, ConsoleOutputInterface
 {
+    // @deprecated Do not use outside as it's an internal old implementation usage
     public const MAX_LINE_LENGTH = 120;
 
     private ?ProgressBar $progressBar = null;
 
-    private int $lineLength;
+    private Terminal $terminal;
 
     public function __construct(
         $stream,
         int $verbosity = parent::VERBOSITY_NORMAL,
         ?bool $decorated = null,
-        ?OutputFormatterInterface $formatter = null
+        ?OutputFormatterInterface $formatter = null,
+        ?Terminal $terminal = null
     ) {
         parent::__construct($stream, $verbosity, $decorated, $formatter);
-        $width = (new Terminal())->getWidth() ?: self::MAX_LINE_LENGTH;
-        $this->lineLength = min($width - (int) (DIRECTORY_SEPARATOR === '\\'), self::MAX_LINE_LENGTH);
+        $this->terminal = $terminal ?? new Terminal();
     }
 
     public function getName(): string
@@ -168,7 +169,7 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
         $maxStepsLen = strlen((string) $maxSteps);
         $process = sprintf('%' . $maxStepsLen . 'd / %' . $maxStepsLen . 'd (%3s%%)', $i, $maxSteps, $percent);
 
-        $maxColumn = $this->lineLength - 2 - strlen('[ XX ]') - strlen(' / (XXX%)') - (2 * $maxStepsLen);
+        $maxColumn = $this->terminal->width() - 2 - strlen('[ XX ]') - strlen(' / (XXX%)') - (2 * $maxStepsLen);
 
         $withColor = static fn (string $color, string $indicator) => sprintf('<%s>%s</>', $color, $indicator);
 
