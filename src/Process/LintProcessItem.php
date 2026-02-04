@@ -25,6 +25,7 @@ final class LintProcessItem
     private bool $hasSyntaxWarning = false;
     private string $message = '';
     private int $line = 0;
+    /** @phpstan-ignore property.onlyRead */
     private SplFileInfo $fileInfo;
 
     public function hasSyntaxError(): bool
