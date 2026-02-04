@@ -51,11 +51,11 @@ final class ProcessHelper extends Helper
             $output = $output->getErrorOutput();
         }
 
-        if ($formatter && $verbosity <= $output->getVerbosity()) {
+        if ($formatter && $verbosity <= $output->getVerbosity() && $formatter instanceof DebugFormatterHelper) {
             $output->write($formatter->start(spl_object_hash($process), $this->escapeString($process->getCommandLine())));
         }
 
-        if ($output->isDebug()) {
+        if ($output->isDebug() && $formatter instanceof DebugFormatterHelper) {
             $callback = $this->wrapCallback($formatter, $output, $process, $callback);
         }
 
@@ -73,7 +73,7 @@ final class ProcessHelper extends Helper
 
         $ended = $process->isTerminated();
 
-        if ($ended && $verbosity <= $output->getVerbosity()) {
+        if ($ended && $verbosity <= $output->getVerbosity() && $formatter instanceof DebugFormatterHelper) {
             $message = $process->isSuccessful()
                 ? 'Command ran successfully' :
                 sprintf('%s Command did not run successfully', $process->getExitCode())
