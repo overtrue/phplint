@@ -1,0 +1,211 @@
+variant = "loose"
+
+[[issues]]
+file = "src/Cache.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 1
+
+[[issues]]
+file = "src/Cache.php"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 1
+
+[[issues]]
+file = "src/Cache.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "src/Command/LintCommand.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 1
+
+[[issues]]
+file = "src/Configuration/AbstractOptionsResolver.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "src/Configuration/AbstractOptionsResolver.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 1
+
+[[issues]]
+file = "src/Configuration/AbstractOptionsResolver.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 7
+
+[[issues]]
+file = "src/Configuration/FileOptionsResolver.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "src/Event/EventDispatcher.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "src/Extension/OutputFormat.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 1
+
+[[issues]]
+file = "src/Extension/ProgressIndicator.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 1
+
+[[issues]]
+file = "src/Finder.php"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 1
+
+[[issues]]
+file = "src/Helper/DebugFormatterHelper.php"
+code = "no-boolean-flag-parameter"
+message = "Avoid boolean flag parameters."
+count = 2
+
+[[issues]]
+file = "src/Helper/DebugFormatterHelper.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 1
+
+[[issues]]
+file = "src/Linter.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "src/Linter.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (2.0700000000000003)."
+count = 1
+
+[[issues]]
+file = "src/Linter.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 5
+
+[[issues]]
+file = "src/Linter.php"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 1
+
+[[issues]]
+file = "src/Linter.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 2
+
+[[issues]]
+file = "src/Output/ConsoleOutput.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "src/Output/ConsoleOutput.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (1.84)."
+count = 1
+
+[[issues]]
+file = "src/Output/ConsoleOutput.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 5
+
+[[issues]]
+file = "src/Output/ConsoleOutput.php"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 3
+
+[[issues]]
+file = "src/Output/ConsoleOutput.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 1
+
+[[issues]]
+file = "src/Output/ConsoleOutput.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 1
+
+[[issues]]
+file = "src/Output/ConsoleOutput.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "src/Output/ConsoleOutputInterface.php"
+code = "too-many-methods"
+message = "Interface has too many methods."
+count = 1
+
+[[issues]]
+file = "src/Output/FormatResolver.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 2
+
+[[issues]]
+file = "src/Output/JsonOutput.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 1
+
+[[issues]]
+file = "src/Output/LinterOutput.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 4
+
+[[issues]]
+file = "src/Process/LintProcess.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "src/Process/LintProcess.php"
+code = "no-boolean-flag-parameter"
+message = "Avoid boolean flag parameters."
+count = 2
+
+[[issues]]
+file = "src/Process/LintProcess.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 3
+
+[[issues]]
+file = "src/Process/LintProcess.php"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 2
+
+[[issues]]
+file = "tests/Cache/CacheTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
