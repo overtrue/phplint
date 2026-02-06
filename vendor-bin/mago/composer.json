@@ -1,0 +1,10 @@
+{
+    "require-dev": {
+        "carthage-software/mago": "^1.5"
+    },
+    "config": {
+        "allow-plugins": {
+            "carthage-software/mago": true
+        }
+    }
+}
