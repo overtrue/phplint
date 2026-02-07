@@ -3,7 +3,7 @@
         "enabled": true,
         "actions": [
             {
-                "action": "{$ENV|value-of:VENDOR_BIN_DIR|default:vendor/bin/}mago --config={$ENV|value-of:XDG_CONFIG_HOME|default:mago.dist.toml} lint --baseline lint-baseline.toml {$STAGED_FILES|of-type:php|separated-by: }",
+                "action": "FORCE_COLOR=1 {$ENV|value-of:VENDOR_BIN_DIR|default:vendor/bin/}mago lint --baseline lint-baseline.toml {$STAGED_FILES|of-type:php|separated-by: }",
                 "config": {
                     "label": "Lint Files (with Mago)"
                 }

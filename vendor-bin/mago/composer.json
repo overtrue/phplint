@@ -1,6 +1,6 @@
 {
     "require-dev": {
-        "carthage-software/mago": "^1.5"
+        "carthage-software/mago": "^1.6"
     },
     "config": {
         "allow-plugins": {
