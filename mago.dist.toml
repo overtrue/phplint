@@ -15,6 +15,7 @@ use-tabs = false
 
 [linter]
 integrations = []
+baseline = "linter-baseline.toml"
 
 [linter.rules]
 ambiguous-function-call = { enabled = false }
