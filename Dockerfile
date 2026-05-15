@@ -4,7 +4,6 @@ ARG PHP_VERSION=8.4
 FROM php:${PHP_VERSION}-cli-alpine
 
 ARG PACKAGE_CONSTRAINT=9.8.x-dev
-ARG SYMFONY_CONSTRAINT="^7.4 || ^8.0"
 
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md
 
@@ -35,14 +34,7 @@ ENV COMPOSER_ALLOW_SUPERUSER 1
 
 RUN composer global require --no-progress \
   overtrue/phplint "$PACKAGE_CONSTRAINT" \
-  php-parallel-lint/php-console-highlighter "^1.0" \
-  symfony/cache "$SYMFONY_CONSTRAINT" \
-  symfony/console "$SYMFONY_CONSTRAINT" \
-  symfony/event-dispatcher "$SYMFONY_CONSTRAINT" \
-  symfony/finder "$SYMFONY_CONSTRAINT" \
-  symfony/options-resolver "$SYMFONY_CONSTRAINT" \
-  symfony/process "$SYMFONY_CONSTRAINT" \
-  symfony/yaml "$SYMFONY_CONSTRAINT"
+  php-parallel-lint/php-console-highlighter "^1.0"
 
 # Following recommendation at https://docs.github.com/en/actions/creating-actions/dockerfile-support-for-github-actions#workdir
 
