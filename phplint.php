@@ -20,13 +20,6 @@ use Overtrue\PHPLint\Extension\ProgressIndicator;
 use Overtrue\PHPLint\Extension\ProgressPrinter;
 use Symfony\Component\Console\Input\ArgvInput;
 
-if (!class_exists(ArgvInput::class)) {
-    echo 'You should install first the Symfony Components, with :', PHP_EOL;
-    echo 'either - composer bin symfony-6.4LTS update', PHP_EOL;
-    echo 'or     - composer bin symfony-7.4LTS update', PHP_EOL;
-    exit(1);
-}
-
 $input = new ArgvInput();
 
 if (true === $input->hasParameterOption(['--no-progress'], true)) {

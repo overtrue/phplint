@@ -52,19 +52,6 @@ if (class_exists(__NAMESPACE__ . '\Autoload', false) === false) {
                 }
 
                 self::$composerAutoloader = require self::getAutoloadFile($possibleAutoloadPaths, $autoloader);
-
-                $possibleAutoloadPaths = [
-                    // optional dependencies
-                    __DIR__ . '/vendor-bin/symfony-6.4LTS',
-                    __DIR__ . '/vendor-bin/symfony-7.4LTS',
-                ];
-                $autoloader = 'vendor/autoload.php';
-
-                try {
-                    self::$optionalAutoloader = require self::getAutoloadFile($possibleAutoloadPaths, $autoloader);
-                } catch (RuntimeException $e) {
-                    // unable to find additional/optional dev deps: it's not an error
-                }
             }
 
             $classLoaded = self::$composerAutoloader->loadClass($class);
