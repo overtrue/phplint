@@ -16,13 +16,19 @@ namespace Overtrue\PHPLint;
 use RuntimeException;
 
 use function basename;
+use function class_exists;
 use function dirname;
 use function file_exists;
+use function glob;
 use function implode;
 use function spl_autoload_register;
 use function sprintf;
 
 use const DIRECTORY_SEPARATOR;
+
+foreach (glob(__DIR__ . '/vendor-bin/*/vendor/autoload.php') as $autoloadFile) {
+    require $autoloadFile;
+}
 
 if (class_exists(__NAMESPACE__ . '\Autoload', false) === false) {
     class Autoload

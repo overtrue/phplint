@@ -1,0 +1,5 @@
+{
+    "require-dev": {
+        "bartlett/captainhook-bin-plugin": "^1.1"
+    }
+}

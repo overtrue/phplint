@@ -1,6 +1,30 @@
 variant = "loose"
 
 [[issues]]
+file = "autoload.php"
+code = "file-name"
+message = "Class `Autoload` should be in a file named `Autoload.php`, found `autoload.php`."
+count = 1
+
+[[issues]]
+file = "autoload.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 1
+
+[[issues]]
+file = "autoload.php"
+code = "no-global"
+message = "Unsafe use of `$GLOBALS` variable."
+count = 3
+
+[[issues]]
+file = "autoload.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
 file = "src/Cache.php"
 code = "no-else-clause"
 message = "Avoid `else` clauses."
@@ -43,9 +67,15 @@ message = "Use of the `empty` construct."
 count = 7
 
 [[issues]]
-file = "src/Configuration/FileOptionsResolver.php"
-code = "prefer-early-continue"
-message = "Consider using early continue pattern to reduce nesting."
+file = "src/Configuration/AbstractOptionsResolver.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "src/Console/Application.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
@@ -85,6 +115,12 @@ message = "Avoid `else` clauses."
 count = 1
 
 [[issues]]
+file = "src/Helper/DebugFormatterHelper.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 4
+
+[[issues]]
 file = "src/Linter.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -93,7 +129,7 @@ count = 1
 [[issues]]
 file = "src/Linter.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.0700000000000003)."
+message = "Class has a high kan defect score."
 count = 1
 
 [[issues]]
@@ -123,7 +159,7 @@ count = 1
 [[issues]]
 file = "src/Output/ConsoleOutput.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (1.84)."
+message = "Class has a high kan defect score."
 count = 1
 
 [[issues]]
@@ -167,6 +203,12 @@ file = "src/Output/FormatResolver.php"
 code = "no-else-clause"
 message = "Avoid `else` clauses."
 count = 2
+
+[[issues]]
+file = "src/Output/FormatResolver.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
 
 [[issues]]
 file = "src/Output/JsonOutput.php"

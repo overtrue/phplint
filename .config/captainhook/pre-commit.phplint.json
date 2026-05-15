@@ -3,9 +3,19 @@
         "enabled": true,
         "actions": [
             {
-                "action": "{$ENV|value-of:VENDOR_BIN_DIR|default:./bin/}phplint --configuration=.phplint.yml.dist -v --ansi {$STAGED_FILES|of-type:php|separated-by: }",
+                "action": [
+                    "bin/phplint",
+                    "--configuration={$ENV|value-of:\\Bartlett\\CaptainHookBinPlugin\\BinPlugin.config-file|cache:false}",
+                    "--no-progress",
+                    "{$ENV|value-of:\\Bartlett\\CaptainHookBinPlugin\\BinPlugin.colors-flag|cache:false}",
+                    "{$STAGED_FILES|of-type:php|separated-by: }"
+                ],
                 "config": {
                     "label": "Lint Files (with PHPLint)"
+                },
+                "options": {
+                    "colors": "ansi",
+                    "config-file": "./.phplint.yml.dist"
                 }
             }
         ]

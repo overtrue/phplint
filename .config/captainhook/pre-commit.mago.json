@@ -3,9 +3,23 @@
         "enabled": true,
         "actions": [
             {
-                "action": "FORCE_COLOR=1 {$ENV|value-of:VENDOR_BIN_DIR|default:vendor/bin/}mago lint {$STAGED_FILES|of-type:php|separated-by: }",
+                "action": [
+                    "{$ENV|value-of:XDG_BIN_HOME}mago",
+                    "{$ENV|value-of:\\Bartlett\\CaptainHookBinPlugin\\BinPlugin.colors-flag|cache:false}",
+                    "--config {$ENV|value-of:\\Bartlett\\CaptainHookBinPlugin\\BinPlugin.config-file|cache:false}",
+                    "lint",
+                    "{$STAGED_FILES|of-type:php|separated-by: }"
+                ],
                 "config": {
                     "label": "Lint Files (with Mago)"
+                },
+                "options": {
+                    "colors": "always",
+                    "config-file": "./mago.dist.toml",
+                    "package-require": [
+                        "carthage-software/mago",
+                        "^1.6"
+                    ]
                 }
             }
         ]

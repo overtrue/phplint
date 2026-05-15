@@ -3,9 +3,27 @@
         "enabled": true,
         "actions": [
             {
-                "action": "{$ENV|value-of:VENDOR_BIN_DIR|default:vendor/bin/}php-cs-fixer fix --dry-run --config=.php-cs-fixer.dist.php --using-cache=no --verbose --ansi {$STAGED_FILES|of-type:php|separated-by: }",
+                "action": [
+                    "{$ENV|value-of:XDG_BIN_HOME}php-cs-fixer",
+                    "fix",
+                    "--dry-run",
+                    "--config={$ENV|value-of:\\Bartlett\\CaptainHookBinPlugin\\BinPlugin.config-file|cache:false}",
+                    "--using-cache=no",
+                    "--show-progress=none",
+                    "--verbose",
+                    "{$ENV|value-of:\\Bartlett\\CaptainHookBinPlugin\\BinPlugin.colors-flag|cache:false}",
+                    "{$STAGED_FILES|of-type:php|separated-by: }"
+                ],
                 "config": {
                     "label": "Checks Coding Standard (with PHP-CS-Fixer)"
+                },
+                "options": {
+                    "colors": "ansi",
+                    "config-file": "./.php-cs-fixer.dist.php",
+                    "package-require": [
+                        "friendsofphp/php-cs-fixer",
+                        "^3.5"
+                    ]
                 }
             }
         ]

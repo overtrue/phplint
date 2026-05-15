@@ -3,14 +3,28 @@
         "verbosity": "normal",
         "allow-failure": false,
         "ansi-colors": true,
+        "bootstrap": "autoload.php",
         "git-directory": ".git",
-        "fail-on-first-error": true,
-        "plugins": [],
+        "fail-on-first-error": false,
+        "plugins": [
+            {
+                "plugin": "\\Bartlett\\CaptainHookBinPlugin\\BinPlugin",
+                "options": {
+                    "binary-directory": "{$ENV|value-of:VENDOR_BIN_DIR|default:vendor/bin}",
+                    "config-directory": "{$ENV|value-of:XDG_CONFIG_HOME|default:.github/linters}",
+                    "ansi-colors-flag": "--ansi",
+                    "auto-colors-flag": "--colors=auto",
+                    "always-colors-flag": "--colors=always",
+                    "never-colors-flag": "--colors=never"
+                }
+            }
+        ],
         "includes": [
-            ".config/captainhook/pre-push.phpstan.json",
-            ".config/captainhook/pre-push.phpunit.json",
+            ".config/captainhook/pre-commit.mago.json",
+            ".config/captainhook/pre-commit.phpcs-fixer.json",
             ".config/captainhook/pre-commit.phplint.json",
-            ".config/captainhook/pre-commit.phpcs-fixer.json"
+            ".config/captainhook/pre-push.phpstan.json",
+            ".config/captainhook/pre-push.phpunit.json"
         ]
     }
 }

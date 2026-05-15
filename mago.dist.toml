@@ -4,7 +4,7 @@ php-version = "8.1.0"
 
 [source]
 workspace = "."
-paths = ["src/", "tests/"]
+paths = ["autoload.php", "src/", "tests/"]
 includes = ["vendor"]
 excludes = ["tests/fixtures/", "tests/EndToEnd/Reserved@Keywords.php"]
 

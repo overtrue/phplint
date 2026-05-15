@@ -3,9 +3,23 @@
         "enabled": true,
         "actions": [
             {
-                "action": "{$ENV|value-of:VENDOR_BIN_DIR|default:vendor/bin/}phpstan analyse --configuration phpstan.neon.dist --verbose --ansi",
+                "action": [
+                    "{$ENV|value-of:XDG_BIN_HOME}phpstan",
+                    "analyse",
+                    "--configuration={$ENV|value-of:\\Bartlett\\CaptainHookBinPlugin\\BinPlugin.config-file|cache:false}",
+                    "--verbose",
+                    "{$ENV|value-of:\\Bartlett\\CaptainHookBinPlugin\\BinPlugin.colors-flag|cache:false}"
+                ],
                 "config": {
                     "label": "Static Analysis (with PHPStan)"
+                },
+                "options": {
+                    "colors": "ansi",
+                    "config-file": "./phpstan.neon.dist",
+                    "package-require": [
+                        "phpstan/phpstan",
+                        "^2.0"
+                    ]
                 }
             }
         ]
