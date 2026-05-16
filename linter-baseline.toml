@@ -74,8 +74,26 @@ count = 1
 
 [[issues]]
 file = "src/Console/Application.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "src/Console/Application.php"
+code = "no-boolean-flag-parameter"
+message = "Avoid boolean flag parameters."
+count = 1
+
+[[issues]]
+file = "src/Console/Application.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "src/Console/ApplicationInterface.php"
+code = "no-boolean-flag-parameter"
+message = "Avoid boolean flag parameters."
 count = 1
 
 [[issues]]
