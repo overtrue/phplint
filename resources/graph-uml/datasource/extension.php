@@ -1,17 +1,20 @@
 <?php
 
-use Overtrue\PHPLint\Extension\OutputFormat;
-use Overtrue\PHPLint\Extension\ProgressBar;
-use Overtrue\PHPLint\Extension\ProgressIndicator;
-use Overtrue\PHPLint\Extension\ProgressPrinter;
+/*
+ * This file is part of the overtrue/phplint package
+ *
+ * (c) overtrue
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
+use Overtrue\PHPLint\Extension\ExtensionInterface;
 
 function dataSource(): Generator
 {
     $classes = [
-        OutputFormat::class,
-        ProgressBar::class,
-        ProgressIndicator::class,
-        ProgressPrinter::class,
+        ExtensionInterface::class
     ];
     foreach ($classes as $class) {
         yield $class;
