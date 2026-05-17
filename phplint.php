@@ -14,7 +14,7 @@ declare(strict_types=1);
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Console\Application;
 use Overtrue\PHPLint\Event\EventDispatcher;
-use Overtrue\PHPLint\Extension\OutputFormat;
+use Overtrue\PHPLint\Extension\OutputManager;
 use Overtrue\PHPLint\Extension\ProgressBar;
 use Overtrue\PHPLint\Extension\ProgressIndicator;
 use Overtrue\PHPLint\Extension\ProgressPrinter;
@@ -49,7 +49,7 @@ if (true === $input->hasParameterOption(['--bootstrap'], true)) {
     }
 }
 
-$extensions[] = new OutputFormat();
+$extensions[] = new OutputManager();
 
 $dispatcher = new EventDispatcher($extensions);
 

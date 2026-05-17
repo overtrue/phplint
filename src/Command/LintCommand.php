@@ -17,12 +17,14 @@ use Overtrue\PHPLint\Client;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
 use Overtrue\PHPLint\Output\LinterOutput;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder as SymfonyFinder;
 use Throwable;
@@ -41,10 +43,24 @@ final class LintCommand extends Command
 
     private LinterOutput $results;
 
-    public function __construct(private readonly EventDispatcherInterface $dispatcher, string $name = 'lint')
+    private EventDispatcherInterface $dispatcher;
+
+    public function __construct(?EventDispatcherInterface $dispatcher = null, string $name = 'lint')
     {
         parent::__construct($name);
         $this->results = new LinterOutput([], new SymfonyFinder());
+
+        if ($dispatcher === null) {
+            // fallback to console application
+            /**
+             * @var ApplicationInterface|null $application
+             * @phpstan-ignore varTag.nativeType
+             */
+            $application = $this->getApplication();
+            $dispatcher = $application ? $application->getEventDispatcher() : new EventDispatcher();
+        }
+
+        $this->dispatcher = $dispatcher;
     }
 
     public function getResults(): LinterOutput

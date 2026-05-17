@@ -18,6 +18,7 @@ use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
 use Overtrue\PHPLint\Event\EventDispatcher;
+use Overtrue\PHPLint\Extension\OutputManager;
 use Overtrue\PHPLint\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -44,8 +45,15 @@ final class ConsoleConfigTest extends TestCase
     #[DataProvider('commandInputProvider')]
     public function testCommandConfig(array $arguments, callable $fetchExpected): void
     {
-        $dispatcher = new EventDispatcher([]);
-        $definition = (new LintCommand($dispatcher))->getDefinition();
+        $defaultCommand = new LintCommand();
+
+        // add this extension for --format and --output additional options
+        $outputManager = new OutputManager();
+
+        $extensionDefinition = $outputManager->getDefinition();
+        $definition = $defaultCommand->getDefinition();
+        $definition->addOptions($extensionDefinition->getOptions());
+        $defaultCommand->setDefinition($definition);
 
         $input = new ArrayInput($arguments, $definition);
 

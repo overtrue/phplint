@@ -102,18 +102,6 @@ trait ConfigureCommandTrait
                 'Hide the progress output'
             )
             ->addOption(
-                'output',
-                'o',
-                InputOption::VALUE_REQUIRED,
-                'Generate an output to the specified path (<comment>default: ' . OptionDefinition::DEFAULT_STANDARD_OUTPUT_LABEL . '</comment>)'
-            )
-            ->addOption(
-                'format',
-                null,
-                InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
-                'Format of requested reports'
-            )
-            ->addOption(
                 'warning',
                 'w',
                 InputOption::VALUE_NONE,
