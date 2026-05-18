@@ -8,7 +8,7 @@ on:
       operating-system:
         description: "OS name and version runtime"
         required: false
-        default: "ubuntu-22.04"
+        default: "ubuntu-24.04"
         type: string
       php-version:
         description: "PHP runtime version in format Major.minor"
@@ -29,12 +29,12 @@ on:
         # https://github.com/llaville/box-manifest
         description: "BOX Manifest runtime version in semver format"
         required: false
-        default: "4.2.0"
+        default: "4.4.0"
         type: string
       box-manifest-options:
         description: "Additional options to pass to BOX Manifest (e.g. `--bootstrap bootstrap.php -r plain.txt -r sbom.json`)"
         required: false
-        default: "-r console-table.txt -r plain.txt -r sbom.json"
+        default: "-r console-table.txt -r plain.txt -r sbom.json -r pkg.composer.txt"
         type: string
       tag-name:
         description: "New Release Tag"
@@ -57,7 +57,7 @@ jobs:
         php:
           - ${{ inputs.php-version }}
         tools:
-          - box:4.6  # available since https://github.com/shivammathur/setup-php/releases/tag/2.27.0
+          - box:4.7  # available since https://github.com/shivammathur/setup-php/releases/tag/2.27.0
 
     steps:
       -   # https://github.com/actions/checkout
@@ -74,7 +74,7 @@ jobs:
 
       -   # https://github.com/ramsey/composer-install
         name: Install Composer dependencies
-        uses: ramsey/composer-install@v3
+        uses: ramsey/composer-install@v4
         with:
           composer-options: ${{ inputs.composer-options }}
 
@@ -95,7 +95,7 @@ jobs:
       -   # https://github.com/softprops/action-gh-release
         name: Create Release
         if: inputs.tag-name != ''
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:  # https://github.com/softprops/action-gh-release#-customizing
           prerelease: false
           draft: false
