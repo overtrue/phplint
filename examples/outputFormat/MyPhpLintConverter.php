@@ -19,15 +19,16 @@ class MyPhpLintConverter extends PhpLintConverter
 {
     public function __construct(bool $prettyPrint)
     {
-        parent::__construct(null, $prettyPrint);
+        parent::__construct(['format_output' => true]);
     }
 
-    public function configure(): void
+    public function configure(array $options = []): void
     {
         $this->toolName = 'My PHPLint';
         $this->toolInformationUri = 'https://github.com/llaville/phplint';
         $this->toolComposerPackage = '';
+        $this->toolSemanticVersion = '0.1.0@dev';
 
-        parent::configure();
+        parent::configure($options);
     }
 }
