@@ -8,7 +8,7 @@ on:
       operating-system:
         description: "OS name and version runtime"
         required: false
-        default: "ubuntu-22.04"
+        default: "ubuntu-24.04"
         type: string
       app-ref-version:
         description: "Application Reference Version"
@@ -53,7 +53,7 @@ jobs:
 
       -   # https://github.com/ramsey/composer-install
         name: Install Composer dependencies
-        uses: ramsey/composer-install@v3
+        uses: ramsey/composer-install@v4
         with:
           composer-options: "--prefer-dist"
 
@@ -84,7 +84,7 @@ jobs:
 
       -   # https://github.com/actions/upload-artifact
         name: Upload PHPBench report
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: "PHPBench-Report-PHP-${{ matrix.php-version }}"
           path: ".phpbench/html/index.html"
