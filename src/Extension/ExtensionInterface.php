@@ -13,16 +13,14 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Extension;
 
-use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Input\InputDefinition;
 
 /**
  * @author Laurent Laville
  * @since Release 9.8.0
  */
-interface ExtensionInterface
+interface ExtensionInterface extends ExtensionEventInterface
 {
     /**
      * @see https://stackoverflow.com/questions/19901850/how-do-i-get-an-objects-unqualified-short-class-name
@@ -42,14 +40,4 @@ interface ExtensionInterface
      * @see https://symfony.com/doc/current/components/console/console_arguments.html
      */
     public static function getDefinition(): InputDefinition;
-
-    /**
-     * Steps to prepare an extension
-     */
-    public function initialize(ConsoleCommandEvent $event): void;
-
-    /**
-     * When extension has finished its job !
-     */
-    public function finish(AfterCheckingEvent $event): void;
 }

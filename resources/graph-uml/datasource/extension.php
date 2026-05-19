@@ -9,12 +9,14 @@
  * with this source code in the file LICENSE.
  */
 
+use Overtrue\PHPLint\Extension\ExtensionEventInterface;
 use Overtrue\PHPLint\Extension\ExtensionInterface;
 
 function dataSource(): Generator
 {
     $classes = [
-        ExtensionInterface::class
+        ExtensionInterface::class,
+        ExtensionEventInterface::class,
     ];
     foreach ($classes as $class) {
         yield $class;
