@@ -18,7 +18,6 @@ use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
-use Overtrue\PHPLint\Event\AfterCheckingInterface;
 use Overtrue\PHPLint\Output\ChainOutput;
 use Overtrue\PHPLint\Output\FormatResolver;
 use Symfony\Component\Console\ConsoleEvents;
@@ -40,8 +39,7 @@ use function substr;
  */
 final class OutputManager implements
     ExtensionInterface,
-    EventSubscriberInterface,
-    AfterCheckingInterface
+    EventSubscriberInterface
 {
     private array $handlers = [];
 
@@ -79,12 +77,12 @@ final class OutputManager implements
     public static function getSubscribedEvents(): array
     {
         return [
-            ConsoleEvents::COMMAND => 'initFormat',
-            AfterCheckingEvent::class => 'afterChecking',
+            ConsoleEvents::COMMAND => 'initialize',
+            AfterCheckingEvent::class => 'finish',
         ];
     }
 
-    public function initFormat(ConsoleCommandEvent $event): void
+    public function initialize(ConsoleCommandEvent $event): void
     {
         $command = $event->getCommand();
         if (!$command instanceof LintCommand) {
@@ -103,7 +101,7 @@ final class OutputManager implements
         $this->handlers = (new FormatResolver())->resolve($configResolver, $event->getOutput());
     }
 
-    public function afterChecking(AfterCheckingEvent $event): void
+    public function finish(AfterCheckingEvent $event): void
     {
         $outputHandler = new ChainOutput($this->handlers);
         $outputHandler->format($event->getArgument('results'));

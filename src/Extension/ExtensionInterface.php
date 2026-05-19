@@ -13,7 +13,9 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Extension;
 
+use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Input\InputDefinition;
 
 /**
@@ -40,4 +42,14 @@ interface ExtensionInterface
      * @see https://symfony.com/doc/current/components/console/console_arguments.html
      */
     public static function getDefinition(): InputDefinition;
+
+    /**
+     * Steps to prepare an extension
+     */
+    public function initialize(ConsoleCommandEvent $event): void;
+
+    /**
+     * When extension has finished its job !
+     */
+    public function finish(AfterCheckingEvent $event): void;
 }
