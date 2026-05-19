@@ -15,7 +15,6 @@ namespace Overtrue\PHPLint\Extension;
 
 use LogicException;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
-use Overtrue\PHPLint\Event\AfterCheckingInterface;
 use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\AfterLintFileInterface;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
@@ -34,9 +33,9 @@ use function sprintf;
  * @since Release 9.0.0
  */
 final class ProgressPrinter implements
+    ExtensionEventInterface,
     EventSubscriberInterface,
     BeforeCheckingInterface,
-    AfterCheckingInterface,
     AfterLintFileInterface
 {
     private ConsoleOutputInterface $output;
@@ -47,17 +46,17 @@ final class ProgressPrinter implements
     public static function getSubscribedEvents(): array
     {
         return [
-            ConsoleEvents::COMMAND => 'initProgress',
+            ConsoleEvents::COMMAND => 'initialize',
+            AfterCheckingEvent::class => 'finish',
             BeforeCheckingEvent::class => 'beforeChecking',
-            AfterCheckingEvent::class => 'afterChecking',
             AfterLintFileEvent::class => 'afterLintFile',
         ];
     }
 
     /**
-     * Initialize progress printer extension (default legacy behavior)
+     * Initializes the progress dots widget (default legacy behavior)
      */
-    public function initProgress(ConsoleCommandEvent $event): void
+    public function initialize(ConsoleCommandEvent $event): void
     {
         $this->hasProcessHelper = $event->getCommand()->getHelperSet()->has('process');
 
@@ -76,14 +75,17 @@ final class ProgressPrinter implements
         $this->output = $output;
     }
 
+    /**
+     * Finishes the progress dots widget
+     */
+    public function finish(AfterCheckingEvent $event): void
+    {
+        $this->output->writeln('');
+    }
+
     public function beforeChecking(BeforeCheckingEvent $event): void
     {
         $this->maxSteps = $event->getArgument('fileCount');
-    }
-
-    public function afterChecking(AfterCheckingEvent $event): void
-    {
-        $this->output->writeln('');
     }
 
     public function afterLintFile(AfterLintFileEvent $event): void

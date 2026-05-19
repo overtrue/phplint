@@ -15,7 +15,6 @@ namespace Overtrue\PHPLint\Extension;
 
 use LogicException;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
-use Overtrue\PHPLint\Event\AfterCheckingInterface;
 use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\AfterLintFileInterface;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
@@ -38,9 +37,9 @@ use function strlen;
  * @since Release 9.0.0
  */
 final class ProgressBar implements
+    ExtensionEventInterface,
     EventSubscriberInterface,
     BeforeCheckingInterface,
-    AfterCheckingInterface,
     BeforeLintFileInterface,
     AfterLintFileInterface
 {
@@ -50,18 +49,18 @@ final class ProgressBar implements
     public static function getSubscribedEvents(): array
     {
         return [
-            ConsoleEvents::COMMAND => 'initProgress',
+            ConsoleEvents::COMMAND => 'initialize',
+            AfterCheckingEvent::class => 'finish',
             BeforeCheckingEvent::class => 'beforeChecking',
-            AfterCheckingEvent::class => 'afterChecking',
             BeforeLintFileEvent::class => 'beforeLintFile',
             AfterLintFileEvent::class => 'afterLintFile',
         ];
     }
 
     /**
-     * Initialize progress bar extension
+     * Initializes the progress bar widget
      */
-    public function initProgress(ConsoleCommandEvent $event): void
+    public function initialize(ConsoleCommandEvent $event): void
     {
         $this->hasProcessHelper = $event->getCommand()->getHelperSet()->has('process');
 
@@ -80,6 +79,14 @@ final class ProgressBar implements
         $this->output = $output;
     }
 
+    /**
+     * Finishes the progress bar widget
+     */
+    public function finish(AfterCheckingEvent $event): void
+    {
+        $this->output->progressFinish();
+    }
+
     public function beforeChecking(BeforeCheckingEvent $event): void
     {
         if ($this->hasProcessHelper && $this->output->isVeryVerbose()) {
@@ -87,11 +94,6 @@ final class ProgressBar implements
             return;
         }
         $this->output->progressStart($event->getArgument('fileCount'));
-    }
-
-    public function afterChecking(AfterCheckingEvent $event): void
-    {
-        $this->output->progressFinish();
     }
 
     public function beforeLintFile(BeforeLintFileEvent $event): void

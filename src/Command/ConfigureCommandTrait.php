@@ -90,18 +90,6 @@ trait ConfigureCommandTrait
                 'Ignore cached data'
             )
             ->addOption(
-                'progress',
-                'p',
-                InputOption::VALUE_REQUIRED,
-                'Show the progress output'
-            )
-            ->addOption(
-                'no-progress',
-                null,
-                InputOption::VALUE_NONE,
-                'Hide the progress output'
-            )
-            ->addOption(
                 'warning',
                 'w',
                 InputOption::VALUE_NONE,

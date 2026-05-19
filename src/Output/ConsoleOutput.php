@@ -210,6 +210,7 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
 
     public function headerBlock(string $appVersion, string $configFile): void
     {
+        $this->newLine();
         $this->writeln($appVersion . " by overtrue and contributors.");
         $this->newLine();
 

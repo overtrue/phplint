@@ -15,7 +15,6 @@ namespace Overtrue\PHPLint\Extension;
 
 use LogicException;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
-use Overtrue\PHPLint\Event\AfterCheckingInterface;
 use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\AfterLintFileInterface;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
@@ -33,9 +32,9 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * @since Release 9.1.0
  */
 final class ProgressIndicator implements
+    ExtensionEventInterface,
     EventSubscriberInterface,
     BeforeCheckingInterface,
-    AfterCheckingInterface,
     AfterLintFileInterface
 {
     private ConsoleOutputInterface $output;
@@ -45,17 +44,17 @@ final class ProgressIndicator implements
     public static function getSubscribedEvents(): array
     {
         return [
-            ConsoleEvents::COMMAND => 'initProgress',
+            ConsoleEvents::COMMAND => 'initialize',
+            AfterCheckingEvent::class => 'finish',
             BeforeCheckingEvent::class => 'beforeChecking',
-            AfterCheckingEvent::class => 'afterChecking',
             AfterLintFileEvent::class => 'afterLintFile',
         ];
     }
 
     /**
-     * Initialize progress indicator extension
+     * Initializes the progress indicator widget
      */
-    public function initProgress(ConsoleCommandEvent $event): void
+    public function initialize(ConsoleCommandEvent $event): void
     {
         $this->hasProcessHelper = $event->getCommand()->getHelperSet()->has('process');
 
@@ -85,6 +84,15 @@ final class ProgressIndicator implements
         }
     }
 
+    /**
+     * Finishes the progress indicator widget
+     */
+    public function finish(AfterCheckingEvent $event): void
+    {
+        $this->progressIndicator?->finish('Finished');
+        $this->output->writeln('');
+    }
+
     public function beforeChecking(BeforeCheckingEvent $event): void
     {
         if ($this->hasProcessHelper && $this->output->isVeryVerbose()) {
@@ -93,11 +101,6 @@ final class ProgressIndicator implements
         }
 
         $this->progressIndicator?->start('Linting files ...');
-    }
-
-    public function afterChecking(AfterCheckingEvent $event): void
-    {
-        $this->progressIndicator?->finish('Finished');
     }
 
     public function afterLintFile(AfterLintFileEvent $event): void
