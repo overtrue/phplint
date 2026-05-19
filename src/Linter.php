@@ -16,6 +16,7 @@ namespace Overtrue\PHPLint;
 use LogicException;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
+use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
@@ -60,7 +61,7 @@ final class Linter
     public function __construct(
         Resolver $configResolver,
         EventDispatcherInterface $dispatcher,
-        private readonly ?Client $client = null,
+        private readonly ?ApplicationInterface $client = null,
         ?HelperSet $helperSet = null,
         ?OutputInterface $output = null,
     ) {
@@ -121,8 +122,8 @@ final class Linter
         if (null !== $this->client) {
             $default = [
                 'application_version' => [
-                    'long' => $this->client->getApplication()->getLongVersion(),
-                    'short' => $this->client->getApplication()->getVersion(),
+                    'long' => $this->client->getLongVersion(),
+                    'short' => $this->client->getVersion(),
                 ]
             ];
         }
