@@ -60,7 +60,7 @@ final class Linter
     public function __construct(
         Resolver $configResolver,
         EventDispatcherInterface $dispatcher,
-        private readonly ?Client $client = null,
+        private readonly array $contextDefaults = [],
         ?HelperSet $helperSet = null,
         ?OutputInterface $output = null,
     ) {
@@ -118,16 +118,8 @@ final class Linter
             $results = [];
         }
 
-        if (null !== $this->client) {
-            $default = [
-                'application_version' => [
-                    'long' => $this->client->getApplication()->getLongVersion(),
-                    'short' => $this->client->getApplication()->getVersion(),
-                ]
-            ];
-        }
         $finalResults = new LinterOutput($results, $finder);
-        $finalResults->setContext($this->configResolver, $startTime, $processCount, $default ?? []);
+        $finalResults->setContext($this->configResolver, $startTime, $processCount, $this->contextDefaults);
 
         $this->cache->prune();
 

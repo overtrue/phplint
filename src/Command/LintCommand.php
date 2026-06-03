@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Command;
 
-use Overtrue\PHPLint\Client;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
@@ -87,7 +86,12 @@ final class LintCommand extends Command
         $linter = new Linter(
             $configResolver,
             $this->dispatcher,
-            new Client($this->getApplication()),
+            [
+                'application_version' => [
+                    'long' => $this->getApplication()->getLongVersion(),
+                    'short' => $this->getApplication()->getVersion(),
+                ],
+            ],
             $this->getHelperSet(),
             $output
         );

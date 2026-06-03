@@ -70,6 +70,15 @@ final class LintCommandTest extends TestCase
             2,
             $this->command->getResults()->getMisses()
         );
+
+        $this->assertSame(
+            $this->command->getApplication()?->getVersion(),
+            $this->command->getResults()->getContext()['application_version']['short']
+        );
+        $this->assertSame(
+            $this->command->getApplication()?->getLongVersion(),
+            $this->command->getResults()->getContext()['application_version']['long']
+        );
     }
 
     public function testLintSyntaxErrorFileWithoutConfigurationAndCache(): void
