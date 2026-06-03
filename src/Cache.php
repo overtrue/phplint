@@ -25,6 +25,7 @@ use Symfony\Contracts\Cache\ItemInterface;
 
 use function class_exists;
 use function get_debug_type;
+use function is_readable;
 use function is_string;
 use function md5_file;
 use function sprintf;
@@ -113,15 +114,16 @@ final class Cache
      */
     public function isHit(string $filename): bool
     {
+        $currentFingerprint = $this->getFingerprint($filename);
+
         // Try to fetch item from cache
-        $item = $this->getItem($filename);
+        $item = $this->pool->getItem($this->getKey($filename, $currentFingerprint));
         if (!$item->isHit()) {
             ++$this->misses;
             return false;
         }
 
         $fingerprintSaved = $item->get();
-        $currentFingerprint = md5_file($filename);
 
         if ($currentFingerprint !== $fingerprintSaved) {
             ++$this->misses;
@@ -151,9 +153,25 @@ final class Cache
         ];
     }
 
-    private function getKey(string $filename): string
+    private function getKey(string $filename, ?string $fingerprint = null): string
     {
+        $fingerprint ??= $this->getFingerprint($filename);
+        if (null !== $fingerprint) {
+            return $fingerprint;
+        }
+
         return str_replace(str_split(ItemInterface::RESERVED_CHARACTERS), '_', $filename);
+    }
+
+    private function getFingerprint(string $filename): ?string
+    {
+        if (!is_readable($filename)) {
+            return null;
+        }
+
+        $fingerprint = md5_file($filename);
+
+        return is_string($fingerprint) ? $fingerprint : null;
     }
 
     /**
