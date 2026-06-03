@@ -21,6 +21,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\Cache\CacheItem;
 
 use function dirname;
+use function is_readable;
 use function md5_file;
 use function sha1_file;
 use function str_replace;
@@ -141,10 +142,32 @@ final class CacheTest extends TestCase
         $this->assertEquals($fingerprint, self::$cache->getItem($filename)->get());
     }
 
+    public function testSameContentsShareCacheItem(): void
+    {
+        $firstFilename = __DIR__ . '/Fixtures/releases/3118/test.fixture';
+        $secondFilename = __DIR__ . '/Fixtures/releases/3119/test.fixture';
+        $fingerprint = md5_file($firstFilename);
+
+        $firstCacheItem = self::$cache->getItem($firstFilename);
+        $secondCacheItem = self::$cache->getItem($secondFilename);
+
+        $this->assertSame($firstCacheItem->getKey(), $secondCacheItem->getKey());
+
+        $firstCacheItem->set($fingerprint);
+        $saved = self::$cache->saveItem($firstCacheItem);
+
+        $this->assertTrue($saved);
+        $this->assertTrue(self::$cache->isHit($secondFilename));
+    }
+
     private function generateItems(array $values): Generator
     {
         foreach ($values as $filename => $processor) {
-            $key = str_replace('/', '_', $filename);
+            if (is_readable($filename)) {
+                $key = md5_file($filename);
+            } else {
+                $key = str_replace('/', '_', $filename);
+            }
             $value = $processor ? $processor($filename) : null;
             $isHit = (null !== $value);
             yield $key => (self::$createCacheItem)($key, $value, $isHit);
