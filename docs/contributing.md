@@ -34,11 +34,15 @@ All dev tools (`phpstan`, `php-cs-fixer`, `phpunit`) are under control of [bamar
 
 Static analysis of source code is provided using [PHPStan][phpstan]
 
+```shell
+composer bin phpstan update
+```
+
 This project comes with a configuration file (located at `/phpstan.neon.dist` in the repository)
 and an executable for PHPStan (located at `vendor/bin/phpstan`) that you can use to analyse your source code for compliance with this project's coding guidelines:
 
 ```shell
-composer code:check
+vendor/bin/captainhook hook:pre-push -c .config/captainhook/pre-push.phpstan.json
 ```
 
 Here is a preview of what call look like:
@@ -49,17 +53,16 @@ Here is a preview of what call look like:
 
 Coding standards are enforced using [PHP-CS-Fixer][php-cs-fixer]
 
-This project comes with a configuration file (located at `/.php-cs-fixer.dist.php` in the repository) 
-and an executable for PHP CS Fixer (located at `vendor/bin/php-cs-fixer`) that you can use to (re)format your source code for compliance with this project's coding guidelines:
-
 ```shell
-composer style:fix
+composer bin php-cs-fixer update
 ```
 
-If you only want to check source code standard violation, without apply changes, please use instead: 
+This project comes with a configuration file (located at `/.php-cs-fixer.dist.php` in the repository) 
+and an executable for PHP CS Fixer (located at `vendor/bin/php-cs-fixer`) that you can use to check source code standard violation, 
+without apply changes:
 
 ```shell
-composer style:check
+vendor/bin/captainhook hook:pre-commit -c .config/captainhook/pre-commit.phpcs-fixer.json
 ```
 
 Here is a preview of what call look like:
@@ -68,24 +71,23 @@ Here is a preview of what call look like:
 
 ## Running Tests
 
+Regression tests are checked using [PHPUnit][phpunit]
+
+```shell
+composer bin phpunit update
+```
+
 All tests must PASS before submitting a Pull Request.
 
-Three Composer shortcuts are available:
-
 ```shell
-composer tests:unit
+vendor/bin/phpunit
 ```
-Executes all unit tests (that include test suites: `cache`, `configuration`, `finder`)
+Executes all unit tests (that include test suites: `cache`, `configuration`, `finder`, `output`)
 
 ```shell
-composer tests:e2e
+vendor/bin/phpunit --testsuite e2e
 ```
 Execute end-to-end tests (that include test suite `e2e`)
-
-```shell
-composer tests:all
-```
-Execute all tests (unit and end-to-end)
 
 [bamarni/composer-bin-plugin]: https://github.com/bamarni/composer-bin-plugin
 [phpstan]: https://github.com/phpstan/phpstan
