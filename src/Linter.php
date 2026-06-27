@@ -16,7 +16,6 @@ namespace Overtrue\PHPLint;
 use LogicException;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
-use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
@@ -27,6 +26,7 @@ use Overtrue\PHPLint\Process\LintProcess;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\NullAdapter;
+use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -61,7 +61,7 @@ final class Linter
     public function __construct(
         Resolver $configResolver,
         EventDispatcherInterface $dispatcher,
-        private readonly ?ApplicationInterface $client = null,
+        private readonly ?Application $client = null,
         ?HelperSet $helperSet = null,
         ?OutputInterface $output = null,
     ) {

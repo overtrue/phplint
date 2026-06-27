@@ -14,10 +14,8 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Tests\EndToEnd;
 
 use Overtrue\PHPLint\Command\LintCommand;
-use Overtrue\PHPLint\Console\Application;
 use Overtrue\PHPLint\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 
 use function dirname;
@@ -30,21 +28,19 @@ use function dirname;
 final class LintCommandTest extends TestCase
 {
     private ?CommandTester $commandTester;
-    private Command $command;
+    private LintCommand $invokableCommand;
 
     protected function setUp(): void
     {
-        // No extensions require for tests.
-        // WARNING: CommandTester is not able to test situation with custom Output
-        //          so display verification is impossible !!!
+        parent::setUp();
 
-        $this->command = new LintCommand();
+        $command = $this->application->find('lint');
 
-        $application = new Application();
-        $application->addCommands([$this->command]);
-        $application->setDefaultCommand($this->command->getName());
+        $this->invokableCommand = $command->getCode();
 
-        $this->commandTester = new CommandTester($this->command);
+        $this->application->setDefaultCommand($command->getName());
+
+        $this->commandTester = new CommandTester($command);
     }
 
     protected function tearDown(): void
@@ -65,7 +61,7 @@ final class LintCommandTest extends TestCase
         $this->commandTester->assertCommandIsSuccessful();
         $this->assertCount(
             2,
-            $this->command->getResults()->getMisses()
+            $this->invokableCommand->getResults()->getMisses()
         );
     }
 
@@ -81,7 +77,7 @@ final class LintCommandTest extends TestCase
 
         $this->assertCount(
             1,
-            $this->command->getResults()->getErrors()
+            $this->invokableCommand->getResults()->getErrors()
         );
     }
 }

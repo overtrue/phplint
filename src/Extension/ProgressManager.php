@@ -56,7 +56,7 @@ final class ProgressManager implements
     {
         return new InputDefinition([
             new InputOption(
-                'progress',
+                OptionDefinition::PROGRESS,
                 'p',
                 InputOption::VALUE_OPTIONAL,
                 'Set type of progress output' .
@@ -64,7 +64,7 @@ final class ProgressManager implements
                 OptionDefinition::DEFAULT_PROGRESS_WIDGET
             ),
             new InputOption(
-                'no-progress',
+                OptionDefinition::NO_PROGRESS,
                 null,
                 InputOption::VALUE_NONE,
                 'Suppress the progress output (same as <comment>--progress quiet</comment>)'
@@ -88,7 +88,7 @@ final class ProgressManager implements
     public function initialize(ConsoleCommandEvent $event): void
     {
         $command = $event->getCommand();
-        if (!$command instanceof LintCommand) {
+        if (!$command->getCode() instanceof LintCommand) {
             // this extension must be only available for lint command
             return;
         }

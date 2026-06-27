@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Tests\Configuration;
 
-use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
@@ -30,7 +29,9 @@ final class YamlConfigTest extends TestCase
     {
         $this->expectException(InvalidOptionsException::class);
 
-        $definition = (new LintCommand())->getDefinition();
+        $command = $this->application->find('lint');
+
+        $definition = $command->getDefinition();
 
         $arguments = ['--configuration' => 'tests/Configuration/invalid_format.yaml'];
         $input = new ArrayInput($arguments, $definition);
@@ -41,7 +42,9 @@ final class YamlConfigTest extends TestCase
     #[DataProvider('commandInputProvider')]
     public function testYamlConfig(array $arguments, callable $fetchExpected): void
     {
-        $definition = (new LintCommand())->getDefinition();
+        $command = $this->application->find('lint');
+
+        $definition = $command->getDefinition();
 
         $input = new ArrayInput($arguments, $definition);
 

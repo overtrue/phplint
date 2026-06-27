@@ -59,13 +59,13 @@ final class OutputManager implements
     {
         return new InputDefinition([
             new InputOption(
-                'format',
+                OptionDefinition::OUTPUT_FORMAT,
                 null,
                 InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
                 'Format of requested reports'
             ),
             new InputOption(
-                'output',
+                OptionDefinition::OUTPUT_FILE,
                 'o',
                 InputOption::VALUE_REQUIRED,
                 'Generate an output to the specified path'
@@ -85,7 +85,7 @@ final class OutputManager implements
     public function initialize(ConsoleCommandEvent $event): void
     {
         $command = $event->getCommand();
-        if (!$command instanceof LintCommand) {
+        if (!$command->getCode() instanceof LintCommand) {
             // this extension must be only available for lint command
             return;
         }

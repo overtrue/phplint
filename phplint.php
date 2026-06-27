@@ -36,7 +36,7 @@ $defaultCommand = new LintCommand();
 
 $application = new Application();
 $application->addCommands([$defaultCommand]);
-$application->setDefaultCommand($defaultCommand->getName());
+$application->setDefaultCommand('lint');
 $application->addExtensions($extensions);
 $application->setDispatcher($dispatcher);
 $application->run($input);

@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Tests\Configuration;
 
-use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
@@ -31,7 +30,9 @@ final class ConsoleConfigTest extends TestCase
 {
     public function testConfigFileNotReadable(): void
     {
-        $definition = (new LintCommand())->getDefinition();
+        $command = $this->application->find('lint');
+
+        $definition = $command->getDefinition();
 
         $input = new ArrayInput(['--configuration' => 'does-not-exists.yaml'], $definition);
 
@@ -43,15 +44,15 @@ final class ConsoleConfigTest extends TestCase
     #[DataProvider('commandInputProvider')]
     public function testCommandConfig(array $arguments, callable $fetchExpected): void
     {
-        $defaultCommand = new LintCommand();
+        $command = $this->application->find('lint');
 
         // add this extension for --format and --output additional options
         $outputManager = new OutputManager();
 
         $extensionDefinition = $outputManager->getDefinition();
-        $definition = $defaultCommand->getDefinition();
+        $definition = $command->getDefinition();
         $definition->addOptions($extensionDefinition->getOptions());
-        $defaultCommand->setDefinition($definition);
+        $command->setDefinition($definition);
 
         $input = new ArrayInput($arguments, $definition);
 

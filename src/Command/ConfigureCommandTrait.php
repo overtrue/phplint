@@ -21,6 +21,7 @@ use Symfony\Component\Console\Input\InputOption;
 /**
  * @author Laurent Laville
  * @since Release 9.0.0
+ * @deprecated Since version 9.8.0, and will be removed in next major version 10.0
  */
 trait ConfigureCommandTrait
 {

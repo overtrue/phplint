@@ -13,10 +13,22 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Tests;
 
+use Overtrue\PHPLint\Command\LintCommand;
+use Overtrue\PHPLint\Console\Application;
+
 /**
  * @author Laurent Laville
  * @since Release 9.0.0
  */
 abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
+    protected Application $application;
+
+    protected function setUp(): void
+    {
+        $application = new Application();
+        $application->addCommand(new LintCommand());
+
+        $this->application = $application;
+    }
 }
