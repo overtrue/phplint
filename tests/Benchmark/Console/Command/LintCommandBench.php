@@ -15,7 +15,6 @@ namespace Overtrue\PHPLint\Tests\Benchmark\Console\Command;
 
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Console\Application;
-use Overtrue\PHPLint\Event\EventDispatcher;
 use PhpBench\Attributes as Bench;
 use Symfony\Component\Console\Tester\CommandTester;
 use Throwable;
@@ -74,14 +73,11 @@ final class LintCommandBench
             '--no-configuration' => true,
         ], $arguments);
 
-        $dispatcher = new EventDispatcher([]);
-
-        $defaultCommand = new LintCommand($dispatcher);
+        $defaultCommand = new LintCommand();
 
         $application = new Application();
         $application->add($defaultCommand);
         $application->setDefaultCommand($defaultCommand->getName());
-        $application->setDispatcher($dispatcher);
 
         $commandTester = new CommandTester($defaultCommand);
         $commandTester->execute($arguments);

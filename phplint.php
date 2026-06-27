@@ -32,7 +32,7 @@ $extensions[] = new ProgressManager();
 
 $dispatcher = new EventDispatcher($extensions);
 
-$defaultCommand = new LintCommand($dispatcher);
+$defaultCommand = new LintCommand();
 
 $application = new Application();
 $application->addCommands([$defaultCommand]);

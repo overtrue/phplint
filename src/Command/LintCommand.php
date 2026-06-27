@@ -42,24 +42,10 @@ final class LintCommand extends Command
 
     private LinterOutput $results;
 
-    private EventDispatcherInterface $dispatcher;
-
-    public function __construct(?EventDispatcherInterface $dispatcher = null, string $name = 'lint')
+    public function __construct(private ?EventDispatcherInterface $dispatcher = null, string $name = 'lint')
     {
         parent::__construct($name);
         $this->results = new LinterOutput([], new SymfonyFinder());
-
-        if ($dispatcher === null) {
-            // fallback to console application
-            /**
-             * @var ApplicationInterface|null $application
-             * @phpstan-ignore varTag.nativeType
-             */
-            $application = $this->getApplication();
-            $dispatcher = $application ? $application->getEventDispatcher() : new EventDispatcher();
-        }
-
-        $this->dispatcher = $dispatcher;
     }
 
     public function getResults(): LinterOutput
@@ -75,6 +61,13 @@ final class LintCommand extends Command
 
     protected function initialize(InputInterface $input, OutputInterface $output): void
     {
+        /**
+         * @var ApplicationInterface|null $application
+         * @phpstan-ignore varTag.nativeType
+         */
+        $application = $this->getApplication();
+        $this->dispatcher = $application ? $application->getEventDispatcher() : new EventDispatcher();
+
         // initializes correctly command and path arguments when lint is set as default command
         $cmd = $input->getArgument('command');
         $paths = $input->getArgument('path');

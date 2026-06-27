@@ -1,8 +1,18 @@
-# Programmatically
-
-```php
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the overtrue/phplint package
+ *
+ * (c) overtrue
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
+require_once dirname(__DIR__) . '/autoload.php';
+#240
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Finder;
@@ -30,36 +40,5 @@ $linter = new Linter($configResolver, $dispatcher);
 $results = $linter->lintFiles($finder->getFiles());
 
 var_dump($results->getErrors());
-/*
- array(1) {
-  ["/absolute/path/to/tests/fixtures/syntax_error.php"]=>
-  array(4) {
-    ["absolute_file"]=>
-    string(62) "/absolute/path/to/tests/fixtures/syntax_error.php"
-    ["relative_file"]=>
-    string(25) "fixtures/syntax_error.php"
-    ["error"]=>
-    string(32) "unexpected end of file in line 4"
-    ["line"]=>
-    int(4)
-  }
-}
- */
 
 var_dump($results->getWarnings());
-/*
-array(1) {
-  ["/absolute/path/to/tests/fixtures/syntax_warning.php"]=>
-  array(4) {
-    ["absolute_file"]=>
-    string(64) "/absolute/path/to/tests/fixtures/syntax_warning.php"
-    ["relative_file"]=>
-    string(27) "fixtures/syntax_warning.php"
-    ["error"]=>
-    string(97) " declare(encoding=...) ignored because Zend multibyte feature is turned off by settings in line 1"
-    ["line"]=>
-    int(1)
-  }
-}
- */
-```

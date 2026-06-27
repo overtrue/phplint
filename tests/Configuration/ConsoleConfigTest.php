@@ -17,7 +17,6 @@ use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
-use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Extension\OutputManager;
 use Overtrue\PHPLint\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -32,8 +31,7 @@ final class ConsoleConfigTest extends TestCase
 {
     public function testConfigFileNotReadable(): void
     {
-        $dispatcher = new EventDispatcher([]);
-        $definition = (new LintCommand($dispatcher))->getDefinition();
+        $definition = (new LintCommand())->getDefinition();
 
         $input = new ArrayInput(['--configuration' => 'does-not-exists.yaml'], $definition);
 

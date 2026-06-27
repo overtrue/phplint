@@ -16,7 +16,6 @@ namespace Overtrue\PHPLint\Tests\Output;
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
-use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
 use Overtrue\PHPLint\Output\JunitOutput;
@@ -26,6 +25,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Throwable;
 
 use function fopen;
@@ -48,7 +48,7 @@ final class OutputTest extends TestCase
      */
     protected function setUp(): void
     {
-        $dispatcher = new EventDispatcher([]);
+        $dispatcher = new EventDispatcher();
 
         $basePath = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'fixtures';
 
@@ -59,7 +59,7 @@ final class OutputTest extends TestCase
             '--' . OptionDefinition::WARNING => true,
             '--' . OptionDefinition::EXTENSIONS => ['php']
         ];
-        $definition = (new LintCommand($dispatcher))->getDefinition();
+        $definition = (new LintCommand())->getDefinition();
         $input = new ArrayInput($arguments, $definition);
 
         $configResolver = new ConsoleOptionsResolver($input);
