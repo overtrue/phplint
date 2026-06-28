@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Console;
 
 use Overtrue\PHPLint\Extension\ExtensionInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -27,6 +28,8 @@ interface ApplicationInterface
      * @param ExtensionInterface[] $extensions
      */
     public function addExtensions(array $extensions): void;
+
+    public function getLogger(): ?LoggerInterface;
 
     public function getEventDispatcher(): EventDispatcherInterface;
 

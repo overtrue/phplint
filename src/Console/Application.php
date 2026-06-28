@@ -19,6 +19,9 @@ use Overtrue\PHPLint\Extension\ExtensionInterface;
 use Overtrue\PHPLint\Helper\DebugFormatterHelper;
 use Overtrue\PHPLint\Helper\ProcessHelper;
 use Overtrue\PHPLint\Output\ConsoleOutput;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Application as BaseApplication;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\HelpCommand;
@@ -44,8 +47,10 @@ use const STDOUT;
  * @author Overtrue
  * @author Laurent Laville (since v9.0)
  */
-final class Application extends BaseApplication implements ApplicationInterface
+final class Application extends BaseApplication implements ApplicationInterface, LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     public const NAME = 'phplint';
 
     private const PACKAGE_NAME = 'overtrue/phplint';
@@ -94,6 +99,11 @@ final class Application extends BaseApplication implements ApplicationInterface
         $this->dispatcher = new EventDispatcher();
         // mandatory because $dispatcher instance of BaseApplication is private
         $this->setDispatcher($this->dispatcher);
+    }
+
+    public function getLogger(): ?LoggerInterface
+    {
+        return $this->logger;
     }
 
     public function getEventDispatcher(): EventDispatcherInterface
