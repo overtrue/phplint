@@ -29,7 +29,7 @@ interface ApplicationInterface
      */
     public function addExtensions(array $extensions): void;
 
-    public function getLogger(): ?LoggerInterface;
+    public function getLogger(): LoggerInterface;
 
     public function getEventDispatcher(): EventDispatcherInterface;
 
