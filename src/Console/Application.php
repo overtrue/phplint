@@ -33,8 +33,8 @@ use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 use function array_keys;
 use function explode;
@@ -110,7 +110,11 @@ final class Application extends BaseApplication implements ApplicationInterface,
         return $this->logger;
     }
 
-    public function getEventDispatcher(): EventDispatcherInterface
+    /**
+     * Officially introduced with version 8.1 of Symfony Console Component
+     * @link https://github.com/symfony/console/blob/2b468472ec5d0e4acbe00f97e62f6cd552509894/Application.php#L115-L118
+     */
+    public function getEventDispatcher(): ?EventDispatcherInterface
     {
         return $this->dispatcher;
     }
