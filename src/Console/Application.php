@@ -119,6 +119,11 @@ final class Application extends BaseApplication implements ApplicationInterface,
     {
         $output ??= new ConsoleOutput(STDOUT);
 
+        // @fixme Will be removed later when Symfony/Runtime component will be implemented
+        if (null === $this->logger) {
+            $this->setLogger(new \Symfony\Component\Console\Logger\ConsoleLogger($output));
+        }
+
         return parent::run($input, $output);
     }
 
