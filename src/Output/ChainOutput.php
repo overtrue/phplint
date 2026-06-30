@@ -16,7 +16,6 @@ namespace Overtrue\PHPLint\Output;
 use InvalidArgumentException;
 
 use function count;
-use function fclose;
 use function get_debug_type;
 use function sprintf;
 
@@ -63,7 +62,6 @@ final class ChainOutput implements OutputInterface
             $this->outputHandlers[$i]->format($results);
         }
 
-        // close stream only once all formatters do their job
-        fclose($this->outputHandlers[0]->getStream());
+        // never close STDOUT stream, otherwise we cannot use anymore the ConsoleLogger or other process that use STDOUT
     }
 }
