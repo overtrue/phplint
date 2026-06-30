@@ -37,6 +37,7 @@ interface OptionDefinition
     public const OUTPUT_FORMAT = 'format';
     public const IGNORE_EXIT_CODE = 'ignore-exit-code';
     public const BOOTSTRAP = 'bootstrap';
+    public const DIAGNOSTIC = 'diagnostic';
 
     public const DEFAULT_JOBS = 5;
     public const DEFAULT_PATH = '.';

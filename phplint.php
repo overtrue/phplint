@@ -11,9 +11,10 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
+use Overtrue\PHPLint\Command\DiagnoseCommand;
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Console\Application;
-use Overtrue\PHPLint\Event\EventDispatcher;
+use Overtrue\PHPLint\Extension\DiagnoseManager;
 use Overtrue\PHPLint\Extension\OutputManager;
 use Overtrue\PHPLint\Extension\ProgressManager;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -27,16 +28,18 @@ if (true === $input->hasParameterOption(['--bootstrap'], true)) {
     }
 }
 
+$extensions = [];
+$extensions[] = new DiagnoseManager();
 $extensions[] = new OutputManager();
 $extensions[] = new ProgressManager();
 
-$dispatcher = new EventDispatcher($extensions);
-
-$defaultCommand = new LintCommand();
-
 $application = new Application();
-$application->addCommands([$defaultCommand]);
+$application->addCommands(
+    [
+        new DiagnoseCommand(),
+        new LintCommand(),
+    ]
+);
 $application->setDefaultCommand('lint');
 $application->addExtensions($extensions);
-$application->setDispatcher($dispatcher);
 $application->run($input);
