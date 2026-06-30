@@ -16,8 +16,6 @@ namespace Overtrue\PHPLint\Console;
 use Composer\InstalledVersions;
 use OutOfBoundsException;
 use Overtrue\PHPLint\Extension\ExtensionInterface;
-use Overtrue\PHPLint\Helper\DebugFormatterHelper;
-use Overtrue\PHPLint\Helper\ProcessHelper;
 use Overtrue\PHPLint\Output\ConsoleOutput;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -41,8 +39,6 @@ use function explode;
 use function in_array;
 use function ltrim;
 use function sprintf;
-
-use const STDOUT;
 
 /**
  * @author Overtrue
@@ -78,14 +74,15 @@ final class Application extends BaseApplication implements ApplicationInterface,
             }
 
             // adds extra arguments and options if any provided by extension(s)
-            $defaultCommand = $this->getDefaultCommand();
+            try {
+                $command = $this->find('lint');
 
-            if (null !== $defaultCommand) {
                 $extensionDefinition = $extension->getDefinition();
-                $definition = $defaultCommand->getDefinition();
+                $definition = $command->getDefinition();
                 $definition->addArguments($extensionDefinition->getArguments());
                 $definition->addOptions($extensionDefinition->getOptions());
-                $defaultCommand->setDefinition($definition);
+                $command->setDefinition($definition);
+            } catch (CommandNotFoundException) {
             }
 
             if ($extension instanceof EventSubscriberInterface) {
@@ -121,7 +118,7 @@ final class Application extends BaseApplication implements ApplicationInterface,
 
     public function run(?InputInterface $input = null, ?OutputInterface $output = null): int
     {
-        $output ??= new ConsoleOutput(STDOUT);
+        $output ??= new ConsoleOutput();
 
         // @fixme Will be removed later when Symfony/Runtime component will be implemented
         if (null === $this->logger) {
@@ -162,8 +159,6 @@ final class Application extends BaseApplication implements ApplicationInterface,
     {
         return new HelperSet([
             new FormatterHelper(),
-            new DebugFormatterHelper(),
-            new ProcessHelper(),
         ]);
     }
 

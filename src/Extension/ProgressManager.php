@@ -13,14 +13,15 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Extension;
 
-use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
-use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\AfterLintFileInterface;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingInterface;
+use Overtrue\PHPLint\Helper\DebugFormatterHelper;
+use Overtrue\PHPLint\Helper\ProcessHelper;
+use Overtrue\PHPLint\Helper\ProgressHelper;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -44,9 +45,10 @@ final class ProgressManager implements
 
     public function getName(): string
     {
-        return 'progress';
+        return 'progress_manager';
     }
 
+    // @deprecated : Will be remove from API later
     public static function getCommands(): array
     {
         return [];
@@ -67,7 +69,7 @@ final class ProgressManager implements
                 OptionDefinition::NO_PROGRESS,
                 null,
                 InputOption::VALUE_NONE,
-                'Suppress the progress output (same as <comment>--progress quiet</comment>)'
+                'Suppress the progress output (<comment>Deprecated option, use "--progress quiet" instead</comment>)'
             )
         ]);
     }
@@ -88,37 +90,39 @@ final class ProgressManager implements
     public function initialize(ConsoleCommandEvent $event): void
     {
         $command = $event->getCommand();
-        if (!$command->getCode() instanceof LintCommand) {
+        if ($command->getName() !== 'lint') {
             // this extension must be only available for lint command
             return;
         }
 
-        $input = $event->getInput();
         $output = $event->getOutput();
 
-        $progress = 'dots';
+        $helperSet = $command->getHelperSet();
+        $helperSet?->set(new ProgressHelper($output));
 
-        if (true === $input->hasParameterOption(['--no-progress'], true)
+        $input = $event->getInput();
+
+        $progress = ProgressEnum::DOTS->value;
+
+        if (true === $input->hasParameterOption(['--' . OptionDefinition::NO_PROGRESS], true)
             || $output->isQuiet()
         ) {
-            $progress = 'quiet';
+            $progress = ProgressEnum::QUIET->value;
         }
 
         if ($output->isVeryVerbose()) {
-            $progress = 'plain';
+            $progress = ProgressEnum::PLAIN->value;
         }
 
-        if (true === $input->hasParameterOption(['--progress'], true)) {
-            $progress = $input->getParameterOption('--progress');
+        if (true === $input->hasParameterOption(['--' . OptionDefinition::PROGRESS, '-p'], true)) {
+            $progress = $input->getParameterOption(['--' . OptionDefinition::PROGRESS, '-p']);
         }
-        if (true === $input->hasParameterOption(['-p'], true)) {
-            $progress = $input->getParameterOption('-p');
-        }
+
         $progress ??= OptionDefinition::DEFAULT_PROGRESS_WIDGET;
 
         $newEvent = clone $event;
 
-        if ($progress === 'plain') {
+        if ($progress === ProgressEnum::PLAIN->value) {
             $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
             $newEvent = new ConsoleCommandEvent(
                 $command,
@@ -128,25 +132,21 @@ final class ProgressManager implements
         }
 
         $this->widget = match ($progress) {
-            'bar' => new ProgressBar(),
-            'indicator' => new ProgressIndicator(),
-            'auto', 'dots', 'plain', 'printer' => new ProgressPrinter(),
-            default => null,
+            ProgressEnum::BAR->value => new ProgressBar(),
+            ProgressEnum::INDICATOR->value => new ProgressIndicator(),
+            ProgressEnum::AUTO->value, ProgressEnum::DOTS->value, ProgressEnum::PLAIN->value, 'printer' => new ProgressPrinter(),
+            ProgressEnum::NEVER->value, ProgressEnum::QUIET->value => null,
+            default => throw new \InvalidArgumentException(\sprintf('Unknown progress enum case "%s"', $progress)),
         };
 
-        if (!$this->widget instanceof EventSubscriberInterface) {
-            return;
+        if ($this->widget instanceof ExtensionEventInterface) {
+            if ($this->widget instanceof ProgressPrinter) {
+                // these helpers are only necessary when using the `--progress plain` flag
+                $helperSet?->set(new ProcessHelper());
+                $helperSet?->set(new DebugFormatterHelper());
+            }
+            $this->widget->initialize($newEvent);
         }
-
-        /**
-         * @var ApplicationInterface|null $application
-         * @phpstan-ignore varTag.nativeType
-         */
-        $application = $command->getApplication();
-
-        $eventDispatcher = $application->getEventDispatcher();
-        $eventDispatcher->addSubscriber($this->widget);
-        $this->widget->initialize($newEvent);
     }
 
     /**

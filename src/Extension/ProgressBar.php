@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Extension;
 
-use LogicException;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\AfterLintFileInterface;
@@ -21,15 +20,13 @@ use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingInterface;
 use Overtrue\PHPLint\Event\BeforeLintFileEvent;
 use Overtrue\PHPLint\Event\BeforeLintFileInterface;
-use Overtrue\PHPLint\Output\ConsoleOutputInterface;
-use Symfony\Component\Console\ConsoleEvents;
+use Overtrue\PHPLint\Helper\ProgressHelper;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Console\Helper\HelperInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
-use function get_class;
 use function mb_strimwidth;
 use function min;
-use function sprintf;
 use function strlen;
 
 /**
@@ -38,24 +35,13 @@ use function strlen;
  */
 final class ProgressBar implements
     ExtensionEventInterface,
-    EventSubscriberInterface,
     BeforeCheckingInterface,
     BeforeLintFileInterface,
     AfterLintFileInterface
 {
-    private ConsoleOutputInterface $output;
+    private OutputInterface $output;
     private bool $hasProcessHelper;
-
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            ConsoleEvents::COMMAND => 'initialize',
-            AfterCheckingEvent::class => 'finish',
-            BeforeCheckingEvent::class => 'beforeChecking',
-            BeforeLintFileEvent::class => 'beforeLintFile',
-            AfterLintFileEvent::class => 'afterLintFile',
-        ];
-    }
+    private ProgressHelper|HelperInterface $progressHelper;
 
     /**
      * Initializes the progress bar widget
@@ -63,20 +49,8 @@ final class ProgressBar implements
     public function initialize(ConsoleCommandEvent $event): void
     {
         $this->hasProcessHelper = $event->getCommand()->getHelperSet()->has('process');
-
-        $output = $event->getOutput();
-
-        if (!$output instanceof ConsoleOutputInterface) {
-            throw new LogicException(
-                sprintf(
-                    'Extension %s must implement %s',
-                    get_class($this),
-                    ConsoleOutputInterface::class
-                )
-            );
-        }
-
-        $this->output = $output;
+        $this->progressHelper = $event->getCommand()->getHelperSet()->get('progress');
+        $this->output = $event->getOutput();
     }
 
     /**
@@ -84,7 +58,7 @@ final class ProgressBar implements
      */
     public function finish(AfterCheckingEvent $event): void
     {
-        $this->output->progressFinish();
+        $this->progressHelper->progressFinish();
     }
 
     public function beforeChecking(BeforeCheckingEvent $event): void
@@ -93,16 +67,17 @@ final class ProgressBar implements
             // ProgressBar extension make some noise that break output when ProcessHelper is active
             return;
         }
-        $this->output->progressStart($event->getArgument('fileCount'));
+
+        $this->progressHelper->progressStart($event->getArgument('fileCount'));
     }
 
     public function beforeLintFile(BeforeLintFileEvent $event): void
     {
-        $this->output->progressMessage('Checking file ...');
+        $this->progressHelper->progressMessage('Checking file ...');
 
         $filename = $event->getArgument('file')->getRelativePathname();
         $width = min(strlen($filename), 70);
-        $this->output->progressMessage(mb_strimwidth($filename, -$width, $width), 'filename');
+        $this->progressHelper->progressMessage(mb_strimwidth($filename, -$width, $width), 'filename');
     }
 
     public function afterLintFile(AfterLintFileEvent $event): void
@@ -112,6 +87,6 @@ final class ProgressBar implements
             return;
         }
 
-        $this->output->progressAdvance();
+        $this->progressHelper->progressAdvance();
     }
 }

@@ -66,7 +66,11 @@ final class FormatResolver
             if (array_key_exists($requestedFormat, self::FORMATTERS)) {
                 // use built-in formatter
                 $formatterClass = self::FORMATTERS[$requestedFormat];
-                $formatter = new $formatterClass($stream, $output->getVerbosity(), $decorated, $output->getFormatter());
+                if ($requestedFormat === 'console') {
+                    $formatter = new $formatterClass($output->getVerbosity(), $decorated, $output->getFormatter());
+                } else {
+                    $formatter = new $formatterClass($stream, $output->getVerbosity(), $decorated, $output->getFormatter());
+                }
                 $handlers[$formatter->getName()] = $formatter;
                 continue;
             }

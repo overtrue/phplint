@@ -13,20 +13,15 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Extension;
 
-use LogicException;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\AfterLintFileInterface;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingInterface;
-use Overtrue\PHPLint\Output\ConsoleOutputInterface;
-use Symfony\Component\Console\ConsoleEvents;
+use Overtrue\PHPLint\Helper\ProgressHelper;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Helper\HelperInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-
-use function get_class;
-use function sprintf;
 
 /**
  * @author Laurent Laville
@@ -34,24 +29,14 @@ use function sprintf;
  */
 final class ProgressPrinter implements
     ExtensionEventInterface,
-    EventSubscriberInterface,
     BeforeCheckingInterface,
     AfterLintFileInterface
 {
-    private ConsoleOutputInterface $output;
+    private OutputInterface $output;
 
     private int $maxSteps = 0;
     private bool $hasProcessHelper;
-
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            ConsoleEvents::COMMAND => 'initialize',
-            AfterCheckingEvent::class => 'finish',
-            BeforeCheckingEvent::class => 'beforeChecking',
-            AfterLintFileEvent::class => 'afterLintFile',
-        ];
-    }
+    private ProgressHelper|HelperInterface $progressHelper;
 
     /**
      * Initializes the progress dots widget (default legacy behavior)
@@ -59,20 +44,8 @@ final class ProgressPrinter implements
     public function initialize(ConsoleCommandEvent $event): void
     {
         $this->hasProcessHelper = $event->getCommand()->getHelperSet()->has('process');
-
-        $output = $event->getOutput();
-
-        if (!$output instanceof ConsoleOutputInterface) {
-            throw new LogicException(
-                sprintf(
-                    'Extension %s must implement %s',
-                    get_class($this),
-                    ConsoleOutputInterface::class
-                )
-            );
-        }
-
-        $this->output = $output;
+        $this->progressHelper = $event->getCommand()->getHelperSet()->get('progress');
+        $this->output = $event->getOutput();
     }
 
     /**
@@ -95,10 +68,12 @@ final class ProgressPrinter implements
             return;
         }
 
-        $this->output->progressPrinterAdvance(
+        $this->progressHelper->progressPrinterAdvance(
             $this->maxSteps,
             $event->getArgument('status'),
-            $event->getArgument('file')
+            $event->getArgument('file'),
+            1,
+            $this->output
         );
     }
 }

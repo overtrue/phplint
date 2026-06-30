@@ -13,9 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Output;
 
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\OutputInterface as SymfonyOutputInterface;
-use Symfony\Component\Finder\SplFileInfo;
 
 /**
  * @author Laurent Laville
@@ -24,18 +22,6 @@ use Symfony\Component\Finder\SplFileInfo;
 interface ConsoleOutputInterface extends SymfonyOutputInterface
 {
     public const NO_FILE_TO_LINT = 'Could not find any files to lint';
-
-    public function createProgressBar($max = 0): ProgressBar;
-
-    public function progressStart(int $max = 0): void;
-
-    public function progressAdvance(int $step = 1): void;
-
-    public function progressFinish(): void;
-
-    public function progressMessage(string $message, string $name = 'message'): void;
-
-    public function progressPrinterAdvance(int $maxSteps, string $status, SplFileInfo $fileInfo, int $step = 1): void;
 
     public function headerBlock(string $appVersion, string $configFile): void;
 

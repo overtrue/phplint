@@ -13,18 +13,14 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Output;
 
-use Overtrue\PHPLint\Console\Terminal;
 use PHP_Parallel_Lint\PhpConsoleColor\ConsoleColor;
 use PHP_Parallel_Lint\PhpConsoleColor\InvalidStyleException;
 use PHP_Parallel_Lint\PhpConsoleHighlighter\Highlighter;
-use Symfony\Component\Console\Formatter\OutputFormatterInterface;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\StreamOutput;
+use Symfony\Component\Console\Output\ConsoleOutput as SymfonyConsoleOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Finder\SplFileInfo;
 
 use function abs;
 use function array_filter;
@@ -34,13 +30,10 @@ use function count;
 use function end;
 use function file;
 use function file_get_contents;
-use function getenv;
 use function in_array;
 use function json_encode;
 use function key;
 use function max;
-use function mb_strimwidth;
-use function min;
 use function realpath;
 use function rtrim;
 use function str_pad;
@@ -48,7 +41,6 @@ use function str_repeat;
 use function strlen;
 
 use const ARRAY_FILTER_USE_KEY;
-use const DIRECTORY_SEPARATOR;
 use const PHP_EOL;
 use const STR_PAD_LEFT;
 
@@ -56,26 +48,8 @@ use const STR_PAD_LEFT;
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-final class ConsoleOutput extends StreamOutput implements OutputInterface, ConsoleOutputInterface
+final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputInterface, OutputInterface
 {
-    // @deprecated Do not use outside as it's an internal old implementation usage
-    public const MAX_LINE_LENGTH = 120;
-
-    private ?ProgressBar $progressBar = null;
-
-    private Terminal $terminal;
-
-    public function __construct(
-        $stream,
-        int $verbosity = parent::VERBOSITY_NORMAL,
-        ?bool $decorated = null,
-        ?OutputFormatterInterface $formatter = null,
-        ?Terminal $terminal = null
-    ) {
-        parent::__construct($stream, $verbosity, $decorated, $formatter);
-        $this->terminal = $terminal ?? new Terminal();
-    }
-
     public function getName(): string
     {
         return 'console';
@@ -104,108 +78,11 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
             $this->errorBlock($context['files_count'], $errCount);
             try {
                 $this->showErrors($data);
-            } catch (InvalidStyleException $e) {
+            } catch (InvalidStyleException) {
             }
         } else {
             $this->successBlock($context['files_count']);
         }
-    }
-
-    public function createProgressBar($max = 0): ProgressBar
-    {
-        $progressBar = new ProgressBar($this, $max);
-        if ('\\' !== DIRECTORY_SEPARATOR || 'Hyper' === getenv('TERM_PROGRAM')) {
-            $progressBar->setEmptyBarCharacter('░'); // light shade character \u2591
-            $progressBar->setProgressCharacter('');
-            $progressBar->setBarCharacter('▓'); // dark shade character \u2593
-        }
-
-        $formats = [
-            'very_verbose' => ' %current%/%max% %percent:3s%% %elapsed:6s% %message% %filename%',
-            'very_verbose_nomax' => ' %current% %elapsed:6s% %message% %filename%',
-
-            'debug' => ' %current%/%max% %percent:3s%% %elapsed:6s% %memory:6s% %message% %filename%',
-            'debug_nomax' => ' %current% %elapsed:6s% %memory:6s% %message% %filename%',
-        ];
-        foreach ($formats as $name => $format) {
-            $progressBar::setFormatDefinition($name, $format);
-        }
-
-        $progressBar->setMessage('Checking ...');
-        $progressBar->setMessage('', 'filename');
-        $this->progressBar = $progressBar;
-        return $progressBar;
-    }
-
-    public function progressStart(int $max = 0): void
-    {
-        $this->progressBar = $this->createProgressBar($max);
-        $this->progressBar->start();
-    }
-
-    public function progressAdvance(int $step = 1): void
-    {
-        $this->progressBar?->advance($step);
-    }
-
-    public function progressFinish(): void
-    {
-        $this->progressBar?->finish();
-        $this->progressBar?->clear();
-        $this->newLine();
-        unset($this->progressBar);
-    }
-
-    public function progressMessage(string $message, string $name = 'message'): void
-    {
-        $this->progressBar?->setMessage($message, $name);
-    }
-
-    public function progressPrinterAdvance(int $maxSteps, string $status, SplFileInfo $fileInfo, int $step = 1): void
-    {
-        static $i = 1;
-
-        $percent = floor(($i / $maxSteps) * 100);
-        $maxStepsLen = strlen((string) $maxSteps);
-        $process = sprintf('%' . $maxStepsLen . 'd / %' . $maxStepsLen . 'd (%3s%%)', $i, $maxSteps, $percent);
-
-        $maxColumn = $this->terminal->width() - 2 - strlen('[ XX ]') - strlen(' / (XXX%)') - (2 * $maxStepsLen);
-
-        $withColor = static fn (string $color, string $indicator) => sprintf('<%s>%s</>', $color, $indicator);
-
-        if ($this->isDebug()) {
-            $filename = $fileInfo->getRelativePathname();
-            $width = min(strlen($filename), $maxColumn);
-            $filename = str_pad(mb_strimwidth($filename, -$width, $width), $maxColumn);
-
-            if ($status === 'ok') {
-                $st = $withColor('fg=green', ' OK ');
-            } elseif ($status === 'error') {
-                $st = $withColor('bg=red;fg=white', 'ERR ');
-            } else {
-                $st = $withColor('fg=yellow', 'WARN');
-            }
-
-            $this->writeln(sprintf("[ %s ] %s %" . strlen($process) . "s", $st, $filename, $process));
-        } else {
-            if ($i && 0 === $i % $maxColumn) {
-                $this->writeln($process);
-            }
-
-            if ($status === 'ok') {
-                $this->write($withColor('fg=green', '.'));
-            } elseif ($status === 'error') {
-                $this->write($withColor('bg=red;fg=white', 'E'));
-            } else {
-                $this->write($withColor('fg=yellow', 'W'));
-            }
-
-            if ($i === $maxSteps) {
-                $this->newLine();
-            }
-        }
-
-        $i += $step;
     }
 
     public function headerBlock(string $appVersion, string $configFile): void
