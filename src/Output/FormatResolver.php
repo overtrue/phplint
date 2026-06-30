@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Output;
 
+use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
 use Symfony\Component\Console\Output\ConsoleOutputInterface as SymfonyConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface as SymfonyOutputInterface;
@@ -45,7 +46,7 @@ final class FormatResolver
     {
         $decorated = $output->isDecorated();
 
-        $filename = $configResolver->getOption('output');
+        $filename = $configResolver->getOption(OptionDefinition::OUTPUT_FILE);
         if ($filename) {
             $stream = fopen($filename, 'w');
             $decorated = false;
@@ -58,7 +59,7 @@ final class FormatResolver
             }
         }
 
-        $requestedFormats = $configResolver->getOption('format');
+        $requestedFormats = $configResolver->getOption(OptionDefinition::OUTPUT_FORMAT);
 
         $handlers = [];
 
