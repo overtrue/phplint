@@ -15,16 +15,24 @@ namespace Overtrue\PHPLint\Console;
 
 use Composer\InstalledVersions;
 use OutOfBoundsException;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Configuration\Resolver\PluginValueResolver;
+use Overtrue\PHPLint\Extension\ExtensionEnum;
 use Overtrue\PHPLint\Extension\ExtensionInterface;
 use Overtrue\PHPLint\Output\ConsoleOutput;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use ReflectionException;
+use ReflectionFunction;
 use Symfony\Component\Console\Application as BaseApplication;
+use Symfony\Component\Console\Attribute\Reflection\ReflectionMember;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\HelpCommand;
 use Symfony\Component\Console\Command\ListCommand;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
+use Symfony\Component\Console\Exception\ExceptionInterface;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\InputInterface;
@@ -33,8 +41,6 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-use function array_keys;
-use function in_array;
 use function sprintf;
 
 /**
@@ -50,41 +56,6 @@ final class Application extends BaseApplication implements ApplicationInterface,
     private const PACKAGE_NAME = 'overtrue/phplint';
 
     private EventDispatcherInterface $dispatcher;
-
-    /**
-     * @inheritDoc
-     */
-    public function addExtensions(array $extensions): void
-    {
-        foreach ($extensions as $extension) {
-            // @phpstan-ignore instanceof.alwaysTrue
-            if (!$extension instanceof ExtensionInterface) {
-                // accepts only valid extension that should implement this interface
-                continue;
-            }
-
-            foreach ($extension->getCommands() as $command) {
-                // adds extra commands if any provided
-                $this->addCommand($command);
-            }
-
-            // adds extra arguments and options if any provided by extension(s)
-            try {
-                $command = $this->find('lint');
-
-                $extensionDefinition = $extension->getDefinition();
-                $definition = $command->getDefinition();
-                $definition->addArguments($extensionDefinition->getArguments());
-                $definition->addOptions($extensionDefinition->getOptions());
-                $command->setDefinition($definition);
-            } catch (CommandNotFoundException) {
-            }
-
-            if ($extension instanceof EventSubscriberInterface) {
-                $this->dispatcher->addSubscriber($extension);
-            }
-        }
-    }
 
     public function __construct()
     {
@@ -123,6 +94,57 @@ final class Application extends BaseApplication implements ApplicationInterface,
         return parent::run($input, $output);
     }
 
+    public function doRun(InputInterface $input, OutputInterface $output): int
+    {
+        if (true === $input->hasParameterOption(['--version', '-V'], true)) {
+            $output->writeln($this->getLongVersion());
+            return Command::SUCCESS;
+        }
+
+        try {
+            // Makes ArgvInput::getFirstArgument() able to distinguish an option from an argument.
+            $input->bind($this->getDefinition());
+        } catch (ExceptionInterface) {
+            // Errors must be ignored, full binding/validation happens later when the command is known.
+        }
+
+        $name = $this->getCommandName($input);
+        if ($name) {
+            try {
+                $command = $this->find($name);
+                $this->loadPlugins($command, $input);
+            } catch (CommandNotFoundException) {
+                // fallback to Symfony Base Application (parent) that will handle this error
+            } catch (ReflectionException) {
+                // plugins cannot be resolved/loaded
+            }
+        }
+
+        return parent::doRun($input, $output);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public function hasPlugin(string $pluginName, InputInterface $input): bool
+    {
+        $name = $this->getCommandName($input);
+        if (!$name) {
+            return false;
+        }
+        $command = $this->find($name);
+
+        $extensions = $this->resolvePlugins($command, $input);
+
+        foreach ($extensions as $extension) {
+            if ($extension?->value === $pluginName) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     protected function getDefaultCommands(): array
     {
         return [new HelpCommand(), new ListCommand()];
@@ -135,10 +157,57 @@ final class Application extends BaseApplication implements ApplicationInterface,
         ]);
     }
 
-    protected function getCommandName(InputInterface $input): ?string
+    /**
+     * @throws ReflectionException
+     */
+    private function resolvePlugins(Command $command, InputInterface $input): iterable
     {
-        $name = parent::getCommandName($input);
-        return in_array($name, array_keys(parent::all()), true) ? $name : null;
+        $code = $command->getCode();
+
+        if ($code === null) {
+            return [];
+        }
+
+        $reflector = new ReflectionFunction($code(...));
+        $argumentName = OptionDefinition::EXTENSIONS;
+        foreach ($reflector->getParameters() as $parameter) {
+            if ($parameter->getName() !== $argumentName) {
+                continue;
+            }
+
+            $pluginValueResolver = new PluginValueResolver();
+            return $pluginValueResolver->resolve($argumentName, $input, new ReflectionMember($parameter));
+        }
+
+        return [];
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    private function loadPlugins(Command $command, InputInterface $input): void
+    {
+        $dispatcher = $this->getDispatcher();
+
+        $extensions = $this->resolvePlugins($command, $input);
+
+        // loads all valid extension on fly, invalid ones will be reported by the Console ArgumentResolver component
+        foreach ($extensions as $extensionName) {
+            $extension = ExtensionEnum::factory($extensionName);
+
+            if ($extension instanceof EventSubscriberInterface) {
+                $dispatcher->addSubscriber($extension);
+            }
+
+            if ($extension instanceof ExtensionInterface) {
+                $definition = $command->getDefinition();
+                // adds new options defined by this $extension to the current $command
+                foreach ($extension::getDefinition()->getOptions() as $option) {
+                    $definition->addOption($option);
+                }
+                $command->setDefinition($definition);
+            }
+        }
     }
 
     private static function getPrettyVersion(): string

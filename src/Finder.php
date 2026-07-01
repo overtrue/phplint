@@ -42,7 +42,7 @@ final class Finder implements JsonSerializable
     {
         $this->paths = $configResolver->getOption(OptionDefinition::PATH);
         $this->excludes = $configResolver->getOption(OptionDefinition::EXCLUDE);
-        $this->extensions = $configResolver->getOption(OptionDefinition::EXTENSIONS);
+        $this->extensions = $configResolver->getOption(OptionDefinition::FILE_EXTENSIONS);
     }
 
     public function jsonSerialize(): array

@@ -60,7 +60,7 @@ class Git implements ProviderInterface
         $exitCode = $process->run();
 
         if ($exitCode === 0) {
-            preg_match('/^(.*)\s\(HEAD\s->\s(.*),/', $process->getOutput(), $matches);
+            preg_match('/^(.*)\s\(HEAD\s->\s(.*)(,|\))/', $process->getOutput(), $matches);
             $commitHash = $matches[1];
             $branchName = $matches[2];
         }

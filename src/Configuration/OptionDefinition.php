@@ -22,6 +22,7 @@ interface OptionDefinition
     public const JOBS = 'jobs';
     public const PATH = 'path';
     public const EXCLUDE = 'exclude';
+    public const FILE_EXTENSIONS = 'file-extensions';
     public const EXTENSIONS = 'extensions';
     public const WARNING = 'warning';
     public const CACHE = 'cache';   // @deprecated Will be removed in version 10.0, use CACHE_DIR instead

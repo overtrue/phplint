@@ -13,25 +13,20 @@ declare(strict_types=1);
 
 use Overtrue\PHPLint\Command\DiagnoseCommand;
 use Overtrue\PHPLint\Command\LintCommand;
+use Overtrue\PHPLint\Configuration\ArgumentResolver;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\Application;
-use Overtrue\PHPLint\Extension\DiagnoseManager;
-use Overtrue\PHPLint\Extension\OutputManager;
-use Overtrue\PHPLint\Extension\ProgressManager;
+use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
 use Symfony\Component\Console\Input\ArgvInput;
 
 $input = new ArgvInput();
 
-if (true === $input->hasParameterOption(['--bootstrap'], true)) {
-    $bootstrap = $input->getParameterOption('--bootstrap');
+if (true === $input->hasParameterOption(['--' . OptionDefinition::BOOTSTRAP, '-b'], true)) {
+    $bootstrap = $input->getParameterOption(['--' . OptionDefinition::BOOTSTRAP, '-b']);
     if ($bootstrap) {
         require_once $bootstrap;
     }
 }
-
-$extensions = [];
-$extensions[] = new DiagnoseManager();
-$extensions[] = new OutputManager();
-$extensions[] = new ProgressManager();
 
 $application = new Application();
 $application->addCommands(
@@ -40,5 +35,9 @@ $application->addCommands(
         new LintCommand(),
     ]
 );
-$application->addExtensions($extensions);
-$application->run($input);
+
+$argumentResolver = new ArgumentResolver(ArgumentResolver::getDefaultValueResolvers());
+$application->setArgumentResolver($argumentResolver);
+
+$runner = new ConsoleApplicationRunner($application, 'dev', $input);
+$runner->run();

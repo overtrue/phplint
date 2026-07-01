@@ -23,11 +23,6 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  */
 interface ApplicationInterface
 {
-    /**
-     * @param ExtensionInterface[] $extensions
-     */
-    public function addExtensions(array $extensions): void;
-
     public function getLogger(): LoggerInterface;
 
     public function getEventDispatcher(): ?EventDispatcherInterface;

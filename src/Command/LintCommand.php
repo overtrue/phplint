@@ -14,8 +14,11 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Command;
 
 use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
+use Overtrue\PHPLint\Configuration\ConfigResolver;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Configuration\Resolver\ConfigValueResolver;
+use Overtrue\PHPLint\Extension\ExtensionEnum;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
 use Overtrue\PHPLint\Output\LinterOutput;
@@ -23,6 +26,7 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
+use Symfony\Component\Console\Attribute\ValueResolver;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -72,6 +76,8 @@ final class LintCommand
         InputInterface $input,
         OutputInterface $output,
         Application $application,
+        #[ValueResolver(ConfigValueResolver::class)]
+        string $configuration, // global option
         #[Argument(
             description: 'Path to file or directory to lint (<comment>default: working directory</comment>)',
             name: OptionDefinition::PATH
@@ -84,26 +90,15 @@ final class LintCommand
         ?array $excludePath = null,
         #[Option(
             description: 'Check only files with selected extensions',
-            name: OptionDefinition::EXTENSIONS,
+            name: OptionDefinition::FILE_EXTENSIONS,
         )]
-        ?array $extensions = null,
+        ?array $fileExtensions = null,
         #[Option(
             description: 'Number of paralleled jobs to run',
             name: OptionDefinition::JOBS,
             shortcut: 'j',
         )]
         ?int $job = null,
-        #[Option(
-            description: 'Read configuration from config file',
-            name: OptionDefinition::CONFIGURATION,
-            shortcut: 'c',
-        )]
-        string $configuration = OptionDefinition::DEFAULT_CONFIG_FILE,
-        #[Option(
-            description: 'Ignore default configuration file (<comment>' . OptionDefinition::DEFAULT_CONFIG_FILE . '</comment>)',
-            name: OptionDefinition::NO_CONFIGURATION,
-        )]
-        bool $noConfig = false,
         #[Option(
             description: 'Path to the cache directory (<comment>Deprecated option, use "cache-dir" instead</comment>)',
             name: OptionDefinition::CACHE,
@@ -141,21 +136,24 @@ final class LintCommand
             name: OptionDefinition::IGNORE_EXIT_CODE,
         )]
         ?bool $ignoreExitCode = null,
-        #[Option(
-            description: 'A PHP script that is included before the linter run',
-            name: OptionDefinition::BOOTSTRAP,
-        )]
-        ?string $bootstrap = null,
+        // ValueResolver is not necessary here, because logic is applied on "Application::doRun" process
+        // but definition is mandatory on this command, otherwise loading plugin on fly is not possible
+        ?ExtensionEnum ...$extensions, // global option
     ): int {
         $startTime = microtime(true);
 
         $this->initialize($input, $output);
 
-        if (true === $noConfig) {
-            $configResolver = new ConsoleOptionsResolver($input);
-        } else {
-            $configResolver = new FileOptionsResolver($input);
-        }
+        $defaults = [
+            // for global options
+            OptionDefinition::CONFIGURATION => $configuration,
+            OptionDefinition::NO_CONFIGURATION => $configuration === '',
+
+            // for local arguments and options
+            OptionDefinition::PATH => $sourcePath,
+            OptionDefinition::EXCLUDE => $excludePath ?? [],
+        ];
+        $configResolver = new ConfigResolver($input, $defaults);
 
         $finder = (new Finder($configResolver))->getFiles();
         $linter = new Linter(
