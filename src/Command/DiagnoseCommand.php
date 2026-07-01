@@ -13,16 +13,17 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Command;
 
-use Overtrue\PHPLint\Configuration\EnvConfig;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\ApplicationInterface;
+use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Environment\Provider\CI;
-use Overtrue\PHPLint\Environment\ProviderData;
-use Overtrue\PHPLint\Environment\ProviderInterface;
-use Overtrue\PHPLint\Environment\Supplier;
+use Overtrue\PHPLint\Environment\Provider\DotEnv;
 use Overtrue\PHPLint\Environment\Provider\Git;
 use Overtrue\PHPLint\Environment\Provider\Php;
 use Overtrue\PHPLint\Environment\Provider\Uname;
+use Overtrue\PHPLint\Environment\ProviderData;
+use Overtrue\PHPLint\Environment\ProviderInterface;
+use Overtrue\PHPLint\Environment\Supplier;
 use Overtrue\PHPLint\Extension\DiagnoseEnum;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\Application;
@@ -73,7 +74,7 @@ final class DiagnoseCommand
                 $parts = explode(',', $whenDiagnosed);
             }
 
-            $vcs = $php = $uname = $ci = false;
+            $vcs = $php = $uname = $ci = $dotenv = false;
 
             if (!in_array(DiagnoseEnum::NEVER->value, $parts, true)) {
                 foreach ($parts as $part) {
@@ -88,6 +89,9 @@ final class DiagnoseCommand
                     }
                     if ($part == DiagnoseEnum::CI->value) {
                         $ci = true;
+                    }
+                    if ($part == DiagnoseEnum::DOTENV->value) {
+                        $dotenv = true;
                     }
                 }
             }
@@ -115,6 +119,9 @@ final class DiagnoseCommand
         if ($ci) {
             $environment->addProvider(new CI());
         }
+        if ($dotenv) {
+            $environment->addProvider(new DotEnv());
+        }
         if (!$vcs && !$php && !$uname && class_exists($whenDiagnosed)) {
             $user = new $whenDiagnosed();
             if ($user instanceof ProviderInterface) {
@@ -124,7 +131,7 @@ final class DiagnoseCommand
 
         $formatter = new FormatterHelper();
 
-        $providerData = $environment->__debugInfo();
+        $providerData = $environment->describe();
 
         if (count($providerData) === 0) {
             $logger->notice('The diagnose command did not produced any results');
@@ -137,6 +144,7 @@ final class DiagnoseCommand
                 Php::class => 'PHP Information',
                 Uname::class => 'OS Information',
                 CI::class => 'CI Information',
+                DotEnv::class => 'Environment Variables Information',
                 default => sprintf('"%s" Information ', $providerId),
             };
 
@@ -162,7 +170,7 @@ final class DiagnoseCommand
                     );
                     continue;
                 }
-                $info = $providerData->__debugInfo();
+                $info = $providerData->describe();
                 $io->writeln($formatter->formatSection(
                     $info['setting'],
                     sprintf('%s <comment>%s</comment>', $info['value'], $info['description'])

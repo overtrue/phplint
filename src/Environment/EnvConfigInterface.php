@@ -11,7 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Overtrue\PHPLint\Configuration;
+namespace Overtrue\PHPLint\Environment;
 
 /**
  * @author Laurent Laville
