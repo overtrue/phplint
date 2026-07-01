@@ -65,7 +65,7 @@ final class DiagnoseCommand
         }
 
         if ($whenDiagnosed === DiagnoseEnum::ALWAYS->value) {
-            $vcs = $php = $uname = $ci = true;
+            $vcs = $php = $uname = $ci = $dotenv = true;
         } else { //
             if ($whenDiagnosed === DiagnoseEnum::AUTO->value) {
                 $envConfig = new EnvConfig('phplint');
