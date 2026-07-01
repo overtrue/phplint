@@ -17,7 +17,6 @@ use PHP_Parallel_Lint\PhpConsoleColor\ConsoleColor;
 use PHP_Parallel_Lint\PhpConsoleColor\InvalidStyleException;
 use PHP_Parallel_Lint\PhpConsoleHighlighter\Highlighter;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\ConsoleOutput as SymfonyConsoleOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -138,9 +137,6 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
 
         foreach ($filtered as $name => $value) {
             $rows[] = [sprintf('<comment>%s</comment>', $name), $normalize($value)];
-            if ('path' === $name) {
-                $rows[] = new TableSeparator();
-            }
         }
 
         $table = new Table($this);
