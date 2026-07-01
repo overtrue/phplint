@@ -107,7 +107,7 @@ class DotEnv implements ProviderInterface, LoggerAwareInterface
 
         $prefix = 'phplint';
         $env = new EnvConfig($prefix);
-        foreach (['env', 'debug', 'project_dir', 'diagnostic', 'log'] as $key) {
+        foreach (['env', 'debug', 'project_dir', 'diagnostic', 'log', 'frontend'] as $key) {
             $defaultFallback = ($key === 'project_dir') ? $this->projectDirectory : null;
             $value = $env->get($key, $defaultFallback);
             if (null !== $value) {
