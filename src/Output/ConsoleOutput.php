@@ -69,7 +69,6 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
         $options = $context['options_used'] ?? [];
         $configFile = $options['no-configuration'] ? '' : $options['configuration'];
         $this->headerBlock($context['application_version']['long'], $configFile);
-        $this->configBlock($options);
 
         $this->consumeBlock($context['time_usage'], $context['memory_usage'], $context['cache_usage'], $context['process_count']);
 
@@ -96,56 +95,6 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
             'Configuration : <comment>%s</comment>',
             (!realpath($configFile) || empty($configFile)) ? 'No config file loaded' : realpath($configFile)
         ));
-
-        $this->newLine();
-    }
-
-    public function configBlock(array $options): void
-    {
-        if ($this->isDebug()) {
-            // see all options from application and command
-            $forbidden = [];
-        } elseif ($this->isVerbose()) {
-            // see only some options
-            $forbidden = [
-                // from command
-                'command',
-                // from application
-                'ansi',
-                'help',
-                'no-interaction',
-                'quiet',
-                'verbose',
-                'version',
-            ];
-        } else {
-            // do not display config block on normal or quiet mode
-            return;
-        }
-
-        $filtered = array_filter(
-            $options,
-            static fn ($name) => !in_array($name, $forbidden, true),
-            ARRAY_FILTER_USE_KEY
-        );
-
-        $headers = ['Name', 'Value'];
-
-        $normalize = static fn ($value) => json_encode($value, JSON_UNESCAPED_SLASHES);
-
-        $rows = [];
-
-        foreach ($filtered as $name => $value) {
-            $rows[] = [sprintf('<comment>%s</comment>', $name), $normalize($value)];
-        }
-
-        $table = new Table($this);
-        $table
-            ->setHeaders($headers)
-            ->setRows($rows)
-            ->setStyle('box')
-            ->render()
-        ;
 
         $this->newLine();
     }

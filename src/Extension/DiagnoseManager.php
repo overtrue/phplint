@@ -41,6 +41,8 @@ final class DiagnoseManager implements
     private LoggerInterface $logger;
     private string $whenDiagnosed = '';
 
+    private ?array $metadata = null;
+
     public function getName(): string
     {
         return 'diagnose_manager';  //ExtensionEnum::DIAGNOSE_MANAGER->value;
@@ -105,6 +107,9 @@ final class DiagnoseManager implements
 
     public function finish(AfterCheckingEvent $event): void
     {
+        $results = $event->getArgument('results');
+        $this->metadata = $results->getContext();
+
         $this->logger->debug(__METHOD__);
     }
 
@@ -133,7 +138,7 @@ final class DiagnoseManager implements
             $application = $command->getApplication();
 
             $diagnoseCommand = new DiagnoseCommand();
-            $exitCode = $diagnoseCommand($input, $output, $io, $application);
+            $exitCode = $diagnoseCommand($input, $output, $io, $application, $this->metadata);
 
             if ($exitCode === 0) {
                 $io->success('The Diagnose Manager has finished successfully.');

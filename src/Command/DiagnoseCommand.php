@@ -17,6 +17,7 @@ use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Environment\Provider\CI;
+use Overtrue\PHPLint\Environment\Provider\Config;
 use Overtrue\PHPLint\Environment\Provider\DotEnv;
 use Overtrue\PHPLint\Environment\Provider\Git;
 use Overtrue\PHPLint\Environment\Provider\Php;
@@ -53,6 +54,7 @@ final class DiagnoseCommand
         OutputInterface $output,
         SymfonyStyle $io,
         Application $application,
+        array $metadata,
     ): int {
         $whenDiagnosed = $input->getParameterOption(
             '--' . OptionDefinition::DIAGNOSTIC,
@@ -65,16 +67,16 @@ final class DiagnoseCommand
         }
 
         if ($whenDiagnosed === DiagnoseEnum::ALWAYS->value) {
-            $vcs = $php = $uname = $ci = $dotenv = true;
+            $vcs = $php = $uname = $ci = $dotenv = $config = true;
         } else { //
             if ($whenDiagnosed === DiagnoseEnum::AUTO->value) {
                 $envConfig = new EnvConfig('phplint');
-                $parts = explode(',', $envConfig->get('diagnostic', 'vcs,ci,dotenv'));
+                $parts = explode(',', $envConfig->get('diagnostic', 'vcs,ci,dotenv,config'));
             } else {
                 $parts = explode(',', $whenDiagnosed);
             }
 
-            $vcs = $php = $uname = $ci = $dotenv = false;
+            $vcs = $php = $uname = $ci = $dotenv = $config = false;
 
             if (!in_array(DiagnoseEnum::NEVER->value, $parts, true)) {
                 foreach ($parts as $part) {
@@ -92,6 +94,9 @@ final class DiagnoseCommand
                     }
                     if ($part == DiagnoseEnum::DOTENV->value) {
                         $dotenv = true;
+                    }
+                    if ($part == DiagnoseEnum::CONFIG->value) {
+                        $config = true;
                     }
                 }
             }
@@ -122,6 +127,9 @@ final class DiagnoseCommand
         if ($dotenv) {
             $environment->addProvider(new DotEnv());
         }
+        if ($config) {
+            $environment->addProvider(new Config($metadata['options_used']));
+        }
         if (!$vcs && !$php && !$uname && class_exists($whenDiagnosed)) {
             $user = new $whenDiagnosed();
             if ($user instanceof ProviderInterface) {
@@ -145,6 +153,7 @@ final class DiagnoseCommand
                 Uname::class => 'OS Information',
                 CI::class => 'CI Information',
                 DotEnv::class => 'Environment Variables Information',
+                Config::class => 'Configuration Information',
                 default => sprintf('"%s" Information ', $providerId),
             };
 

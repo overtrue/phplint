@@ -25,8 +25,6 @@ interface ConsoleOutputInterface extends SymfonyOutputInterface
 
     public function headerBlock(string $appVersion, string $configFile): void;
 
-    public function configBlock(array $options): void;
-
     public function consumeBlock(string $timeUsage, string $memUsage, string $cacheUsage, int $processCount): void;
 
     public function errorBlock(int $fileCount, int $errorCount): void;
