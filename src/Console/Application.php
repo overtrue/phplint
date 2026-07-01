@@ -22,7 +22,6 @@ use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\Application as BaseApplication;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\HelpCommand;
 use Symfony\Component\Console\Command\ListCommand;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
@@ -35,9 +34,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 use function array_keys;
-use function explode;
 use function in_array;
-use function ltrim;
 use function sprintf;
 
 /**
@@ -53,8 +50,6 @@ final class Application extends BaseApplication implements ApplicationInterface,
     private const PACKAGE_NAME = 'overtrue/phplint';
 
     private EventDispatcherInterface $dispatcher;
-
-    private string $defaultCommand = 'list';
 
     /**
      * @inheritDoc
@@ -126,28 +121,6 @@ final class Application extends BaseApplication implements ApplicationInterface,
         }
 
         return parent::run($input, $output);
-    }
-
-    /**
-     * Mandatory because $defaultCommand instance of BaseApplication is private
-     */
-    public function setDefaultCommand(string $commandName, bool $isSingleCommand = false): static
-    {
-        $this->defaultCommand = explode('|', ltrim($commandName, '|'))[0];
-        parent::setDefaultCommand($commandName, $isSingleCommand);
-        return $this;
-    }
-
-    public function getDefaultCommand(): ?Command
-    {
-        if ('list' === $this->defaultCommand) {
-            return null;
-        }
-        try {
-            return $this->find($this->defaultCommand);
-        } catch (CommandNotFoundException) {
-            return null;
-        }
     }
 
     protected function getDefaultCommands(): array

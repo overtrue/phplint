@@ -15,7 +15,6 @@ namespace Overtrue\PHPLint\Console;
 
 use Overtrue\PHPLint\Extension\ExtensionInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -32,10 +31,6 @@ interface ApplicationInterface
     public function getLogger(): LoggerInterface;
 
     public function getEventDispatcher(): ?EventDispatcherInterface;
-
-    public function setDefaultCommand(string $commandName, bool $isSingleCommand = false): static;
-
-    public function getDefaultCommand(): ?Command;
 
     /**
      * Returns the long version of the application.

@@ -40,6 +40,5 @@ $application->addCommands(
         new LintCommand(),
     ]
 );
-$application->setDefaultCommand('lint');
 $application->addExtensions($extensions);
 $application->run($input);

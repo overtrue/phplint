@@ -76,8 +76,7 @@ final class LintCommandBench
         $defaultCommand = new LintCommand();
 
         $application = new Application();
-        $application->add($defaultCommand);
-        $application->setDefaultCommand($defaultCommand->getName());
+        $application->addCommand($defaultCommand);
 
         $commandTester = new CommandTester($defaultCommand);
         $commandTester->execute($arguments);

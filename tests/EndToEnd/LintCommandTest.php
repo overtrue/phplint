@@ -38,8 +38,6 @@ final class LintCommandTest extends TestCase
 
         $this->invokableCommand = $command->getCode();
 
-        $this->application->setDefaultCommand($command->getName());
-
         $this->commandTester = new CommandTester($command);
     }
 

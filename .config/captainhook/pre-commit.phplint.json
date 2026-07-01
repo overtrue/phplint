@@ -4,7 +4,7 @@
         "actions": [
             {
                 "action": [
-                    "bin/phplint",
+                    "bin/phplint lint",
                     "--configuration={$ENV|value-of:\\Bartlett\\CaptainHookBinPlugin\\BinPlugin.config-file|cache:false}",
                     "--no-progress",
                     "{$ENV|value-of:\\Bartlett\\CaptainHookBinPlugin\\BinPlugin.colors-flag|cache:false}",
