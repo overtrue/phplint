@@ -26,13 +26,6 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-use function get_class;
-use function ltrim;
-use function preg_replace;
-use function strrchr;
-use function strtolower;
-use function substr;
-
 /**
  * @author Laurent Laville
  * @since Release 9.0.0 (renamed from OutputFormat to OutputManager since 9.8.0)
@@ -45,9 +38,7 @@ final class OutputManager implements
 
     public function getName(): string
     {
-        $shortClassName = substr(strrchr(get_class($this), '\\'), 1);
-        // @see https://stackoverflow.com/questions/1993721/how-to-convert-pascalcase-to-snake-case
-        return ltrim(strtolower(preg_replace('/[A-Z]([A-Z](?![a-z]))*/', '_$0', $shortClassName)), '_');
+        return ExtensionEnum::OUTPUT_MANAGER->value;
     }
 
     public static function getCommands(): array

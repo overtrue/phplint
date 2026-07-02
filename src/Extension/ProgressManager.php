@@ -45,7 +45,7 @@ final class ProgressManager implements
 
     public function getName(): string
     {
-        return 'progress_manager';
+        return ExtensionEnum::PROGRESS_MANAGER->value;
     }
 
     // @deprecated : Will be remove from API later

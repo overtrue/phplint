@@ -48,7 +48,7 @@ final class DiagnoseManager implements
 
     public function getName(): string
     {
-        return 'diagnose_manager';  //ExtensionEnum::DIAGNOSE_MANAGER->value;
+        return ExtensionEnum::DIAGNOSE_MANAGER->value;
     }
 
     // @deprecated : Will be remove from API later
