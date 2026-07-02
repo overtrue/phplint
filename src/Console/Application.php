@@ -13,12 +13,11 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Console;
 
-use Composer\InstalledVersions;
-use OutOfBoundsException;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver\PluginValueResolver;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
 use Overtrue\PHPLint\Extension\ExtensionInterface;
+use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Output\ConsoleOutput;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -26,6 +25,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use ReflectionException;
 use ReflectionFunction;
+use stdClass;
 use Symfony\Component\Console\Application as BaseApplication;
 use Symfony\Component\Console\Attribute\Reflection\ReflectionMember;
 use Symfony\Component\Console\Command\Command;
@@ -51,18 +51,36 @@ final class Application extends BaseApplication implements ApplicationInterface,
 {
     use LoggerAwareTrait;
 
-    public const NAME = 'phplint';
-
-    private const PACKAGE_NAME = 'overtrue/phplint';
+    private stdClass $metaApplicationVersion;
 
     private EventDispatcherInterface $dispatcher;
 
     public function __construct()
     {
-        parent::__construct(self::NAME, self::getPrettyVersion());
+        parent::__construct();
         $this->dispatcher = new EventDispatcher();
         // mandatory because $dispatcher instance of BaseApplication is private
         $this->setDispatcher($this->dispatcher);
+
+        $this->metaApplicationVersion = Metadata::applicationVersion()->describe();
+        $this->setVersion($this->metaApplicationVersion->value);
+    }
+
+    public function getLongVersion(): string
+    {
+        $name = $this->metaApplicationVersion->description;
+
+        if ('UNKNOWN' !== $name) {
+            if ('UNKNOWN' !== $this->metaApplicationVersion->pretty_version) {
+                $version = sprintf('%s <info>%s</info>', $name, $this->metaApplicationVersion->pretty_version);
+            } else {
+                $version = sprintf('%s <info>%s</info>', $name, $this->metaApplicationVersion->value);
+            }
+        } else {
+            $version = 'PHPLint';
+        }
+
+        return $version;
     }
 
     public function getLogger(): LoggerInterface
@@ -208,34 +226,5 @@ final class Application extends BaseApplication implements ApplicationInterface,
                 $command->setDefinition($definition);
             }
         }
-    }
-
-    private static function getPrettyVersion(): string
-    {
-        foreach (InstalledVersions::getAllRawData() as $installed) {
-            if (!isset($installed['versions'][self::PACKAGE_NAME])) {
-                continue;
-            }
-
-            $version = $installed['versions'][self::PACKAGE_NAME]['pretty_version']
-                ?? $installed['versions'][self::PACKAGE_NAME]['version']
-                ?? 'dev'
-            ;
-
-            $aliases = $installed['versions'][self::PACKAGE_NAME]['aliases'] ?? [];
-
-            $reference = $installed['versions'][self::PACKAGE_NAME]['reference'];
-            if (null === $reference) {
-                return sprintf('%s', $aliases[0] ?? $version);
-            }
-
-            return sprintf(
-                '%s@%s',
-                $aliases[0] ?? $version,
-                substr($reference, 0, 7)
-            );
-        }
-
-        throw new OutOfBoundsException(sprintf('Package "%s" is not installed', self::PACKAGE_NAME));
     }
 }
