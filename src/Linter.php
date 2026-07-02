@@ -21,6 +21,7 @@ use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeLintFileEvent;
 use Overtrue\PHPLint\Helper\ProcessHelper;
+use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Output\LinterOutput;
 use Overtrue\PHPLint\Process\LintProcess;
 use Psr\Cache\InvalidArgumentException;
@@ -61,7 +62,8 @@ final class Linter
     public function __construct(
         Resolver $configResolver,
         EventDispatcherInterface $dispatcher,
-        private readonly ?Application $client = null,
+        private readonly ?Application $client = null,   // @deprecated keep only for API compatible with previous version 9.7.x
+                                                        // will be removed in next major version
         ?HelperSet $helperSet = null,
         ?OutputInterface $output = null,
     ) {
@@ -119,16 +121,16 @@ final class Linter
             $results = [];
         }
 
-        if (null !== $this->client) {
-            $default = [
-                'application_version' => [
-                    'long' => $this->client->getLongVersion(),
-                    'short' => $this->client->getVersion(),
-                ]
-            ];
-        }
+        $metaApplicationVersion = Metadata::applicationVersion()->describe();
+
+        $default = [
+            $metaApplicationVersion->name => [
+                'long' => $metaApplicationVersion->description . ' ' . $metaApplicationVersion->pretty_version,
+                'short' => $metaApplicationVersion->value,
+            ]
+        ];
         $finalResults = new LinterOutput($results, $finder);
-        $finalResults->setContext($this->configResolver, $startTime, $processCount, $default ?? []);
+        $finalResults->setContext($this->configResolver, $startTime, $processCount, $default);
 
         $this->cache->prune();
 
