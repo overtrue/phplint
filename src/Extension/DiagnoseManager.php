@@ -17,8 +17,11 @@ use Overtrue\PHPLint\Command\DiagnoseCommand;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
+use Overtrue\PHPLint\Metadata\ConfigurationSettings;
+use Overtrue\PHPLint\Metadata\Metadata;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use stdClass;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
@@ -41,7 +44,7 @@ final class DiagnoseManager implements
     private LoggerInterface $logger;
     private string $whenDiagnosed = '';
 
-    private ?array $metadata = null;
+    private ConfigurationSettings $metaConfigurationSettings;
 
     public function getName(): string
     {
@@ -107,10 +110,10 @@ final class DiagnoseManager implements
 
     public function finish(AfterCheckingEvent $event): void
     {
-        $results = $event->getArgument('results');
-        $this->metadata = $results->getContext();
-
         $this->logger->debug(__METHOD__);
+
+        $results = $event->getArgument('results');
+        $this->metaConfigurationSettings = Metadata::configurationSettings($results->getContext()['options_used']);
     }
 
     public function terminate(ConsoleTerminateEvent $event): void
@@ -138,7 +141,7 @@ final class DiagnoseManager implements
             $application = $command->getApplication();
 
             $diagnoseCommand = new DiagnoseCommand();
-            $exitCode = $diagnoseCommand($input, $output, $io, $application, $this->metadata);
+            $exitCode = $diagnoseCommand($input, $output, $io, $application, $this->metaConfigurationSettings);
 
             if ($exitCode === 0) {
                 $io->success('The Diagnose Manager has finished successfully.');

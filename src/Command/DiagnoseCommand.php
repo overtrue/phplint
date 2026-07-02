@@ -26,6 +26,7 @@ use Overtrue\PHPLint\Environment\ProviderData;
 use Overtrue\PHPLint\Environment\ProviderInterface;
 use Overtrue\PHPLint\Environment\Supplier;
 use Overtrue\PHPLint\Extension\DiagnoseEnum;
+use Overtrue\PHPLint\Metadata\ConfigurationSettings;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -40,6 +41,7 @@ use function count;
 use function explode;
 use function in_array;
 use function is_iterable;
+use function json_decode;
 use function sprintf;
 
 /**
@@ -54,7 +56,7 @@ final class DiagnoseCommand
         OutputInterface $output,
         SymfonyStyle $io,
         Application $application,
-        array $metadata,
+        ConfigurationSettings $metaConfigurationSettings,
     ): int {
         $whenDiagnosed = $input->getParameterOption(
             '--' . OptionDefinition::DIAGNOSTIC,
@@ -128,7 +130,8 @@ final class DiagnoseCommand
             $environment->addProvider(new DotEnv());
         }
         if ($config) {
-            $environment->addProvider(new Config($metadata['options_used']));
+            $settings = json_decode($metaConfigurationSettings->describe()->value, true);
+            $environment->addProvider(new Config($settings));
         }
         if (!$vcs && !$php && !$uname && class_exists($whenDiagnosed)) {
             $user = new $whenDiagnosed();

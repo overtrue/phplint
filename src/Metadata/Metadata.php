@@ -39,4 +39,9 @@ abstract class Metadata
     {
         return new ApplicationVersion();
     }
+
+    public static function configurationSettings(array $settings): ConfigurationSettings
+    {
+        return new ConfigurationSettings($settings);
+    }
 }

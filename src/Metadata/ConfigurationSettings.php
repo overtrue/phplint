@@ -1,0 +1,41 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+ * This file is part of the overtrue/phplint package
+ *
+ * (c) overtrue
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
+namespace Overtrue\PHPLint\Metadata;
+
+use stdClass;
+
+use function json_encode;
+
+use const JSON_UNESCAPED_SLASHES;
+
+/**
+ * @author Laurent Laville
+ * @since Release 9.8.0
+ */
+final class ConfigurationSettings extends Metadata
+{
+    public function __construct(array $settings)
+    {
+        $this->name = 'current_configuration';
+        $this->description = 'Current configuration settings';
+        $this->value = json_encode($settings, JSON_UNESCAPED_SLASHES);
+    }
+
+    public function describe(): stdClass
+    {
+        $metadata = parent::describe();
+
+        return $metadata;
+    }
+}
