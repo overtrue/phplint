@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Output;
 
+use Overtrue\PHPLint\Configuration\FormatEnum;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
 use Symfony\Component\Console\Output\ConsoleOutputInterface as SymfonyConsoleOutputInterface;
@@ -33,10 +34,10 @@ use const STDOUT;
 final class FormatResolver
 {
     private const FORMATTERS = [
-        'checkstyle' => CheckstyleOutput::class,
-        'console' => ConsoleOutput::class,
-        'json' => JsonOutput::class,
-        'junit' => JunitOutput::class,
+        FormatEnum::CHECKSTYLE->value => CheckstyleOutput::class,
+        FormatEnum::TXT->value => ConsoleOutput::class,
+        FormatEnum::JSON->value => JsonOutput::class,
+        FormatEnum::JUNIT->value => JunitOutput::class,
     ];
 
     /**
