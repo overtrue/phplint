@@ -48,12 +48,6 @@ final class ProgressManager implements
         return ExtensionEnum::PROGRESS_MANAGER->value;
     }
 
-    // @deprecated : Will be remove from API later
-    public static function getCommands(): array
-    {
-        return [];
-    }
-
     public static function getDefinition(): InputDefinition
     {
         return new InputDefinition([

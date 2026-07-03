@@ -51,12 +51,6 @@ final class DiagnoseManager implements
         return ExtensionEnum::DIAGNOSE_MANAGER->value;
     }
 
-    // @deprecated : Will be remove from API later
-    public static function getCommands(): array
-    {
-        return [];
-    }
-
     public static function getDefinition(): InputDefinition
     {
         return new InputDefinition([

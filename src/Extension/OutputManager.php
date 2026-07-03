@@ -41,11 +41,6 @@ final class OutputManager implements
         return ExtensionEnum::OUTPUT_MANAGER->value;
     }
 
-    public static function getCommands(): array
-    {
-        return [];
-    }
-
     public static function getDefinition(): InputDefinition
     {
         return new InputDefinition([

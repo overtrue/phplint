@@ -28,13 +28,6 @@ interface ExtensionInterface extends ExtensionEventInterface
     public function getName(): string;
 
     /**
-     * A Command Provider for additional command to add to Application
-     *
-     * @return Command[]
-     */
-    public static function getCommands(): array;
-
-    /**
      * Add extra arguments and options provided by an extension to the Console Application lint command
      *
      * @see https://symfony.com/doc/current/components/console/console_arguments.html
