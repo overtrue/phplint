@@ -73,7 +73,7 @@ final class DiagnoseCommand
         } else { //
             if ($whenDiagnosed === DiagnoseEnum::AUTO->value) {
                 $envConfig = new EnvConfig('phplint');
-                $parts = explode(',', $envConfig->get('diagnostic', 'vcs,ci,dotenv,config'));
+                $parts = explode(',', $envConfig->get('diagnostic', 'config'));
             } else {
                 $parts = explode(',', $whenDiagnosed);
             }
