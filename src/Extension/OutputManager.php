@@ -90,6 +90,6 @@ final class OutputManager implements
     public function finish(AfterCheckingEvent $event): void
     {
         $outputHandler = new ChainOutput($this->handlers);
-        $outputHandler->format($event->getArgument('results'));
+        $outputHandler->format($event->getArgument($event::SCAN_RESULTS));
     }
 }

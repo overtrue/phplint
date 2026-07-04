@@ -21,4 +21,15 @@ use Symfony\Component\EventDispatcher\GenericEvent;
  */
 final class AfterLintFileEvent extends GenericEvent
 {
+    /**
+     * Argument identifier to retrieve the file information.
+     * @since Release 9.8.0
+     */
+    public const FILE_INFO = 'file';
+
+    /**
+     * Argument identifier to retrieve status of file scanned.
+     * @since Release 9.8.0
+     */
+    public const FILE_STATUS = 'status';
 }

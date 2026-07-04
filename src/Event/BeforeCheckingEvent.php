@@ -21,4 +21,9 @@ use Symfony\Component\EventDispatcher\GenericEvent;
  */
 final class BeforeCheckingEvent extends GenericEvent
 {
+    /**
+     * Argument identifier to retrieve number of file queued for the scan.
+     * @since Release 9.8.0
+     */
+    public const FILE_COUNT = 'file_count';
 }

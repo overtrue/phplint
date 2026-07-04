@@ -58,7 +58,7 @@ final class ProgressPrinter implements
 
     public function beforeChecking(BeforeCheckingEvent $event): void
     {
-        $this->maxSteps = $event->getArgument('fileCount');
+        $this->maxSteps = $event->getArgument($event::FILE_COUNT);
     }
 
     public function afterLintFile(AfterLintFileEvent $event): void
@@ -70,8 +70,8 @@ final class ProgressPrinter implements
 
         $this->progressHelper->progressPrinterAdvance(
             $this->maxSteps,
-            $event->getArgument('status'),
-            $event->getArgument('file'),
+            $event->getArgument($event::FILE_STATUS),
+            $event->getArgument($event::FILE_INFO),
             1,
             $this->output
         );

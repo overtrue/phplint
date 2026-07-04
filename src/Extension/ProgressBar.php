@@ -68,14 +68,14 @@ final class ProgressBar implements
             return;
         }
 
-        $this->progressHelper->progressStart($event->getArgument('fileCount'));
+        $this->progressHelper->progressStart($event->getArgument($event::FILE_COUNT));
     }
 
     public function beforeLintFile(BeforeLintFileEvent $event): void
     {
         $this->progressHelper->progressMessage('Checking file ...');
 
-        $filename = $event->getArgument('file')->getRelativePathname();
+        $filename = $event->getArgument($event::FILE_INFO)->getRelativePathname();
         $width = min(strlen($filename), 70);
         $this->progressHelper->progressMessage(mb_strimwidth($filename, -$width, $width), 'filename');
     }

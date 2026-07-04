@@ -114,7 +114,15 @@ final class Linter
             $fileCount = 0;
         }
 
-        $this->dispatcher->dispatch(new BeforeCheckingEvent($this, ['fileCount' => $fileCount]));
+        $this->dispatcher->dispatch(
+            new BeforeCheckingEvent(
+                $this,
+                [
+                    'fileCount' => $fileCount,  // @deprecated entry, use next entry instead
+                    BeforeCheckingEvent::FILE_COUNT => $fileCount,
+                ]
+            )
+        );
 
         $processCount = 0;
         if ($fileCount > 0) {
@@ -141,7 +149,7 @@ final class Linter
             new AfterCheckingEvent(
                 $this,
                 [
-                    'results' => $finalResults,
+                    AfterCheckingEvent::SCAN_RESULTS => $finalResults,
                     ConfigurationSettings::METADATA_ID => $this->configResolver->getOptions(),
                 ]
             )
@@ -215,12 +223,20 @@ final class Linter
 
             // checks status of all files linked at end of the php lint process
             foreach ($lintProcess->getFiles() as $fileInfo) {
-                $this->dispatcher->dispatch(new BeforeLintFileEvent($this, ['file' => $fileInfo]));
+                $this->dispatcher->dispatch(
+                    new BeforeLintFileEvent($this, [BeforeLintFileEvent::FILE_INFO => $fileInfo])
+                );
 
                 $status = $this->processFile($fileInfo, $lintProcess);
 
                 $this->dispatcher->dispatch(
-                    new AfterLintFileEvent($this, ['file' => $fileInfo, 'status' => $status])
+                    new AfterLintFileEvent(
+                        $this,
+                        [
+                            AfterLintFileEvent::FILE_INFO => $fileInfo,
+                            AfterLintFileEvent::FILE_STATUS => $status
+                        ]
+                    )
                 );
             }
         }

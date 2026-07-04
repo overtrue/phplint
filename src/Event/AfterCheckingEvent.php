@@ -21,4 +21,9 @@ use Symfony\Component\EventDispatcher\GenericEvent;
  */
 final class AfterCheckingEvent extends GenericEvent
 {
+    /**
+     * Argument identifier to retrieve all scanned results.
+     * @since Release 9.8.0
+     */
+    public const SCAN_RESULTS = 'results';
 }
