@@ -48,9 +48,9 @@ final class Finder implements JsonSerializable
     public function jsonSerialize(): array
     {
         return [
-            'paths' => $this->paths,
-            'excludes' => $this->excludes,
-            'extensions' => $this->extensions,
+            OptionDefinition::PATH => $this->paths,
+            OptionDefinition::EXCLUDE => $this->excludes,
+            OptionDefinition::EXTENSIONS => $this->extensions,
         ];
     }
 
@@ -69,6 +69,7 @@ final class Finder implements JsonSerializable
         }
         return $finder;
     }
+
     private function getFilesFromDir(string $dir): SymfonyFinder
     {
         $finder = new SymfonyFinder();
