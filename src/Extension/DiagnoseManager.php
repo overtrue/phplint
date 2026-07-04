@@ -43,8 +43,6 @@ final class DiagnoseManager implements
 {
     private LoggerInterface $logger;
     private string $whenDiagnosed = '';
-
-    private ConfigurationSettings $metaConfigurationSettings;
     private MetadataCollection $metadataCollection;
 
     public function getName(): string
@@ -107,8 +105,6 @@ final class DiagnoseManager implements
         $this->logger->debug(__METHOD__);
 
         $settings = $event->getArgument(ConfigurationSettings::METADATA_ID);
-
-        $this->metaConfigurationSettings = Metadata::configurationSettings($settings);
 
         $this->metadataCollection = new MetadataCollection(
             Metadata::applicationVersion(),
