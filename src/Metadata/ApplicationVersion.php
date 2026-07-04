@@ -15,7 +15,6 @@ namespace Overtrue\PHPLint\Metadata;
 
 use Composer\InstalledVersions;
 use OutOfBoundsException;
-use stdClass;
 
 use function sprintf;
 
@@ -29,9 +28,6 @@ final class ApplicationVersion extends Metadata
 
     private const PACKAGE_NAME = 'overtrue/phplint';
 
-    private string $prettyVersion;
-    private string $reference;
-
     public function __construct()
     {
         $installed = InstalledVersions::getAllRawData()[0];
@@ -40,8 +36,8 @@ final class ApplicationVersion extends Metadata
             throw new OutOfBoundsException(sprintf('Package "%s" is not installed', self::PACKAGE_NAME));
         }
 
-        $this->prettyVersion = $installed['versions'][self::PACKAGE_NAME]['pretty_version'] ?? 'UNKNOWN';
-        $this->value = $installed['versions'][self::PACKAGE_NAME]['version'] ?? 'dev';
+        $prettyVersion = $installed['versions'][self::PACKAGE_NAME]['pretty_version'] ?? 'UNKNOWN';
+        $version = $installed['versions'][self::PACKAGE_NAME]['version'] ?? 'dev';
 
         $aliases = $installed['versions'][self::PACKAGE_NAME]['aliases'] ?? [];
 
@@ -49,17 +45,15 @@ final class ApplicationVersion extends Metadata
         if (null === $reference) {
             $reference = $aliases[0] ?? 'UNKNOWN';
         }
-        $this->reference = $reference;
 
         $this->description = 'PHPLint Console Application version';
-    }
 
-    public function describe(): stdClass
-    {
-        $metadata = parent::describe();
-        $metadata->reference = $this->reference;
-        $metadata->pretty_version = $this->prettyVersion;
+        $value = [
+            'semantic_version' => $version,
+            'pretty_version' => $prettyVersion,
+            'reference' => $reference,
+        ];
 
-        return $metadata;
+        $this->value = json_encode($value, JSON_UNESCAPED_SLASHES);
     }
 }
