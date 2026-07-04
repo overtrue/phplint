@@ -86,7 +86,7 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
     public function headerBlock(string $appVersion, string $configFile): void
     {
         $this->newLine();
-        $this->writeln($appVersion . " by overtrue and contributors.");
+        $this->writeln($appVersion);
         $this->newLine();
 
         $this->writeln(sprintf('Runtime       : PHP <comment>%s</comment>', phpversion()));

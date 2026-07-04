@@ -39,7 +39,6 @@ use Throwable;
 use function array_chunk;
 use function array_push;
 use function count;
-use function json_decode;
 use function md5_file;
 use function microtime;
 use function phpversion;
@@ -102,7 +101,7 @@ final class Linter
     /**
      * @throws Throwable
      */
-    public function lintFiles(Finder $finder, ?float $startTime = null): LinterOutput
+    public function lintFiles(Finder $finder, ?float $startTime = null, ?string $appVersion = null): LinterOutput
     {
         if (null === $startTime) {
             $startTime = microtime(true);
@@ -132,12 +131,11 @@ final class Linter
         }
 
         $metaApplicationVersion = Metadata::applicationVersion()->describe();
-        $appVersion = json_decode($metaApplicationVersion->value, true);
 
         $default = [
             $metaApplicationVersion->name => [
-                'long' => $metaApplicationVersion->description . ' ' . $appVersion['pretty_version'],
-                'short' => $appVersion['semantic_version'],
+                'long' => $appVersion,
+                'short' => 'UNKNOWN', // @deprecated usage. Will be removed in future versions
             ]
         ];
         $finalResults = new LinterOutput($results, $finder);

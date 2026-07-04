@@ -163,7 +163,7 @@ final class LintCommand
             $application->getHelperSet(),
             $output
         );
-        $this->results = $linter->lintFiles($finder, $startTime);
+        $this->results = $linter->lintFiles($finder, $startTime, $application->getLongVersion());
 
         $data = $this->results->getFailures();
 

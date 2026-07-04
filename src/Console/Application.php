@@ -42,6 +42,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 use function sprintf;
+use function substr;
 
 /**
  * @author Overtrue
@@ -68,19 +69,22 @@ final class Application extends BaseApplication implements ApplicationInterface,
 
     public function getLongVersion(): string
     {
-        $name = $this->metaApplicationVersion->description;
+        $appName = $this->metaApplicationVersion->description;
+        $appVersion = json_decode($this->metaApplicationVersion->value, true);
 
-        if ('UNKNOWN' !== $name) {
-            if ('UNKNOWN' !== $this->metaApplicationVersion->pretty_version) {
-                $version = sprintf('%s <info>%s</info>', $name, $this->metaApplicationVersion->pretty_version);
-            } else {
-                $version = sprintf('%s <info>%s</info>', $name, $this->metaApplicationVersion->value);
-            }
-        } else {
-            $version = 'PHPLint';
-        }
+        $version = ('UNKNOWN' !== $appVersion['pretty_version'])
+            ? $appVersion['pretty_version']
+            : $appVersion['semantic_version']
+        ;
+        $shortRef = substr($appVersion['reference'], 0, 7);
 
-        return $version;
+        return ('UNKNOWN' === $appName)
+            ? 'PHPLint'
+            : sprintf(
+                '%s <info>%s</info> <comment>(%s)</comment> by overtrue and contributors.',
+                $appName, $version, $shortRef
+            )
+        ;
     }
 
     public function getLogger(): LoggerInterface
