@@ -23,6 +23,7 @@ use function file_exists;
 use function getcwd;
 use function preg_match;
 use function sprintf;
+use function trim;
 
 /**
  * @author Laurent Laville
@@ -55,14 +56,20 @@ class Git implements ProviderInterface
             $version = $matches[1];
         }
 
-        $cmd = sprintf('%s %s', escapeshellarg($binaryPath), 'log -1 --pretty=oneline --decorate');
+        $cmd = sprintf('%s %s', escapeshellarg($binaryPath), 'rev-parse --abbrev-ref HEAD');
         $process = Process::fromShellCommandline($cmd, $this->workingDirectory);
         $exitCode = $process->run();
 
         if ($exitCode === 0) {
-            preg_match('/^(.*)\s\(HEAD\s->\s(.*)(,|\))/', $process->getOutput(), $matches);
-            $commitHash = $matches[1];
-            $branchName = $matches[2];
+            $branchName = trim($process->getOutput());
+        }
+
+        $cmd = sprintf('%s %s', escapeshellarg($binaryPath), 'log -1 --format="%H"');
+        $process = Process::fromShellCommandline($cmd, $this->workingDirectory);
+        $exitCode = $process->run();
+
+        if ($exitCode === 0) {
+            $commitHash = trim($process->getOutput());
         }
 
         return [
