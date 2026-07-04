@@ -106,15 +106,15 @@ class XdgConfig extends EnvConfig implements XdgConfigInterface
     public function __debugInfo(): array
     {
         return [
-            'homeDir' => $this->getHomeDir(),
-            'homeConfigDir' => $this->getHomeConfigDir(),
-            'homeCacheDir' => $this->getHomeCacheDir(),
-            'homeDataDir' => $this->getHomeDataDir(),
-            'homeStateDir' => $this->getHomeStateDir(),
-            'configDirs' => $this->getConfigDirs(),
-            'dataDirs' => $this->getDataDirs(),
-            'runtimeDir' => $this->getRuntimeDir(),
-            'userName' => $this->getUser(),
+            new ProviderData('HOME', $this->getHomeDir(), 'Home directory'),
+            new ProviderData('USER', $this->getUser(), 'User name'),
+            new ProviderData('XDG_CONFIG_HOME', $this->getHomeConfigDir(), 'Home config directory'),
+            new ProviderData('XDG_CACHE_HOME', $this->getHomeCacheDir(), 'Home cache directory'),
+            new ProviderData('XDG_DATA_HOME', $this->getHomeDataDir(), 'Home data directory'),
+            new ProviderData('XDG_STATE_HOME', $this->getHomeStateDir(), 'Home state directory'),
+            new ProviderData('XDG_CONFIG_DIRS', implode(', ', $this->getConfigDirs()), 'Config directories'),
+            new ProviderData('XDG_DATA_DIRS', implode(', ', $this->getDataDirs()), 'Data directories'),
+            new ProviderData('XDG_RUNTIME_DIR', $this->getRuntimeDir(), 'Runtime directory'),
         ];
     }
 }

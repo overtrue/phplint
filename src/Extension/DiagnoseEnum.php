@@ -23,8 +23,8 @@ enum DiagnoseEnum: string
     case AUTO = 'auto';
     case ALWAYS = 'always';
     case CI = 'ci';
-    case CONFIG = 'config';
     case DOTENV = 'dotenv';
+    case METADATA = 'metadata';
     case NEVER = 'never';
     case PHP = 'php';
     case UNAME = 'uname';

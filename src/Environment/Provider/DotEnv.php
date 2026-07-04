@@ -22,6 +22,7 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Dotenv\Dotenv as SymfonyDotenv;
 
+use function array_push;
 use function array_unique;
 use function array_unshift;
 use function dirname;
@@ -86,7 +87,7 @@ class DotEnv implements ProviderInterface, LoggerAwareInterface
                     $dotenv = new SymfonyDotenv($this->envKey, $this->debugKey);
                     $dotenv->usePutenv();
                     $dotenv->loadEnv($envFile, overrideExistingVars: $this->overrideExistingVars);
-                    $data[] = $this->providerData('dotEnvPath', $envFile);
+                    $data[] = $this->providerData('dotEnvPath', $envFile, 'The path to the dotenv file');
                 } else {
                     $path = dirname($this->dotEnvPath);
                     if ($path === '.') {
@@ -101,26 +102,34 @@ class DotEnv implements ProviderInterface, LoggerAwareInterface
             }
         }
 
-        foreach ($xdg->describe() as $setting => $value) {
-            $data[] = $this->providerData($setting, $value);
-        }
+        array_push($data, ...$xdg->describe());
 
         $prefix = 'phplint';
         $env = new EnvConfig($prefix);
-        foreach (['env', 'debug', 'project_dir', 'diagnostic', 'log', 'frontend'] as $key) {
+
+        $variables = [
+            'env' => 'The name of the environment PHPLint runs it',
+            'debug' => 'Toggles the debug mode',
+            'frontend' => 'The name of the interface PHPLint runs it',
+            'project_dir' => 'The project directory relative to the parent directory of your composer.json file',
+            'log' => 'Identify what class to use as PSR-3 compatible logger',
+            'diagnostic' => 'Identify what diagnostics are runs',
+        ];
+
+        foreach ($variables as $key => $desc) {
             $defaultFallback = ($key === 'project_dir') ? $this->projectDirectory : null;
             $value = $env->get($key, $defaultFallback);
             if (null !== $value) {
-                $data[] = $this->providerData(strtoupper(sprintf('%s_%s', $prefix, $key)), $value);
+                $data[] = $this->providerData(strtoupper(sprintf('%s_%s', $prefix, $key)), $value, $desc);
             }
         }
 
         return $data;
     }
 
-    protected function providerData(string $setting, mixed $value): ProviderData
+    protected function providerData(string $setting, mixed $value, ?string $description = null): ProviderData
     {
-        return new ProviderData($setting, json_encode($value, JSON_UNESCAPED_SLASHES));
+        return new ProviderData($setting, json_encode($value, JSON_UNESCAPED_SLASHES), $description);
     }
 
     /**

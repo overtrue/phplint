@@ -19,9 +19,9 @@ use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Metadata\ConfigurationSettings;
 use Overtrue\PHPLint\Metadata\Metadata;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use stdClass;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
@@ -45,6 +45,7 @@ final class DiagnoseManager implements
     private string $whenDiagnosed = '';
 
     private ConfigurationSettings $metaConfigurationSettings;
+    private MetadataCollection $metadataCollection;
 
     public function getName(): string
     {
@@ -98,16 +99,21 @@ final class DiagnoseManager implements
         }
 
         $this->logger->notice('The Diagnose Manager launched {kind} diagnostic', ['kind' => $this->whenDiagnosed]);
-        //$this->logger->debug(__METHOD__);
-        $this->logger->notice(__METHOD__);
+        $this->logger->debug(__METHOD__);
     }
 
     public function finish(AfterCheckingEvent $event): void
     {
         $this->logger->debug(__METHOD__);
 
-        $results = $event->getArgument('results');
-        $this->metaConfigurationSettings = Metadata::configurationSettings($results->getContext()['options_used']);
+        $settings = $event->getArgument(ConfigurationSettings::METADATA_ID);
+
+        $this->metaConfigurationSettings = Metadata::configurationSettings($settings);
+
+        $this->metadataCollection = new MetadataCollection(
+            Metadata::applicationVersion(),
+            Metadata::configurationSettings($settings),
+        );
     }
 
     public function terminate(ConsoleTerminateEvent $event): void
@@ -135,7 +141,7 @@ final class DiagnoseManager implements
             $application = $command->getApplication();
 
             $diagnoseCommand = new DiagnoseCommand();
-            $exitCode = $diagnoseCommand($input, $output, $io, $application, $this->metaConfigurationSettings);
+            $exitCode = $diagnoseCommand($input, $output, $io, $application, $this->metadataCollection);
 
             if ($exitCode === 0) {
                 $io->success('The Diagnose Manager has finished successfully.');

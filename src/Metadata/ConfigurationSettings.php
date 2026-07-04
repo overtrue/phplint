@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Metadata;
 
-use stdClass;
-
 use function json_encode;
 
 use const JSON_UNESCAPED_SLASHES;
@@ -25,17 +23,11 @@ use const JSON_UNESCAPED_SLASHES;
  */
 final class ConfigurationSettings extends Metadata
 {
+    public const METADATA_ID = 'current_configuration';
+
     public function __construct(array $settings)
     {
-        $this->name = 'current_configuration';
         $this->description = 'Current configuration settings';
         $this->value = json_encode($settings, JSON_UNESCAPED_SLASHES);
-    }
-
-    public function describe(): stdClass
-    {
-        $metadata = parent::describe();
-
-        return $metadata;
     }
 }

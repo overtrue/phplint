@@ -20,6 +20,7 @@ use Overtrue\PHPLint\Environment\Provider\CI;
 use Overtrue\PHPLint\Environment\Provider\Config;
 use Overtrue\PHPLint\Environment\Provider\DotEnv;
 use Overtrue\PHPLint\Environment\Provider\Git;
+use Overtrue\PHPLint\Environment\Provider\Metadata;
 use Overtrue\PHPLint\Environment\Provider\Php;
 use Overtrue\PHPLint\Environment\Provider\Uname;
 use Overtrue\PHPLint\Environment\ProviderData;
@@ -27,6 +28,7 @@ use Overtrue\PHPLint\Environment\ProviderInterface;
 use Overtrue\PHPLint\Environment\Supplier;
 use Overtrue\PHPLint\Extension\DiagnoseEnum;
 use Overtrue\PHPLint\Metadata\ConfigurationSettings;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -39,9 +41,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use function class_exists;
 use function count;
 use function explode;
+use function get_debug_type;
 use function in_array;
 use function is_iterable;
-use function json_decode;
 use function sprintf;
 
 /**
@@ -56,7 +58,7 @@ final class DiagnoseCommand
         OutputInterface $output,
         SymfonyStyle $io,
         Application $application,
-        ConfigurationSettings $metaConfigurationSettings,
+        MetadataCollection $metadataCollection,
     ): int {
         $whenDiagnosed = $input->getParameterOption(
             '--' . OptionDefinition::DIAGNOSTIC,
@@ -69,16 +71,16 @@ final class DiagnoseCommand
         }
 
         if ($whenDiagnosed === DiagnoseEnum::ALWAYS->value) {
-            $vcs = $php = $uname = $ci = $dotenv = $config = true;
+            $vcs = $php = $uname = $ci = $dotenv = $metadata = true;
         } else { //
             if ($whenDiagnosed === DiagnoseEnum::AUTO->value) {
                 $envConfig = new EnvConfig('phplint');
-                $parts = explode(',', $envConfig->get('diagnostic', 'config'));
+                $parts = explode(',', $envConfig->get('diagnostic', 'metadata'));
             } else {
                 $parts = explode(',', $whenDiagnosed);
             }
 
-            $vcs = $php = $uname = $ci = $dotenv = $config = false;
+            $vcs = $php = $uname = $ci = $dotenv = $metadata = false;
 
             if (!in_array(DiagnoseEnum::NEVER->value, $parts, true)) {
                 foreach ($parts as $part) {
@@ -97,8 +99,8 @@ final class DiagnoseCommand
                     if ($part == DiagnoseEnum::DOTENV->value) {
                         $dotenv = true;
                     }
-                    if ($part == DiagnoseEnum::CONFIG->value) {
-                        $config = true;
+                    if ($part == DiagnoseEnum::METADATA->value) {
+                        $metadata = true;
                     }
                 }
             }
@@ -129,9 +131,8 @@ final class DiagnoseCommand
         if ($dotenv) {
             $environment->addProvider(new DotEnv());
         }
-        if ($config) {
-            $settings = json_decode($metaConfigurationSettings->describe()->value, true);
-            $environment->addProvider(new Config($settings));
+        if ($metadata) {
+            $environment->addProvider(new Metadata($metadataCollection));
         }
         if (!$vcs && !$php && !$uname && class_exists($whenDiagnosed)) {
             $user = new $whenDiagnosed();
@@ -157,8 +158,13 @@ final class DiagnoseCommand
                 CI::class => 'CI Information',
                 DotEnv::class => 'Environment Variables Information',
                 Config::class => 'Configuration Information',
+                Metadata::class => 'Metadata Information',
                 default => sprintf('"%s" Information ', $providerId),
             };
+
+            if ($output->isDebug()) {
+                $title .= sprintf(' (%s)', $providerId);
+            }
 
             if (!is_iterable($values)) {
                 $logger->warning(
@@ -177,7 +183,7 @@ final class DiagnoseCommand
                         [
                             'provider_id' => $providerId,
                             'provider_data' => ProviderData::class,
-                            'unexpected_data' => \get_debug_type($providerData)
+                            'unexpected_data' => get_debug_type($providerData)
                         ]
                     );
                     continue;
@@ -185,7 +191,7 @@ final class DiagnoseCommand
                 $info = $providerData->describe();
                 $io->writeln($formatter->formatSection(
                     $info['setting'],
-                    sprintf('%s <comment>%s</comment>', $info['value'], $info['description'])
+                    sprintf('<comment>%s</comment> %s', $info['description'], $info['value'])
                 ));
             }
 

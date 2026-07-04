@@ -21,14 +21,13 @@ use stdClass;
  */
 abstract class Metadata
 {
-    protected string $name;
     protected string $value;
     protected ?string $description;
 
     public function describe(): stdClass
     {
         $metadata = new stdClass();
-        $metadata->name = $this->name;
+        $metadata->name = static::METADATA_ID;
         $metadata->value = $this->value;
         $metadata->description = $this->description;
 

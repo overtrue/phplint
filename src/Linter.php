@@ -21,6 +21,7 @@ use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeLintFileEvent;
 use Overtrue\PHPLint\Helper\ProcessHelper;
+use Overtrue\PHPLint\Metadata\ConfigurationSettings;
 use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Output\LinterOutput;
 use Overtrue\PHPLint\Process\LintProcess;
@@ -134,7 +135,15 @@ final class Linter
 
         $this->cache->prune();
 
-        $this->dispatcher->dispatch(new AfterCheckingEvent($this, ['results' => $finalResults]));
+        $this->dispatcher->dispatch(
+            new AfterCheckingEvent(
+                $this,
+                [
+                    'results' => $finalResults,
+                    ConfigurationSettings::METADATA_ID => $this->configResolver->getOptions(),
+                ]
+            )
+        );
 
         return $finalResults;
     }

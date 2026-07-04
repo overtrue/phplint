@@ -15,14 +15,15 @@ namespace Overtrue\PHPLint\Environment\Provider;
 
 use Overtrue\PHPLint\Environment\ProviderData;
 use Overtrue\PHPLint\Environment\ProviderInterface;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
 
 /**
  * @author Laurent Laville
  * @since Release 9.8.0
  */
-class Config implements ProviderInterface
+readonly class Metadata implements ProviderInterface
 {
-    public function __construct(private readonly array $settings = [])
+    public function __construct(private MetadataCollection $metadataCollection)
     {
     }
 
@@ -30,15 +31,11 @@ class Config implements ProviderInterface
     {
         $data = [];
 
-        foreach ($this->settings as $setting => $value) {
-            $data[] = $this->providerData($setting, $value);
+        foreach ($this->metadataCollection as $metadata) {
+            $dto = $metadata->describe();
+            $data[] = new ProviderData($dto->name, $dto->value, $dto->description);
         }
 
         return $data;
-    }
-
-    protected function providerData(string $setting, mixed $value): ProviderData
-    {
-        return new ProviderData($setting, json_encode($value, JSON_UNESCAPED_SLASHES));
     }
 }

@@ -25,6 +25,8 @@ use function sprintf;
  */
 final class ApplicationVersion extends Metadata
 {
+    public const METADATA_ID = 'application_version';
+
     private const PACKAGE_NAME = 'overtrue/phplint';
 
     private string $prettyVersion;
@@ -49,7 +51,6 @@ final class ApplicationVersion extends Metadata
         }
         $this->reference = $reference;
 
-        $this->name = 'application_version';
         $this->description = 'PHPLint Console Application version';
     }
 
