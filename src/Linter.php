@@ -39,6 +39,7 @@ use Throwable;
 use function array_chunk;
 use function array_push;
 use function count;
+use function json_decode;
 use function md5_file;
 use function microtime;
 use function phpversion;
@@ -123,11 +124,12 @@ final class Linter
         }
 
         $metaApplicationVersion = Metadata::applicationVersion()->describe();
+        $appVersion = json_decode($metaApplicationVersion->value, true);
 
         $default = [
             $metaApplicationVersion->name => [
-                'long' => $metaApplicationVersion->description . ' ' . $metaApplicationVersion->pretty_version,
-                'short' => $metaApplicationVersion->value,
+                'long' => $metaApplicationVersion->description . ' ' . $appVersion['pretty_version'],
+                'short' => $appVersion['semantic_version'],
             ]
         ];
         $finalResults = new LinterOutput($results, $finder);
