@@ -17,7 +17,6 @@ use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Environment\Provider\CI;
-use Overtrue\PHPLint\Environment\Provider\Config;
 use Overtrue\PHPLint\Environment\Provider\DotEnv;
 use Overtrue\PHPLint\Environment\Provider\Git;
 use Overtrue\PHPLint\Environment\Provider\Metadata;
@@ -27,7 +26,6 @@ use Overtrue\PHPLint\Environment\ProviderData;
 use Overtrue\PHPLint\Environment\ProviderInterface;
 use Overtrue\PHPLint\Environment\Supplier;
 use Overtrue\PHPLint\Extension\DiagnoseEnum;
-use Overtrue\PHPLint\Metadata\ConfigurationSettings;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\Application;
@@ -157,7 +155,6 @@ final class DiagnoseCommand
                 Uname::class => 'OS Information',
                 CI::class => 'CI Information',
                 DotEnv::class => 'Environment Variables Information',
-                Config::class => 'Configuration Information',
                 Metadata::class => 'Metadata Information',
                 default => sprintf('"%s" Information ', $providerId),
             };
