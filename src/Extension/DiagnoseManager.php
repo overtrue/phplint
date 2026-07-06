@@ -134,10 +134,11 @@ final class DiagnoseManager implements
         $io = new SymfonyStyle($input, $output);
 
         try {
+            /** @var ApplicationInterface $application */
             $application = $command->getApplication();
 
             $diagnoseCommand = new DiagnoseCommand();
-            $exitCode = $diagnoseCommand($input, $output, $io, $application, $this->metadataCollection);
+            $exitCode = $diagnoseCommand($input, $output, $io, $application->getLogger(), $this->metadataCollection);
 
             if ($exitCode === 0) {
                 $io->success('The Diagnose Manager has finished successfully.');

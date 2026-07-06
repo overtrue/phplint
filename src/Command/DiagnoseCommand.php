@@ -27,6 +27,7 @@ use Overtrue\PHPLint\Environment\ProviderInterface;
 use Overtrue\PHPLint\Environment\Supplier;
 use Overtrue\PHPLint\Extension\DiagnoseEnum;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
+use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -55,7 +56,7 @@ final class DiagnoseCommand
         InputInterface $input,
         OutputInterface $output,
         SymfonyStyle $io,
-        Application $application,
+        LoggerInterface $logger,
         MetadataCollection $metadataCollection,
     ): int {
         $whenDiagnosed = $input->getParameterOption(
@@ -102,14 +103,6 @@ final class DiagnoseCommand
                     }
                 }
             }
-        }
-
-        if ($application instanceof ApplicationInterface) {
-            $logger = $application->getLogger();
-        } else {
-            // for future implementation of Symfony/Runtime component that may provide a non-compatible Application instance
-            // if final user put a wrong implementation ...
-            $logger = new NullLogger();
         }
 
         $environment = new Supplier($logger);
