@@ -15,6 +15,7 @@ namespace Overtrue\PHPLint\Environment;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
+use ReflectionClass;
 use RuntimeException;
 
 use function get_class;
@@ -39,7 +40,13 @@ final class Supplier
     public function addProvider(ProviderInterface $provider): void
     {
         $this->providers[] = $provider;
-        $this->logger->debug(sprintf('Provider "%s" registered', get_class($provider)));
+        $this->logger->debug(
+            'Provider "{provider_id}" registered from "{filename}"',
+            [
+                'provider_id' => get_class($provider),
+                'filename' => (new ReflectionClass($provider))->getFileName(),
+            ]
+        );
     }
 
     public function describe(?ProviderInterface $provider = null, ?string $part = null): null|string|array
@@ -79,7 +86,10 @@ final class Supplier
             }
             $values = $provider->describe();
             if (null === $values) {
-                $this->logger->debug(sprintf('[%s] did not provided any values', get_class($provider)));
+                $this->logger->debug(
+                    '[{provider_id}] did not provided any values',
+                    ['provider_id' => get_class($provider)]
+                );
                 continue;
             }
             $data[get_class($provider)] = $values;
