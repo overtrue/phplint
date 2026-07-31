@@ -137,11 +137,16 @@ final class ProfileManager implements
             return;
         }
 
-        if (!$this->stopwatch?->isStarted(self::PROFILING_EVENT)) {
+        if (!$this->stopwatch->isStarted(self::PROFILING_EVENT)) {
             return;
         }
 
-        $this->stopwatch?->stop(self::PROFILING_EVENT);
+        $this->stopwatch->stop(self::PROFILING_EVENT);
+
+        if (!$this->stopwatch->isStarted(self::LINT_FILES_EVENT)) {
+            // a console error has probably been raised before linting process begun; let a chance see error
+            return;
+        }
 
         // adds the profiler analysis results
         $this->metadataCollection->add(Metadata::profilerResults($this->stopwatch));

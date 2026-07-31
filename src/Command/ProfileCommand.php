@@ -113,8 +113,6 @@ final class ProfileCommand
             );
         }
 
-        //$linterResults = $metadataCollection->getMetadata(LinterOutput::class);
-
         $cacheResults = $metadataCollection->getMetadata(CacheOutput::class);
 
         if (null !== $cacheResults && in_array($when, ['cache', 'auto'])) {
