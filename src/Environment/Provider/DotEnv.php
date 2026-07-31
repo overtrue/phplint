@@ -54,8 +54,8 @@ class DotEnv implements ProviderInterface, LoggerAwareInterface
 
     public function __construct(array $options = [])
     {
-        $this->envKey = $options['env_var_name'] ??= 'PHPLINT_ENV';
-        $this->debugKey = $options['debug_var_name'] ??= 'PHPLINT_DEBUG';
+        $this->envKey = $options['env_var_name'] ??= 'PLINT_ENV';
+        $this->debugKey = $options['debug_var_name'] ??= 'PLINT_DEBUG';
 
         $this->disableDotEnvLookup = $options['disable_dotenv'] ?? false;
         $this->overrideExistingVars = $options['dotenv_overload'] ?? false;
@@ -104,7 +104,7 @@ class DotEnv implements ProviderInterface, LoggerAwareInterface
 
         array_push($data, ...$xdg->describe());
 
-        $prefix = 'phplint';
+        $prefix = 'plint';
         $env = new EnvConfig($prefix);
 
         $variables = [
