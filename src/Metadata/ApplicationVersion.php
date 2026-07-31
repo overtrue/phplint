@@ -16,7 +16,9 @@ namespace Overtrue\PHPLint\Metadata;
 use Composer\InstalledVersions;
 use OutOfBoundsException;
 
+use function json_decode;
 use function sprintf;
+use function substr;
 
 /**
  * @author Laurent Laville
@@ -28,8 +30,10 @@ final class ApplicationVersion extends Metadata
 
     private const PACKAGE_NAME = 'overtrue/phplint';
 
-    public function __construct()
+    public function __construct(string $description = 'PHPLint Console Application')
     {
+        $this->description = $description;
+
         $installed = InstalledVersions::getAllRawData()[0];
 
         if (!isset($installed['versions'][self::PACKAGE_NAME])) {
@@ -46,8 +50,6 @@ final class ApplicationVersion extends Metadata
             $reference = $aliases[0] ?? 'UNKNOWN';
         }
 
-        $this->description = 'PHPLint Console Application version';
-
         $value = [
             'semantic_version' => $version,
             'pretty_version' => $prettyVersion,
@@ -55,5 +57,32 @@ final class ApplicationVersion extends Metadata
         ];
 
         $this->value = json_encode($value, JSON_UNESCAPED_SLASHES);
+    }
+
+    public function getLongVersion(): string
+    {
+        $appName = $this->description;
+        $appVersion = json_decode($this->value, true);
+
+        $version = ('UNKNOWN' !== $appVersion['pretty_version'])
+            ? $appVersion['pretty_version']
+            : $appVersion['semantic_version']
+        ;
+        $shortRef = substr($appVersion['reference'], 0, 7);
+
+        return ('UNKNOWN' === $appName)
+            ? 'PHPLint'
+            : sprintf(
+                '%s version <info>%s</info> <comment>(%s)</comment> by overtrue and contributors.',
+                $appName, $version, $shortRef
+            )
+        ;
+    }
+
+    public function getVersion(): string
+    {
+        $appVersion = json_decode($this->value, true);
+
+        return $appVersion['pretty_version'] ?? 'UNKNOWN';
     }
 }

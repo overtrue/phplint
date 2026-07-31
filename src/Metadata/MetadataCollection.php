@@ -19,21 +19,24 @@ use IteratorAggregate;
 use Traversable;
 
 use function count;
+use function get_class;
 
 /**
  * @author Laurent Laville
  * @since Release 9.8.0
  */
-final readonly class MetadataCollection implements Countable, IteratorAggregate
+final class MetadataCollection implements Countable, IteratorAggregate
 {
     /**
      * @var list<Metadata>
      */
-    private array $metadata;
+    private array $metadata = [];
 
     public function __construct(Metadata ...$metadata)
     {
-        $this->metadata = $metadata;
+        foreach ($metadata as $meta) {
+            $this->metadata[get_class($meta)] = $meta;
+        }
     }
 
     public function count(): int
@@ -41,8 +44,19 @@ final readonly class MetadataCollection implements Countable, IteratorAggregate
         return count($this->metadata);
     }
 
+    public function add(Metadata $metadata): void
+    {
+        $this->metadata[get_class($metadata)] = $metadata;
+    }
+
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->metadata);
+    }
+
+    public function getMetadata(string $id): ?Metadata
+    {
+        $iterator = $this->getIterator();
+        return $iterator->offsetExists($id) ? $iterator->offsetGet($id) : null;
     }
 }

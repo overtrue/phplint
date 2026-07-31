@@ -25,9 +25,15 @@ final class ConfigurationSettings extends Metadata
 {
     public const METADATA_ID = 'current_configuration';
 
-    public function __construct(array $settings)
+
+    public function __construct(private readonly array $settings)
     {
         $this->description = 'Current configuration settings';
-        $this->value = json_encode($settings, JSON_UNESCAPED_SLASHES);
+        $this->value = json_encode($this->settings, JSON_UNESCAPED_SLASHES);
+    }
+
+    public function getConfigFilePath(): string
+    {
+        return $this->settings['configuration'] ?? '';
     }
 }
