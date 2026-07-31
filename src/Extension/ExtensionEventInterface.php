@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Extension;
 
-use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 
 /**
@@ -26,9 +25,4 @@ interface ExtensionEventInterface
      * Steps to prepare an extension
      */
     public function initialize(ConsoleCommandEvent $event): void;
-
-    /**
-     * When extension has finished its job !
-     */
-    public function finish(AfterCheckingEvent $event): void;
 }
