@@ -25,10 +25,12 @@ use function is_string;
  * @author Laurent Laville
  * @since Release 9.8.0
  */
-enum ExtensionEnum: string
+enum ExtensionEnum: string implements ExtensionEnumInterface
 {
+    case CACHE_MANAGER = 'cache_manager';
     case DIAGNOSE_MANAGER = 'diagnose_manager';
     case OUTPUT_MANAGER = 'output_manager';
+    case PROFILE_MANAGER = 'profile_manager';
     case PROGRESS_MANAGER = 'progress_manager';
 
     public static function factory(BackedEnum|string|null $value): ?ExtensionInterface
