@@ -14,7 +14,7 @@ declare(strict_types=1);
 use Overtrue\PHPLint\Environment\ProviderData;
 use Overtrue\PHPLint\Environment\ProviderInterface;
 
-class MyProvider implements ProviderInterface
+class MyEnvProvider implements ProviderInterface
 {
     public function describe(): ?array
     {

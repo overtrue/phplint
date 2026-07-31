@@ -1,2 +1,3 @@
 <?php
-require __DIR__ . '/MyProvider.php';
+
+require __DIR__ . '/MyEnvProvider.php';
