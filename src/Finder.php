@@ -34,15 +34,20 @@ use function sprintf;
  */
 final class Finder implements JsonSerializable
 {
-    private array $paths;
-    private array $excludes;
-    private array $extensions;
+    private array $paths = [];
+    private array $excludes = [];
+    private array $fileExtensions = [];
 
     public function __construct(Resolver $configResolver)
     {
         $this->paths = $configResolver->getOption(OptionDefinition::PATH);
         $this->excludes = $configResolver->getOption(OptionDefinition::EXCLUDE);
-        $this->extensions = $configResolver->getOption(OptionDefinition::FILE_EXTENSIONS);
+        $this->fileExtensions = $configResolver->getOption(OptionDefinition::FILE_EXTENSIONS);
+    }
+
+    public function describe(): array
+    {
+        return $this->jsonSerialize();
     }
 
     public function jsonSerialize(): array
@@ -50,7 +55,7 @@ final class Finder implements JsonSerializable
         return [
             OptionDefinition::PATH => $this->paths,
             OptionDefinition::EXCLUDE => $this->excludes,
-            OptionDefinition::EXTENSIONS => $this->extensions,
+            OptionDefinition::FILE_EXTENSIONS => $this->fileExtensions,
         ];
     }
 
@@ -76,7 +81,7 @@ final class Finder implements JsonSerializable
         $finder->files()
             ->ignoreUnreadableDirs()
             ->filter(static fn (SplFileInfo $file) => $file->isReadable())
-            ->name(sprintf('/\\.(%s)$/', implode('|', $this->extensions)))
+            ->name(sprintf('/\\.(%s)$/', implode('|', $this->fileExtensions)))
             ->notPath($this->excludes)
             ->in(realpath($dir));
 
