@@ -16,12 +16,9 @@ namespace Overtrue\PHPLint\Extension;
 use Overtrue\PHPLint\Command\DiagnoseCommand;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\ApplicationInterface;
-use Overtrue\PHPLint\Event\AfterCheckingEvent;
-use Overtrue\PHPLint\Metadata\ConfigurationSettings;
-use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
@@ -39,9 +36,11 @@ use function in_array;
  */
 final class DiagnoseManager implements
     ExtensionInterface,
-    EventSubscriberInterface
+    EventSubscriberInterface,
+    LoggerAwareInterface
 {
-    private LoggerInterface $logger;
+    use LoggerAwareTrait;
+
     private string $whenDiagnosed = '';
     private MetadataCollection $metadataCollection;
 
@@ -66,25 +65,16 @@ final class DiagnoseManager implements
     public static function getSubscribedEvents(): array
     {
         return [
-            ConsoleEvents::COMMAND => 'initialize',
-            ConsoleEvents::TERMINATE => 'terminate',
-            AfterCheckingEvent::class => 'finish',
+            ConsoleEvents::COMMAND => ['initialize', -100],
+            ConsoleEvents::TERMINATE => ['terminate', -100],
         ];
     }
 
     public function initialize(ConsoleCommandEvent $event): void
     {
-        $input = $event->getInput();
-        $command = $event->getCommand();
-        $application = $command->getApplication();
+        $this->logger->debug(__METHOD__);
 
-        if ($application instanceof ApplicationInterface) {
-            $this->logger = $application->getLogger();
-        } else {
-            // for future implementation of Symfony/Runtime component that may provide a non-compatible Application instance
-            // if final user put a wrong implementation ...
-            $this->logger = new NullLogger();
-        }
+        $input = $event->getInput();
 
         $this->whenDiagnosed = $input->getParameterOption(
             '--' . OptionDefinition::DIAGNOSTIC,
@@ -97,19 +87,8 @@ final class DiagnoseManager implements
         }
 
         $this->logger->notice('The Diagnose Manager launched {kind} diagnostic', ['kind' => $this->whenDiagnosed]);
-        $this->logger->debug(__METHOD__);
-    }
 
-    public function finish(AfterCheckingEvent $event): void
-    {
-        $this->logger->debug(__METHOD__);
-
-        $settings = $event->getArgument(ConfigurationSettings::METADATA_ID);
-
-        $this->metadataCollection = new MetadataCollection(
-            Metadata::applicationVersion(),
-            Metadata::configurationSettings($settings),
-        );
+        $this->metadataCollection = $event->getCommand()->getApplication()->getMetadata();
     }
 
     public function terminate(ConsoleTerminateEvent $event): void
