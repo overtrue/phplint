@@ -43,8 +43,10 @@ final class FormatResolver
     /**
      * @return OutputInterface[]
      */
-    public function resolve(Resolver $configResolver, SymfonyOutputInterface $output): array
-    {
+    public function resolve(
+        Resolver $configResolver,
+        SymfonyOutputInterface $output,
+    ): array {
         $decorated = $output->isDecorated();
 
         $filename = $configResolver->getOption(OptionDefinition::OUTPUT_FILE);
@@ -89,10 +91,12 @@ final class FormatResolver
             }
         }
 
-        // Be sure to always have console output printed first (@see \Overtrue\PHPLint\Output\ChainOutput::format)
-        if (isset($handlers['console'])) {
-            $consoleHandler = $handlers['console'];
-            unset($handlers['console']);
+        // Be sure to always have ($defaultHandler) console output printed first
+        // (@see \Overtrue\PHPLint\Output\ChainOutput::format)
+        $defaultHandler = OptionDefinition::DEFAULT_FORMATS[0];
+        if (isset($handlers[$defaultHandler])) {
+            $consoleHandler = $handlers[$defaultHandler];
+            unset($handlers[$defaultHandler]);
 
             $handlers = array_values($handlers);
             $handlers[] = $consoleHandler;
