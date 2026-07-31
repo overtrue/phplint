@@ -38,6 +38,7 @@ final class FormatResolver
         FormatEnum::TXT->value => ConsoleOutput::class,
         FormatEnum::JSON->value => JsonOutput::class,
         FormatEnum::JUNIT->value => JunitOutput::class,
+        FormatEnum::SARIF->value => SarifOutput::class,
     ];
 
     /**
