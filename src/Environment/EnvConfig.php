@@ -35,7 +35,7 @@ class EnvConfig implements EnvConfigInterface
      *   For example, if the prefix is 'MYAPP_', then the key 'foo_bar' will be
      *   fetched from the environment variable MYAPP_FOO_BAR.
      */
-    public function __construct(string $prefix)
+    public function __construct(string $prefix = 'PLINT')
     {
         // Ensure that the prefix is always uppercase, and always
         // ends with a '_', regardless of the form the caller provided.

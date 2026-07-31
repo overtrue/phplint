@@ -14,7 +14,8 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Command;
 
 use Overtrue\PHPLint\Configuration\OptionDefinition;
-use Overtrue\PHPLint\Console\ApplicationInterface;
+use Overtrue\PHPLint\Configuration\Resolver\LoggerValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
 use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Environment\Provider\CI;
 use Overtrue\PHPLint\Environment\Provider\DotEnv;
@@ -28,9 +29,8 @@ use Overtrue\PHPLint\Environment\Supplier;
 use Overtrue\PHPLint\Extension\DiagnoseEnum;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
-use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\ValueResolver;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -56,7 +56,9 @@ final class DiagnoseCommand
         InputInterface $input,
         OutputInterface $output,
         SymfonyStyle $io,
+        #[ValueResolver(LoggerValueResolver::class)]
         LoggerInterface $logger,
+        #[ValueResolver(MetadataValueResolver::class)]
         MetadataCollection $metadataCollection,
     ): int {
         $whenDiagnosed = $input->getParameterOption(
@@ -69,11 +71,13 @@ final class DiagnoseCommand
             return Command::SUCCESS;
         }
 
+        $user = false;
+
         if ($whenDiagnosed === DiagnoseEnum::ALWAYS->value) {
             $vcs = $php = $uname = $ci = $dotenv = $metadata = true;
         } else { //
             if ($whenDiagnosed === DiagnoseEnum::AUTO->value) {
-                $envConfig = new EnvConfig('phplint');
+                $envConfig = new EnvConfig();
                 $parts = explode(',', $envConfig->get('diagnostic', 'metadata'));
             } else {
                 $parts = explode(',', $whenDiagnosed);
@@ -100,6 +104,13 @@ final class DiagnoseCommand
                     }
                     if ($part == DiagnoseEnum::METADATA->value) {
                         $metadata = true;
+                    } else {
+                        if (class_exists($part)) {
+                            $user = new $part();
+                            if (!$user instanceof ProviderInterface) {
+                                $user = false;
+                            }
+                        }
                     }
                 }
             }
@@ -125,11 +136,8 @@ final class DiagnoseCommand
         if ($metadata) {
             $environment->addProvider(new Metadata($metadataCollection));
         }
-        if (!$vcs && !$php && !$uname && class_exists($whenDiagnosed)) {
-            $user = new $whenDiagnosed();
-            if ($user instanceof ProviderInterface) {
-                $environment->addProvider($user);
-            }
+        if ($user) {
+            $environment->addProvider($user);
         }
 
         $formatter = new FormatterHelper();
