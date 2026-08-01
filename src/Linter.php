@@ -20,27 +20,30 @@ use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeLintFileEvent;
+use Overtrue\PHPLint\Event\Events;
+use Overtrue\PHPLint\Extension\ProfileManager;
 use Overtrue\PHPLint\Helper\ProcessHelper;
-use Overtrue\PHPLint\Metadata\ConfigurationSettings;
 use Overtrue\PHPLint\Metadata\Metadata;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
+use Overtrue\PHPLint\Metadata\ProfilerOutput;
 use Overtrue\PHPLint\Output\LinterOutput;
 use Overtrue\PHPLint\Process\LintProcess;
 use Psr\Cache\InvalidArgumentException;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Component\Cache\Adapter\NullAdapter;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
+use Symfony\Component\Stopwatch\Stopwatch;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Throwable;
 
 use function array_chunk;
 use function array_push;
 use function count;
 use function md5_file;
-use function microtime;
 use function phpversion;
 use function version_compare;
 
@@ -48,64 +51,57 @@ use function version_compare;
  * @author Overtrue
  * @author Laurent Laville (code-rewrites since v9.0)
  */
-final class Linter
+final class Linter implements LoggerAwareInterface, \Countable
 {
-    private Resolver $configResolver;
-    private EventDispatcherInterface $dispatcher;
-    private Cache $cache;
-    private ?HelperSet $helperSet;
-    private ?OutputInterface $output;
+    use LoggerAwareTrait;
+
     private array $results;
+
     private int $processLimit;
-    private string $memoryLimit;
-    private bool $warning;
+
+    private ?Stopwatch $stopwatch = null;
+
+    private \Overtrue\PHPLint\Metadata\LinterOutput $finalResults;
 
     public function __construct(
-        Resolver $configResolver,
-        EventDispatcherInterface $dispatcher,
-        private readonly ?Application $client = null,   // @deprecated keep only for API compatible with previous version 9.7.x
-                                                        // will be removed in next major version
-        ?HelperSet $helperSet = null,
-        ?OutputInterface $output = null,
+        private readonly Resolver $configResolver,
+        private readonly EventDispatcherInterface $dispatcher,
+        private readonly ?Application $client = null,   // @deprecated keep only for API compatibility with previous version 9.7.x
+                                                        // will be removed in next API version
+        private readonly ?HelperSet $helperSet = null,
+        private readonly ?OutputInterface $output = null,
+        private readonly ?Cache $cache = null,
     ) {
-        $this->configResolver = $configResolver;
-        $this->dispatcher = $dispatcher;
-        $this->processLimit = $configResolver->getOption(OptionDefinition::JOBS);
-        $this->memoryLimit = (string) $configResolver->getOption(OptionDefinition::OPTION_MEMORY_LIMIT);
-        $this->warning = $configResolver->getOption(OptionDefinition::WARNING);
-
-        if ($configResolver->getOption(OptionDefinition::NO_CACHE)) {
-            $defaultLifetime = OptionDefinition::DEFAULT_CACHE_TTL;
-            $adapter = new NullAdapter();
-        } else {
-            $defaultLifetime = $configResolver->getOption(OptionDefinition::CACHE_TTL);
-            $adapter = new FilesystemAdapter('paths', $defaultLifetime, $configResolver->getOption(OptionDefinition::CACHE_DIR));
-        }
-        $this->cache = new Cache($adapter);
-
-        if ($defaultLifetime < OptionDefinition::DEFAULT_CACHE_TTL) {
-            $this->cache->clear();
-        }
-
         $this->results = [
             'errors' => [],
             'warnings' => [],
             'hits' => [],
             'misses' => [],
+            'process_count' => 0,
         ];
 
-        $this->helperSet = $helperSet;
-        $this->output = $output;
+        $this->processLimit = $configResolver->getOption(OptionDefinition::JOBS);
+        /**
+         * Since php 8.3 the `php -l` commandline supports passing multiple file paths at once.
+         * @link https://github.com/overtrue/phplint/issues/197
+         */
+        if (version_compare(phpversion(), '8.3', 'lt')) {
+            $this->processLimit = 1;
+        }
+
+        $this->finalResults = Metadata::linterResults($this->results, new Finder());
     }
 
     /**
      * @throws Throwable
      */
-    public function lintFiles(Finder $finder, ?float $startTime = null, ?string $appVersion = null): LinterOutput
-    {
-        if (null === $startTime) {
-            $startTime = microtime(true);
-        }
+    public function lintFiles(
+        Finder $finder,
+        ?float $startTime = null,  // @deprecated since release 9.8.0, and will be removed in next API version
+        ?MetadataCollection $metadataCollection = null
+    ): LinterOutput {
+        $profiling = $metadataCollection->getMetadata(ProfilerOutput::class);
+        $this->stopwatch = $profiling?->getStopwatch();
 
         try {
             $fileCount = count($finder);
@@ -120,7 +116,8 @@ final class Linter
                     'fileCount' => $fileCount,  // @deprecated entry, use next entry instead
                     BeforeCheckingEvent::FILE_COUNT => $fileCount,
                 ]
-            )
+            ),
+            Events::BEFORE_CHECKING,
         );
 
         $processCount = 0;
@@ -130,30 +127,43 @@ final class Linter
             $results = [];
         }
 
-        $metaApplicationVersion = Metadata::applicationVersion()->describe();
-
-        $default = [
-            $metaApplicationVersion->name => [
-                'long' => $appVersion,
-                'short' => 'UNKNOWN', // @deprecated usage. Will be removed in future versions
-            ]
-        ];
-        $finalResults = new LinterOutput($results, $finder);
-        $finalResults->setContext($this->configResolver, $startTime, $processCount, $default);
+        // adds the cache analysis results
+        $metadataCollection->add(Metadata::cacheResults($this->cache));
 
         $this->cache->prune();
+
+        // adds the source code analysis results
+        $finalResults = Metadata::linterResults($results, $finder);
+        $metadataCollection->add($finalResults);
 
         $this->dispatcher->dispatch(
             new AfterCheckingEvent(
                 $this,
-                [
-                    AfterCheckingEvent::SCAN_RESULTS => $finalResults,
-                    ConfigurationSettings::METADATA_ID => $this->configResolver->getOptions(),
-                ]
-            )
+                // only to keep compatibility with previous API 9.7 version
+                [AfterCheckingEvent::ANALYSIS_RESULTS => $finalResults]
+            ),
+            Events::AFTER_CHECKING,
         );
 
-        return $finalResults;
+        // Only to keep API Backward Compatible with version 9.7.x
+        // Will be removed in next API version
+        $results = [
+            'errors' => $finalResults->getErrors(),
+            'warnings' => $finalResults->getWarnings(),
+            'hits' => $finalResults->getHits(),
+            'misses' => $finalResults->getMisses(),
+        ];
+        return new LinterOutput($results, $finder);
+    }
+
+    public function count(): int
+    {
+        return count($this->finalResults);
+    }
+
+    public function hasFailures(): bool
+    {
+        return $this->finalResults->hasFailures();
     }
 
     /**
@@ -165,7 +175,6 @@ final class Linter
 
         while ($iterator->valid()) {
             $fileInfo = $iterator->current();
-
             if ($this->cache->isHit($fileInfo->getRealPath())) {
                 $this->results['hits'][] = $fileInfo;
             } else {
@@ -176,18 +185,31 @@ final class Linter
         }
         unset($iterator);
 
-        if (version_compare(phpversion(), '8.3', 'ge')) {
-            $chunkSize = $this->processLimit;
-        } else {
-            $chunkSize = 1;
+        $chunks = array_chunk($this->results['misses'], $this->processLimit);
+
+        $this->results['process_count'] = count($chunks);
+
+        $dryRun = $this->configResolver->getOption(OptionDefinition::DRY_RUN);
+        if ($dryRun) {
+            foreach ($chunks as $index => $chunk) {
+                foreach ($chunk as $fileInfo) {
+                    $this->logger->info(
+                        '{filename} ... queued on process #{process_id}',
+                        ['filename' => $fileInfo->getRelativePathname(), 'process_id' => $index + 1]
+                    );
+                }
+            }
+
+            return $this->results;
         }
-        $chunks = array_chunk($this->results['misses'], $chunkSize);
+
         $processRunning = [];
 
         /** @var ?ProcessHelper $helper */
         $helper = $this->helperSet?->has('process') ? $this->helperSet?->get('process') : null;  // @phpstan-ignore-line
 
         foreach ($chunks as $loop => $files) {
+            $this->stopwatch?->lap(ProfileManager::LINT_FILES_EVENT);
             $lintProcess = $this->createLintProcess($files)
                 ->setHelper($helper)
                 ->setOutput($this->output)
@@ -202,6 +224,8 @@ final class Linter
                 $this->checkProcessRunning($processRunning);
             }
         }
+
+        $this->results['process_count'] = $processCount;
 
         return $this->results;
     }
@@ -222,7 +246,8 @@ final class Linter
             // checks status of all files linked at end of the php lint process
             foreach ($lintProcess->getFiles() as $fileInfo) {
                 $this->dispatcher->dispatch(
-                    new BeforeLintFileEvent($this, [BeforeLintFileEvent::FILE_INFO => $fileInfo])
+                    new BeforeLintFileEvent($this, [BeforeLintFileEvent::FILE_INFO => $fileInfo]),
+                    Events::BEFORE_LINT_FILE,
                 );
 
                 $status = $this->processFile($fileInfo, $lintProcess);
@@ -232,9 +257,10 @@ final class Linter
                         $this,
                         [
                             AfterLintFileEvent::FILE_INFO => $fileInfo,
-                            AfterLintFileEvent::FILE_STATUS => $status
+                            AfterLintFileEvent::FILE_STATUS => $status,
                         ]
-                    )
+                    ),
+                    Events::AFTER_LINT_FILE,
                 );
             }
         }
@@ -249,9 +275,11 @@ final class Linter
 
         $item = $lintProcess->getItem($fileInfo);
 
+        $showWarning = $this->configResolver->getOption(OptionDefinition::WARNING);
+
         if ($item->hasSyntaxError()) {
             $status = 'error';
-        } elseif ($this->warning && $item->hasSyntaxWarning()) {
+        } elseif ($showWarning && $item->hasSyntaxWarning()) {
             $status = 'warning';
         } else {
             $status = 'ok';
@@ -281,8 +309,10 @@ final class Linter
             '-d display_errors=On',
         ];
 
-        if (!empty($this->memoryLimit)) {
-            $command[] = '-d memory_limit=' . $this->memoryLimit;
+        $memoryLimit = $this->configResolver->getOption(OptionDefinition::OPTION_MEMORY_LIMIT);
+
+        if (!empty($memoryLimit)) {
+            $command[] = '-d memory_limit=' . $memoryLimit;
         }
 
         $command[] = '-l';
