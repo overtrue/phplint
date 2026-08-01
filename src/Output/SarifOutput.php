@@ -16,12 +16,11 @@ namespace Overtrue\PHPLint\Output;
 use Bartlett\Sarif\Contract\ConverterInterface;
 use Bartlett\Sarif\Converter\PhpLintConverter;
 use Bartlett\Sarif\Converter\Reporter\PhpLintReport;
-
+use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Symfony\Component\Console\Formatter\OutputFormatterInterface;
 use Symfony\Component\Console\Output\StreamOutput;
 
 use function class_exists;
-use function dirname;
 use function ob_get_clean;
 use function ob_start;
 
@@ -41,8 +40,11 @@ class SarifOutput extends StreamOutput implements OutputInterface
         ?ConverterInterface $converter = null
     ) {
         if (!class_exists(PhpLintConverter::class)) {
-            // use default Composer-Bin-Plugin autoloader to load Sarif-Php-Converters components
-            require_once dirname(__DIR__, 2) . '/vendor-bin/sarif/vendor/autoload.php';
+            // Please, use default Composer-Bin-Plugin autoloader to load Sarif-Php-Converters components
+            throw new \RuntimeException(
+                'Unable to load the SARIF PHP converter ("bartlett/sarif-php-converters").'
+                . ' Please install it and try again.'
+            );
         }
         parent::__construct($stream, $verbosity, $decorated, $formatter);
         $this->converter = $converter ?? new PhpLintConverter(['format_output' => $this->isVerbose()]);
@@ -53,7 +55,7 @@ class SarifOutput extends StreamOutput implements OutputInterface
         return 'sarif';
     }
 
-    public function format(LinterOutput $results): void
+    public function format(LinterOutput $results, MetadataCollection $metadataCollection): void
     {
         $reporter = new PhpLintReport($this->converter);
         ob_start();

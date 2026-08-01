@@ -13,24 +13,24 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Output;
 
+use Overtrue\PHPLint\Metadata\ApplicationVersion;
+use Overtrue\PHPLint\Metadata\ConfigurationSettings;
+use Overtrue\PHPLint\Metadata\Metadata;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
 use PHP_Parallel_Lint\PhpConsoleColor\ConsoleColor;
 use PHP_Parallel_Lint\PhpConsoleColor\InvalidStyleException;
 use PHP_Parallel_Lint\PhpConsoleHighlighter\Highlighter;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\ConsoleOutput as SymfonyConsoleOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 use function abs;
-use function array_filter;
 use function array_slice;
 use function class_exists;
 use function count;
 use function end;
 use function file;
 use function file_get_contents;
-use function in_array;
-use function json_encode;
 use function key;
 use function max;
 use function realpath;
@@ -39,7 +39,6 @@ use function str_pad;
 use function str_repeat;
 use function strlen;
 
-use const ARRAY_FILTER_USE_KEY;
 use const PHP_EOL;
 use const STR_PAD_LEFT;
 
@@ -54,32 +53,51 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
         return 'console';
     }
 
-    public function format(LinterOutput $results): void
-    {
-        $data = $results->getFailures();
-        $context = $results->getContext();
+    public function format(
+        LinterOutput $results,  // @deprecated since release 9.8.0, and will be removed in next API version
+        MetadataCollection $metadataCollection
+    ): void {
+        /** @var \Overtrue\PHPLint\Metadata\LinterOutput $results */
+        $results = $metadataCollection->getMetadata(\Overtrue\PHPLint\Metadata\LinterOutput::class);
 
-        $errCount = count($data);
+        if (null === $results) {
+            // no result available
+            return;
+        }
 
-        if ($context['files_count'] === 0) {
+        $fileCount = $results->count();
+
+        if ($fileCount === 0) {
             $this->warningBlock();
             return;
         }
 
-        $options = $context['options_used'] ?? [];
-        $configFile = $options['no-configuration'] ? '' : $options['configuration'];
-        $this->headerBlock($context['application_version']['long'], $configFile);
+        $applicationVersion = $metadataCollection->getMetadata(ApplicationVersion::class);
+        if (null === $applicationVersion) {
+            // fallback strategy, just in case the metadata collection was not properly initialized
+            $applicationVersion = Metadata::applicationVersion();
+        }
 
-        $this->consumeBlock($context['time_usage'], $context['memory_usage'], $context['cache_usage'], $context['process_count']);
+        /** @var ConfigurationSettings $configurationSettings */
+        $configurationSettings = $metadataCollection->getMetadata(ConfigurationSettings::class);
+        if (null === $configurationSettings) {
+            $configFile = '';
+        } else {
+            $configFile = $configurationSettings->getConfigFilePath();
+        }
+
+        $this->headerBlock($applicationVersion->getLongVersion(), $configFile);
+
+        $errCount = count($results->getErrors());
 
         if ($errCount > 0) {
-            $this->errorBlock($context['files_count'], $errCount);
+            $this->errorBlock($fileCount, $errCount);
             try {
-                $this->showErrors($data);
+                $this->showErrors($results->getFailures());
             } catch (InvalidStyleException) {
             }
         } else {
-            $this->successBlock($context['files_count']);
+            $this->successBlock($fileCount);
         }
     }
 
@@ -89,16 +107,19 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
         $this->writeln($appVersion);
         $this->newLine();
 
-        $this->writeln(sprintf('Runtime       : PHP <comment>%s</comment>', phpversion()));
+        $this->writeln(sprintf('Runtime       : PHP <info>%s</info>', phpversion()));
 
         $this->writeln(sprintf(
-            'Configuration : <comment>%s</comment>',
+            'Configuration : <info>%s</info>',
             (!realpath($configFile) || empty($configFile)) ? 'No config file loaded' : realpath($configFile)
         ));
 
         $this->newLine();
     }
 
+    /**
+     * @deprecated since Release 9.8.0 in favour of the ProfilerManager extension
+     */
     public function consumeBlock(string $timeUsage, string $memUsage, string $cacheUsage, int $processCount): void
     {
         $message = sprintf(
@@ -162,6 +183,8 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
             $this->writeln($this->getHighlightedCodeSnippet($filename, $error['line']));
             $this->writeln("<error> {$error['error']}</error>");
         }
+
+        $this->newLine();
     }
 
     private function getCodeSnippet(string $filePath, int $lineNumber, int $linesBefore = 3, int $linesAfter = 3): string

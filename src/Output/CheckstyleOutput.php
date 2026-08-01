@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Output;
 
 use DOMDocument;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Symfony\Component\Console\Output\StreamOutput;
 
 /**
@@ -27,7 +28,7 @@ final class CheckstyleOutput extends StreamOutput implements OutputInterface
         return 'checkstyle';
     }
 
-    public function format(LinterOutput $results): void
+    public function format(LinterOutput $results, MetadataCollection $metadataCollection): void
     {
         $failures = $results->getFailures();
 

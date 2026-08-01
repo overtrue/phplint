@@ -17,6 +17,9 @@ use DateTime;
 use DOMDocument;
 use DOMElement;
 use DOMException;
+use Overtrue\PHPLint\Metadata\ApplicationVersion;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
+use Overtrue\PHPLint\Metadata\ProfilerOutput;
 use Symfony\Component\Console\Output\StreamOutput;
 
 use function count;
@@ -35,10 +38,35 @@ final class JunitOutput extends StreamOutput implements OutputInterface
     /**
      * @throws DOMException
      */
-    public function format(LinterOutput $results): void
-    {
+    public function format(
+        LinterOutput $results,  // @deprecated since release 9.8.0, and will be removed in next API version
+        MetadataCollection $metadataCollection
+    ): void {
+        /** @var \Overtrue\PHPLint\Metadata\LinterOutput $results */
+        $results = $metadataCollection->getMetadata(\Overtrue\PHPLint\Metadata\LinterOutput::class);
+
+        if (null === $results) {
+            // no result available
+            return;
+        }
+
+        $applicationVersion = $metadataCollection->getMetadata(ApplicationVersion::class);
+        $appName = 'PHP Linter';
+
+        if (null !== $applicationVersion) {
+            $appName .= ' ' . $applicationVersion->getVersion();
+        }
+
+        $profiling = $metadataCollection->getMetadata(ProfilerOutput::class);
+
+        if (null === $profiling) {
+            // no profile info available
+            $timeUsage = '';
+        } else {
+            $timeUsage = $profiling->getTimeUsage();
+        }
+
         $failures = $results->getFailures();
-        $context = $results->getContext();
 
         $document = new DOMDocument('1.0', 'UTF-8');
         $document->formatOutput = $this->isVerbose();
@@ -48,9 +76,9 @@ final class JunitOutput extends StreamOutput implements OutputInterface
 
         $suite = new DOMElement('testsuite');
         $rootElement->appendChild($suite);
-        $suite->setAttribute('name', 'PHP Linter ' . $context['application_version']['short']);
+        $suite->setAttribute('name', $appName);
         $suite->setAttribute('timestamp', (new DateTime())->format(DateTime::ISO8601));
-        $suite->setAttribute('time', $context['time_usage']);
+        $suite->setAttribute('time', $timeUsage);
         $suite->setAttribute('tests', '1');
         $suite->setAttribute('errors', (string) count($failures));
 
