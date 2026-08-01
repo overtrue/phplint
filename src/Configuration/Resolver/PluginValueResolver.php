@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the overtrue/phplint package
+ *
+ * (c) overtrue
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Overtrue\PHPLint\Configuration\Resolver;
 
 use BackedEnum;
@@ -16,22 +25,29 @@ use function array_column;
 use function count;
 use function in_array;
 use function is_array;
+use function is_object;
+use function method_exists;
 
 use const PHP_SAPI;
 
+/**
+ * @author Laurent Laville
+ * @since Release 9.8.0
+ */
 class PluginValueResolver implements ValueResolverInterface
 {
     public function __construct(
         private ?EnvConfigInterface $envConfig = null,
+        private readonly string $extensionEnumClass = ExtensionEnum::class,
     ) {
-        $this->envConfig ??= new EnvConfig('phplint');
+        $this->envConfig ??= new EnvConfig;
     }
 
     public function resolve(string $argumentName, InputInterface $input, ReflectionMember $member): iterable
     {
         $argumentType = $member->getType()?->getName();
 
-        if ($argumentType !== ExtensionEnum::class) {
+        if ($argumentType !== $this->extensionEnumClass) {
             return [];
         }
 
@@ -44,23 +60,25 @@ class PluginValueResolver implements ValueResolverInterface
         };
 
         $value = $input->hasOption($argumentName) ? $input->getOption($argumentName) : [];
-        $value = count($value) === 0 ? $defaultPlugin : $value;
 
         if (!is_array($value)) {
             $value = [$value];
         }
-        if (!in_array($defaultPlugin, $value, true)) {
+        if (null !== $defaultPlugin && !in_array($defaultPlugin, $value, true)) {
             $value[] = $defaultPlugin;
         }
 
         $resolved = [];
 
         foreach ($value as $v) {
-            $enum = $v instanceof BackedEnum ? $v : $this->resolveOption($argumentName, $v, $frontend);
-            if ($enum instanceof BackedEnum && !ExtensionEnum::isAllowed($enum->value, $frontend)) {
+            $enum = $this->resolveOption($argumentName, $v, $frontend);
+            if (null === $enum) {
                 continue;
             }
-            $resolved[] = $enum ?? null;
+            if (!$this->extensionEnumClass::isAllowed($enum->value, $frontend)) {
+                continue;
+            }
+            $resolved[] = $enum;
         }
 
         if (count($resolved) === 0 && count($value)) {
@@ -70,15 +88,26 @@ class PluginValueResolver implements ValueResolverInterface
         return $resolved;
     }
 
-    private function resolveOption(string $argumentName, ?string $value, string $frontend): ?BackedEnum
+    /**
+     * @param null|string|object|BackedEnum $value (may be an anonymous class instance that implement the ExtensionInterface contract)
+     */
+    private function resolveOption(string $argumentName, mixed $value, string $frontend): ?BackedEnum
     {
+        if ($value instanceof BackedEnum) {
+            return $value;
+        }
+
         if (null === $value) {
             return null;
         }
 
-        $suggestedValues = array_column(ExtensionEnum::allowed($frontend), 'value');
+        if (is_object($value) && method_exists($value, 'getName')) {
+            $value = $value->getName();
+        }
 
-        return ExtensionEnum::tryFrom($value)
+        $suggestedValues = array_column($this->extensionEnumClass::allowed($frontend), 'value');
+
+        return $this->extensionEnumClass::tryFrom($value)
             ?? throw InvalidOptionException::fromEnumValue($argumentName, $value, $suggestedValues, $frontend);
     }
 }
