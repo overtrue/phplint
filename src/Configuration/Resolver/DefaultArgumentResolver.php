@@ -11,24 +11,22 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Overtrue\PHPLint\Configuration;
+namespace Overtrue\PHPLint\Configuration\Resolver;
 
 use InvalidArgumentException;
 use LogicException;
-use Overtrue\PHPLint\Configuration\Resolver\ConfigValueResolver;
-use Overtrue\PHPLint\Configuration\Resolver\PathValueResolver;
-use Overtrue\PHPLint\Configuration\Resolver\PluginValueResolver;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\NullLogger;
 use ReflectionException;
 use ReflectionFunction;
 use ReflectionFunctionAbstract;
 use ReflectionNamedType;
 use RuntimeException;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\ArgumentResolver\ArgumentResolverInterface;
 use Symfony\Component\Console\ArgumentResolver\Exception\NearMissValueResolverException;
 use Symfony\Component\Console\ArgumentResolver\Exception\ResolverNotFoundException;
-use Symfony\Component\Console\ArgumentResolver\ValueResolver\BuiltinTypeValueResolver;
 use Symfony\Component\Console\Attribute\Reflection\ReflectionMember;
 use Symfony\Component\Console\Attribute\ValueResolver;
 use Symfony\Component\Console\Command\Command;
@@ -37,9 +35,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\RawInputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Contracts\Service\ServiceProviderInterface;
 
-use function array_keys;
 use function get_debug_type;
 use function implode;
 use function in_array;
@@ -50,13 +46,15 @@ use function sprintf;
  * @author Laurent Laville
  * @since Release 9.8.0
  */
-class ArgumentResolver implements ArgumentResolverInterface
+final class DefaultArgumentResolver implements ArgumentResolverInterface, LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     public function __construct(
-        private iterable $argumentValueResolvers = [],
+        private readonly iterable $argumentValueResolvers = [],
         private readonly ?ContainerInterface $namedResolvers = null,
     ) {
-        $this->argumentValueResolvers = $argumentValueResolvers ?: static::getDefaultValueResolvers();
+        $this->logger = new NullLogger();
     }
 
     /**
@@ -78,6 +76,8 @@ class ArgumentResolver implements ArgumentResolverInterface
             $type = $member->getType();
             $typeName = $type instanceof ReflectionNamedType ? $type->getName() : null;
 
+            $resolverName = null;
+
             if ($typeName && in_array($typeName, [
                     InputInterface::class,
                     RawInputInterface::class,
@@ -87,11 +87,10 @@ class ArgumentResolver implements ArgumentResolverInterface
                     Application::class,
                     Command::class,
                 ], true)) {
-                continue;
+                $resolverName = CoreValueResolver::class;
             }
 
-            if ($this->namedResolvers && $attributes = $member->getAttribute(ValueResolver::class)) {
-                $resolverName = null;
+            if ($this->namedResolvers && $attributes = $member->getAttributes(ValueResolver::class)) {
                 foreach ($attributes as $attribute) {
                     if ($attribute->disabled) {
                         $disabledResolvers[$attribute->resolver] = true;
@@ -107,21 +106,16 @@ class ArgumentResolver implements ArgumentResolverInterface
                         $resolverName = $attribute->resolver;
                     }
                 }
+            }
 
-                if ($resolverName) {
-                    if (!$this->namedResolvers->has($resolverName)) {
-                        throw new ResolverNotFoundException(
-                            $resolverName,
-                            $this->namedResolvers instanceof ServiceProviderInterface
-                                ? array_keys($this->namedResolvers->getProvidedServices())
-                                : []
-                        );
-                    }
-
-                    $argumentValueResolvers = [
-                        $this->namedResolvers->get($resolverName),
-                    ];
+            if ($this->namedResolvers && $resolverName) {
+                if (!$this->namedResolvers->has($resolverName)) {
+                    throw new ResolverNotFoundException($resolverName);
                 }
+
+                $argumentValueResolvers = [
+                    $this->namedResolvers->get($resolverName),
+                ];
             }
 
             $valueResolverExceptions = [];
@@ -151,6 +145,13 @@ class ArgumentResolver implements ArgumentResolverInterface
                 }
 
                 if ($count) {
+                    $this->logger->debug(
+                        'Argument "{argumentName}" may be resolved by {argumentValueResolvers}',
+                        [
+                            'argumentName' => $argumentName,
+                            'argumentValueResolvers' => get_debug_type($resolver)
+                        ]
+                    );
                     continue 2;
                 }
             }
@@ -172,24 +173,6 @@ class ArgumentResolver implements ArgumentResolverInterface
             );
         }
 
-        //\var_dump([__METHOD__ => $arguments]);
         return $arguments;
-    }
-
-    public static function getDefaultValueResolvers(): iterable
-    {
-        return [
-            new BuiltinTypeValueResolver(),
-            new PluginValueResolver(),
-            new ConfigValueResolver(),
-            new PathValueResolver(
-                [OptionDefinition::PATH],
-                [OptionDefinition::EXCLUDE],
-                [
-                    OptionDefinition::PATH => OptionDefinition::DEFAULT_PATH,
-                    OptionDefinition::EXCLUDE => OptionDefinition::DEFAULT_EXCLUDES,
-                ]
-            ),
-        ];
     }
 }
