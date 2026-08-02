@@ -13,14 +13,23 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Command;
 
-use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
-use Overtrue\PHPLint\Configuration\ConfigResolver;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver\ConfigValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\DryRunValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\FileExtensionValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\IgnoreExitCodeValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\JobValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\MemoryLimitValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\PathValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\PluginValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\ShowWarningsValueResolver;
+use Overtrue\PHPLint\Extension\CacheManager;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
+use Overtrue\PHPLint\Metadata\Metadata;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Output\LinterOutput;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Attribute\Argument;
@@ -28,13 +37,15 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Attribute\ValueResolver;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder as SymfonyFinder;
 use Throwable;
 
-use function count;
-use function microtime;
+use function json_encode;
+
+use const JSON_UNESCAPED_SLASHES;
 
 /**
  * @author Overtrue
@@ -45,28 +56,16 @@ final class LintCommand
 {
     private LinterOutput $results;
 
-    public function __construct()
-    {
-        $this->results = new LinterOutput([], new SymfonyFinder());
-    }
-
+    /**
+     * @deprecated since release 9.8.0, and will be removed in API next version;
+     *             replaced by "\Overtrue\PHPLint\Metadata\LinterOutput"
+     */
     public function getResults(): LinterOutput
     {
-        return $this->results;
-    }
-
-    private function initialize(InputInterface $input, OutputInterface $output): void
-    {
-        $cmdName = 'lint';
-
-        // initializes correctly command and path arguments when lint is set as default command
-        $cmd = $input->getArgument('command');
-        $paths = $input->getArgument('path');
-        if ($cmd !== $cmdName) {
-            array_unshift($paths, $cmd);
+        if (!isset($this->results)) {
+            $this->results = new LinterOutput([], new SymfonyFinder());
         }
-        $input->setArgument('path', $paths);
-        $input->setArgument('command', $cmdName);
+        return $this->results;
     }
 
     /**
@@ -77,101 +76,107 @@ final class LintCommand
         OutputInterface $output,
         Application $application,
         #[ValueResolver(ConfigValueResolver::class)]
-        string $configuration, // global option
+        string $configuration = OptionDefinition::DEFAULT_CONFIG_FILE, // global option
         #[Argument(
             description: 'Path to file or directory to lint (<comment>default: working directory</comment>)',
             name: OptionDefinition::PATH
         )]
+        #[ValueResolver(PathValueResolver::class)]
         ?array $sourcePath = null,
         #[Option(
             description: 'Path to file or directory to exclude from linting',
             name: OptionDefinition::EXCLUDE,
         )]
+        #[ValueResolver(PathValueResolver::class)]
         ?array $excludePath = null,
         #[Option(
             description: 'Check only files with selected extensions',
             name: OptionDefinition::FILE_EXTENSIONS,
         )]
+        #[ValueResolver(FileExtensionValueResolver::class)]
         ?array $fileExtensions = null,
         #[Option(
             description: 'Number of paralleled jobs to run',
             name: OptionDefinition::JOBS,
             shortcut: 'j',
         )]
-        ?int $job = null,
-        #[Option(
-            description: 'Path to the cache directory (<comment>Deprecated option, use "cache-dir" instead</comment>)',
-            name: OptionDefinition::CACHE,
-        )]
-        ?string $cachePath = null,
-        #[Option(
-            description: 'Path to the cache directory',
-            name: OptionDefinition::CACHE_DIR,
-        )]
-        ?string $cacheDir = null,
-        #[Option(
-            description: 'Limit cached data for a period of time'
-            . ' (<info>>0: time to live in seconds</info>)',
-            name: 'cache-ttl',
-        )]
-        int $cacheTtl = OptionDefinition::DEFAULT_CACHE_TTL,
-        #[Option(
-            description: 'Ignore cached data',
-            name: OptionDefinition::NO_CACHE,
-        )]
-        ?bool $noCache = null,
+        #[ValueResolver(JobValueResolver::class)]
+        ?int $parallelJob = null,
         #[Option(
             description: 'Also show warnings',
             name: OptionDefinition::WARNING,
             shortcut: 'w',
         )]
-        ?bool $showWarning = null,
+        #[ValueResolver(ShowWarningsValueResolver::class)]
+        bool $showWarning = false,
         #[Option(
             description: 'Memory limit for analysis',
             name: OptionDefinition::OPTION_MEMORY_LIMIT,
         )]
+        #[ValueResolver(MemoryLimitValueResolver::class)]
         ?int $memoryLimit = null,
         #[Option(
             description: 'Ignore exit codes so there are no "failure" exit code even when no files processed',
             name: OptionDefinition::IGNORE_EXIT_CODE,
         )]
-        ?bool $ignoreExitCode = null,
-        // ValueResolver is not necessary here, because logic is applied on "Application::doRun" process
-        // but definition is mandatory on this command, otherwise loading plugin on fly is not possible
-        ?ExtensionEnum ...$extensions, // global option
+        #[ValueResolver(IgnoreExitCodeValueResolver::class)]
+        bool $ignoreExitCode = false,
+        #[Option(
+            description: 'Only shows which files would have been analysed',
+            name: 'dry-run',
+        )]
+        #[ValueResolver(DryRunValueResolver::class)]
+        bool $dryRun = false,
+        #[ValueResolver(PluginValueResolver::class)]
+        ExtensionEnum ...$extensions, // global option
     ): int {
-        $startTime = microtime(true);
+        $command = $application->find('lint');
+        $invokableCommand = $command->getCode();
 
-        $this->initialize($input, $output);
+        $parameters = $invokableCommand->getArguments($input, $output);  //\var_dump($parameters);
+        $configResolver = new FileOptionsResolver($input, $parameters);
 
-        $defaults = [
-            // for global options
-            OptionDefinition::CONFIGURATION => $configuration,
-            OptionDefinition::NO_CONFIGURATION => $configuration === '',
+        /** @var MetadataCollection $metadataCollection */
+        $metadataCollection = $application->getMetadata();
+        // adds the configuration applied to run source code analysis
+        $metadataCollection->add(Metadata::configurationSettings($configResolver->getOptions()));
 
-            // for local arguments and options
-            OptionDefinition::PATH => $sourcePath,
-            OptionDefinition::EXCLUDE => $excludePath ?? [],
-        ];
-        $configResolver = new ConfigResolver($input, $defaults);
+        $logger = $application->getLogger();
 
-        $finder = (new Finder($configResolver))->getFiles();
+        /** @var CacheManager $cacheManager */
+        $cacheManager = ExtensionEnum::factory(ExtensionEnum::CACHE_MANAGER->value);
+        $cacheManager->setLogger($logger);
+
+        foreach ($extensions as $extensionName) {
+            if ($extensionName === ExtensionEnum::CACHE_MANAGER) {
+                // found the "cache_manager" on command line options
+                $consoleEvent = new ConsoleCommandEvent(null, $input, $output);
+                $cacheManager->initialize($consoleEvent);
+                break;
+            }
+        }
+        $cache = $cacheManager::getCacheInstance();
+
+        $finder = new Finder($configResolver);
+        $logger->debug('Finder rules: {rules}', ['rules' => json_encode($finder, JSON_UNESCAPED_SLASHES)]);
+        $finder = $finder->getFiles();
+
         $linter = new Linter(
             $configResolver,
-            $application->getEventDispatcher(),   // @phpstan-ignore method.notFound
+            $application->getDispatcher(),   // @phpstan-ignore method.notFound
             $application,
             $application->getHelperSet(),
-            $output
+            $output,
+            $cache,
         );
-        $this->results = $linter->lintFiles($finder, $startTime, $application->getLongVersion());
+        $linter->setLogger($logger);
+        $this->results = $linter->lintFiles($finder, null, $metadataCollection);
 
-        $data = $this->results->getFailures();
-
-        if ($configResolver->getOption(OptionDefinition::IGNORE_EXIT_CODE)) {
+        if ($ignoreExitCode) {
             return Command::SUCCESS;
         }
 
-        if (count($this->results) === 0 || count($data)) {
+        if ($linter->count() === 0 || $linter->hasFailures()) {
             return Command::FAILURE;
         }
 
