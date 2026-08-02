@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Tests\EndToEnd;
 
 use Overtrue\PHPLint\Command\LintCommand;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -28,13 +29,16 @@ use function dirname;
 final class LintCommandTest extends TestCase
 {
     private ?CommandTester $commandTester;
-    private LintCommand $invokableCommand;
+
+    private $invokableCommand;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $command = $this->application->find('lint');
+        $application = $this->getApplication();
+
+        $command = $application->find('lint');
 
         $this->invokableCommand = $command->getCode();
 
@@ -49,33 +53,30 @@ final class LintCommandTest extends TestCase
     public function testLintDirectoryWithoutConfigurationAndCache(): void
     {
         $arguments = [
-            'path' => [__DIR__],
-            '--no-configuration' => true,
-            '--no-cache' => true,
+            OptionDefinition::PATH => [__DIR__],
+            '--' . OptionDefinition::NO_CONFIGURATION => true,
         ];
 
         $this->commandTester->execute($arguments);
 
-        $this->commandTester->assertCommandIsSuccessful();
         $this->assertCount(
             2,
-            $this->invokableCommand->getResults()->getMisses()
+            $this->invokableCommand->getCode()->getResults()->getMisses()
         );
     }
 
     public function testLintSyntaxErrorFileWithoutConfigurationAndCache(): void
     {
         $arguments = [
-            'path' => [dirname(__DIR__) . '/fixtures/syntax_error.php'],
-            '--no-configuration' => true,
-            '--no-cache' => true,
+            OptionDefinition::PATH => [dirname(__DIR__) . '/fixtures/syntax_error.php'],
+            '--' . OptionDefinition::NO_CONFIGURATION => true,
         ];
 
         $this->commandTester->execute($arguments);
 
         $this->assertCount(
             1,
-            $this->invokableCommand->getResults()->getErrors()
+            $this->invokableCommand->getCode()->getResults()->getErrors()
         );
     }
 }

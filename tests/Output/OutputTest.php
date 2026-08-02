@@ -13,21 +13,21 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Tests\Output;
 
-use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
+use Overtrue\PHPLint\Cache;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Output\JunitOutput;
 use Overtrue\PHPLint\Output\LinterOutput;
 use Overtrue\PHPLint\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Throwable;
 
 use function fopen;
-use function microtime;
 use function rewind;
 
 use const DIRECTORY_SEPARATOR;
@@ -41,6 +41,8 @@ final class OutputTest extends TestCase
 {
     private LinterOutput $linterOutput;
 
+    private MetadataCollection $metadataCollection;
+
     /**
      * @throws Throwable
      */
@@ -48,41 +50,34 @@ final class OutputTest extends TestCase
     {
         parent::setUp();
 
-        $command = $this->application->find('lint');
-
-        $definition = $command->getDefinition();
-
-        $dispatcher = new EventDispatcher();
-
         $basePath = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'fixtures';
 
         $arguments = [
             OptionDefinition::PATH => [$basePath],
-            '--no-configuration' => true,
-            '--no-cache' => true,
+            '--' . OptionDefinition::NO_CONFIGURATION => true,
             '--' . OptionDefinition::WARNING => true,
-            '--' . OptionDefinition::EXTENSIONS => ['php']
+            '--' . OptionDefinition::FILE_EXTENSIONS => ['php']
         ];
-        $input = new ArrayInput($arguments, $definition);
 
-        $configResolver = new ConsoleOptionsResolver($input);
+        $configResolver = $this->getOptionsResolver($arguments);
 
         $finder = new Finder($configResolver);
 
-        $linter = new Linter($configResolver, $dispatcher);
+        $cache = new Cache(new NullAdapter());
 
-        $startTime = microtime(true);
-        $defaults = ['application_version' => ['short' => '9.x-dev', 'long' => '9.x-dev']];
+        $linter = new Linter($configResolver, new EventDispatcher(), null, null, null, $cache);
 
-        $this->linterOutput = $linter->lintFiles($finder->getFiles(), $startTime);
-        $this->linterOutput->setContext($configResolver, $startTime, 2, $defaults);
+        $application = $this->getApplication();
+        $this->metadataCollection = $application->getMetadata();
+
+        $this->linterOutput = $linter->lintFiles($finder->getFiles(), null, $this->metadataCollection);
     }
 
     public function testJunitOutput(): void
     {
         $stream = fopen('php://memory', 'w+');
         $output = new JunitOutput($stream, OutputInterface::VERBOSITY_VERBOSE, false);
-        $output->format($this->linterOutput);
+        $output->format($this->linterOutput, $this->metadataCollection);
 
         rewind($stream);
         $xml = stream_get_contents($stream);

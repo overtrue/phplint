@@ -35,4 +35,7 @@
             <directory suffix=".php">src</directory>
         </include>
     </source>
+    <php>
+        <env name="XDG_CONFIG_DIRS" value="./tests/Configuration/xdg"/>
+    </php>
 </phpunit>
