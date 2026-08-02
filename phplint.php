@@ -13,11 +13,15 @@ declare(strict_types=1);
 
 use Overtrue\PHPLint\Command\DiagnoseCommand;
 use Overtrue\PHPLint\Command\LintCommand;
-use Overtrue\PHPLint\Configuration\ArgumentResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Configuration\Resolver\CoreValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\DefaultArgumentResolver;
+use Overtrue\PHPLint\Configuration\Resolver\DefaultValueResolver;
 use Overtrue\PHPLint\Console\Application;
+use Overtrue\PHPLint\Output\ConsoleOutput;
 use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
 use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 
 $input = new ArgvInput();
 
@@ -28,16 +32,23 @@ if (true === $input->hasParameterOption(['--' . OptionDefinition::BOOTSTRAP, '-b
     }
 }
 
+$output = new ConsoleOutput();
+$logger = new ConsoleLogger($output);
+
 $application = new Application();
-$application->addCommands(
-    [
-        new DiagnoseCommand(),
-        new LintCommand(),
-    ]
-);
 
-$argumentResolver = new ArgumentResolver(ArgumentResolver::getDefaultValueResolvers());
-$application->setArgumentResolver($argumentResolver);
+$namedResolvers = new DefaultValueResolver($logger, new CoreValueResolver($application, $output));
 
-$runner = new ConsoleApplicationRunner($application, 'dev', $input);
+$argumentResolver = new DefaultArgumentResolver([], $namedResolvers);
+$argumentResolver->setLogger($logger);
+
+$application->setArgResolver($argumentResolver);
+
+$application->setLogger($logger);
+$application->addCommands([
+    new DiagnoseCommand(),
+    new LintCommand(),
+]);
+
+$runner = new ConsoleApplicationRunner($application, 'dev', $input, $output);
 $runner->run();
