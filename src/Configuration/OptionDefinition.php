@@ -29,16 +29,19 @@ interface OptionDefinition
     public const CACHE_DIR = 'cache-dir';
     public const NO_CACHE = 'no-cache';
     public const CACHE_TTL = 'cache-ttl';
+    public const CACHE_ADAPTER = 'cache-adapter';
     public const CONFIGURATION = 'configuration';
     public const NO_CONFIGURATION = 'no-configuration';
     public const OPTION_MEMORY_LIMIT = 'memory-limit';
     public const PROGRESS = 'progress';
     public const NO_PROGRESS = 'no-progress';
-    public const OUTPUT_FILE = 'output';
-    public const OUTPUT_FORMAT = 'format';
+    public const OUTPUT_FILE = 'output-file';
+    public const OUTPUT_FORMAT = 'output-format';
     public const IGNORE_EXIT_CODE = 'ignore-exit-code';
     public const BOOTSTRAP = 'bootstrap';
     public const DIAGNOSTIC = 'diagnostic';
+    public const PROFILE = 'profile';
+    public const DRY_RUN = 'dry-run';
 
     public const DEFAULT_JOBS = 5;
     public const DEFAULT_PATH = '.';
@@ -46,6 +49,7 @@ interface OptionDefinition
     public const DEFAULT_EXTENSIONS = ['php'];
     public const DEFAULT_CACHE_DIR = '.phplint.cache';
     public const DEFAULT_CACHE_TTL = 3600; // 1 hour === 3600 seconds
+    public const DEFAULT_CACHE_ADAPTER = 'Filesystem';
     public const DEFAULT_CONFIG_FILE = '.phplint.yml';
     public const DEFAULT_PROGRESS_WIDGET = 'auto';
     public const DEFAULT_STANDARD_OUTPUT_LABEL = 'standard output';

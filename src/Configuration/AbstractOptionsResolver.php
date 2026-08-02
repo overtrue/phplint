@@ -13,44 +13,43 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Configuration;
 
+use Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 
+use function array_filter;
 use function array_key_exists;
+use function in_array;
 use function ini_get;
 use function sprintf;
 
 /**
  * @author Laurent Laville
  * @since Release 9.0.0
- * @deprecated Since version 9.8.0, and will be removed in next major version 10.0
  */
 abstract class AbstractOptionsResolver implements Resolver
 {
     protected array $defaults;
     protected array $options;
 
-    public function __construct(InputInterface $input, array $configuration = [])
-    {
-        $arguments = $input->getArguments();
-        $options = $input->getOptions();
-
-        if (null !== $options[OptionDefinition::CACHE]) {
-            // "cache" option is deprecated since 9.6.2, use instead "cache-dir" automagically
-            $options[OptionDefinition::CACHE_DIR] = $options[OptionDefinition::CACHE];
-        }
+    public function __construct(
+        protected InputInterface $input,  // @deprecated since Release 9.8.0, will be removed in next API version
+        array $configuration = []
+    ) {
+        $options = $configuration;
 
         $optionDefaults = [
             OptionDefinition::PATH => OptionDefinition::DEFAULT_PATH,
             OptionDefinition::CONFIGURATION => OptionDefinition::DEFAULT_CONFIG_FILE,
             OptionDefinition::NO_CONFIGURATION => false,
             OptionDefinition::EXCLUDE => OptionDefinition::DEFAULT_EXCLUDES,
-            OptionDefinition::EXTENSIONS => OptionDefinition::DEFAULT_EXTENSIONS,
+            OptionDefinition::FILE_EXTENSIONS => OptionDefinition::DEFAULT_EXTENSIONS,
             OptionDefinition::JOBS => OptionDefinition::DEFAULT_JOBS,
             OptionDefinition::CACHE => OptionDefinition::DEFAULT_CACHE_DIR,
             OptionDefinition::CACHE_DIR => OptionDefinition::DEFAULT_CACHE_DIR,
             OptionDefinition::NO_CACHE => false,
             OptionDefinition::CACHE_TTL => OptionDefinition::DEFAULT_CACHE_TTL,
+            OptionDefinition::CACHE_ADAPTER => OptionDefinition::DEFAULT_CACHE_ADAPTER,
             OptionDefinition::PROGRESS => OptionDefinition::DEFAULT_PROGRESS_WIDGET,
             OptionDefinition::NO_PROGRESS => false,
             OptionDefinition::OUTPUT_FILE => null,
@@ -59,53 +58,30 @@ abstract class AbstractOptionsResolver implements Resolver
             OptionDefinition::OPTION_MEMORY_LIMIT => ini_get('memory_limit'),
             OptionDefinition::IGNORE_EXIT_CODE => false,
             OptionDefinition::BOOTSTRAP => OptionDefinition::DEFAULT_BOOTSTRAP,
+            OptionDefinition::DRY_RUN => false,
         ];
 
         $defaults = [];
 
-        if (empty($arguments['path'])) {
-            $defaults[OptionDefinition::PATH] = $configuration[OptionDefinition::PATH] ?? $optionDefaults[OptionDefinition::PATH];
-        } else {
-            $defaults[OptionDefinition::PATH] = $arguments['path'];
-        }
-
-        if (empty($options['format'])) {
-            unset($options['format']);
-        }
-        if (empty($options['exclude'])) {
-            unset($options['exclude']);
-        }
-        if (empty($options['extensions'])) {
-            unset($options['extensions']);
-        }
-        if (empty($options['no-cache'])) {
-            unset($options['no-cache']);
-        }
-        if (empty($options['no-progress'])) {
-            unset($options['no-progress']);
-        }
-        if (empty($options['warning'])) {
-            unset($options['warning']);
-        }
-
         // options that cannot be overridden by YAML config file values
-        $names = [
-            OptionDefinition::CONFIGURATION,
-            OptionDefinition::NO_CONFIGURATION
-        ];
-        foreach ($names as $name) {
-            $defaults[$name] = $options[$name] ?? $optionDefaults[$name];
-        }
+        $name = OptionDefinition::CONFIGURATION;
+        $withoutConfigFile = in_array($options[$name], ['', 'never']);
+        $defaults[$name] = $withoutConfigFile ? '' : $options[$name];
+
+        $name = OptionDefinition::NO_CONFIGURATION;
+        $defaults[$name] = $withoutConfigFile;
 
         // all options that may be overridden by YAML config file values
         $names = [
+            OptionDefinition::PATH,
             OptionDefinition::EXCLUDE,
-            OptionDefinition::EXTENSIONS,
+            OptionDefinition::FILE_EXTENSIONS,
             OptionDefinition::JOBS,
             OptionDefinition::NO_CACHE,
             OptionDefinition::CACHE,
             OptionDefinition::CACHE_DIR,
             OptionDefinition::CACHE_TTL,
+            OptionDefinition::CACHE_ADAPTER,
             OptionDefinition::NO_PROGRESS,
             OptionDefinition::PROGRESS,
             OptionDefinition::OUTPUT_FILE,
@@ -114,9 +90,10 @@ abstract class AbstractOptionsResolver implements Resolver
             OptionDefinition::OPTION_MEMORY_LIMIT,
             OptionDefinition::IGNORE_EXIT_CODE,
             OptionDefinition::BOOTSTRAP,
+            OptionDefinition::DRY_RUN,
         ];
         foreach ($names as $name) {
-            $defaults[$name] = $options[$name] ?? $configuration[$name] ?? $optionDefaults[$name];
+            $defaults[$name] = $options[$name] ?? $optionDefaults[$name];
         }
 
         $this->defaults = $defaults;
@@ -126,14 +103,20 @@ abstract class AbstractOptionsResolver implements Resolver
 
     public function getOptions(): array
     {
-        $options = $this->factory();
-        return $this->options = $options->resolve();
+        $optionsFactory = $this->factory();
+        return $this->options = $optionsFactory->resolve(
+            array_filter($this->input->getArguments() + $this->input->getOptions())
+        );
     }
 
     public function getOption(string $name): mixed
     {
         if (!isset($this->options)) {
-            $this->getOptions();
+            try {
+                $this->getOptions();
+            } catch (Exception) {
+                return null;
+            }
         }
 
         if (array_key_exists($name, $this->options)) {

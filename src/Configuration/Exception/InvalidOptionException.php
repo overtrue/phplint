@@ -15,6 +15,8 @@ namespace Overtrue\PHPLint\Configuration\Exception;
 
 use Closure;
 use InvalidArgumentException;
+
+use function count;
 use function is_array;
 use function sprintf;
 
@@ -38,7 +40,7 @@ class InvalidOptionException extends InvalidArgumentException
         }
         $error .= ".";
 
-        if (is_array($suggestedValues)) {
+        if (is_array($suggestedValues) && count($suggestedValues)) {
             $error .= sprintf(' Supported values are "%s".', implode('", "', $suggestedValues));
         }
 

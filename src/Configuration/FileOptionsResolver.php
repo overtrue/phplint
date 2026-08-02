@@ -24,17 +24,45 @@ use function sprintf;
 /**
  * @author Laurent Laville
  * @since Release 9.0.0
- * @deprecated Since version 9.8.0, and will be removed in next major version 10.0
  */
 final class FileOptionsResolver extends AbstractOptionsResolver
 {
-    public function __construct(InputInterface $input)
-    {
-        $configFile = $input->getOption(OptionDefinition::CONFIGURATION);
+    public function __construct(
+        protected InputInterface $input,
+        array $configuration = []
+    ) {
+        $withoutConfigFile = $configuration[OptionDefinition::NO_CONFIGURATION] ?? false;
 
+        $configFile = $withoutConfigFile
+            ? ''
+            : ($configuration[OptionDefinition::CONFIGURATION] ?? null)
+        ;
+        if (null === $configFile) {
+            if (true === $input->hasOption(OptionDefinition::CONFIGURATION)) {
+                $configFile = $input->getOption(OptionDefinition::CONFIGURATION);
+            } else {
+                $configFile = '';
+            }
+        }
+
+        if (!empty($configFile)) {
+            $configuration = $this->parseYamlConfiguration($configFile);
+            $configuration[OptionDefinition::CONFIGURATION] = $configFile;
+        }
+
+        parent::__construct($input, $configuration);
+    }
+
+    public function factory(): Options
+    {
+        return new OptionsFactory($this->defaults);
+    }
+
+    private function parseYamlConfiguration(string $filename): array
+    {
         try {
-            $configuration = Yaml::parseFile($configFile);
-        } catch (ParseException) {
+            $configuration = Yaml::parseFile($filename);
+        } catch (ParseException $e) {
             // If the file could not be read or the YAML is not valid
             $configuration = [];
         }
@@ -45,20 +73,15 @@ final class FileOptionsResolver extends AbstractOptionsResolver
         }
 
         if (!is_array($configuration)) {
-            throw new InvalidOptionsException(sprintf('Invalid content type in "%s".', $configFile));
+            throw new InvalidOptionsException(sprintf('Invalid content type in "%s".', $filename));
         }
 
         foreach ($configuration as $name => $value) {
             if (null === $value) {
-                throw new InvalidOptionsException(sprintf('Invalid content type in "%s" for option "%s".', $configFile, $name));
+                throw new InvalidOptionsException(sprintf('Invalid content type in "%s" for option "%s".', $filename, $name));
             }
         }
 
-        parent::__construct($input, $configuration);
-    }
-
-    public function factory(): Options
-    {
-        return new OptionsFactory($this->defaults);
+        return $configuration;
     }
 }

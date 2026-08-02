@@ -32,7 +32,7 @@ class OptionsFactory implements Options
         $this->defaults = $defaults;
     }
 
-    public function resolve(): array
+    public function resolve(array $options = []): array
     {
         $resolver = new OptionsResolver();
         $this->configureOptions($resolver);
@@ -43,7 +43,8 @@ class OptionsFactory implements Options
             '9.6.2',
             'The option "%name%" is deprecated and will be removed in the future, use "cache-dir" instead'
         );
-        return $resolver->resolve();
+        $resolver->setIgnoreUndefined();
+        return $resolver->resolve($options);
     }
 
     protected function configureOptions(OptionsResolver $resolver): void
@@ -51,10 +52,11 @@ class OptionsFactory implements Options
         $definitions = [
             OptionDefinition::PATH => ['null', 'string', 'string[]'],
             OptionDefinition::EXCLUDE => ['string[]'],
-            OptionDefinition::EXTENSIONS => ['string[]'],
-            OptionDefinition::JOBS => ['int', 'string'],
+            OptionDefinition::FILE_EXTENSIONS => ['string[]'],
+            OptionDefinition::JOBS => ['null', 'int', 'string'],
             OptionDefinition::CONFIGURATION => 'string',
             OptionDefinition::NO_CONFIGURATION => 'bool',
+            OptionDefinition::CACHE_ADAPTER => ['null', 'string'],
             OptionDefinition::CACHE => ['null', 'string'],
             OptionDefinition::CACHE_DIR => ['null', 'string'],
             OptionDefinition::CACHE_TTL => ['int', 'string'],
@@ -64,17 +66,10 @@ class OptionsFactory implements Options
             OptionDefinition::OUTPUT_FILE => ['null', 'string'],
             OptionDefinition::OUTPUT_FORMAT => ['string', 'string[]'],
             OptionDefinition::WARNING => 'bool',
-            OptionDefinition::OPTION_MEMORY_LIMIT => ['int', 'string'],
+            OptionDefinition::OPTION_MEMORY_LIMIT => ['null', 'int', 'string'],
             OptionDefinition::IGNORE_EXIT_CODE => 'bool',
             OptionDefinition::BOOTSTRAP => ['null', 'string'],
-
-            'ansi' => ['null', 'bool'],
-            'help' => ['null', 'bool'],
-            'no-interaction' => 'bool',
-            'quiet' => ['null', 'bool'],
-            'verbose' => ['null', 'bool'],
-            'version' => ['null', 'bool'],
-            'command' => ['null', 'string'],
+            OptionDefinition::DRY_RUN => 'bool',
         ];
 
         $resolver->setDefined(array_keys($definitions));
@@ -91,6 +86,8 @@ class OptionsFactory implements Options
 
         $resolver->setNormalizer(OptionDefinition::CACHE_TTL, static fn (SymfonyOptions $options, $value) => (int) $value);
 
-        $resolver->setAllowedValues(OptionDefinition::CACHE_TTL, static fn (string $value) => (intval($value) > 0));
+        $resolver->setAllowedValues(OptionDefinition::JOBS, static fn (?string $value) => (intval($value) >= 0));
+
+        $resolver->setAllowedValues(OptionDefinition::CACHE_TTL, static fn (string $value) => (intval($value) >= 0));
     }
 }
