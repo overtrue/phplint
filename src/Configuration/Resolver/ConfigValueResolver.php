@@ -2,10 +2,18 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the overtrue/phplint package
+ *
+ * (c) overtrue
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Overtrue\PHPLint\Configuration\Resolver;
 
 use Overtrue\PHPLint\Configuration\OptionDefinition;
-use Overtrue\PHPLint\Environment\Provider\DotEnv;
 use Overtrue\PHPLint\Environment\XdgConfig;
 use Overtrue\PHPLint\Environment\XdgConfigInterface;
 use Symfony\Component\Console\Attribute\Option;
@@ -13,14 +21,17 @@ use Symfony\Component\Console\Attribute\Reflection\ReflectionMember;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Dotenv\Dotenv as SymfonyDotenv;
 
-use function array_merge;
+use function class_exists;
 use function file_exists;
 use function getcwd;
 use function is_readable;
-use function realpath;
 
 use const DIRECTORY_SEPARATOR;
 
+/**
+ * @author Laurent Laville
+ * @since Release 9.8.0
+ */
 class ConfigValueResolver implements ValueResolverInterface
 {
     public function __construct(
@@ -49,11 +60,11 @@ class ConfigValueResolver implements ValueResolverInterface
             return [];
         }
 
-        $value = $input->hasOption($argumentName) ? $input->getOption($argumentName) : ($this->defaultValues[$argumentName] ?? 'auto');
-
-        if ($input->hasParameterOption('--no-' . $argumentName, true)) {
+        if ($input->hasOption('no-' . $argumentName) && $input->getOption('no-' . $argumentName)) {
             // to keep BC with previous versions 9.7.x
             $value = 'never';
+        } else {
+            $value = $input->hasOption($argumentName) ? $input->getOption($argumentName) : ($this->defaultValues[$argumentName] ?? 'auto');
         }
 
         $configFile = match ($value) {
@@ -62,15 +73,8 @@ class ConfigValueResolver implements ValueResolverInterface
             'never' => $this->neverDiscovery(),
             default => $this->defaultDiscovery($value),
         };
-        $resolved = [$configFile];
 
-        #\var_dump([$argumentName, $member->getName(), $argumentType, $argumentAttributes, $resolved]);
-        /*
-        \var_dump(['XDG env vars' => \array_filter($_SERVER, function ($key) {
-            return \str_starts_with($key, 'XDG_');
-        }, \ARRAY_FILTER_USE_KEY )]);
-        */
-        return $resolved;
+        return [$configFile];
     }
 
     public static function getDefaultConfigFileCandidates(): array
@@ -93,10 +97,28 @@ class ConfigValueResolver implements ValueResolverInterface
 
     private function autoDiscovery(): string
     {
-        if (!\class_exists('\Symfony\Component\Dotenv\Dotenv')) {
-            return '';
+        if (class_exists(SymfonyDotenv::class)) {
+            $xdg = $this->xdgConfig;
+
+            $values = [
+                'XDG_CONFIG_HOME' => $xdg->getHomeConfigDir(),
+                'XDG_CONFIG_DIRS' => $xdg->getConfigDirs(),
+                'XDG_CACHE_HOME' => $xdg->getHomeCacheDir(),
+                'XDG_DATA_HOME' => $xdg->getHomeDataDir(),
+                'XDG_DATA_DIRS' => $xdg->getDataDirs(),
+            ];
+
+            (new SymfonyDotenv())->populate($values);
         }
-        return $this->scanFile();
+
+        $filename = $this->scanFile($this->xdgConfig->getConfigDirs());
+
+        if (empty($filename)) {
+            // last chance (to be compatible with API 9.7.x), try to search into current working directory
+            $filename = $this->scanFile([getcwd()]);
+        }
+
+        return $filename;
     }
 
     private function alwaysDiscovery(string $argumentName): string
@@ -111,27 +133,12 @@ class ConfigValueResolver implements ValueResolverInterface
 
     private function defaultDiscovery(string $filename): string
     {
-        return (!file_exists($filename) || !is_readable($filename)) ? '' : (realpath($filename) ? : '');
+        return (!file_exists($filename) || !is_readable($filename)) ? '' : ($filename ? : '');
     }
 
-    private function scanFile(string $envPrefix = 'PHPLINT'): string
+    private function scanFile(array $directories): string
     {
-        $xdg = $this->xdgConfig;
-
-        $values = [
-            'XDG_CONFIG_HOME' => $xdg->getHomeConfigDir(),
-            'XDG_CONFIG_DIRS' => $xdg->getConfigDirs(),
-            'XDG_CACHE_HOME' => $xdg->getHomeCacheDir(),
-            'XDG_DATA_HOME' => $xdg->getHomeDataDir(),
-            'XDG_DATA_DIRS' => $xdg->getDataDirs(),
-        ];
-
-        $dotenv = new Dotenv($envPrefix . '_ENV', $envPrefix . '_DEBUG');
-        $dotenv->populate($values);
-
-        $dirs = array_merge([getcwd()], $xdg->getConfigDirs());
-
-        foreach ($dirs as $dir) {
+        foreach ($directories as $dir) {
             foreach ($this->configFileCandidates as $fileCandidate) {
                 $filename = $dir . DIRECTORY_SEPARATOR . $fileCandidate;
                 if (file_exists($filename)) {
