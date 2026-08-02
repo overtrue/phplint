@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Console;
 
-use Overtrue\PHPLint\Extension\ExtensionInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -25,7 +24,8 @@ interface ApplicationInterface
 {
     public function getLogger(): LoggerInterface;
 
-    public function getEventDispatcher(): ?EventDispatcherInterface;
+    // API compatibility with Symfony/Console 8.1+
+    public function getDispatcher(): ?EventDispatcherInterface;
 
     /**
      * Returns the long version of the application.
