@@ -26,19 +26,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ConsoleApplicationRunner
 {
     public function __construct(
-        protected Application      $application,
-        protected ?string          $defaultEnv,
-        protected InputInterface   $input,
+        protected Application $application,
+        protected ?string $defaultEnv,
+        protected ?InputInterface $input = null,
         protected ?OutputInterface $output = null,
     ) {
-    }
-
-    public function run(): int
-    {
-        if (null === $this->defaultEnv) {
-            return $this->application->run($this->input, $this->output);
-        }
-
         $definition = $this->application->getDefinition();
 
         if (!$definition->hasOption(OptionDefinition::BOOTSTRAP) && !$definition->hasOption('b') && !$definition->hasShortcut('b')) {
@@ -73,7 +65,7 @@ class ConsoleApplicationRunner
                     OptionDefinition::DEFAULT_CONFIG_FILE,
                 )
             );
-            // @todo Will be removed in major version 10.0
+            // @todo Will be removed in next API version
             // (that will only support "--configuration never" to disable the feature)
             $definition->addOption(
                 new InputOption(
@@ -94,7 +86,15 @@ class ConsoleApplicationRunner
                 $this->defaultEnv,
             ));
         }
+    }
 
+    public function getApplication(): Application
+    {
+        return $this->application;
+    }
+
+    public function run(): int
+    {
         return $this->application->run($this->input, $this->output);
     }
 }
