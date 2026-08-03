@@ -15,10 +15,10 @@ namespace Overtrue\PHPLint\Command;
 
 use BackedEnum;
 use Overtrue\PHPLint\Configuration\Resolver\ArgumentResolverInterface;
+use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
-use Symfony\Component\Console\Attribute\Reflection\ReflectionMember;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

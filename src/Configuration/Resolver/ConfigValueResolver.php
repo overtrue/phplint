@@ -14,10 +14,10 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Configuration\Resolver;
 
 use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Overtrue\PHPLint\Environment\XdgConfig;
 use Overtrue\PHPLint\Environment\XdgConfigInterface;
 use Symfony\Component\Console\Attribute\Option;
-use Symfony\Component\Console\Attribute\Reflection\ReflectionMember;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Dotenv\Dotenv as SymfonyDotenv;
 

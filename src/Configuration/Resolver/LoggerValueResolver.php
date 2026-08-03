@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Configuration\Resolver;
 
+use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Symfony\Component\Console\Attribute\Reflection\ReflectionMember;
 use Symfony\Component\Console\Input\InputInterface;
 
 /**

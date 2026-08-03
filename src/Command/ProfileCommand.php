@@ -15,12 +15,12 @@ namespace Overtrue\PHPLint\Command;
 
 use Overtrue\PHPLint\Configuration\Resolver\LoggerValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
+use Overtrue\PHPLint\Console\Attribute\ValueResolver;
 use Overtrue\PHPLint\Metadata\CacheOutput;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Metadata\ProfilerOutput;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Attribute\ValueResolver;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputInterface;

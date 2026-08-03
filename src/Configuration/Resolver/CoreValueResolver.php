@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Configuration\Resolver;
 
+use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Attribute\Reflection\ReflectionMember;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Cursor;
 use Symfony\Component\Console\Exception\CommandNotFoundException;

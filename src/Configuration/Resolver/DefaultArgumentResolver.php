@@ -15,6 +15,8 @@ namespace Overtrue\PHPLint\Configuration\Resolver;
 
 use InvalidArgumentException;
 use LogicException;
+use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
+use Overtrue\PHPLint\Console\Attribute\ValueResolver;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -27,8 +29,6 @@ use RuntimeException;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\ArgumentResolver\Exception\NearMissValueResolverException;
 use Symfony\Component\Console\ArgumentResolver\Exception\ResolverNotFoundException;
-use Symfony\Component\Console\Attribute\Reflection\ReflectionMember;
-use Symfony\Component\Console\Attribute\ValueResolver;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Cursor;
 use Symfony\Component\Console\Input\InputInterface;

@@ -15,10 +15,10 @@ namespace Overtrue\PHPLint\Configuration\Resolver;
 
 use BackedEnum;
 use Overtrue\PHPLint\Configuration\Exception\InvalidOptionException;
+use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
-use Symfony\Component\Console\Attribute\Reflection\ReflectionMember;
 use Symfony\Component\Console\Input\InputInterface;
 
 use function array_column;

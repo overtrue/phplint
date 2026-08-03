@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Configuration\Resolver;
 
+use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Symfony\Component\Console\Attribute\Option;
-use Symfony\Component\Console\Attribute\Reflection\ReflectionMember;
 use Symfony\Component\Console\Input\InputInterface;
 
 use function ini_get;
