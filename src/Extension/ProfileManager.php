@@ -122,10 +122,6 @@ final class ProfileManager implements
     public function afterExecute(AfterCheckingEvent $event): void
     {
         $this->logger->debug(__METHOD__);
-
-        if ($this->stopwatch?->isStarted(self::LINT_FILES_EVENT)) {
-            $this->stopwatch?->stop(self::LINT_FILES_EVENT);
-        }
     }
 
     public function terminate(ConsoleTerminateEvent $event): void
@@ -147,6 +143,7 @@ final class ProfileManager implements
             // a console error has probably been raised before linting process begun; let a chance see error
             return;
         }
+        $this->stopwatch->stop(self::LINT_FILES_EVENT);
 
         // adds the profiler analysis results
         $this->metadataCollection->add(Metadata::profilerResults($this->stopwatch));
