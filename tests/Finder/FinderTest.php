@@ -87,6 +87,10 @@ final class FinderTest extends TestCase
         $this->assertEqualsCanonicalizing(
             [
                 'Cache/CacheTest.php',
+                'Configuration/Resolver/CoreValueResolverTest.php',
+                'Configuration/Resolver/MetadataValueResolverTest.php',
+                'Configuration/Resolver/PathValueResolverTest.php',
+                'Configuration/Resolver/PluginValueResolverTest.php',
                 'Configuration/ConsoleConfigTest.php',
                 'Configuration/YamlConfigTest.php',
                 'EndToEnd/LintCommandTest.php',
