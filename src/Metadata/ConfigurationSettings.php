@@ -36,4 +36,9 @@ final class ConfigurationSettings extends Metadata
     {
         return $this->settings['configuration'] ?? '';
     }
+
+    public function hasConfigFile(): bool
+    {
+        return !($this->settings['no-configuration'] ?? true);
+    }
 }

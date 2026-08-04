@@ -83,7 +83,7 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
         if (null === $configurationSettings) {
             $configFile = '';
         } else {
-            $configFile = $configurationSettings->getConfigFilePath();
+            $configFile = $configurationSettings->hasConfigFile() ? $configurationSettings->getConfigFilePath() : '';
         }
 
         $this->headerBlock($applicationVersion->getLongVersion(), $configFile);
