@@ -41,4 +41,9 @@ final class ConfigurationSettings extends Metadata
     {
         return !($this->settings['no-configuration'] ?? true);
     }
+
+    public function getMode(): string
+    {
+        return $this->settings['mode'] ?? 'off';
+    }
 }

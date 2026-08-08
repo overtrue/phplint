@@ -139,7 +139,10 @@ final class LintCommand
         /** @var MetadataCollection $metadataCollection */
         $metadataCollection = $application->getMetadata();
         // adds the configuration applied to run source code analysis
-        $metadataCollection->add(Metadata::configurationSettings($configResolver->getOptions()));
+        $envConfig = $application->getEnvConfig();
+        $settings = $configResolver->getOptions();
+        $settings['mode'] = $envConfig->get('mode', 'off');
+        $metadataCollection->add(Metadata::configurationSettings($settings));
 
         $logger = $application->getLogger();
 

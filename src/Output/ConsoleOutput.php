@@ -20,17 +20,22 @@ use Overtrue\PHPLint\Metadata\MetadataCollection;
 use PHP_Parallel_Lint\PhpConsoleColor\ConsoleColor;
 use PHP_Parallel_Lint\PhpConsoleColor\InvalidStyleException;
 use PHP_Parallel_Lint\PhpConsoleHighlighter\Highlighter;
+use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\ConsoleOutput as SymfonyConsoleOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 use function abs;
 use function array_slice;
+use function array_unshift;
 use function class_exists;
 use function count;
 use function end;
 use function file;
 use function file_get_contents;
+use function json_decode;
+use function json_encode;
 use function key;
 use function max;
 use function realpath;
@@ -39,6 +44,7 @@ use function str_pad;
 use function str_repeat;
 use function strlen;
 
+use const JSON_UNESCAPED_SLASHES;
 use const PHP_EOL;
 use const STR_PAD_LEFT;
 
@@ -80,13 +86,22 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
 
         /** @var ConfigurationSettings $configurationSettings */
         $configurationSettings = $metadataCollection->getMetadata(ConfigurationSettings::class);
+        $settings = [];
         if (null === $configurationSettings) {
             $configFile = '';
         } else {
             $configFile = $configurationSettings->hasConfigFile() ? $configurationSettings->getConfigFilePath() : '';
+
+            if ($configurationSettings->getMode() === 'legacy') {
+                $settings = json_decode($configurationSettings->describe('value'), true);
+            }
         }
 
         $this->headerBlock($applicationVersion->getLongVersion(), $configFile);
+
+        if (count($settings) && $this->isVerbose()) {
+            $this->configBlock($settings);
+        }
 
         $errCount = count($results->getErrors());
 
@@ -113,6 +128,45 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
             'Configuration : <info>%s</info>',
             (!realpath($configFile) || empty($configFile)) ? 'No config file loaded' : realpath($configFile)
         ));
+
+        $this->newLine();
+    }
+
+    /**
+     * Used only for legacy environment, for smooth migration from version 9.7 to 9.8
+     * @deprecated Will be removed in next API version
+     *
+     * @param array<string, mixed> $options Contents of current configuration applied
+     */
+    public function configBlock(array $options): void
+    {
+        $headers = ['Name', 'Value'];
+
+        $normalize = fn ($value) => json_encode($value, JSON_UNESCAPED_SLASHES);
+
+        $rows = [];
+
+        foreach ($options as $name => $value) {
+            if ('path' == $name) {
+                $position = count($rows);
+            }
+            $rows[] = [sprintf('<comment>%s</comment>', $name), $normalize($value)];
+        }
+
+        if (isset($position)) {
+            // make the path always visible at top of settings list
+            $pathRow = $rows[$position];
+            unset($rows[$position]);
+            array_unshift($rows, $pathRow, new TableSeparator());
+        }
+
+        $table = new Table($this);
+        $table
+            ->setHeaders($headers)
+            ->setRows($rows)
+            ->setStyle('box')
+            ->render()
+        ;
 
         $this->newLine();
     }
