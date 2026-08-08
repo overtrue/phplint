@@ -19,6 +19,7 @@ use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\AfterLintFileInterface;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingInterface;
+use Overtrue\PHPLint\Event\Events;
 use Overtrue\PHPLint\Helper\DebugFormatterHelper;
 use Overtrue\PHPLint\Helper\ProcessHelper;
 use Overtrue\PHPLint\Helper\ProgressHelper;
@@ -72,9 +73,9 @@ final class ProgressManager implements
     {
         return [
             ConsoleEvents::COMMAND => 'initialize',
-            AfterCheckingEvent::class => 'finish',
-            BeforeCheckingEvent::class => 'beforeChecking',
-            AfterLintFileEvent::class => 'afterLintFile',
+            Events::AFTER_CHECKING => 'finish',
+            Events::BEFORE_CHECKING => 'beforeChecking',
+            Events::AFTER_LINT_FILE => 'afterLintFile',
         ];
     }
 
@@ -98,7 +99,7 @@ final class ProgressManager implements
 
         $progress = ProgressEnum::DOTS->value;
 
-        if (true === $input->hasParameterOption(['--' . OptionDefinition::NO_PROGRESS], true)
+        if (true === $input->getOption(OptionDefinition::NO_PROGRESS)
             || $output->isQuiet()
         ) {
             $progress = ProgressEnum::QUIET->value;
