@@ -17,6 +17,7 @@ use Overtrue\PHPLint\Configuration\Resolver\LoggerValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
 use Overtrue\PHPLint\Console\Attribute\ValueResolver;
 use Overtrue\PHPLint\Metadata\CacheOutput;
+use Overtrue\PHPLint\Metadata\LinterOutput;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Metadata\ProfilerOutput;
 use Psr\Log\LoggerInterface;
@@ -60,6 +61,9 @@ final class ProfileCommand
             $title .= sprintf(' (%s)', get_class($profilerResults));
         }
 
+        /** @var LinterOutput $linterResults */
+        $linterResults = $metadataCollection->getMetadata(LinterOutput::class);
+
         $io->section($title);
 
         $lines = [
@@ -92,6 +96,12 @@ final class ProfileCommand
                 'Total memory',
                 'Amount of memory allocated to PHPLint',
                 $profilerResults->getTotalMemoryUsage(),
+            ],
+            [
+                'process',
+                'Total process',
+                'Process used to scan all source files',
+                $linterResults->getProcessCount(),
             ],
         ];
 
