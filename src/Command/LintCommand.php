@@ -123,7 +123,7 @@ final class LintCommand
         bool $ignoreExitCode = false,
         #[Option(
             description: 'Only shows which files would have been analysed',
-            name: 'dry-run',
+            name: OptionDefinition::DRY_RUN,
         )]
         #[ValueResolver(DryRunValueResolver::class)]
         bool $dryRun = false,
@@ -133,7 +133,7 @@ final class LintCommand
         $command = $application->find('lint');
         $invokableCommand = $command->getCode();
 
-        $parameters = $invokableCommand->getArguments($input, $output);  //\var_dump($parameters);
+        $parameters = $invokableCommand->getArguments($input, $output);
         $configResolver = new FileOptionsResolver($input, $parameters);
 
         /** @var MetadataCollection $metadataCollection */
