@@ -46,6 +46,11 @@ with a lot of improvement, full documentation, and full unit code tested.
 1. [Contributing](docs/contributing.md#contributing)
 1. [Architecture](docs/architecture/README.md#architecture)
 
+## Run it with MegaLinter
+
+`phplint` is also embedded out of the box in [MegaLinter](https://megalinter.io/), an open-source linters aggregator for CI:
+see the [phplint page](https://megalinter.io/latest/descriptors/php_phplint/) to run it there without installing anything.
+
 ## :heart: Sponsor me 
 
 [![Sponsor me](https://github.com/overtrue/overtrue/blob/master/sponsor-me.svg?raw=true)](https://github.com/sponsors/overtrue)
