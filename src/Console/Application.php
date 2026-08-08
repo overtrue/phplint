@@ -18,6 +18,8 @@ use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver\ArgumentResolverInterface;
 use Overtrue\PHPLint\Configuration\Resolver\PluginValueResolver;
 use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
+use Overtrue\PHPLint\Environment\EnvConfig;
+use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
 use Overtrue\PHPLint\Extension\ExtensionInterface;
 use Overtrue\PHPLint\Metadata\ApplicationVersion;
@@ -66,7 +68,7 @@ final class Application extends BaseApplication implements ApplicationInterface,
 
     private MetadataCollection $metadataCollection;
 
-    public function __construct()
+    public function __construct(private EnvConfigInterface $envConfig)
     {
         parent::__construct();
 
@@ -141,6 +143,11 @@ final class Application extends BaseApplication implements ApplicationInterface,
     public function getMetadata(): MetadataCollection
     {
         return $this->metadataCollection;
+    }
+
+    public function getEnvConfig(): EnvConfigInterface
+    {
+        return $this->envConfig;
     }
 
     public function run(?InputInterface $input = null, ?OutputInterface $output = null): int
