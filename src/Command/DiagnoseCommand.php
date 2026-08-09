@@ -19,6 +19,7 @@ use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
 use Overtrue\PHPLint\Console\Attribute\ValueResolver;
 use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Environment\Provider\CI;
+use Overtrue\PHPLint\Environment\Provider\Cpu;
 use Overtrue\PHPLint\Environment\Provider\DotEnv;
 use Overtrue\PHPLint\Environment\Provider\Git;
 use Overtrue\PHPLint\Environment\Provider\Metadata;
@@ -78,7 +79,7 @@ final class DiagnoseCommand
         $user = false;
 
         if ($whenDiagnosed === DiagnoseEnum::ALWAYS->value) {
-            $vcs = $php = $uname = $ci = $dotenv = $metadata = true;
+            $vcs = $php = $uname = $ci = $cpu = $dotenv = $metadata = true;
         } else { //
             if ($whenDiagnosed === DiagnoseEnum::AUTO->value) {
                 $envConfig = new EnvConfig();
@@ -87,7 +88,7 @@ final class DiagnoseCommand
                 $parts = explode(',', $whenDiagnosed);
             }
 
-            $vcs = $php = $uname = $ci = $dotenv = $metadata = false;
+            $vcs = $php = $uname = $ci = $cpu = $dotenv = $metadata = false;
 
             if (!in_array(DiagnoseEnum::NEVER->value, $parts, true)) {
                 foreach ($parts as $part) {
@@ -102,6 +103,9 @@ final class DiagnoseCommand
                     }
                     if ($part == DiagnoseEnum::CI->value) {
                         $ci = true;
+                    }
+                    if ($part == DiagnoseEnum::CPU->value) {
+                        $cpu = true;
                     }
                     if ($part == DiagnoseEnum::DOTENV->value) {
                         $dotenv = true;
@@ -134,6 +138,9 @@ final class DiagnoseCommand
         if ($ci) {
             $environment->addProvider(new CI());
         }
+        if ($cpu) {
+            $environment->addProvider(new Cpu());
+        }
         if ($dotenv) {
             $environment->addProvider(new DotEnv());
         }
@@ -159,6 +166,7 @@ final class DiagnoseCommand
                 Php::class => 'PHP Information',
                 Uname::class => 'OS Information',
                 CI::class => 'CI Information',
+                Cpu::class => 'CPU Information',
                 DotEnv::class => 'Environment Variables Information',
                 Metadata::class => 'Metadata Information',
                 default => sprintf('"%s" Information ', $providerId),

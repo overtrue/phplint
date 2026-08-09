@@ -23,6 +23,7 @@ enum DiagnoseEnum: string
     case AUTO = 'auto';
     case ALWAYS = 'always';
     case CI = 'ci';
+    case CPU = 'cpu';
     case DOTENV = 'dotenv';
     case METADATA = 'metadata';
     case NEVER = 'never';
