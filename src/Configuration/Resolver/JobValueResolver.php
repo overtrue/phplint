@@ -13,9 +13,13 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Configuration\Resolver;
 
+use Fidry\CpuCoreCounter\CpuCoreCounter;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Input\InputInterface;
+
+use function min;
 
 /**
  * @author Laurent Laville
@@ -24,8 +28,17 @@ use Symfony\Component\Console\Input\InputInterface;
 class JobValueResolver implements ValueResolverInterface
 {
     public function __construct(
-        protected int $defaultValue,
+        protected ?int $defaultValue = null,
     ) {
+        if (null === $this->defaultValue) {
+            // Jobs auto-detection when "fidry/cpu-core-counter" package is installed
+            $this->defaultValue = OptionDefinition::DEFAULT_JOBS;
+            // @see https://getcomposer.org/doc/07-runtime.md#installed-versions
+            if (\Composer\InstalledVersions::isInstalled('fidry/cpu-core-counter')) {
+                $cpuDetector = new CpuCoreCounter();
+                $this->defaultValue = $cpuDetector->getAvailableForParallelisation(1)->availableCpus;
+            }
+        }
     }
 
     public function resolve(string $argumentName, InputInterface $input, ReflectionMember $member): iterable
@@ -44,6 +57,8 @@ class JobValueResolver implements ValueResolverInterface
 
         if (empty($value)) {
             $value = $this->defaultValue;
+        } else {
+            $value = min($value, $this->defaultValue);
         }
 
         return [$value];

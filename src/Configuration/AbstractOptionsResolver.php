@@ -17,7 +17,6 @@ use Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 
-use function array_filter;
 use function array_key_exists;
 use function in_array;
 use function ini_get;
@@ -104,9 +103,7 @@ abstract class AbstractOptionsResolver implements Resolver
     public function getOptions(): array
     {
         $optionsFactory = $this->factory();
-        return $this->options = $optionsFactory->resolve(
-            array_filter($this->input->getArguments() + $this->input->getOptions())
-        );
+        return $this->options = $optionsFactory->resolve();
     }
 
     public function getOption(string $name): mixed

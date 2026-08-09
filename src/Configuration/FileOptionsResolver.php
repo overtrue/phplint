@@ -18,6 +18,7 @@ use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
+use function array_merge;
 use function is_array;
 use function sprintf;
 
@@ -46,7 +47,10 @@ final class FileOptionsResolver extends AbstractOptionsResolver
         }
 
         if (!empty($configFile)) {
-            $configuration = $this->parseYamlConfiguration($configFile);
+            $configuration = array_merge(
+                $this->parseYamlConfiguration($configFile),
+                $configuration
+            );
             $configuration[OptionDefinition::CONFIGURATION] = $configFile;
         }
 

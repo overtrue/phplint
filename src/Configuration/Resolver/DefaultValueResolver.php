@@ -56,7 +56,7 @@ class DefaultValueResolver implements ContainerInterface
                     'fileExtensions' => OptionDefinition::DEFAULT_EXTENSIONS,
                 ]
             ),
-            JobValueResolver::class => fn() => new JobValueResolver(OptionDefinition::DEFAULT_JOBS),
+            JobValueResolver::class => fn() => new JobValueResolver(),
             ShowWarningsValueResolver::class => fn() => new ShowWarningsValueResolver(),
             MemoryLimitValueResolver::class => fn() => new MemoryLimitValueResolver(),
             IgnoreExitCodeValueResolver::class => fn() => new IgnoreExitCodeValueResolver(),

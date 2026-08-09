@@ -81,13 +81,6 @@ final class Linter implements LoggerAwareInterface, \Countable
         ];
 
         $this->processLimit = $configResolver->getOption(OptionDefinition::JOBS);
-        /**
-         * Since php 8.3 the `php -l` commandline supports passing multiple file paths at once.
-         * @link https://github.com/overtrue/phplint/issues/197
-         */
-        if (version_compare(phpversion(), '8.3', 'lt')) {
-            $this->processLimit = 1;
-        }
 
         $this->finalResults = Metadata::linterResults($this->results, new Finder());
     }
@@ -185,7 +178,12 @@ final class Linter implements LoggerAwareInterface, \Countable
         }
         unset($iterator);
 
-        $chunks = array_chunk($this->results['misses'], $this->processLimit);
+        /**
+         * Since php 8.3 the `php -l` commandline supports passing multiple file paths at once.
+         * @link https://github.com/overtrue/phplint/issues/197
+         */
+        $chunkSize = version_compare(phpversion(), '8.3', 'lt') ? 1 : $this->processLimit;
+        $chunks = array_chunk($this->results['misses'], $chunkSize);
 
         $this->results['process_count'] = count($chunks);
 
@@ -216,7 +214,7 @@ final class Linter implements LoggerAwareInterface, \Countable
             ;
             $lintProcess->begin();
 
-            // enqueue lint process as much as authorized by --jobs option (number of paralleled jobs to run)
+            // enqueue lint process as much as authorized by --jobs option (number of paralleled jobs to run) and/or CPU available
             ++$processCount;
             $processRunning[$processCount] = $lintProcess;
 
