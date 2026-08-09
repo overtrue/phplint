@@ -43,7 +43,11 @@ use function explode;
 use function get_debug_type;
 use function in_array;
 use function is_iterable;
+use function json_decode;
+use function json_encode;
 use function sprintf;
+use const JSON_PRETTY_PRINT;
+use const JSON_UNESCAPED_SLASHES;
 
 /**
  * @author Laurent Laville
@@ -187,9 +191,13 @@ final class DiagnoseCommand
                     continue;
                 }
                 $info = $providerData->describe();
+                $value = $output->isVerbose()
+                    ? json_encode(json_decode($info['value']), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+                    : $info['value']
+                ;
                 $io->writeln($formatter->formatSection(
                     $info['setting'],
-                    sprintf('<comment>%s</comment> %s', $info['description'], $info['value'])
+                    sprintf('<comment>%s</comment> %s', $info['description'], $value),
                 ));
             }
 
