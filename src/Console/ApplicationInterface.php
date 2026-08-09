@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Console;
 
+use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -26,6 +27,11 @@ interface ApplicationInterface
 
     // API compatibility with Symfony/Console 8.1+
     public function getDispatcher(): ?EventDispatcherInterface;
+
+    /**
+     * Each command may retrieve environment variables easily
+     */
+    public function getEnvConfig(): EnvConfigInterface;
 
     /**
      * Returns the long version of the application.
