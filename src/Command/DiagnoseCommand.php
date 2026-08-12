@@ -47,6 +47,9 @@ use function is_iterable;
 use function json_decode;
 use function json_encode;
 use function sprintf;
+use function str_starts_with;
+use function substr;
+
 use const JSON_PRETTY_PRINT;
 use const JSON_UNESCAPED_SLASHES;
 
@@ -66,11 +69,7 @@ final class DiagnoseCommand
         #[ValueResolver(MetadataValueResolver::class)]
         MetadataCollection $metadataCollection,
     ): int {
-        $whenDiagnosed = $input->getParameterOption(
-            '--' . OptionDefinition::DIAGNOSTIC,
-            DiagnoseEnum::AUTO->value,
-            true
-        );
+        $whenDiagnosed = $input->getOption(OptionDefinition::DIAGNOSTIC) ?? DiagnoseEnum::NEVER->value;
 
         if (($whenDiagnosed === DiagnoseEnum::NEVER->value) || $output->isQuiet()) {
             return Command::SUCCESS;
@@ -83,9 +82,19 @@ final class DiagnoseCommand
         } else { //
             if ($whenDiagnosed === DiagnoseEnum::AUTO->value) {
                 $envConfig = new EnvConfig();
-                $parts = explode(',', $envConfig->get('diagnostic', 'metadata'));
+                $what = explode(',', $envConfig->get('diagnostic', 'metadata:current_configuration'));
             } else {
-                $parts = explode(',', $whenDiagnosed);
+                $what = explode(',', $whenDiagnosed);
+            }
+            $parts = [];
+            $filters = [];
+            foreach ($what as $pos => $part) {
+                if (str_starts_with($part, 'metadata:')) {
+                    $filters[] = substr($part, 9);
+                    $parts[] = 'metadata';
+                } else {
+                    $parts[] = $part;
+                }
             }
 
             $vcs = $php = $uname = $ci = $cpu = $dotenv = $metadata = false;
@@ -145,7 +154,7 @@ final class DiagnoseCommand
             $environment->addProvider(new DotEnv());
         }
         if ($metadata) {
-            $environment->addProvider(new Metadata($metadataCollection));
+            $environment->addProvider(new Metadata($metadataCollection, $filters));
         }
         if ($user) {
             $environment->addProvider($user);

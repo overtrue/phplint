@@ -17,14 +17,28 @@ use Overtrue\PHPLint\Environment\ProviderData;
 use Overtrue\PHPLint\Environment\ProviderInterface;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 
+use function in_array;
+
 /**
  * @author Laurent Laville
  * @since Release 9.8.0
  */
 readonly class Metadata implements ProviderInterface
 {
-    public function __construct(private MetadataCollection $metadataCollection)
+    private MetadataCollection $metadataCollection;
+
+    public function __construct(MetadataCollection $metadataCollection, array $filters = [])
     {
+        if (empty($filters)) {
+            $this->metadataCollection = $metadataCollection;
+        } else {
+            $this->metadataCollection = new MetadataCollection();
+            foreach ($metadataCollection as $metadata) {
+                if (in_array($metadata->describe()->name, $filters, true)) {
+                    $this->metadataCollection->add($metadata);
+                }
+            }
+        }
     }
 
     public function describe(): ?array
@@ -33,6 +47,7 @@ readonly class Metadata implements ProviderInterface
 
         foreach ($this->metadataCollection as $metadata) {
             $dto = $metadata->describe();
+
             $data[] = new ProviderData($dto->name, $dto->value, $dto->description);
         }
 

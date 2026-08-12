@@ -55,9 +55,9 @@ final class DiagnoseManager implements
             new InputOption(
                 OptionDefinition::DIAGNOSTIC,
                 null,
-                InputOption::VALUE_REQUIRED,
+                InputOption::VALUE_OPTIONAL,
                 'Control the use of providers to diagnose the system',
-                'never'
+                DiagnoseEnum::NEVER->value
             )
         ]);
     }
@@ -76,11 +76,7 @@ final class DiagnoseManager implements
 
         $input = $event->getInput();
 
-        $this->whenDiagnosed = $input->getParameterOption(
-            '--' . OptionDefinition::DIAGNOSTIC,
-            DiagnoseEnum::AUTO->value,
-            true
-        );
+        $this->whenDiagnosed = $input->getOption(OptionDefinition::DIAGNOSTIC) ?? DiagnoseEnum::NEVER->value;
 
         if ($this->whenDiagnosed === DiagnoseEnum::NEVER->value) {
             return;

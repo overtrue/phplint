@@ -19,6 +19,7 @@ use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
 use function array_merge;
+use function array_replace_recursive;
 use function is_array;
 use function sprintf;
 
@@ -47,10 +48,8 @@ final class FileOptionsResolver extends AbstractOptionsResolver
         }
 
         if (!empty($configFile)) {
-            $configuration = array_merge(
-                $this->parseYamlConfiguration($configFile),
-                $configuration
-            );
+            $yamlConf = $this->parseYamlConfiguration($configFile);
+            $configuration = array_replace_recursive($yamlConf, $configuration);
             $configuration[OptionDefinition::CONFIGURATION] = $configFile;
         }
 
