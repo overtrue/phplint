@@ -15,13 +15,13 @@ namespace Overtrue\PHPLint\Tests\Configuration\Resolver;
 
 use Overtrue\PHPLint\Configuration\Resolver\CoreValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\ValueResolverInterface;
+use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Overtrue\PHPLint\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Attribute\Reflection\ReflectionMember;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\NullOutput;
@@ -77,7 +77,7 @@ final class CoreValueResolverTest extends TestCase
 
         $resolved = $this->resolver->resolve('input', $this->input, $member);
 
-        $this->assertArraysHaveEqualValues(
+        $this->assertSame(
             $expected,
             iterator_to_array($resolved),
             '',
@@ -92,7 +92,7 @@ final class CoreValueResolverTest extends TestCase
 
         $resolved = $this->resolver->resolve('output', $this->input, $member);
 
-        $this->assertArraysHaveEqualValues(
+        $this->assertSame(
             $expected,
             iterator_to_array($resolved),
             '',
@@ -107,7 +107,7 @@ final class CoreValueResolverTest extends TestCase
 
         $resolved = $this->resolver->resolve('application', $this->input, $member);
 
-        $this->assertArraysHaveEqualValues(
+        $this->assertSame(
             $expected,
             iterator_to_array($resolved),
             '',

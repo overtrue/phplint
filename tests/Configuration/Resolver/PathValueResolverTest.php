@@ -15,6 +15,7 @@ namespace Overtrue\PHPLint\Tests\Configuration\Resolver;
 
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver\PathValueResolver;
+use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Overtrue\PHPLint\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use ReflectionException;
@@ -22,7 +23,6 @@ use ReflectionMethod;
 use ReflectionParameter;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\Option;
-use Symfony\Component\Console\Attribute\Reflection\ReflectionMember;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -89,7 +89,7 @@ final class PathValueResolverTest extends TestCase
 
         $resolved = $resolver->resolve('sourcePath', $input, $member);
 
-        $this->assertArraysHaveEqualValues(
+        $this->assertSame(
             $expected,
             iterator_to_array($resolved),
             ''
@@ -123,7 +123,7 @@ final class PathValueResolverTest extends TestCase
 
         $resolved = $resolver->resolve('exclude', $input, $member);
 
-        $this->assertArraysHaveEqualValues(
+        $this->assertSame(
             $expected,
             iterator_to_array($resolved),
             ''

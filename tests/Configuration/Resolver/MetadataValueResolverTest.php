@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Tests\Configuration\Resolver;
 
 use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
+use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Tests\TestCase;
@@ -21,7 +22,6 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
-use Symfony\Component\Console\Attribute\Reflection\ReflectionMember;
 use Symfony\Component\Console\Input\ArrayInput;
 
 use function iterator_to_array;
@@ -66,7 +66,7 @@ final class MetadataValueResolverTest extends TestCase
 
         $resolved = $resolver->resolve('metadataCollection', $input, $member);
 
-        $this->assertArraysHaveEqualValues(
+        $this->assertSame(
             $expected,
             iterator_to_array($resolved),
             ''
@@ -87,7 +87,7 @@ final class MetadataValueResolverTest extends TestCase
 
         $resolved = $resolver->resolve('metadataCollection', $input, $member);
 
-        $this->assertArraysHaveEqualValues(
+        $this->assertSame(
             $expected,
             iterator_to_array($resolved),
             ''

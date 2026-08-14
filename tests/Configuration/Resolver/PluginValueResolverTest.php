@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Tests\Configuration\Resolver;
 
 use Overtrue\PHPLint\Configuration\Resolver\PluginValueResolver;
+use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
 use Overtrue\PHPLint\Extension\ExtensionEnumInterface;
 use Overtrue\PHPLint\Extension\ExtensionInterface;
@@ -23,7 +24,6 @@ use ReflectionEnum;
 use ReflectionException;
 use ReflectionMethod;
 use Symfony\Component\Console\Attribute\Option;
-use Symfony\Component\Console\Attribute\Reflection\ReflectionMember;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -91,7 +91,7 @@ final class PluginValueResolverTest extends TestCase
         $resolver = new PluginValueResolver();
         $resolved = $resolver->resolve('extensions', $input, $member);
 
-        $this->assertArraysHaveEqualValues(
+        $this->assertSame(
             $expected,
             iterator_to_array($resolved),
             '',
@@ -146,7 +146,7 @@ final class PluginValueResolverTest extends TestCase
         $resolver = new PluginValueResolver(null, ExtensionTestAllowed::class);
         $resolved = $resolver->resolve('extensions', $input, $member);
 
-        $this->assertArraysHaveEqualValues(
+        $this->assertSame(
             $expected,
             iterator_to_array($resolved),
             '',
