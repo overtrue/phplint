@@ -18,6 +18,7 @@ use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Input\InputInterface;
 
+use function array_filter;
 use function array_map;
 use function in_array;
 
@@ -66,7 +67,6 @@ class PathValueResolver implements ValueResolverInterface
         }
 
         $realpaths = array_map('realpath', $values);
-
-        return [$realpaths];
+        return [array_filter($realpaths)];
     }
 }
