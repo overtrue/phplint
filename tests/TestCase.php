@@ -19,9 +19,12 @@ use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\Resolver\CoreValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\DefaultArgumentResolver;
 use Overtrue\PHPLint\Configuration\Resolver\DefaultValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\JobValueResolver;
 use Overtrue\PHPLint\Console\Application;
+use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Extension\OutputManager;
 use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
+use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -36,15 +39,21 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
 
     protected function setUp(): void
     {
-        $application = new Application();
+        $application = new Application(new EnvConfig());
 
-        $argumentResolver = new DefaultArgumentResolver(
-            [],
-            new DefaultValueResolver(
-                new NullLogger(),
-                new CoreValueResolver($application, new BufferedOutput())
-            )
-        );
+        $valueResolver = new class(
+            new NullLogger(),
+            new CoreValueResolver($application, new BufferedOutput())
+        ) extends DefaultValueResolver {
+            public function __construct(LoggerInterface $logger, CoreValueResolver $coreValueResolver)
+            {
+                parent::__construct($logger, $coreValueResolver);
+                // to avoid auto CPU detection
+                $this->valueResolvers[JobValueResolver::class] = new JobValueResolver(10);
+            }
+        };
+
+        $argumentResolver = new DefaultArgumentResolver([], $valueResolver);
 
         $application->setArgResolver($argumentResolver);
         $application->addCommand(new LintCommand());
@@ -70,10 +79,9 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         $extensionDefinition = $outputManager->getDefinition();
         $definition = $command->getDefinition();
         $definition->addOptions($extensionDefinition->getOptions());
-        $command->setDefinition($definition);
 
         $input = new ArrayInput($arguments);
-        $input->bind($command->getDefinition());
+        $input->bind($definition);
 
         $output = new BufferedOutput();
 
