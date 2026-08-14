@@ -37,7 +37,11 @@ class MemoryLimitValueResolver implements ValueResolverInterface
         // retrieve the argument name defined by the #[Option(name:)] attribute, or fallback to PHP variable name
         $argumentName = $argumentAttributes?->name ? : $argumentName;
 
-        $value = $input->hasOption($argumentName) ? $input->getOption($argumentName) : (int) ini_get('memory_limit');
+        $value = $input->hasOption($argumentName) ? $input->getOption($argumentName) : null;
+
+        if (null === $value) {
+            $value = (int) ini_get('memory_limit');
+        }
 
         return [$value];
     }
