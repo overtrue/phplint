@@ -74,8 +74,9 @@ class PathValueResolver implements ValueResolverInterface
             if (str_starts_with($value, '.') || str_starts_with($value, '/')) {
                 // try to get the realpath only for relative or absolute path names
                 $paths[] = realpath($value);
+            } else {
+                $paths[] = $value;
             }
-            $paths[] = $value;
         }
 
         return [array_unique(array_filter($paths))];
