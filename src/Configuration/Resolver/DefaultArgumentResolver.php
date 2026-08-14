@@ -15,6 +15,8 @@ namespace Overtrue\PHPLint\Configuration\Resolver;
 
 use InvalidArgumentException;
 use LogicException;
+use Overtrue\PHPLint\Configuration\Exception\NearMissValueResolverException;
+use Overtrue\PHPLint\Configuration\Exception\ResolverNotFoundException;
 use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Overtrue\PHPLint\Console\Attribute\ValueResolver;
 use Psr\Container\ContainerInterface;
@@ -27,15 +29,13 @@ use ReflectionFunctionAbstract;
 use ReflectionNamedType;
 use RuntimeException;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\ArgumentResolver\Exception\NearMissValueResolverException;
-use Symfony\Component\Console\ArgumentResolver\Exception\ResolverNotFoundException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Cursor;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\RawInputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+use function class_exists;
 use function get_debug_type;
 use function implode;
 use function in_array;
@@ -78,15 +78,22 @@ final class DefaultArgumentResolver implements ArgumentResolverInterface, Logger
 
             $resolverName = null;
 
-            if ($typeName && in_array($typeName, [
-                    InputInterface::class,
-                    RawInputInterface::class,
-                    OutputInterface::class,
-                    SymfonyStyle::class,
-                    Cursor::class,
-                    Application::class,
-                    Command::class,
-                ], true)) {
+            $coreClasses = [
+                InputInterface::class,
+                OutputInterface::class,
+                SymfonyStyle::class,
+                Cursor::class,
+                Application::class,
+                Command::class,
+            ];
+
+            // introduced with Symfony/Console 8.1
+            $rawInputContract = '\\Symfony\\Component\\Console\\Input\\RawInputInterface';
+            if (class_exists($rawInputContract)) {
+                $coreClasses[] = $rawInputContract;
+            }
+
+            if ($typeName && in_array($typeName, $coreClasses, true)) {
                 $resolverName = CoreValueResolver::class;
             }
 
