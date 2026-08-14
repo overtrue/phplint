@@ -98,11 +98,11 @@ final class PathValueResolverTest extends TestCase
 
     public function testPathOption(): void
     {
-        $excludes = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'vendor';
+        $excludes = ['vendor'];
 
-        $expected = [[$excludes]];
+        $expected = [$excludes];
 
-        $arguments = ['--exclude' => ['vendor']];
+        $arguments = ['--exclude' => $excludes];
 
         $input = new ArrayInput(
             $arguments,
