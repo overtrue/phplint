@@ -13,32 +13,26 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Tests\Configuration;
 
-use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
+use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
 use Overtrue\PHPLint\Extension\OutputManager;
 use Overtrue\PHPLint\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Symfony\Component\Console\Input\ArrayInput;
 
 use function dirname;
-use function realpath;
 
-#[CoversClass(ConsoleOptionsResolver::class)]
+#[CoversClass(FileOptionsResolver::class)]
 final class ConsoleConfigTest extends TestCase
 {
     public function testConfigFileNotReadable(): void
     {
-        $command = $this->application->find('lint');
+        $arguments = ['--configuration' => 'does-not-exists.yaml'];
 
-        $definition = $command->getDefinition();
+        $resolver = $this->getOptionsResolver($arguments);
 
-        $input = new ArrayInput(['--configuration' => 'does-not-exists.yaml'], $definition);
-
-        $resolver = new ConsoleOptionsResolver($input);
-
-        $this->assertFalse(realpath($resolver->getOption(OptionDefinition::CONFIGURATION)));
+        $this->assertEmpty($resolver->getOption(OptionDefinition::CONFIGURATION));
     }
 
     #[DataProvider('commandInputProvider')]
@@ -54,9 +48,9 @@ final class ConsoleConfigTest extends TestCase
         $definition->addOptions($extensionDefinition->getOptions());
         $command->setDefinition($definition);
 
-        $input = new ArrayInput($arguments, $definition);
+        $arguments['--no-configuration'] = true;
 
-        $resolver = new ConsoleOptionsResolver($input);
+        $resolver = $this->getOptionsResolver($arguments);
 
         $this->assertSame($fetchExpected($resolver, $arguments), $resolver->getOptions());
     }
@@ -69,10 +63,10 @@ final class ConsoleConfigTest extends TestCase
             'multiple path modified' => [['path' => [dirname(__DIR__) . '/Cache', __DIR__]], __CLASS__ . '::expectedPathModified'],
             'without external configuration' => [['--no-configuration' => true], __CLASS__ . '::expectedExternalConfigNotFetched'],
             'with external empty configuration' => [['--configuration' => 'tests/Configuration/empty.yaml'], __CLASS__ . '::expectedExternalEmptyConfig'],
-            'output to JSON format on Stdout' => [['--format' => 'json'], __CLASS__ . '::expectedJsonOutputFormat'],
-            'output to JSON format on File' => [['--format' => 'json', '--output' => '/tmp/phplint.json'], __CLASS__ . '::expectedJsonOutputFormat'],
-            'output to XML format on Stdout' => [['--format' => 'junit'], __CLASS__ . '::expectedXmlOutputFormat'],
-            'output to XML format on File' => [['--format' => 'junit', '--output' => '/tmp/phplint.xml'], __CLASS__ . '::expectedXmlOutputFormat'],
+            'output to JSON format on Stdout' => [['--output-format' => 'json'], __CLASS__ . '::expectedJsonOutputFormat'],
+            'output to JSON format on File' => [['--output-format' => 'json', '--output-file' => '/tmp/phplint.json'], __CLASS__ . '::expectedJsonOutputFormat'],
+            'output to XML format on Stdout' => [['--output-format' => 'junit'], __CLASS__ . '::expectedXmlOutputFormat'],
+            'output to XML format on File' => [['--output-format' => 'junit', '--output-file' => '/tmp/phplint.xml'], __CLASS__ . '::expectedXmlOutputFormat'],
         ];
     }
 
