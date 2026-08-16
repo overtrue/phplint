@@ -48,7 +48,13 @@ readonly class CoreValueResolver implements ValueResolverInterface
         }
 
         if ($argumentType === SymfonyStyle::class) {
-            return [new SymfonyStyle($input, $this->output, $this->application->getDispatcher())];
+            return [new SymfonyStyle(
+                $input,
+                $this->output,
+                // optional argument introduced with Symfony Console 8.1
+                // on commit https://github.com/symfony/console/commit/2b468472ec5d0e4acbe00f97e62f6cd552509894
+                $this->application->getDispatcher())
+            ];
         }
 
         if ($argumentType === Cursor::class) {
