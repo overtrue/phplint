@@ -27,6 +27,7 @@ use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -104,7 +105,7 @@ class ConsoleApplicationRunner
         $this->application->setMetadata($metadataCollection);
 
         $dynamicValueResolvers = [
-            CoreValueResolver::class => fn() => new CoreValueResolver($this->application, $this->output),
+            CoreValueResolver::class => fn() => new CoreValueResolver($this->application, $this->output ?? new NullOutput()),
             MetadataValueResolver::class => fn() => new MetadataValueResolver($this->application)
         ];
 

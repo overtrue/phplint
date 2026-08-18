@@ -83,20 +83,26 @@ final class OutputManager implements
 
     public function initialize(ConsoleCommandEvent $event): void
     {
+        $this->logger->debug(__METHOD__);
+
         $command = $event->getCommand();
         if ($command->getName() !== 'lint') {
             // this extension must be only available for lint command
             return;
         }
 
-        $this->logger->debug(__METHOD__);
+        $input = $event->getInput();
 
-        $this->metadataCollection = $command->getApplication()->getMetadata();
+        $invokableCommand = $command->getCode();
+        $parameters = $invokableCommand->getArguments($input);
+        $configResolver = new FileOptionsResolver($input, $parameters);
 
-        $this->handlers = (new FormatResolver())->resolve(
-            new FileOptionsResolver($event->getInput()),
-            $event->getOutput(),
-        );
+        $application = $command->getApplication();
+
+        $this->metadataCollection = $application->getMetadata($configResolver);
+        $this->metadataCollection->describe($this->logger);
+
+        $this->handlers = (new FormatResolver())->resolve($configResolver, $event->getOutput());
     }
 
     public function terminate(ConsoleTerminateEvent $event): void
@@ -104,6 +110,7 @@ final class OutputManager implements
         $this->logger->debug(__METHOD__);
 
         $metadataCollection = $this->metadataCollection ?? new MetadataCollection();
+        $metadataCollection->describe($this->logger);
 
         /** @var \Overtrue\PHPLint\Metadata\LinterOutput $results */
         $finalResults = $metadataCollection->getMetadata(\Overtrue\PHPLint\Metadata\LinterOutput::class);

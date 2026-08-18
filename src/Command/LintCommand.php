@@ -20,7 +20,10 @@ use Overtrue\PHPLint\Configuration\Resolver\DryRunValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\FileExtensionValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\IgnoreExitCodeValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\JobValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\LoggerValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\MemoryLimitValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\OutputFileResolver;
+use Overtrue\PHPLint\Configuration\Resolver\OutputFormatResolver;
 use Overtrue\PHPLint\Configuration\Resolver\PathValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\PluginValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\ShowWarningsValueResolver;
@@ -29,9 +32,9 @@ use Overtrue\PHPLint\Extension\CacheManager;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
-use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Output\LinterOutput;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -75,6 +78,8 @@ final class LintCommand
         InputInterface $input,
         OutputInterface $output,
         Application $application,
+        #[ValueResolver(LoggerValueResolver::class)]
+        LoggerInterface $logger,
         #[ValueResolver(ConfigValueResolver::class)]
         string $configuration = OptionDefinition::DEFAULT_CONFIG_FILE, // global option
         #[Argument(
@@ -127,24 +132,25 @@ final class LintCommand
         )]
         #[ValueResolver(DryRunValueResolver::class)]
         bool $dryRun = false,
+        #[Option(name: OptionDefinition::OUTPUT_FORMAT)]  // option dynamically added by the "output_manager" extension
+        #[ValueResolver(OutputFormatResolver::class)]
+        ?array $outputFormat = null,
+        #[Option(name: OptionDefinition::OUTPUT_FILE)]  // option dynamically added by the "output_manager" extension
+        #[ValueResolver(OutputFileResolver::class)]
+        ?string $outputFile = null,
         #[ValueResolver(PluginValueResolver::class)]
         ExtensionEnum ...$extensions, // global option
     ): int {
+        $logger->debug(__METHOD__);
+
         $command = $application->find('lint');
         $invokableCommand = $command->getCode();
-
-        $parameters = $invokableCommand->getArguments($input, $output);
+        $parameters = $invokableCommand->getArguments($input);
         $configResolver = new FileOptionsResolver($input, $parameters);
 
         /** @var MetadataCollection $metadataCollection */
-        $metadataCollection = $application->getMetadata();
-        // adds the configuration applied to run source code analysis
-        $envConfig = $application->getEnvConfig();
-        $settings = $configResolver->getOptions();
-        $settings['mode'] = $envConfig->get('mode', 'off');
-        $metadataCollection->add(Metadata::configurationSettings($settings));
-
-        $logger = $application->getLogger();
+        $metadataCollection = $application->getMetadata($configResolver);
+        $metadataCollection->describe($logger);
 
         /** @var CacheManager $cacheManager */
         $cacheManager = ExtensionEnum::factory(ExtensionEnum::CACHE_MANAGER->value);

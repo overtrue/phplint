@@ -16,7 +16,6 @@ namespace Overtrue\PHPLint\Tests\Configuration;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
-use Overtrue\PHPLint\Extension\OutputManager;
 use Overtrue\PHPLint\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -38,16 +37,6 @@ final class ConsoleConfigTest extends TestCase
     #[DataProvider('commandInputProvider')]
     public function testCommandConfig(array $arguments, callable $fetchExpected): void
     {
-        $command = $this->application->find('lint');
-
-        // add this extension for --format and --output additional options
-        $outputManager = new OutputManager();
-
-        $extensionDefinition = $outputManager->getDefinition();
-        $definition = $command->getDefinition();
-        $definition->addOptions($extensionDefinition->getOptions());
-        $command->setDefinition($definition);
-
         $arguments['--no-configuration'] = true;
 
         $resolver = $this->getOptionsResolver($arguments);

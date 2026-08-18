@@ -18,8 +18,8 @@ use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
-use function array_merge;
-use function array_replace_recursive;
+use function array_filter;
+use function array_replace;
 use function is_array;
 use function sprintf;
 
@@ -49,10 +49,9 @@ final class FileOptionsResolver extends AbstractOptionsResolver
 
         if (!empty($configFile)) {
             $yamlConf = $this->parseYamlConfiguration($configFile);
-            $configuration = array_replace_recursive($yamlConf, $configuration);
+            $configuration = array_replace(array_filter($yamlConf), array_filter($configuration));
             $configuration[OptionDefinition::CONFIGURATION] = $configFile;
         }
-
         parent::__construct($input, $configuration);
     }
 
@@ -79,12 +78,8 @@ final class FileOptionsResolver extends AbstractOptionsResolver
             throw new InvalidOptionsException(sprintf('Invalid content type in "%s".', $filename));
         }
 
-        foreach ($configuration as $name => $value) {
-            if (null === $value) {
-                throw new InvalidOptionsException(sprintf('Invalid content type in "%s" for option "%s".', $filename, $name));
-            }
-        }
-
-        return $configuration;
+        // Checks that YAML config file contents adhere to configuration syntax
+        $factory = new OptionsFactory([]);
+        return $factory->resolve($configuration);
     }
 }

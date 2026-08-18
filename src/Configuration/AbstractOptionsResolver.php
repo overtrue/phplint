@@ -20,6 +20,7 @@ use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use function array_key_exists;
 use function in_array;
 use function ini_get;
+use function realpath;
 use function sprintf;
 
 /**
@@ -38,8 +39,8 @@ abstract class AbstractOptionsResolver implements Resolver
         $options = $configuration;
 
         $optionDefaults = [
-            OptionDefinition::PATH => OptionDefinition::DEFAULT_PATH,
-            OptionDefinition::CONFIGURATION => OptionDefinition::DEFAULT_CONFIG_FILE,
+            OptionDefinition::PATH => realpath(OptionDefinition::DEFAULT_PATH),
+            OptionDefinition::CONFIGURATION => realpath(OptionDefinition::DEFAULT_CONFIG_FILE),
             OptionDefinition::NO_CONFIGURATION => false,
             OptionDefinition::EXCLUDE => OptionDefinition::DEFAULT_EXCLUDES,
             OptionDefinition::FILE_EXTENSIONS => OptionDefinition::DEFAULT_EXTENSIONS,

@@ -76,11 +76,15 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         $command = $application->find('lint');
         $command->mergeApplicationDefinition();
 
-        // add this extension for --output-format and --output-file additional options
+        // add this extension (when necessary) for --output-format and --output-file additional options
         $outputManager = new OutputManager();
         $extensionDefinition = $outputManager->getDefinition();
         $definition = $command->getDefinition();
-        $definition->addOptions($extensionDefinition->getOptions());
+        foreach ($extensionDefinition->getOptions() as $option) {
+            if (!$definition->hasOption($option->getName())) {
+                $definition->addOption($option);
+            }
+        }
 
         $input = new ArrayInput($arguments);
         $input->bind($definition);
