@@ -16,6 +16,7 @@ namespace Overtrue\PHPLint\Metadata;
 use ArrayIterator;
 use Countable;
 use IteratorAggregate;
+use Psr\Log\LoggerInterface;
 use Traversable;
 
 use function count;
@@ -58,5 +59,32 @@ final class MetadataCollection implements Countable, IteratorAggregate
     {
         $iterator = $this->getIterator();
         return $iterator->offsetExists($id) ? $iterator->offsetGet($id) : null;
+    }
+
+    public function hasMetadata(string $id): bool
+    {
+        $iterator = $this->getIterator();
+        return $iterator->offsetExists($id);
+    }
+
+    public function describe(
+        LoggerInterface $logger,
+        string $messagePattern = 'Metadata "{metadataClass}" values are {metadataValues}'
+    ): array {
+        $values = [];
+
+        foreach ($this as $metadataClass => $metadata) {
+            $metadataValues = $metadata->describe('value');
+            $logger->debug(
+                $messagePattern,
+                [
+                    'metadataClass' => $metadataClass,
+                    'metadataValues' => $metadataValues,
+                ]
+            );
+            $values[$metadataClass] = $metadataValues;
+        }
+
+        return $values;
     }
 }
