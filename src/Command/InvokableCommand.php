@@ -66,7 +66,7 @@ final class InvokableCommand extends \Symfony\Component\Console\Command\Invokabl
 
     public function __invoke(InputInterface $input, OutputInterface $output): int
     {
-        $statusCode = $this->invokable->invoke(...$this->getParameters($this->invokable, $input, $output));
+        $statusCode = $this->invokable->invoke(...$this->getParameters($this->invokable, $input));
 
         if (!\is_int($statusCode)) {
             throw new \TypeError(\sprintf('The command "%s" must return an integer value in the "%s" method, but "%s" was returned.', $this->command->getName(), $this->invokable->getName(), get_debug_type($statusCode)));
@@ -85,9 +85,9 @@ final class InvokableCommand extends \Symfony\Component\Console\Command\Invokabl
         return $this->description;
     }
 
-    public function getArguments(InputInterface $input, OutputInterface $output): array
+    public function getArguments(InputInterface $input): array
     {
-        $parameters = $this->getParameters($this->invokable, $input, $output);
+        $parameters = $this->getParameters($this->invokable, $input);
 
         $function = $this->invokable;
 
@@ -122,7 +122,7 @@ final class InvokableCommand extends \Symfony\Component\Console\Command\Invokabl
         return array_combine($parameterNames, $parameterValues);
     }
 
-    protected function getParameters(\ReflectionFunction $function, InputInterface $input, OutputInterface $output): array
+    protected function getParameters(\ReflectionFunction $function, InputInterface $input): array
     {
         if (null === $this->parameters) {
             $command = $this->invokable->getClosure();
