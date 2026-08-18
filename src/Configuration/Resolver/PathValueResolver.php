@@ -22,7 +22,6 @@ use function array_filter;
 use function array_map;
 use function array_unique;
 use function in_array;
-use function str_starts_with;
 
 /**
  * @author Laurent Laville
@@ -68,16 +67,7 @@ class PathValueResolver implements ValueResolverInterface
             $values = [$values];
         }
 
-        $paths = [];
-
-        foreach ($values as $value) {
-            if (str_starts_with($value, '.') || str_starts_with($value, '/')) {
-                // try to get the realpath only for relative or absolute path names
-                $paths[] = realpath($value);
-            } else {
-                $paths[] = $value;
-            }
-        }
+        $paths = array_map('realpath', $values);
 
         return [array_unique(array_filter($paths))];
     }

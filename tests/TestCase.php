@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Tests;
 
 use Overtrue\PHPLint\Command\InvokableCommand;
-use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\Resolver\CoreValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\DefaultArgumentResolver;
@@ -39,32 +38,35 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
 
     protected function setUp(): void
     {
-        $application = new Application(new EnvConfig());
+        $envConfig = new EnvConfig();
+
+        $application = new Application($envConfig);
+
+        $logger = new NullLogger();
 
         $valueResolver = new class(
-            new NullLogger(),
-            new CoreValueResolver($application, new BufferedOutput())
+            $logger,
+            [new CoreValueResolver($application, new BufferedOutput())]
         ) extends DefaultValueResolver {
-            public function __construct(LoggerInterface $logger, CoreValueResolver $coreValueResolver)
+            public function __construct(LoggerInterface $logger, array $dynamicValueResolvers = [])
             {
-                parent::__construct($logger, $coreValueResolver);
+                parent::__construct($logger, $dynamicValueResolvers);
                 // to avoid auto CPU detection
                 $this->valueResolvers[JobValueResolver::class] = new JobValueResolver(10);
             }
         };
 
+        $runner = new ConsoleApplicationRunner($logger, $envConfig);
+        $this->application = $runner->getApplication();
+
+        // adds special ArgumentResolver for unit tests
         $argumentResolver = new DefaultArgumentResolver([], $valueResolver);
-
-        $application->setArgResolver($argumentResolver);
-        $application->addCommand(new LintCommand());
-
-        $this->application = $application;
+        $this->application->setArgResolver($argumentResolver);
     }
 
     protected function getApplication(): \Symfony\Component\Console\Application
     {
-        $runner = new ConsoleApplicationRunner($this->application, 'tests');
-        return $runner->getApplication();
+        return $this->application;
     }
 
     protected function getOptionsResolver(array $arguments): FileOptionsResolver
@@ -83,12 +85,10 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         $input = new ArrayInput($arguments);
         $input->bind($definition);
 
-        $output = new BufferedOutput();
-
         /** @var InvokableCommand $invokableCommand */
         $invokableCommand = $command->getCode();
 
-        $parameters = $invokableCommand->getArguments($input, $output);
+        $parameters = $invokableCommand->getArguments($input);
 
         return new FileOptionsResolver($input, $parameters);
     }

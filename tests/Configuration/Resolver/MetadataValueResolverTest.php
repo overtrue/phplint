@@ -41,6 +41,8 @@ final class MetadataValueResolverTest extends TestCase
      */
     protected function setUp(): void
     {
+        parent::setUp();
+
         $command = new class {
             public function __invoke(
                 MetadataCollection $metadataCollection,
@@ -52,42 +54,24 @@ final class MetadataValueResolverTest extends TestCase
         $this->parameters = $reflection->getParameters();
     }
 
-    public function testEmptyMetadataCollection(): void
+    public function testDefaultApplicationMetadata(): void
     {
-        $metadataCollection = new MetadataCollection();
-
-        $expected = [$metadataCollection];
-
-        $input = new ArrayInput(['metadataCollection' => $metadataCollection]);
-
-        $resolver = new MetadataValueResolver($metadataCollection);
-
-        $member = new ReflectionMember($this->parameters[0]);
-
-        $resolved = $resolver->resolve('metadataCollection', $input, $member);
-
-        $this->assertSame(
-            $expected,
-            iterator_to_array($resolved),
-            ''
+        $metadataCollection = new MetadataCollection(
+            Metadata::applicationVersion(),
+            Metadata::configurationSettings(['mode' => 'off'])
         );
-    }
-
-    public function testNotEmptyMetadataCollection(): void
-    {
-        $metadataCollection = new MetadataCollection(Metadata::applicationVersion());
 
         $expected = [$metadataCollection];
 
         $input = new ArrayInput(['metadataCollection' => $metadataCollection]);
 
-        $resolver = new MetadataValueResolver($metadataCollection);
+        $resolver = new MetadataValueResolver($this->getApplication());
 
         $member = new ReflectionMember($this->parameters[0]);
 
         $resolved = $resolver->resolve('metadataCollection', $input, $member);
 
-        $this->assertSame(
+        $this->assertEquals(
             $expected,
             iterator_to_array($resolved),
             ''

@@ -13,19 +13,19 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Configuration\Resolver;
 
-use Overtrue\PHPLint\Console\Application;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
-use Overtrue\PHPLint\Metadata\MetadataCollection;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Input\InputInterface;
 
 /**
  * @author Laurent Laville
  * @since Release 9.8.0
  */
-class MetadataValueResolver implements ValueResolverInterface
+class OutputFileResolver implements ValueResolverInterface
 {
     public function __construct(
-        protected Application $application,
+        protected array $defaultValues = [],
     ) {
     }
 
@@ -33,14 +33,15 @@ class MetadataValueResolver implements ValueResolverInterface
     {
         $argumentType = $member->getType()?->getName();
 
-        if ($argumentType !== MetadataCollection::class) {
+        if ($argumentType !== 'string') {
             return [];
         }
 
-        $value = $input->hasArgument($argumentName)
-            ? $input->getArgument($argumentName)
-            : $this->application->getMetadata()
-        ;
+        $argumentAttributes = $member->getAttribute(Option::class);
+        // retrieve the argument name defined by the #[Option(name:)] attribute, or fallback to PHP variable name
+        $argumentName = $argumentAttributes?->name ? : $argumentName;
+
+        $value = $input->hasOption($argumentName) ? $input->getOption($argumentName) : $this->defaultValues[$argumentName];
 
         return [$value];
     }

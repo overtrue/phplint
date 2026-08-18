@@ -17,8 +17,9 @@ use Closure;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\ArgumentResolver\ValueResolver\BuiltinTypeValueResolver;
 use Symfony\Component\Console\ArgumentResolver\ValueResolver\ValueResolverInterface as SymfonyValueResolverInterface;
+
+use function array_merge;
 
 /**
  * @author Laurent Laville
@@ -28,13 +29,10 @@ class DefaultValueResolver implements ContainerInterface
 {
     protected array $valueResolvers = [];
 
-    public function __construct(LoggerInterface $logger, CoreValueResolver $coreValueResolver)
+    public function __construct(LoggerInterface $logger, array $dynamicValueResolvers = [])
     {
-        $this->valueResolvers = [
-            CoreValueResolver::class => $coreValueResolver,
-            BuiltinTypeValueResolver::class => fn() => new BuiltinTypeValueResolver(),
+        $this->valueResolvers = array_merge($dynamicValueResolvers, [
             LoggerValueResolver::class => fn() => new LoggerValueResolver($logger),
-            MetadataValueResolver::class => fn() => new MetadataValueResolver(),
             PluginValueResolver::class => fn() => new PluginValueResolver(),
             ConfigValueResolver::class => fn() => new ConfigValueResolver(),
             PathValueResolver::class => fn() => new PathValueResolver(
@@ -61,7 +59,13 @@ class DefaultValueResolver implements ContainerInterface
             MemoryLimitValueResolver::class => fn() => new MemoryLimitValueResolver(),
             IgnoreExitCodeValueResolver::class => fn() => new IgnoreExitCodeValueResolver(),
             DryRunValueResolver::class => fn() => new DryRunValueResolver(),
-        ];
+            OutputFormatResolver::class => fn() => new OutputFormatResolver([
+                OptionDefinition::OUTPUT_FORMAT => OptionDefinition::DEFAULT_FORMATS,
+            ]),
+            OutputFileResolver::class => fn() => new OutputFileResolver([
+                OptionDefinition::OUTPUT_FILE => OptionDefinition::DEFAULT_STANDARD_OUTPUT
+            ]),
+        ]);
     }
 
     final public function get(string $id): null|ValueResolverInterface|SymfonyValueResolverInterface
