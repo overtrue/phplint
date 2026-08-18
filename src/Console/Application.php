@@ -15,10 +15,10 @@ namespace Overtrue\PHPLint\Console;
 
 use Overtrue\PHPLint\Command\InvokableCommand;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Configuration\Resolver;
 use Overtrue\PHPLint\Configuration\Resolver\ArgumentResolverInterface;
 use Overtrue\PHPLint\Configuration\Resolver\PluginValueResolver;
 use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
-use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
 use Overtrue\PHPLint\Extension\ExtensionInterface;
@@ -66,7 +66,7 @@ final class Application extends BaseApplication implements ApplicationInterface,
 
     private ?Stopwatch $stopwatch = null;
 
-    private MetadataCollection $metadataCollection;
+    private ?MetadataCollection $metadataCollection = null;
 
     public function __construct(private EnvConfigInterface $envConfig)
     {
@@ -76,10 +76,6 @@ final class Application extends BaseApplication implements ApplicationInterface,
         // mandatory because $dispatcher instance of BaseApplication is private
         // and native getDispatcher() method is only available with release 8.1.0 of Symfony/Console
         $this->setDispatcher($this->dispatcher);
-
-        $applicationVersion = Metadata::applicationVersion();
-        $this->setVersion($applicationVersion->getVersion());
-        $this->metadataCollection = new MetadataCollection($applicationVersion);
     }
 
     /**
@@ -88,6 +84,11 @@ final class Application extends BaseApplication implements ApplicationInterface,
     public function setArgResolver(ArgumentResolverInterface $argumentResolver): void
     {
         $this->argumentResolver = $argumentResolver;
+    }
+
+    public function setMetadata(MetadataCollection $metadataCollection): void
+    {
+        $this->metadataCollection = $metadataCollection;
     }
 
     /**
@@ -140,9 +141,16 @@ final class Application extends BaseApplication implements ApplicationInterface,
         return $this->dispatcher;
     }
 
-    public function getMetadata(): MetadataCollection
+    public function getMetadata(?Resolver $configResolver = null): MetadataCollection
     {
-        return $this->metadataCollection;
+        $settings = $configResolver ? $configResolver->getOptions() : [];
+        $settings['mode'] = $this->getEnvConfig()->get('mode', 'off');
+
+        $metadataCollection =  $this->metadataCollection ?? new MetadataCollection(
+            Metadata::applicationVersion(),
+        );
+        $metadataCollection->add(Metadata::configurationSettings($settings));
+        return $metadataCollection;
     }
 
     public function getEnvConfig(): EnvConfigInterface
@@ -294,7 +302,9 @@ final class Application extends BaseApplication implements ApplicationInterface,
                 $definition = $command->getDefinition();
                 // adds new options defined by this $extension to the current $command
                 foreach ($extension::getDefinition()->getOptions() as $option) {
-                    $definition->addOption($option);
+                    if (!$definition->hasOption($option->getName())) {
+                        $definition->addOption($option);
+                    }
                 }
                 $command->setDefinition($definition);
             }

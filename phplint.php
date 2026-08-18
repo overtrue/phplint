@@ -11,13 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-use Overtrue\PHPLint\Command\DiagnoseCommand;
-use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
-use Overtrue\PHPLint\Configuration\Resolver\CoreValueResolver;
-use Overtrue\PHPLint\Configuration\Resolver\DefaultArgumentResolver;
-use Overtrue\PHPLint\Configuration\Resolver\DefaultValueResolver;
-use Overtrue\PHPLint\Console\Application;
 use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Output\ConsoleOutput;
 use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
@@ -37,20 +31,5 @@ $output = new ConsoleOutput();
 $logger = new ConsoleLogger($output);
 $envConfig = new EnvConfig();
 
-$application = new Application($envConfig);
-
-$namedResolvers = new DefaultValueResolver($logger, new CoreValueResolver($application, $output));
-
-$argumentResolver = new DefaultArgumentResolver([], $namedResolvers);
-$argumentResolver->setLogger($logger);
-
-$application->setArgResolver($argumentResolver);
-
-$application->setLogger($logger);
-$application->addCommands([
-    new DiagnoseCommand(),
-    new LintCommand(),
-]);
-
-$runner = new ConsoleApplicationRunner($application, $envConfig->get('env', 'dev'), $input, $output);
+$runner = new ConsoleApplicationRunner($logger, $envConfig, $input, $output);
 $runner->run();
