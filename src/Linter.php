@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint;
 
+use Countable;
 use LogicException;
-use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\AfterLintFileEvent;
@@ -51,26 +51,29 @@ use function version_compare;
  * @author Overtrue
  * @author Laurent Laville (code-rewrites since v9.0)
  */
-final class Linter implements LoggerAwareInterface, \Countable
+final class Linter implements LoggerAwareInterface, Countable
 {
     use LoggerAwareTrait;
 
     private array $results;
-
-    private int $processLimit;
 
     private ?Stopwatch $stopwatch = null;
 
     private \Overtrue\PHPLint\Metadata\LinterOutput $finalResults;
 
     public function __construct(
-        private readonly Resolver $configResolver,
-        private readonly EventDispatcherInterface $dispatcher,
+        private readonly ?Resolver $configResolver = null,  // @deprecated keep only for API compatibility with previous version 9.7.x
+                                                            // will be removed in next API version
+        private readonly ?EventDispatcherInterface $dispatcher = null,
         private readonly ?Application $client = null,   // @deprecated keep only for API compatibility with previous version 9.7.x
                                                         // will be removed in next API version
         private readonly ?HelperSet $helperSet = null,
         private readonly ?OutputInterface $output = null,
         private readonly ?Cache $cache = null,
+        private readonly int $processLimit = 1,
+        private readonly bool $dryRun = false,
+        private readonly bool $showWarning = false,
+        private readonly int $memoryLimit = -1,
     ) {
         $this->results = [
             'errors' => [],
@@ -79,8 +82,6 @@ final class Linter implements LoggerAwareInterface, \Countable
             'misses' => [],
             'process_count' => 0,
         ];
-
-        $this->processLimit = $configResolver->getOption(OptionDefinition::JOBS);
 
         $this->finalResults = Metadata::linterResults($this->results, new Finder());
     }
@@ -187,8 +188,7 @@ final class Linter implements LoggerAwareInterface, \Countable
 
         $this->results['process_count'] = count($chunks);
 
-        $dryRun = $this->configResolver->getOption(OptionDefinition::DRY_RUN);
-        if ($dryRun) {
+        if ($this->dryRun) {
             foreach ($chunks as $index => $chunk) {
                 foreach ($chunk as $fileInfo) {
                     $this->logger->info(
@@ -244,7 +244,12 @@ final class Linter implements LoggerAwareInterface, \Countable
             // checks status of all files linked at end of the php lint process
             foreach ($lintProcess->getFiles() as $fileInfo) {
                 $this->dispatcher->dispatch(
-                    new BeforeLintFileEvent($this, [BeforeLintFileEvent::FILE_INFO => $fileInfo]),
+                    new BeforeLintFileEvent(
+                        $this,
+                        [
+                            BeforeLintFileEvent::FILE_INFO => $fileInfo,
+                        ]
+                    ),
                     Events::BEFORE_LINT_FILE,
                 );
 
@@ -273,11 +278,9 @@ final class Linter implements LoggerAwareInterface, \Countable
 
         $item = $lintProcess->getItem($fileInfo);
 
-        $showWarning = $this->configResolver->getOption(OptionDefinition::WARNING);
-
         if ($item->hasSyntaxError()) {
             $status = 'error';
-        } elseif ($showWarning && $item->hasSyntaxWarning()) {
+        } elseif ($this->showWarning && $item->hasSyntaxWarning()) {
             $status = 'warning';
         } else {
             $status = 'ok';
@@ -307,10 +310,8 @@ final class Linter implements LoggerAwareInterface, \Countable
             '-d display_errors=On',
         ];
 
-        $memoryLimit = $this->configResolver->getOption(OptionDefinition::OPTION_MEMORY_LIMIT);
-
-        if (!empty($memoryLimit)) {
-            $command[] = '-d memory_limit=' . $memoryLimit;
+        if ($this->memoryLimit > 0) {
+            $command[] = '-d memory_limit=' . $this->memoryLimit;
         }
 
         $command[] = '-l';
