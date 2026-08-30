@@ -24,6 +24,7 @@ use function array_key_exists;
 use function array_values;
 use function class_exists;
 use function fopen;
+use function is_string;
 
 use const STDOUT;
 
@@ -45,13 +46,16 @@ final class FormatResolver
      * @return OutputInterface[]
      */
     public function resolve(
-        Resolver $configResolver,
-        SymfonyOutputInterface $output,
+        ?Resolver $configResolver = null,   // @deprecated keep only for API compatibility with previous version 9.7.x
+                                            // will be removed in next API version
+        ?SymfonyOutputInterface $output = null,
+        ?string $outputFile = null,
+        ?array $requestedFormats = [],
     ): array {
         $decorated = $output->isDecorated();
 
-        $filename = $configResolver->getOption(OptionDefinition::OUTPUT_FILE);
-        if ($filename) {
+        $filename = $outputFile;
+        if (is_string($filename)) {
             $stream = fopen($filename, 'w');
             $decorated = false;
         } else {
@@ -62,8 +66,6 @@ final class FormatResolver
                 $stream = STDOUT;
             }
         }
-
-        $requestedFormats = $configResolver->getOption(OptionDefinition::OUTPUT_FORMAT);
 
         $handlers = [];
 
