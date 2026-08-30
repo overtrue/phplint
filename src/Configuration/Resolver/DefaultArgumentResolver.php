@@ -19,6 +19,7 @@ use Overtrue\PHPLint\Configuration\Exception\NearMissValueResolverException;
 use Overtrue\PHPLint\Configuration\Exception\ResolverNotFoundException;
 use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Overtrue\PHPLint\Console\Attribute\ValueResolver;
+use Overtrue\PHPLint\Console\SectionEnum;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -36,11 +37,17 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 use function class_exists;
+use function end;
 use function get_debug_type;
 use function implode;
 use function in_array;
 use function is_int;
+use function is_object;
+use function is_scalar;
+use function json_encode;
 use function sprintf;
+
+use const JSON_UNESCAPED_SLASHES;
 
 /**
  * @author Laurent Laville
@@ -152,13 +159,7 @@ final class DefaultArgumentResolver implements ArgumentResolverInterface, Logger
                 }
 
                 if ($count) {
-                    $this->logger->debug(
-                        'Argument "{argumentName}" may be resolved by {argumentValueResolvers}',
-                        [
-                            'argumentName' => $argumentName,
-                            'argumentValueResolvers' => get_debug_type($resolver)
-                        ]
-                    );
+                    $this->describe(end($arguments), $argumentName, $resolver);
                     continue 2;
                 }
             }
@@ -181,5 +182,29 @@ final class DefaultArgumentResolver implements ArgumentResolverInterface, Logger
         }
 
         return $arguments;
+    }
+
+    private function describe(mixed $argument, string $argumentName, ValueResolverInterface $resolver): void
+    {
+        $valueResolvedDump = is_scalar($argument)
+            ? $argument
+            : (is_object($argument) ? get_debug_type($argument): json_encode($argument, JSON_UNESCAPED_SLASHES));
+
+        $message = sprintf(
+            '<comment>%s</comment> %s',
+            '"{argumentName}" may be resolved by {argumentValueResolvers}',
+            ': {argumentValueResolved}',
+        );
+
+        $this->logger->debug(
+            $message,
+            [
+                '__section__' => SectionEnum::ARGUMENT->label(),
+                '__style__' => SectionEnum::ARGUMENT->value,
+                'argumentName' => $argumentName,
+                'argumentValueResolvers' => get_debug_type($resolver),
+                'argumentValueResolved' => $valueResolvedDump,
+            ]
+        );
     }
 }
