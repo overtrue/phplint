@@ -16,6 +16,7 @@ namespace Overtrue\PHPLint\Metadata;
 use ArrayIterator;
 use Countable;
 use IteratorAggregate;
+use Overtrue\PHPLint\Console\SectionEnum;
 use Psr\Log\LoggerInterface;
 use Traversable;
 
@@ -69,15 +70,23 @@ final class MetadataCollection implements Countable, IteratorAggregate
 
     public function describe(
         LoggerInterface $logger,
-        string $messagePattern = 'Metadata "{metadataClass}" values are {metadataValues}'
     ): array {
         $values = [];
 
         foreach ($this as $metadataClass => $metadata) {
             $metadataValues = $metadata->describe('value');
+
+            $message = sprintf(
+                '<comment>%s</comment> %s',
+                '"{metadataClass}" values are',
+                '{metadataValues}',
+            );
+
             $logger->debug(
-                $messagePattern,
+                $message,
                 [
+                    '__section__' => SectionEnum::METADATA->label(),
+                    '__style__' => SectionEnum::METADATA->value,
                     'metadataClass' => $metadataClass,
                     'metadataValues' => $metadataValues,
                 ]
