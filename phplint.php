@@ -12,13 +12,18 @@ declare(strict_types=1);
  */
 
 use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Console\ConsoleLogger;
 use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Output\ConsoleOutput;
 use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
 use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Logger\ConsoleLogger;
 
 $input = new ArgvInput();
+
+$output = new ConsoleOutput();
+$envConfig = new EnvConfig();
+
+$loggerClass = $envConfig->get('logger', ConsoleLogger::class);
 
 if (true === $input->hasParameterOption(['--' . OptionDefinition::BOOTSTRAP, '-b'], true)) {
     $bootstrap = $input->getParameterOption(['--' . OptionDefinition::BOOTSTRAP, '-b']);
@@ -27,9 +32,7 @@ if (true === $input->hasParameterOption(['--' . OptionDefinition::BOOTSTRAP, '-b
     }
 }
 
-$output = new ConsoleOutput();
-$logger = new ConsoleLogger($output);
-$envConfig = new EnvConfig();
+$logger = new $loggerClass($output);
 
 $runner = new ConsoleApplicationRunner($logger, $envConfig, $input, $output);
 $runner->run();
