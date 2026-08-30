@@ -32,17 +32,15 @@ use function sprintf;
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-final class Finder implements JsonSerializable
+final readonly class Finder implements JsonSerializable
 {
-    private array $paths = [];
-    private array $excludes = [];
-    private array $fileExtensions = [];
-
-    public function __construct(Resolver $configResolver)
-    {
-        $this->paths = $configResolver->getOption(OptionDefinition::PATH);
-        $this->excludes = $configResolver->getOption(OptionDefinition::EXCLUDE);
-        $this->fileExtensions = $configResolver->getOption(OptionDefinition::FILE_EXTENSIONS);
+    public function __construct(
+        ?Resolver $configResolver = null, // @deprecated keep only for API compatibility with previous version 9.7.x
+                                          // will be removed in next API version
+        private array $paths = [],
+        private array $excludes = [],
+        private array $fileExtensions = [],
+    ) {
     }
 
     public function describe(): array
