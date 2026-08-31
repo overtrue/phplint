@@ -17,6 +17,7 @@ use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver\LoggerValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
 use Overtrue\PHPLint\Console\Attribute\ValueResolver;
+use Overtrue\PHPLint\Console\SectionEnum;
 use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Environment\Provider\CI;
 use Overtrue\PHPLint\Environment\Provider\Cpu;
@@ -76,6 +77,7 @@ final class DiagnoseCommand
         }
 
         $user = false;
+        $filters = [];
 
         if ($whenDiagnosed === DiagnoseEnum::ALWAYS->value) {
             $vcs = $php = $uname = $ci = $cpu = $dotenv = $metadata = true;
@@ -87,7 +89,6 @@ final class DiagnoseCommand
                 $what = explode(',', $whenDiagnosed);
             }
             $parts = [];
-            $filters = [];
             foreach ($what as $pos => $part) {
                 if (str_starts_with($part, 'metadata:')) {
                     $filters[] = substr($part, 9);
@@ -160,12 +161,9 @@ final class DiagnoseCommand
             $environment->addProvider($user);
         }
 
-        $formatter = new FormatterHelper();
-
         $providerData = $environment->describe();
 
         if (count($providerData) === 0) {
-            $logger->notice('The diagnose command did not produced any results');
             return 127;
         }
 
@@ -195,6 +193,8 @@ final class DiagnoseCommand
 
             $io->section($title);
 
+            $formatter = new FormatterHelper();
+
             foreach ($values as $providerData) {
                 if (!$providerData instanceof ProviderData) {
                     $logger->warning(
@@ -212,10 +212,18 @@ final class DiagnoseCommand
                     ? json_encode(json_decode($info['value']), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
                     : $info['value']
                 ;
-                $io->writeln($formatter->formatSection(
-                    $info['setting'],
-                    sprintf('<comment>%s</comment> %s', $info['description'], $value),
-                ));
+
+                $style = SectionEnum::ENVIRONMENT->value;
+                // when style is not available, fallback to default style defined by \Overtrue\PHPLint\Console\Application::run
+                $style = $output->getFormatter()->hasStyle($style) ? $style : SectionEnum::DEFAULT->value;
+
+                $io->writeln(
+                    $formatter->formatSection(
+                        $info['setting'],
+                        sprintf('<comment>%s</comment> %s', $info['description'], $value),
+                        $style,
+                    )
+                );
             }
 
             $io->newLine();
