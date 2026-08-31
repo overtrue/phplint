@@ -13,9 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Command;
 
-use Overtrue\PHPLint\Configuration\Resolver\LoggerValueResolver;
-use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
-use Overtrue\PHPLint\Console\Attribute\ValueResolver;
+use Overtrue\PHPLint\Console\SectionEnum;
 use Overtrue\PHPLint\Metadata\CacheOutput;
 use Overtrue\PHPLint\Metadata\LinterOutput;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
@@ -44,9 +42,7 @@ final class ProfileCommand
         OutputInterface $output,
         SymfonyStyle $io,
         string $when,
-        #[ValueResolver(LoggerValueResolver::class)]
         LoggerInterface $logger,
-        #[ValueResolver(MetadataValueResolver::class)]
         MetadataCollection $metadataCollection,
     ): int
     {
@@ -107,6 +103,10 @@ final class ProfileCommand
 
         $formatter = new FormatterHelper();
 
+        $style = SectionEnum::toValue(SectionEnum::PROFILE->value);
+        // when style is not available, fallback to default style defined by \Overtrue\PHPLint\Console\Application::run
+        $style = $output->getFormatter()->hasStyle($style) ? $style : SectionEnum::DEFAULT->value;
+
         foreach ($lines as $line) {
             list ($kind, $section, $message, $comment) = $line;
 
@@ -118,7 +118,7 @@ final class ProfileCommand
                 $formatter->formatSection(
                     $section,
                     sprintf('<comment>%s</comment> %s', $message, $comment),
-                    'profile'
+                    $style,
                 )
             );
         }
@@ -138,11 +138,13 @@ final class ProfileCommand
             );
             $comment = $cacheResults->innerAdapterClass();
 
-            $io->writeln($formatter->formatSection(
-                'Cache',
-                sprintf('<comment>%s</comment> %s', $comment, $message),
-                'profile'
-            ));
+            $io->writeln(
+                $formatter->formatSection(
+                    SectionEnum::CACHE->label(),
+                    sprintf('<comment>%s</comment> %s', $comment, $message),
+                    $style,
+                )
+            );
         }
 
         $io->newLine();
