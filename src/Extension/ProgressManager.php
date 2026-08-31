@@ -19,6 +19,8 @@ use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\AfterLintFileInterface;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingInterface;
+use Overtrue\PHPLint\Event\BeforeLintFileEvent;
+use Overtrue\PHPLint\Event\BeforeLintFileInterface;
 use Overtrue\PHPLint\Event\Events;
 use Overtrue\PHPLint\Helper\DebugFormatterHelper;
 use Overtrue\PHPLint\Helper\ProcessHelper;
@@ -40,6 +42,7 @@ final class ProgressManager extends AbstractManager implements
     ExtensionInterface,
     EventSubscriberInterface,
     BeforeCheckingInterface,
+    BeforeLintFileInterface,
     AfterLintFileInterface
 {
     private ?ExtensionEventInterface $widget = null;
@@ -75,6 +78,7 @@ final class ProgressManager extends AbstractManager implements
             ConsoleEvents::COMMAND => 'initialize',
             Events::AFTER_CHECKING => 'finish',
             Events::BEFORE_CHECKING => 'beforeChecking',
+            Events::BEFORE_LINT_FILE => 'beforeLintFile',
             Events::AFTER_LINT_FILE => 'afterLintFile',
         ];
     }
@@ -157,6 +161,16 @@ final class ProgressManager extends AbstractManager implements
     }
 
     public function beforeChecking(BeforeCheckingEvent $event): void
+    {
+        $this->describeEvent($event);
+
+        if (null === $this->widget || !method_exists($this->widget, __FUNCTION__)) {
+            return;
+        }
+        $this->widget->{__FUNCTION__}($event);
+    }
+
+    public function beforeLintFile(BeforeLintFileEvent $event): void
     {
         $this->describeEvent($event);
 
