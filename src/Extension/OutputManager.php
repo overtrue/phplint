@@ -13,17 +13,15 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Extension;
 
-use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\Events;
+use Overtrue\PHPLint\Metadata\ConfigurationSettings;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Output\ChainOutput;
 use Overtrue\PHPLint\Output\FormatResolver;
 use Overtrue\PHPLint\Output\LinterOutput;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
@@ -32,17 +30,16 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Finder\Finder;
 
+use function json_decode;
+
 /**
  * @author Laurent Laville
  * @since Release 9.0.0 (renamed from OutputFormat to OutputManager since 9.8.0)
  */
-final class OutputManager implements
+final class OutputManager extends AbstractManager implements
     ExtensionInterface,
-    EventSubscriberInterface,
-    LoggerAwareInterface
+    EventSubscriberInterface
 {
-    use LoggerAwareTrait;
-
     private array $handlers = [];
 
     private MetadataCollection $metadataCollection;
@@ -83,7 +80,7 @@ final class OutputManager implements
 
     public function initialize(ConsoleCommandEvent $event): void
     {
-        $this->logger->debug(__METHOD__);
+        $this->describeEvent($event);
 
         $command = $event->getCommand();
         if ($command->getName() !== 'lint') {
@@ -91,26 +88,28 @@ final class OutputManager implements
             return;
         }
 
-        $input = $event->getInput();
-
-        $invokableCommand = $command->getCode();
-        $parameters = $invokableCommand->getArguments($input);
-        $configResolver = new FileOptionsResolver($input, $parameters);
-
         $application = $command->getApplication();
 
-        $this->metadataCollection = $application->getMetadata($configResolver);
-        $this->metadataCollection->describe($this->logger);
+        $this->metadataCollection = $application->getMetadata();
 
-        $this->handlers = (new FormatResolver())->resolve($configResolver, $event->getOutput());
+        $settings = json_decode(
+            $this->metadataCollection->getMetadata(ConfigurationSettings::class)->describe('value'),
+            true
+        );
+
+        $this->handlers = (new FormatResolver())->resolve(
+            null,
+            $event->getOutput(),
+            $settings[OptionDefinition::OUTPUT_FILE],
+            $settings[OptionDefinition::OUTPUT_FORMAT],
+        );
     }
 
     public function terminate(ConsoleTerminateEvent $event): void
     {
-        $this->logger->debug(__METHOD__);
+        $this->describeEvent($event);
 
         $metadataCollection = $this->metadataCollection ?? new MetadataCollection();
-        $metadataCollection->describe($this->logger);
 
         /** @var \Overtrue\PHPLint\Metadata\LinterOutput $results */
         $finalResults = $metadataCollection->getMetadata(\Overtrue\PHPLint\Metadata\LinterOutput::class);
@@ -138,14 +137,11 @@ final class OutputManager implements
 
     public function beforeExecute(BeforeCheckingEvent $event): void
     {
-        $this->logger->debug(
-            __METHOD__ . ' ; file count queued to process: {' . BeforeCheckingEvent::FILE_COUNT . '}',
-            [BeforeCheckingEvent::FILE_COUNT => $event->getArgument(BeforeCheckingEvent::FILE_COUNT)]
-        );
+        $this->describeEvent($event);
     }
 
     public function afterExecute(AfterCheckingEvent $event): void
     {
-        $this->logger->debug(__METHOD__);
+        $this->describeEvent($event);
     }
 }

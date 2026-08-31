@@ -14,12 +14,11 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Extension;
 
 use Overtrue\PHPLint\Cache;
-use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Console\SectionEnum;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\Events;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
+use Overtrue\PHPLint\Metadata\ConfigurationSettings;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\NullAdapter;
@@ -31,18 +30,16 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use function get_class;
 use function is_object;
+use function json_decode;
 
 /**
  * @author Laurent Laville
  * @since Release 9.8.0
  */
-final class CacheManager implements
+final class CacheManager extends AbstractManager implements
     ExtensionInterface,
-    EventSubscriberInterface,
-    LoggerAwareInterface
+    EventSubscriberInterface
 {
-    use LoggerAwareTrait;
-
     private static Cache $cache;
 
     public function __construct(private readonly ?AdapterInterface $adapter = null)
@@ -100,15 +97,23 @@ final class CacheManager implements
 
     public function initialize(ConsoleCommandEvent $event): void
     {
-        $this->logger->debug(__METHOD__);
+        $this->describeEvent($event);
 
-        $input = $event->getInput();
-        $configResolver = new FileOptionsResolver($input);
+        $command = $event->getCommand();
 
-        $withoutCache = $configResolver->getOption(OptionDefinition::NO_CACHE);
-        $defaultLifetime = $configResolver->getOption(OptionDefinition::CACHE_TTL);
-        $cacheDir = $configResolver->getOption(OptionDefinition::CACHE_DIR);
-        $adapterAlias = $configResolver->getOption(OptionDefinition::CACHE_ADAPTER);
+        $application = $command->getApplication();
+
+        $metadataCollection = $application->getMetadata();
+
+        $settings = json_decode(
+            $metadataCollection->getMetadata(ConfigurationSettings::class)->describe('value'),
+            true
+        );
+
+        $withoutCache = $settings[OptionDefinition::NO_CACHE];
+        $defaultLifetime = $settings[OptionDefinition::CACHE_TTL];
+        $cacheDir = $settings[OptionDefinition::CACHE_DIR];
+        $adapterAlias = $settings[OptionDefinition::CACHE_ADAPTER];
 
         if (!$withoutCache && $adapterAlias === 'never') {
             $withoutCache = true;
@@ -121,9 +126,19 @@ final class CacheManager implements
         }
         self::$cache = new Cache($adapter);
 
+        $message = sprintf(
+            '<comment>%s</comment> %s',
+            'The "Cache" was initialized with following adapter"',
+            ': {adapter}'
+        );
+
         $this->logger->notice(
-            'Cache initialized with "{adapter}" adapter"',
-            ['adapter' => is_object($adapter) ? get_class($adapter): $adapter]
+            $message,
+            [
+                '__section__' => SectionEnum::PLUGIN->label(),
+                '__style__' => SectionEnum::PLUGIN->value,
+                'adapter' => is_object($adapter) ? get_class($adapter): $adapter
+            ]
         );
 
         if ($defaultLifetime < OptionDefinition::DEFAULT_CACHE_TTL) {
@@ -133,7 +148,7 @@ final class CacheManager implements
 
     public function afterExecute(AfterCheckingEvent $event): void
     {
-        $this->logger->debug(__METHOD__);
+        $this->describeEvent($event);
 
         self::$cache->prune();
     }

@@ -16,9 +16,7 @@ namespace Overtrue\PHPLint\Extension;
 use Overtrue\PHPLint\Command\DiagnoseCommand;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\ApplicationInterface;
-use Overtrue\PHPLint\Metadata\MetadataCollection;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
+use Overtrue\PHPLint\Console\SectionEnum;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
@@ -34,15 +32,11 @@ use function in_array;
  * @author Laurent Laville
  * @since Release 9.8.0
  */
-final class DiagnoseManager implements
+final class DiagnoseManager extends AbstractManager implements
     ExtensionInterface,
-    EventSubscriberInterface,
-    LoggerAwareInterface
+    EventSubscriberInterface
 {
-    use LoggerAwareTrait;
-
     private string $whenDiagnosed = '';
-    private MetadataCollection $metadataCollection;
 
     public function getName(): string
     {
@@ -57,7 +51,7 @@ final class DiagnoseManager implements
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'Control the use of providers to diagnose the system',
-                DiagnoseEnum::NEVER->value
+                DiagnoseEnum::AUTO->value
             )
         ]);
     }
@@ -72,24 +66,32 @@ final class DiagnoseManager implements
 
     public function initialize(ConsoleCommandEvent $event): void
     {
-        $this->logger->debug(__METHOD__);
+        $this->describeEvent($event);
 
         $input = $event->getInput();
 
-        $this->whenDiagnosed = $input->getOption(OptionDefinition::DIAGNOSTIC) ?? DiagnoseEnum::NEVER->value;
+        $this->whenDiagnosed = $input->getOption(OptionDefinition::DIAGNOSTIC) ?? DiagnoseEnum::AUTO->value;
 
         if ($this->whenDiagnosed === DiagnoseEnum::NEVER->value) {
             return;
         }
 
-        $this->logger->notice('The Diagnose Manager launched {kind} diagnostic', ['kind' => $this->whenDiagnosed]);
+        $message = sprintf(
+            '<comment>%s</comment> %s',
+            'The "Diagnose Manager" launched following diagnostic',
+            ': {kind}'
+        );
 
-        $this->metadataCollection = $event->getCommand()->getApplication()->getMetadata();
+        $this->logger->notice($message, [
+            '__section__' => SectionEnum::PLUGIN->label(),
+            '__style__' => SectionEnum::PLUGIN->value,
+            'kind' => $this->whenDiagnosed,
+        ]);
     }
 
     public function terminate(ConsoleTerminateEvent $event): void
     {
-        $this->logger->debug(__METHOD__);
+        $this->describeEvent($event);
 
         if ($this->whenDiagnosed === DiagnoseEnum::NEVER->value) {
             return;
@@ -112,8 +114,10 @@ final class DiagnoseManager implements
             /** @var ApplicationInterface $application */
             $application = $command->getApplication();
 
+            $metadataCollection = $application->getMetadata();
+
             $diagnoseCommand = new DiagnoseCommand();
-            $exitCode = $diagnoseCommand($input, $output, $io, $application->getLogger(), $this->metadataCollection);
+            $exitCode = $diagnoseCommand($input, $output, $io, $application->getLogger(), $metadataCollection, $this->whenDiagnosed);
 
             if ($exitCode === 0) {
                 $io->success('The Diagnose Manager has finished successfully.');
@@ -123,6 +127,24 @@ final class DiagnoseManager implements
             $exitCode = $exception->getCode() > 0 ? $exception->getCode() : 1;
         }
 
-        $this->logger->notice('The Diagnose Manager has terminated its diagnostic with exit code: ' . $exitCode);
+        $message = sprintf(
+            '<comment>%s</comment> %s',
+            'The "Diagnose Manager" has terminated its diagnostic with exit code',
+            ': {exit_code}'
+        );
+
+        $context = [
+            '__section__' => SectionEnum::PLUGIN->label(),
+            '__style__' => SectionEnum::PLUGIN->value,
+            'exit_code' => $exitCode,
+        ];
+
+        if ($exitCode > 0) {
+            $message .= ' {reason_code}';
+
+            $context['reason_code'] = '(none result produced)';
+        }
+
+        $this->logger->notice($message, $context);
     }
 }

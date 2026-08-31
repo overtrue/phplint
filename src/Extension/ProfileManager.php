@@ -16,13 +16,11 @@ namespace Overtrue\PHPLint\Extension;
 use Overtrue\PHPLint\Command\ProfileCommand;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\ApplicationInterface;
+use Overtrue\PHPLint\Console\SectionEnum;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\Events;
 use Overtrue\PHPLint\Metadata\Metadata;
-use Overtrue\PHPLint\Metadata\MetadataCollection;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
@@ -37,17 +35,12 @@ use Throwable;
  * @author Laurent Laville
  * @since Release 9.8.0
  */
-final class ProfileManager implements
+final class ProfileManager extends AbstractManager implements
     ExtensionInterface,
-    EventSubscriberInterface,
-    LoggerAwareInterface
+    EventSubscriberInterface
 {
-    use LoggerAwareTrait;
-
     public const PROFILING_EVENT = 'profiling';
     public const LINT_FILES_EVENT = 'lint-files';
-
-    private MetadataCollection $metadataCollection;
 
     private string $whenProfiled;
 
@@ -83,7 +76,7 @@ final class ProfileManager implements
 
     public function initialize(ConsoleCommandEvent $event): void
     {
-        $this->logger->debug(__METHOD__);
+        $this->describeEvent($event);
 
         $command = $event->getCommand();
         if ($command->getName() !== 'lint') {
@@ -102,8 +95,6 @@ final class ProfileManager implements
             // when symfony/stopwatch package is installed, start to use it !
             $this->stopwatch?->start(self::PROFILING_EVENT);
         }
-
-        $this->metadataCollection = $application->getMetadata();
     }
 
     /**
@@ -111,7 +102,7 @@ final class ProfileManager implements
      */
     public function beforeExecute(BeforeCheckingEvent $event): void
     {
-        $this->logger->debug(__METHOD__);
+        $this->describeEvent($event);
 
         $this->stopwatch?->start(self::LINT_FILES_EVENT);
     }
@@ -121,12 +112,12 @@ final class ProfileManager implements
      */
     public function afterExecute(AfterCheckingEvent $event): void
     {
-        $this->logger->debug(__METHOD__);
+        $this->describeEvent($event);
     }
 
     public function terminate(ConsoleTerminateEvent $event): void
     {
-        $this->logger->debug(__METHOD__);
+        $this->describeEvent($event);
 
         if (null === $this->stopwatch) {
             // when symfony/stopwatch package is not installed
@@ -145,26 +136,43 @@ final class ProfileManager implements
         }
         $this->stopwatch->stop(self::LINT_FILES_EVENT);
 
-        // adds the profiler analysis results
-        $this->metadataCollection->add(Metadata::profilerResults($this->stopwatch));
-
         $command = $event->getCommand();
+
+        /** @var ApplicationInterface $application */
+        $application = $command->getApplication();
+
+        $metadataCollection = $application->getMetadata();
+
+        // adds the profiler analysis results
+        $metadataCollection->add(Metadata::profilerResults($this->stopwatch));
+        $application->setMetadata($metadataCollection);
+
         $input = $event->getInput();
         $output = $event->getOutput();
 
         $io = new SymfonyStyle($input, $output);
 
         try {
-            /** @var ApplicationInterface $application */
-            $application = $command->getApplication();
-
             $profileCommand = new ProfileCommand();
-            $exitCode = $profileCommand($input, $output, $io, $this->whenProfiled, $application->getLogger(), $this->metadataCollection);
+            $exitCode = $profileCommand($input, $output, $io, $this->whenProfiled, $application->getLogger(), $metadataCollection);
         } catch (Throwable $exception) {
             $io->error("The Diagnose Manager has finished with following error:\n" . $exception->getMessage());
             $exitCode = $exception->getCode() > 0 ? $exception->getCode() : 1;
         }
 
-        $this->logger->notice('The Profile Manager has terminated its execution with exit code: ' . $exitCode);
+        $message = sprintf(
+            '<comment>%s</comment> %s',
+            'The Profile Manager has terminated its execution with exit code',
+            ': {exit_code}'
+        );
+
+        $this->logger->notice(
+            $message,
+            [
+                '__section__' => SectionEnum::PLUGIN->label(),
+                '__style__' => SectionEnum::PLUGIN->value,
+                'exit_code' => $exitCode,
+            ]
+        );
     }
 }

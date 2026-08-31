@@ -36,7 +36,7 @@ use function method_exists;
  * @author Laurent Laville
  * @since Release 9.8.0
  */
-final class ProgressManager implements
+final class ProgressManager extends AbstractManager implements
     ExtensionInterface,
     EventSubscriberInterface,
     BeforeCheckingInterface,
@@ -84,6 +84,8 @@ final class ProgressManager implements
      */
     public function initialize(ConsoleCommandEvent $event): void
     {
+        $this->describeEvent($event);
+
         $command = $event->getCommand();
         if ($command->getName() !== 'lint') {
             // this extension must be only available for lint command
@@ -149,11 +151,15 @@ final class ProgressManager implements
      */
     public function finish(AfterCheckingEvent $event): void
     {
+        $this->describeEvent($event);
+
         $this->widget?->finish($event);
     }
 
     public function beforeChecking(BeforeCheckingEvent $event): void
     {
+        $this->describeEvent($event);
+
         if (null === $this->widget || !method_exists($this->widget, __FUNCTION__)) {
             return;
         }
@@ -162,6 +168,8 @@ final class ProgressManager implements
 
     public function afterLintFile(AfterLintFileEvent $event): void
     {
+        $this->describeEvent($event);
+
         if (null === $this->widget || !method_exists($this->widget, __FUNCTION__)) {
             return;
         }
