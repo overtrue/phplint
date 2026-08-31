@@ -22,6 +22,12 @@ use Symfony\Component\EventDispatcher\GenericEvent;
 final class BeforeLintFileEvent extends GenericEvent
 {
     /**
+     * Argument identifier to retrieve only the filename.
+     * @since Release 9.8.0
+     */
+    public const FILENAME = 'filename';
+
+    /**
      * Argument identifier to retrieve the file information.
      * @since Release 9.8.0
      */

@@ -247,6 +247,7 @@ final class Linter implements LoggerAwareInterface, Countable
                     new BeforeLintFileEvent(
                         $this,
                         [
+                            BeforeLintFileEvent::FILENAME => $fileInfo->getRelativePathname(),
                             BeforeLintFileEvent::FILE_INFO => $fileInfo,
                         ]
                     ),
@@ -259,6 +260,7 @@ final class Linter implements LoggerAwareInterface, Countable
                     new AfterLintFileEvent(
                         $this,
                         [
+                            AfterLintFileEvent::FILENAME => $fileInfo->getRelativePathname(),
                             AfterLintFileEvent::FILE_INFO => $fileInfo,
                             AfterLintFileEvent::FILE_STATUS => $status,
                         ]
