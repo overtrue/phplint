@@ -32,6 +32,7 @@ readonly class CoreValueResolver implements ValueResolverInterface
     public function __construct(
         private Application $application,
         private OutputInterface $output,
+        private string $commandName,
     ) {
     }
 
@@ -67,7 +68,7 @@ readonly class CoreValueResolver implements ValueResolverInterface
 
         if ($argumentType === Command::class) {
             try {
-                $command = $this->application->find($input->getFirstArgument());
+                $command = $this->application->find($this->commandName);
             } catch (CommandNotFoundException) {
                 $command = null;
             }

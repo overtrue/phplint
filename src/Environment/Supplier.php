@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Environment;
 
+use Overtrue\PHPLint\Console\SectionEnum;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
@@ -40,9 +41,18 @@ final class Supplier
     public function addProvider(ProviderInterface $provider): void
     {
         $this->providers[] = $provider;
+
+        $message = sprintf(
+            '<comment>%s</comment> %s',
+            '"{provider_id}" provider was registered from following filename',
+            ': {filename}'
+        );
+
         $this->logger->debug(
-            'Provider "{provider_id}" registered from "{filename}"',
+            $message,
             [
+                '__section__' => SectionEnum::ENVIRONMENT->label(),
+                '__style__' => SectionEnum::ENVIRONMENT->value,
                 'provider_id' => get_class($provider),
                 'filename' => (new ReflectionClass($provider))->getFileName(),
             ]
@@ -86,9 +96,18 @@ final class Supplier
             }
             $values = $provider->describe();
             if (null === $values) {
+                $message = sprintf(
+                    '<comment>%s</comment> %s',
+                    '"{provider_id}" did not provided any values',
+                    ''
+                );
                 $this->logger->debug(
-                    '[{provider_id}] did not provided any values',
-                    ['provider_id' => get_class($provider)]
+                    $message,
+                    [
+                        '__section__' => SectionEnum::ENVIRONMENT->label(),
+                        '__style__' => SectionEnum::ENVIRONMENT->value,
+                        'provider_id' => get_class($provider),
+                    ]
                 );
                 continue;
             }

@@ -21,6 +21,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use function array_filter;
 use function array_map;
 use function array_unique;
+use function array_values;
 use function in_array;
 
 /**
@@ -68,7 +69,6 @@ class PathValueResolver implements ValueResolverInterface
         }
 
         $paths = array_map('realpath', $values);
-
-        return [array_unique(array_filter($paths))];
+        return [array_values(array_unique(array_filter($paths)))];
     }
 }

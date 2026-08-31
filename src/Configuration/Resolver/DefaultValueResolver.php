@@ -15,6 +15,7 @@ namespace Overtrue\PHPLint\Configuration\Resolver;
 
 use Closure;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\ArgumentResolver\ValueResolver\ValueResolverInterface as SymfonyValueResolverInterface;
@@ -29,11 +30,11 @@ class DefaultValueResolver implements ContainerInterface
 {
     protected array $valueResolvers = [];
 
-    public function __construct(LoggerInterface $logger, array $dynamicValueResolvers = [])
+    public function __construct(LoggerInterface $logger, EnvConfigInterface $envConfig, array $dynamicValueResolvers = [])
     {
         $this->valueResolvers = array_merge($dynamicValueResolvers, [
             LoggerValueResolver::class => fn() => new LoggerValueResolver($logger),
-            PluginValueResolver::class => fn() => new PluginValueResolver(),
+            PluginValueResolver::class => fn() => new PluginValueResolver($envConfig),
             ConfigValueResolver::class => fn() => new ConfigValueResolver(),
             PathValueResolver::class => fn() => new PathValueResolver(
                 [OptionDefinition::PATH, 'sourcePath'],

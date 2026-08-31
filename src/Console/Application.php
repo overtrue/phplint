@@ -13,31 +13,32 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Console;
 
+use Overtrue\PHPLint\Cache;
 use Overtrue\PHPLint\Command\InvokableCommand;
-use Overtrue\PHPLint\Configuration\OptionDefinition;
-use Overtrue\PHPLint\Configuration\Resolver;
+use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\Resolver\ArgumentResolverInterface;
-use Overtrue\PHPLint\Configuration\Resolver\PluginValueResolver;
-use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Overtrue\PHPLint\Environment\EnvConfigInterface;
+use Overtrue\PHPLint\Extension\CacheManager;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
 use Overtrue\PHPLint\Extension\ExtensionInterface;
 use Overtrue\PHPLint\Metadata\ApplicationVersion;
 use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Output\ConsoleOutput;
+use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use ReflectionException;
-use ReflectionFunction;
 use Symfony\Component\Console\Application as BaseApplication;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Command\HelpCommand;
 use Symfony\Component\Console\Command\ListCommand;
-use Symfony\Component\Console\Exception\CommandNotFoundException;
-use Symfony\Component\Console\Exception\ExceptionInterface;
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\HelperSet;
@@ -48,15 +49,17 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-use function array_filter;
-use function iterator_to_array;
+use Throwable;
 use function json_encode;
 
 /**
  * @author Overtrue
  * @author Laurent Laville (since v9.0)
  */
-final class Application extends BaseApplication implements ApplicationInterface, LoggerAwareInterface
+final class Application extends BaseApplication implements
+    ApplicationInterface,
+    LoggerAwareInterface,
+    EventSubscriberInterface
 {
     use LoggerAwareTrait;
 
@@ -68,11 +71,16 @@ final class Application extends BaseApplication implements ApplicationInterface,
 
     private ?MetadataCollection $metadataCollection = null;
 
+    private ExtensionEnum $extensions;
+
+    private ?Cache $cache = null;
+
     public function __construct(private EnvConfigInterface $envConfig)
     {
         parent::__construct();
 
         $this->dispatcher = new EventDispatcher();
+        $this->dispatcher->addSubscriber($this);
         // mandatory because $dispatcher instance of BaseApplication is private
         // and native getDispatcher() method is only available with release 8.1.0 of Symfony/Console
         $this->setDispatcher($this->dispatcher);
@@ -127,6 +135,11 @@ final class Application extends BaseApplication implements ApplicationInterface,
         return $this->logger;
     }
 
+    public function getCache(): Cache
+    {
+        return $this->cache ?? (new CacheManager())->getCacheInstance();
+    }
+
     public function getProfiler(): ?Stopwatch
     {
         return $this->stopwatch;
@@ -141,15 +154,15 @@ final class Application extends BaseApplication implements ApplicationInterface,
         return $this->dispatcher;
     }
 
-    public function getMetadata(?Resolver $configResolver = null): MetadataCollection
+    public function getMetadata(array $settings = []): MetadataCollection
     {
-        $settings = $configResolver ? $configResolver->getOptions() : [];
-        $settings['mode'] = $this->getEnvConfig()->get('mode', 'off');
-
         $metadataCollection =  $this->metadataCollection ?? new MetadataCollection(
             Metadata::applicationVersion(),
         );
-        $metadataCollection->add(Metadata::configurationSettings($settings));
+        if (!empty($settings)) {
+            $settings['mode'] = $this->getEnvConfig()->get('mode', 'off');
+            $metadataCollection->add(Metadata::configurationSettings($settings));
+        }
         return $metadataCollection;
     }
 
@@ -158,69 +171,70 @@ final class Application extends BaseApplication implements ApplicationInterface,
         return $this->envConfig;
     }
 
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            ConsoleEvents::COMMAND => ['initialize', 200],
+            ConsoleEvents::ERROR => 'error',
+        ];
+    }
+
     public function run(?InputInterface $input = null, ?OutputInterface $output = null): int
     {
         $output ??= new ConsoleOutput();
 
-        if (!$output->getFormatter()->hasStyle('profile')) {
+        $defaultStyle = SectionEnum::DEFAULT->value;
+        if (!$output->getFormatter()->hasStyle($defaultStyle)) {
             $output->getFormatter()->setStyle(
-                'profile',
-                new OutputFormatterStyle('black', 'gray')
+                $defaultStyle,
+                new OutputFormatterStyle('black', 'cyan')
             );
         }
 
         return parent::run($input, $output);
     }
 
-    public function doRun(InputInterface $input, OutputInterface $output): int
+    /**
+     * @throws ReflectionException
+     * @throws Throwable
+     */
+    protected function doRunCommand(Command $command, InputInterface $input, OutputInterface $output): int
     {
-        if (true === $input->hasParameterOption(['--version', '-V'], true)) {
-            $output->writeln($this->getLongVersion());
-            return SymfonyCommand::SUCCESS;
-        }
+        $extensions = ConsoleApplicationRunner::getAllowedPlugins($this->envConfig, $input);
 
-        try {
-            // Makes ArgvInput::getFirstArgument() able to distinguish an option from an argument.
-            $input->bind($this->getDefinition());
-        } catch (ExceptionInterface) {
-            // Errors must be ignored, full binding/validation happens later when the command is known.
-        }
+        $this->loadPlugins($extensions, $command);
 
-        $name = $this->getCommandName($input);
-        if ('lint' === $name) {
-            try {
-                $command = $this->find($name);
-                $this->loadPlugins($command, $input, $output);
-            } catch (CommandNotFoundException) {
-                // fallback to Symfony Base Application (parent) that will handle this error
-            } catch (ReflectionException) {
-                // plugins cannot be resolved/loaded
-            }
-        }
+        return parent::doRunCommand($command, $input, $output);
+    }
 
-        return parent::doRun($input, $output);
+    /**
+     * @internal For debugging purpose only, until 9.8.0-rc.1 was released
+     */
+    public function error(ConsoleErrorEvent $event): void
+    {
+        $error = $event->getError();
+
+        if ($this->envConfig->get('PLINT_DUMP', false)) {
+            \var_export($error);
+        } else {
+            \var_dump($error);
+        }
     }
 
     /**
      * @throws ReflectionException
      */
-    public function hasPlugin(string $pluginName, InputInterface $input): bool
+    public function initialize(ConsoleCommandEvent $event): void
     {
-        $name = $this->getCommandName($input);
-        if (!$name) {
-            return false;
-        }
-        $command = $this->find($name);
+        $command = $event->getCommand();
+        $input  = $event->getInput();
 
-        $extensions = $this->resolvePlugins($command, $input);
+        $invokableCommand = $command->getCode();
+        $parameters = $invokableCommand?->getArguments($input) ?? [];
+        $configResolver = new FileOptionsResolver($input, $parameters);
 
-        foreach ($extensions as $extension) {
-            if ($extension?->value === $pluginName) {
-                return true;
-            }
-        }
-
-        return false;
+        $metadataCollection = $this->getMetadata($configResolver->getOptions());
+        $metadataCollection->describe($this->getLogger());
     }
 
     protected function getDefaultCommands(): array
@@ -238,45 +252,22 @@ final class Application extends BaseApplication implements ApplicationInterface,
     /**
      * @throws ReflectionException
      */
-    private function resolvePlugins(SymfonyCommand $command, InputInterface $input): iterable
-    {
-        $invokableCommand = $command->getCode();
-
-        $code = $invokableCommand?->getCode() ?? null;
-
-        if (null === $code) {
-            return [];
-        }
-
-        $reflector = new ReflectionFunction($code(...));
-        $argumentName = OptionDefinition::EXTENSIONS;
-        foreach ($reflector->getParameters() as $parameter) {
-            if ($parameter->getName() !== $argumentName) {
-                continue;
-            }
-
-            $pluginValueResolver = new PluginValueResolver();
-            return $pluginValueResolver->resolve($argumentName, $input, new ReflectionMember($parameter));
-        }
-
-        return [];
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    private function loadPlugins(SymfonyCommand $command, InputInterface $input, OutputInterface $output): void
+    private function loadPlugins(array $extensions, SymfonyCommand $command): void
     {
         $dispatcher = $this->getDispatcher();
         $logger = $this->getLogger();
 
-        $extensions = array_filter(
-            iterator_to_array($this->resolvePlugins($command, $input))
+        $message = sprintf(
+            '<comment>%s</comment> %s',
+            'The "{command}" command load the following extensions',
+            ': {extensions}'
         );
 
         $logger->notice(
-            'The "{command}" command load the following extensions: {extensions}}',
+            $message,
             [
+                '__section__' => SectionEnum::PLUGIN->label(),
+                '__style__' => SectionEnum::PLUGIN->value,
                 'command' => $command->getName(),
                 'extensions' => json_encode($extensions),
             ]
@@ -286,7 +277,11 @@ final class Application extends BaseApplication implements ApplicationInterface,
         foreach ($extensions as $extensionName) {
             $extension = ExtensionEnum::factory($extensionName);
 
-            if ($extensionName === ExtensionEnum::PROFILE_MANAGER) {
+            if ($extensionName == ExtensionEnum::CACHE_MANAGER->value) {
+                $this->cache = $extension::getCacheInstance();
+            }
+
+            if ($extensionName === ExtensionEnum::PROFILE_MANAGER->value) {
                 $this->stopwatch = new Stopwatch(true);
             }
 

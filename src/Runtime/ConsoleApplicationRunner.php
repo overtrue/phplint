@@ -30,6 +30,11 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use function array_intersect;
+use function array_merge;
+use function array_values;
+use function explode;
+
 /**
  * @author Laurent Laville
  * @since Release 9.8.0
@@ -49,6 +54,16 @@ class ConsoleApplicationRunner
 
         $definition = $this->application->getDefinition();
 
+        if (!$definition->hasOption('env') && !$definition->hasOption('e') && !$definition->hasShortcut('e')) {
+            $definition->addOption(new InputOption(
+                'env',
+                'e',
+                InputOption::VALUE_REQUIRED,
+                'The Environment name',
+                $envConfig->get('env', 'dev'),
+            ));
+        }
+
         if (!$definition->hasOption(OptionDefinition::BOOTSTRAP) && !$definition->hasOption('b') && !$definition->hasShortcut('b')) {
             $definition->addOption(new InputOption(
                 OptionDefinition::BOOTSTRAP,
@@ -65,6 +80,7 @@ class ConsoleApplicationRunner
                 'x',
                 InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
                 'Allows to change/extend features easily with one or more extensions',
+                self::getAllowedPlugins($envConfig, $input),
             ));
         }
 
@@ -86,17 +102,9 @@ class ConsoleApplicationRunner
             ));
         }
 
-        if (!$definition->hasOption('env') && !$definition->hasOption('e') && !$definition->hasShortcut('e')) {
-            $definition->addOption(new InputOption(
-                'env',
-                'e',
-                InputOption::VALUE_REQUIRED,
-                'The Environment name',
-                $envConfig->get('env', 'dev'),
-            ));
-        }
-
         $applicationVersion = Metadata::applicationVersion();
+
+        $this->application->setVersion($applicationVersion->getVersion());
 
         $metadataCollection = new MetadataCollection(
             $applicationVersion,
@@ -104,29 +112,56 @@ class ConsoleApplicationRunner
 
         $this->application->setMetadata($metadataCollection);
 
+        $defaultCommand = $envConfig->get('mode', 'off') === 'legacy' ? 'lint' : 'list';
+
         $dynamicValueResolvers = [
-            CoreValueResolver::class => fn() => new CoreValueResolver($this->application, $this->output ?? new NullOutput()),
+            CoreValueResolver::class => fn() => new CoreValueResolver($this->application, $this->output ?? new NullOutput(), $defaultCommand),
             MetadataValueResolver::class => fn() => new MetadataValueResolver($this->application)
         ];
 
         $argumentResolver = new DefaultArgumentResolver(
             [],
-            new DefaultValueResolver($logger, $dynamicValueResolvers),
+            new DefaultValueResolver($logger, $envConfig, $dynamicValueResolvers),
         );
         $argumentResolver->setLogger($logger);
         $this->application->setArgResolver($argumentResolver);
-
-        $this->application->setVersion($applicationVersion->getVersion());
 
         $this->application->addCommands([
             new DiagnoseCommand(),
             new LintCommand(),
         ]);
+
+        $this->application->setDefaultCommand($defaultCommand, ($defaultCommand !== 'list'));
     }
 
     public function getApplication(): Application
     {
         return $this->application;
+    }
+
+    public static function getAllowedPlugins(EnvConfigInterface $envConfig, InputInterface $input): array
+    {
+        $envName = $envConfig->get('env', 'dev');
+
+        $defaultFallback = $envConfig->getDefaultFallback($envName);
+
+        $key = 'allow_plugins';
+        $allowPlugins = explode(',', $envConfig->get($key, $defaultFallback[$key]));
+
+        $key = 'default_plugins';
+        $defaultPlugins = explode(',', $envConfig->get($key, $defaultFallback[$key]));
+
+        $extensions = [];
+
+        if (true === $input->hasParameterOption(['--' . OptionDefinition::EXTENSIONS, '-x'], true)) {
+            $extensions = (array) $input->getParameterOption(OptionDefinition::EXTENSIONS);
+        }
+
+        $extensions = array_merge($defaultPlugins, $extensions);
+
+        return array_values(
+            array_intersect($extensions, $allowPlugins)
+        );
     }
 
     public function run(): int

@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Command;
 
-use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver\ConfigValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\DryRunValueResolver;
@@ -22,25 +21,22 @@ use Overtrue\PHPLint\Configuration\Resolver\IgnoreExitCodeValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\JobValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\LoggerValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\MemoryLimitValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\OutputFileResolver;
 use Overtrue\PHPLint\Configuration\Resolver\OutputFormatResolver;
 use Overtrue\PHPLint\Configuration\Resolver\PathValueResolver;
-use Overtrue\PHPLint\Configuration\Resolver\PluginValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\ShowWarningsValueResolver;
 use Overtrue\PHPLint\Console\Attribute\ValueResolver;
-use Overtrue\PHPLint\Extension\CacheManager;
-use Overtrue\PHPLint\Extension\ExtensionEnum;
+use Overtrue\PHPLint\Console\SectionEnum;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Output\LinterOutput;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder as SymfonyFinder;
@@ -77,9 +73,11 @@ final class LintCommand
     public function __invoke(
         InputInterface $input,
         OutputInterface $output,
-        Application $application,
+        Command $command,
         #[ValueResolver(LoggerValueResolver::class)]
         LoggerInterface $logger,
+        #[ValueResolver(MetadataValueResolver::class)]
+        MetadataCollection $metadataCollection,
         #[ValueResolver(ConfigValueResolver::class)]
         string $configuration = OptionDefinition::DEFAULT_CONFIG_FILE, // global option
         #[Argument(
@@ -138,45 +136,60 @@ final class LintCommand
         #[Option(name: OptionDefinition::OUTPUT_FILE)]  // option dynamically added by the "output_manager" extension
         #[ValueResolver(OutputFileResolver::class)]
         ?string $outputFile = null,
-        #[ValueResolver(PluginValueResolver::class)]
-        ExtensionEnum ...$extensions, // global option
     ): int {
-        $logger->debug(__METHOD__);
+        $message = sprintf(
+            '<comment>%s</comment> %s',
+            'The "{command}" command was invoked with following parameters',
+            ': {parameters}'
+        );
 
-        $command = $application->find('lint');
         $invokableCommand = $command->getCode();
-        $parameters = $invokableCommand->getArguments($input);
-        $configResolver = new FileOptionsResolver($input, $parameters);
+        $parameters = $invokableCommand?->getArguments($input) ?? [];
 
-        /** @var MetadataCollection $metadataCollection */
-        $metadataCollection = $application->getMetadata($configResolver);
-        $metadataCollection->describe($logger);
+        $valueResolvedDump = is_scalar($parameters)
+            ? $parameters
+            : (is_object($parameters) ? get_debug_type($parameters): json_encode($parameters, JSON_UNESCAPED_SLASHES));
 
-        /** @var CacheManager $cacheManager */
-        $cacheManager = ExtensionEnum::factory(ExtensionEnum::CACHE_MANAGER->value);
-        $cacheManager->setLogger($logger);
+        $logger->notice(
+            $message,
+            [
+                '__section__' => SectionEnum::COMMAND->label(),
+                '__style__' => SectionEnum::COMMAND->value,
+                'command' => $command->getName(),
+                'parameters' => $valueResolvedDump
+            ]
+        );
 
-        foreach ($extensions as $extensionName) {
-            if ($extensionName === ExtensionEnum::CACHE_MANAGER) {
-                // found the "cache_manager" on command line options
-                $consoleEvent = new ConsoleCommandEvent(null, $input, $output);
-                $cacheManager->initialize($consoleEvent);
-                break;
-            }
-        }
-        $cache = $cacheManager::getCacheInstance();
+        $finder = new Finder(null, $sourcePath, $excludePath, $fileExtensions);
 
-        $finder = new Finder($configResolver);
-        $logger->debug('Finder rules: {rules}', ['rules' => json_encode($finder, JSON_UNESCAPED_SLASHES)]);
+        $message = sprintf(
+            '<comment>%s</comment> %s',
+            'The "Finder" rules was applied',
+            ': {rules}'
+        );
+        $logger->debug(
+            $message,
+            [
+                '__section__' => SectionEnum::COMMAND->label(),
+                '__style__' => SectionEnum::COMMAND->value,
+                'rules' => json_encode($finder, JSON_UNESCAPED_SLASHES)
+            ]
+        );
         $finder = $finder->getFiles();
 
+        $application = $command->getApplication();
+
         $linter = new Linter(
-            $configResolver,
+            null,
             $application->getDispatcher(),   // @phpstan-ignore method.notFound
             $application,
             $application->getHelperSet(),
             $output,
-            $cache,
+            $application->getCache(),
+            $parallelJob,
+            $dryRun,
+            $showWarning,
+            $memoryLimit,
         );
         $linter->setLogger($logger);
         $this->results = $linter->lintFiles($finder, null, $metadataCollection);

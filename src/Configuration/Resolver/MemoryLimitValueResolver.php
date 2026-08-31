@@ -18,6 +18,7 @@ use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Input\InputInterface;
 
 use function ini_get;
+use function str_ends_with;
 
 /**
  * @author Laurent Laville
@@ -40,7 +41,14 @@ class MemoryLimitValueResolver implements ValueResolverInterface
         $value = $input->hasOption($argumentName) ? $input->getOption($argumentName) : null;
 
         if (null === $value) {
-            $value = (int) ini_get('memory_limit');
+            $value = ini_get('memory_limit');
+            if (str_ends_with($value, 'G')) {
+                $value = intval($value) * 1024 * 1024 * 1024;
+            } elseif (str_ends_with($value, 'M')) {
+                $value = intval($value) * 1024 * 1024;
+            } elseif (str_ends_with($value, 'K')) {
+                $value = intval($value) * 1024;
+            }
         }
 
         return [$value];

@@ -40,7 +40,7 @@ class PluginValueResolver implements ValueResolverInterface
         private ?EnvConfigInterface $envConfig = null,
         private readonly string $extensionEnumClass = ExtensionEnum::class,
     ) {
-        $this->envConfig ??= new EnvConfig;
+        $this->envConfig ??= new EnvConfig();
     }
 
     public function resolve(string $argumentName, InputInterface $input, ReflectionMember $member): iterable

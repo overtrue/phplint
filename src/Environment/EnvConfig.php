@@ -13,11 +13,15 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Environment;
 
+use Overtrue\PHPLint\Extension\ExtensionEnum;
 use function getenv;
+use function implode;
 use function rtrim;
+use function sort;
 use function str_replace;
 use function strtoupper;
 use function strtr;
+use const PHP_SAPI;
 
 /**
  * @author Laurent Laville
@@ -52,5 +56,37 @@ class EnvConfig implements EnvConfigInterface
         $envKey = $this->prefix . strtoupper(strtr($key, '.-', '__'));
         $envKey = str_replace($this->prefix . $this->prefix, $this->prefix, $envKey);
         return getenv($envKey) ?: $defaultFallback;
+    }
+
+    public function getDefaultFallback(string $envName): array
+    {
+        $allowPlugins = [
+            ExtensionEnum::DIAGNOSE_MANAGER->value,
+            ExtensionEnum::OUTPUT_MANAGER->value,
+            ExtensionEnum::PROFILE_MANAGER->value,
+            ExtensionEnum::PROGRESS_MANAGER->value,
+            ExtensionEnum::CACHE_MANAGER->value,
+        ];
+        sort($allowPlugins);
+
+        $defaultPlugins = [
+            ExtensionEnum::CACHE_MANAGER->value,
+        ];
+
+        if ('dev' === $envName) {
+            $defaultPlugins[] = ExtensionEnum::DIAGNOSE_MANAGER->value;
+            $defaultPlugins[] = ExtensionEnum::PROFILE_MANAGER->value;
+            $defaultPlugins[] = ExtensionEnum::PROGRESS_MANAGER->value;
+
+            if ('cli' === $this->get('frontend', PHP_SAPI)) {
+                $defaultPlugins[] = ExtensionEnum::OUTPUT_MANAGER->value;
+            }
+        }
+        sort($defaultPlugins);
+
+        return [
+            'allow_plugins' => implode(',', $allowPlugins),
+            'default_plugins' => implode(',', $defaultPlugins),
+        ];
     }
 }

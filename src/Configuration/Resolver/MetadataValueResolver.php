@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Configuration\Resolver;
 
+use Overtrue\PHPLint\Configuration\FileOptionsResolver;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\Application;
 use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
@@ -37,9 +39,17 @@ class MetadataValueResolver implements ValueResolverInterface
             return [];
         }
 
+        $parameters = [];
+
+        foreach([OptionDefinition::NO_CONFIGURATION, OptionDefinition::CONFIGURATION] as $name) {
+            if ($input->hasOption($name)) {
+                $parameters[$name] = $input->getOption($name);
+            }
+        }
+
         $value = $input->hasArgument($argumentName)
             ? $input->getArgument($argumentName)
-            : $this->application->getMetadata()
+            : $this->application->getMetadata((new FileOptionsResolver($input, $parameters))->getOptions());
         ;
 
         return [$value];

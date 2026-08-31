@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Command;
 
-use BackedEnum;
 use Overtrue\PHPLint\Configuration\Resolver\ArgumentResolverInterface;
 use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Symfony\Component\Console\Attribute\Argument;
@@ -24,11 +23,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_combine;
-use function array_key_last;
-use function array_reduce;
-use function array_splice;
-use function count;
-use function end;
 
 /**
  * Represents an invokable command.
@@ -105,21 +99,8 @@ final class InvokableCommand extends \Symfony\Component\Console\Command\Invokabl
             $parameterNames[$index] = $argumentName;
         }
 
-        // group by variadic parameter into an array
-        $parameterValues = $parameters;
-        $extensions = [end($parameters)];
-        if (count($parameters) > count($parameterNames)) {
-            $extensions = array_reduce($parameterValues, function ($carry, $item) {
-                if ($item instanceof BackedEnum) {
-                    $carry[] = $item;
-                }
-                return $carry;
-            }, []);
-        }
-        array_splice($parameterValues, array_key_last($parameterNames), null, [$extensions]);
-
         // save list of all parameters and their names into a key-value map array
-        return array_combine($parameterNames, $parameterValues);
+        return array_combine($parameterNames, $parameters);
     }
 
     protected function getParameters(\ReflectionFunction $function, InputInterface $input): array
