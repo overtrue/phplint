@@ -15,6 +15,7 @@ namespace Overtrue\PHPLint\Extension;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * @author Laurent Laville
@@ -26,6 +27,19 @@ interface ExtensionInterface extends ExtensionEventInterface
      * @see https://stackoverflow.com/questions/19901850/how-do-i-get-an-objects-unqualified-short-class-name
      */
     public function getName(): string;
+
+    /**
+     * Describes the contextual event and write a line to the current Logger instance (if available)
+     *
+     * @return array{
+     *     command?: Command,
+     *     arguments?: string[],
+     *     eventType: string,
+     *     listener: string,
+     *     stopPropagation: string
+     * }
+     */
+    public function describeEvent(Event $event): array;
 
     /**
      * Add extra arguments and options provided by an extension to the Console Application lint command
