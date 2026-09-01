@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Environment\Provider;
 
 use Fidry\CpuCoreCounter\CpuCoreCounter;
+use Overtrue\PHPLint\Console\SectionEnum;
 use Overtrue\PHPLint\Environment\ProviderData;
 use Overtrue\PHPLint\Environment\ProviderInterface;
 use Psr\Log\LoggerAwareInterface;
@@ -43,7 +44,10 @@ class Cpu implements ProviderInterface, LoggerAwareInterface
         if (!\Composer\InstalledVersions::isInstalled($packageName)) {
             $this->logger->warning(
                 'Package "{packageName}" is not installed.',
-                ['packageName' => $packageName]
+                [
+                    '__section__' => SectionEnum::DEPENDENCY->label(),
+                    'packageName' => $packageName
+                ]
             );
             return null;
         }

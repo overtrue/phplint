@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Environment\Provider;
 
 use Composer\InstalledVersions;
+use Overtrue\PHPLint\Console\SectionEnum;
 use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Overtrue\PHPLint\Environment\ProviderData;
@@ -90,7 +91,10 @@ class DotEnv implements ProviderInterface, LoggerAwareInterface
             if (!InstalledVersions::isInstalled($packageName)) {
                 $this->logger->warning(
                     'Package "{packageName}" is not installed.',
-                    ['packageName' => $packageName]
+                    [
+                        '__section__' => SectionEnum::DEPENDENCY->label(),
+                        'packageName' => $packageName
+                    ]
                 );
             } else {
                 $dirs = $xdg->getConfigDirs();

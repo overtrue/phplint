@@ -26,6 +26,7 @@ enum SectionEnum: string
     case ARGUMENT = 'argument';
     case CACHE = 'cache';
     case COMMAND = 'command';
+    case DEPENDENCY = 'dependency';
     case ENVIRONMENT = 'environment';
     case EVENT = 'event';
     case METADATA = 'metadata';
