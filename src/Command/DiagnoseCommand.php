@@ -47,14 +47,9 @@ use function explode;
 use function get_debug_type;
 use function in_array;
 use function is_iterable;
-use function json_decode;
-use function json_encode;
 use function sprintf;
 use function str_starts_with;
 use function substr;
-
-use const JSON_PRETTY_PRINT;
-use const JSON_UNESCAPED_SLASHES;
 
 /**
  * @author Laurent Laville
@@ -164,13 +159,13 @@ final class DiagnoseCommand
             $environment->addProvider($user);
         }
 
-        $providerData = $environment->describe();
+        $providerDataList = $environment->describe();
 
-        if (count($providerData) === 0) {
+        if (count($providerDataList) === 0) {
             return 127;
         }
 
-        foreach ($providerData as $providerId => $values) {
+        foreach ($providerDataList as $providerId => $values) {
             $title = match ($providerId) {
                 Git::class => 'VCS Information',
                 Php::class => 'PHP Information',
@@ -211,10 +206,6 @@ final class DiagnoseCommand
                     continue;
                 }
                 $info = $providerData->describe();
-                $value = $output->isVerbose()
-                    ? json_encode(json_decode($info['value']), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
-                    : $info['value']
-                ;
 
                 $style = SectionEnum::ENVIRONMENT->value;
                 // when style is not available, fallback to default style defined by \Overtrue\PHPLint\Console\Application::run
@@ -223,7 +214,7 @@ final class DiagnoseCommand
                 $io->writeln(
                     $formatter->formatSection(
                         $info['setting'],
-                        sprintf('<comment>%s</comment> %s', $info['description'], $value),
+                        sprintf('<comment>%s</comment> %s', $info['description'], $info['value']),
                         $style,
                     )
                 );
