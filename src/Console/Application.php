@@ -183,12 +183,23 @@ final class Application extends BaseApplication implements
     {
         $output ??= new ConsoleOutput();
 
-        $defaultStyle = SectionEnum::DEFAULT->value;
-        if (!$output->getFormatter()->hasStyle($defaultStyle)) {
-            $output->getFormatter()->setStyle(
-                $defaultStyle,
-                new OutputFormatterStyle('black', 'cyan')
-            );
+        // Default colors skin :
+        // If you want to override, use the bootstrapping feature
+        $styles = [
+            SectionEnum::DEFAULT->value => new OutputFormatterStyle('black', 'cyan'),
+            SectionEnum::COMMAND->value => new OutputFormatterStyle('white', 'blue'),
+            SectionEnum::ARGUMENT->value => new OutputFormatterStyle('yellow', 'blue'),
+            SectionEnum::PLUGIN->value => new OutputFormatterStyle('white', 'red'),
+            SectionEnum::PROFILE->value => new OutputFormatterStyle('black', 'gray'),
+            SectionEnum::ENVIRONMENT->value => new OutputFormatterStyle('yellow', 'blue'),
+            SectionEnum::EVENT->value => new OutputFormatterStyle('white', 'magenta'),
+            SectionEnum::METADATA->value => new OutputFormatterStyle('black', 'yellow'),
+        ];
+
+        foreach ($styles as $name => $style) {
+            if (!$output->getFormatter()->hasStyle($name)) {
+                $output->getFormatter()->setStyle($name, $style);
+            }
         }
 
         return parent::run($input, $output);
