@@ -16,6 +16,7 @@ namespace Overtrue\PHPLint\Command;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver\LoggerValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
+use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Console\Attribute\ValueResolver;
 use Overtrue\PHPLint\Console\SectionEnum;
 use Overtrue\PHPLint\Environment\EnvConfig;
@@ -32,6 +33,7 @@ use Overtrue\PHPLint\Environment\Supplier;
 use Overtrue\PHPLint\Extension\DiagnoseEnum;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\FormatterHelper;
@@ -65,6 +67,7 @@ final class DiagnoseCommand
         InputInterface $input,
         OutputInterface $output,
         SymfonyStyle $io,
+        Application $application,
         #[ValueResolver(LoggerValueResolver::class)]
         LoggerInterface $logger,
         #[ValueResolver(MetadataValueResolver::class)]
@@ -83,7 +86,7 @@ final class DiagnoseCommand
             $vcs = $php = $uname = $ci = $cpu = $dotenv = $metadata = true;
         } else { //
             if ($whenDiagnosed === DiagnoseEnum::AUTO->value) {
-                $envConfig = new EnvConfig();
+                $envConfig = $application instanceof ApplicationInterface ? $application->getEnvConfig() : new EnvConfig();
                 $what = explode(',', $envConfig->get('diagnostic', 'metadata:current_configuration'));
             } else {
                 $what = explode(',', $whenDiagnosed);
