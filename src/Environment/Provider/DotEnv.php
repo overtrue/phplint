@@ -126,7 +126,7 @@ class DotEnv implements ProviderInterface, LoggerAwareInterface
             'debug' => 'Toggles the debug mode',
             'frontend' => 'The name of the interface PHPLint runs it',
             'project_dir' => 'The project directory relative to the parent directory of your composer.json file',
-            'log' => 'Identify what class to use as PSR-3 compatible logger',
+            'logger' => 'Identify what class to use as PSR-3 compatible logger',
             'diagnostic' => 'Identify what diagnostics are runs',
             'mode' => 'This setting controls which PHPLint features are enabled',
             'allow_plugins' => 'List of extensions allowed to be executed',
