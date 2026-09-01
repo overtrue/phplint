@@ -114,8 +114,10 @@ class ConsoleApplicationRunner
 
         $defaultCommand = $envConfig->get('mode', 'off') === 'legacy' ? 'lint' : 'list';
 
+        $commandName = $this->application->isSingleCommand() ? $defaultCommand : $input->getFirstArgument();
+
         $dynamicValueResolvers = [
-            CoreValueResolver::class => fn() => new CoreValueResolver($this->application, $this->output ?? new NullOutput(), $defaultCommand),
+            CoreValueResolver::class => fn() => new CoreValueResolver($this->application, $this->output ?? new NullOutput(), $commandName),
             MetadataValueResolver::class => fn() => new MetadataValueResolver($this->application)
         ];
 
