@@ -47,9 +47,14 @@ use function explode;
 use function get_debug_type;
 use function in_array;
 use function is_iterable;
+use function is_null;
+use function json_decode;
+use function json_encode;
 use function sprintf;
 use function str_starts_with;
 use function substr;
+use const JSON_PRETTY_PRINT;
+use const JSON_UNESCAPED_SLASHES;
 
 /**
  * @author Laurent Laville
@@ -207,6 +212,13 @@ final class DiagnoseCommand
                 }
                 $info = $providerData->describe();
 
+                $jsonEncodedValue = json_decode($info['value']);
+
+                $value = $output->isVerbose() && !is_null($jsonEncodedValue)
+                    ? json_encode($jsonEncodedValue, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+                    : $info['value']
+                ;
+
                 $style = SectionEnum::ENVIRONMENT->value;
                 // when style is not available, fallback to default style defined by \Overtrue\PHPLint\Console\Application::run
                 $style = $output->getFormatter()->hasStyle($style) ? $style : SectionEnum::DEFAULT->value;
@@ -214,7 +226,7 @@ final class DiagnoseCommand
                 $io->writeln(
                     $formatter->formatSection(
                         $info['setting'],
-                        sprintf('<comment>%s</comment> %s', $info['description'], $info['value']),
+                        sprintf('<comment>%s</comment> %s', $info['description'], $value),
                         $style,
                     )
                 );
