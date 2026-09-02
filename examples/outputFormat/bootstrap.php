@@ -17,5 +17,4 @@ declare(strict_types=1);
  */
 
 require_once dirname(__DIR__, 2) . '/autoload.php';
-require_once '/shared/backups/bartlett/sarif-php-converters/' . 'vendor/autoload.php';
 require_once __DIR__ . '/MyPhpLintConverter.php';

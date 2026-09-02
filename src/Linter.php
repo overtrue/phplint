@@ -34,6 +34,7 @@ use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Stopwatch\Stopwatch;
@@ -57,6 +58,10 @@ final class Linter implements LoggerAwareInterface, Countable
 
     private array $results;
 
+    private EventDispatcherInterface $dispatcher;
+
+    private Cache $cache;
+
     private ?Stopwatch $stopwatch = null;
 
     private \Overtrue\PHPLint\Metadata\LinterOutput $finalResults;
@@ -64,17 +69,20 @@ final class Linter implements LoggerAwareInterface, Countable
     public function __construct(
         private readonly ?Resolver $configResolver = null,  // @deprecated keep only for API compatibility with previous version 9.7.x
                                                             // will be removed in next API version
-        private readonly ?EventDispatcherInterface $dispatcher = null,
+        ?EventDispatcherInterface $dispatcher = null,
         private readonly ?Application $client = null,   // @deprecated keep only for API compatibility with previous version 9.7.x
                                                         // will be removed in next API version
         private readonly ?HelperSet $helperSet = null,
         private readonly ?OutputInterface $output = null,
-        private readonly ?Cache $cache = null,
+        ?Cache $cache = null,
         private readonly int $processLimit = 1,
         private readonly bool $dryRun = false,
         private readonly bool $showWarning = false,
         private readonly int $memoryLimit = -1,
     ) {
+        $this->dispatcher = $dispatcher ?? new EventDispatcher();
+        $this->cache = $cache ?? new Cache();
+
         $this->results = [
             'errors' => [],
             'warnings' => [],
@@ -94,6 +102,8 @@ final class Linter implements LoggerAwareInterface, Countable
         ?float $startTime = null,  // @deprecated since release 9.8.0, and will be removed in next API version
         ?MetadataCollection $metadataCollection = null
     ): LinterOutput {
+        $metadataCollection = $metadataCollection ?? new MetadataCollection();
+
         $profiling = $metadataCollection->getMetadata(ProfilerOutput::class);
         $this->stopwatch = $profiling?->getStopwatch();
 

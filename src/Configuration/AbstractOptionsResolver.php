@@ -65,7 +65,7 @@ abstract class AbstractOptionsResolver implements Resolver
 
         // options that cannot be overridden by YAML config file values
         $name = OptionDefinition::CONFIGURATION;
-        $withoutConfigFile = in_array($options[$name], ['', 'never']);
+        $withoutConfigFile = in_array($options[$name] ?? '', ['', 'never']);
         $defaults[$name] = $withoutConfigFile ? '' : $options[$name];
 
         $name = OptionDefinition::NO_CONFIGURATION;
