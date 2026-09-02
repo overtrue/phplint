@@ -114,7 +114,9 @@ class ConsoleApplicationRunner
 
         $defaultCommand = $envConfig->get('mode', 'off') === 'legacy' ? 'lint' : 'list';
 
-        $commandName = $this->application->isSingleCommand() ? $defaultCommand : $input->getFirstArgument();
+        $singleCommand = ($defaultCommand !== 'list');
+
+        $commandName = $singleCommand ? $defaultCommand : $input->getFirstArgument();
 
         $dynamicValueResolvers = [
             CoreValueResolver::class => fn() => new CoreValueResolver($this->application, $this->output ?? new NullOutput(), $commandName),
@@ -133,7 +135,7 @@ class ConsoleApplicationRunner
             new LintCommand(),
         ]);
 
-        $this->application->setDefaultCommand($defaultCommand, ($defaultCommand !== 'list'));
+        $this->application->setDefaultCommand($defaultCommand, $singleCommand);
     }
 
     public function getApplication(): Application
