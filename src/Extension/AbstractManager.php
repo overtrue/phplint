@@ -16,6 +16,7 @@ namespace Overtrue\PHPLint\Extension;
 use Overtrue\PHPLint\Console\SectionEnum;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Event\ConsoleEvent;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Contracts\EventDispatcher\Event;
@@ -37,7 +38,18 @@ abstract class AbstractManager implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    public function describeEvent(Event $event): array
+    /**
+     * Describes the contextual event and write a line to the current Logger instance (if available)
+     *
+     * @return array{
+     *     command?: Command,
+     *     arguments?: string[],
+     *     eventType: string,
+     *     listener: string,
+     *     stopPropagation: string
+     * }
+     */
+    protected function describeEvent(Event $event): array
     {
         $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
         $trace = end($trace);
