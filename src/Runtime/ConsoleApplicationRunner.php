@@ -158,7 +158,7 @@ class ConsoleApplicationRunner
         $extensions = [];
 
         if (true === $input->hasParameterOption(['--' . OptionDefinition::EXTENSIONS, '-x'], true)) {
-            $extensions = (array) $input->getParameterOption(OptionDefinition::EXTENSIONS);
+            $extensions = (array) $input->getParameterOption(['--' . OptionDefinition::EXTENSIONS, '-x']);
         }
 
         $extensions = array_merge($defaultPlugins, $extensions);
