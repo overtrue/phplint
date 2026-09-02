@@ -82,11 +82,11 @@ final class OutputManager extends AbstractManager implements
     {
         $this->describeEvent($event);
 
-        $command = $event->getCommand();
-        if ($command->getName() !== 'lint') {
-            // this extension must be only available for lint command
+        if (!$this->allowEvent($event)) {
             return;
         }
+
+        $command = $event->getCommand();
 
         $application = $command->getApplication();
 
@@ -108,6 +108,10 @@ final class OutputManager extends AbstractManager implements
     public function terminate(ConsoleTerminateEvent $event): void
     {
         $this->describeEvent($event);
+
+        if (!$this->allowEvent($event)) {
+            return;
+        }
 
         $metadataCollection = $this->metadataCollection ?? new MetadataCollection();
 

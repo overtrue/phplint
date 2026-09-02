@@ -99,6 +99,10 @@ final class CacheManager extends AbstractManager implements
     {
         $this->describeEvent($event);
 
+        if (!$this->allowEvent($event)) {
+            return;
+        }
+
         $command = $event->getCommand();
 
         $application = $command->getApplication();

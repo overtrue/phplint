@@ -84,4 +84,9 @@ abstract class AbstractManager implements LoggerAwareInterface
 
         return $context;
     }
+
+    protected function allowEvent(ConsoleEvent $event): bool
+    {
+        return $event->getCommand()?->getName() === 'lint';
+    }
 }

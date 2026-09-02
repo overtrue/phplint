@@ -90,11 +90,11 @@ final class ProgressManager extends AbstractManager implements
     {
         $this->describeEvent($event);
 
-        $command = $event->getCommand();
-        if ($command->getName() !== 'lint') {
-            // this extension must be only available for lint command
+        if (!$this->allowEvent($event)) {
             return;
         }
+
+        $command = $event->getCommand();
 
         $output = $event->getOutput();
 

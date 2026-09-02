@@ -68,6 +68,10 @@ final class DiagnoseManager extends AbstractManager implements
     {
         $this->describeEvent($event);
 
+        if (!$this->allowEvent($event)) {
+            return;
+        }
+
         $input = $event->getInput();
 
         $this->whenDiagnosed = $input->getOption(OptionDefinition::DIAGNOSTIC) ?? DiagnoseEnum::AUTO->value;
@@ -93,17 +97,15 @@ final class DiagnoseManager extends AbstractManager implements
     {
         $this->describeEvent($event);
 
+        if (!$this->allowEvent($event)) {
+            return;
+        }
+
         if ($this->whenDiagnosed === DiagnoseEnum::NEVER->value) {
             return;
         }
 
         $command = $event->getCommand();
-
-        if (in_array($command->getName(), ['list', 'help', 'diagnose'], true)) {
-            // don't print any diagnostic for the "list" and "help" commands
-            // avoid duplicated output for the diagnose command
-            return;
-        }
 
         $input = $event->getInput();
         $output = $event->getOutput();

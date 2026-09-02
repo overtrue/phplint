@@ -78,11 +78,11 @@ final class ProfileManager extends AbstractManager implements
     {
         $this->describeEvent($event);
 
-        $command = $event->getCommand();
-        if ($command->getName() !== 'lint') {
-            // this extension must be only available for lint command
+        if (!$this->allowEvent($event)) {
             return;
         }
+
+        $command = $event->getCommand();
 
         $input = $event->getInput();
         $application = $command->getApplication();
@@ -118,6 +118,10 @@ final class ProfileManager extends AbstractManager implements
     public function terminate(ConsoleTerminateEvent $event): void
     {
         $this->describeEvent($event);
+
+        if (!$this->allowEvent($event)) {
+            return;
+        }
 
         if (null === $this->stopwatch) {
             // when symfony/stopwatch package is not installed
