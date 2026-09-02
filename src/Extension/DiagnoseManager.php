@@ -117,7 +117,7 @@ final class DiagnoseManager extends AbstractManager implements
             $metadataCollection = $application->getMetadata();
 
             $diagnoseCommand = new DiagnoseCommand();
-            $exitCode = $diagnoseCommand($input, $output, $io, $application->getLogger(), $metadataCollection, $this->whenDiagnosed);
+            $exitCode = $diagnoseCommand($input, $output, $io, $application, $application->getLogger(), $metadataCollection, $this->whenDiagnosed);
 
             if ($exitCode === 0) {
                 $io->success('The Diagnose Manager has finished successfully.');
