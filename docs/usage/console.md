@@ -1,17 +1,51 @@
 # Console CLI
 
-Linting PHP source files should be as simple as running `phplint` with one or more source paths (no config required!).
-It will however assume some defaults that you might want to change.
+PHPLint 9.8 supports two console invocation modes controlled by the `PLINT_MODE`
+environment variable.
 
-PHPLint will by default be looking in order for the file `.phplint.yml` in the current working directory.
-You can use another filename by option: `--configuration=FILENAME` or `-c FILENAME`.
+## Default command mode
 
-A basic configuration could be for example:
+When `PLINT_MODE` is unset (or set to `off`), PHPLint behaves like a normal
+multi-command Symfony Console application. Running `phplint` displays the
+command list; invoke the linter explicitly:
+
+```shell
+phplint lint [<path>...]
+phplint lint --help
+```
+
+## Legacy mode
+
+Set `PLINT_MODE=legacy` to keep the single-command style where `lint` is the
+default command:
+
+```shell
+PLINT_MODE=legacy phplint [<path>...]
+PLINT_MODE=legacy phplint --help
+```
+
+The lint path defaults to the current working directory when omitted.
+
+## Configuration
+
+The default configuration filename remains `.phplint.yml`. Use the global
+`--configuration|-c` option to select another file.
+
+PHPLint 9.8 also supports configuration discovery modes:
+
+- `--configuration auto` scans supported `.phplint` and `.phplint.dist`
+  candidates (`php`, `yaml`, `yml`, and `json`).
+- `--configuration always` uses the configured default candidate directly.
+- `--configuration never` disables configuration loading.
+- `--no-configuration` is retained for 9.7 compatibility but is deprecated in
+  favor of `--configuration never`.
+
+A basic YAML configuration can still look like:
 
 ```yaml
 path: ./src
 jobs: 10
-extensions:
+file-extensions:
   - php
 exclude:
   - vendor
@@ -20,44 +54,22 @@ memory-limit: -1
 no-cache: true
 ```
 
-> If you want to ignore the configuration file directives, you should specify option `--no-configuration`.
+## Core lint options
 
-You can then find more advanced configuration settings in [the configuration documentation](../configuration.md).
-For more information on which options are available, you can run: `phplint --help`
+PHPLint 9.8 separates source-file extensions from application extensions
+(plugins):
 
-```text
-Description:
-  Files syntax check only
+- `--file-extensions` limits the source file extensions to lint.
+- `-x|--extensions` is a global option for PHPLint extension managers/plugins.
 
-Usage:
-  lint [options] [--] [<path>...]
+The core `lint` command also exposes `--exclude`, `-j|--jobs`, `-w|--warning`,
+`--memory-limit`, `--ignore-exit-code`, and `--dry-run`.
 
-Arguments:
-  path                               Path to file or directory to lint (default: working directory)
+Additional cache, diagnostic, output, profile, and progress options are added by
+the corresponding enabled extension managers. Because that option set is
+extension-dependent, use `phplint lint --help` (default command mode) or
+`PLINT_MODE=legacy phplint --help` (legacy mode) for the authoritative options
+for the current environment.
 
-Options:
-      --exclude=EXCLUDE              Path to file or directory to exclude from linting (multiple values allowed)
-      --extensions=EXTENSIONS        Check only files with selected extensions (multiple values allowed)
-  -j, --jobs=JOBS                    Number of paralleled jobs to run
-  -c, --configuration=CONFIGURATION  Read configuration from config file [default: ".phplint.yml"]
-      --no-configuration             Ignore default configuration file (.phplint.yml)
-      --cache=CACHE                  Path to the cache directory (Deprecated option, use "cache-dir" instead)
-      --cache-dir=CACHE-DIR          Path to the cache directory
-      --cache-ttl=CACHE-TTL          Limit cached data for a period of time (>0: time to live in seconds) [default: 3600]
-      --no-cache                     Ignore cached data
-  -p, --progress=PROGRESS            Show the progress output
-      --no-progress                  Hide the progress output
-  -o, --output=OUTPUT                Generate an output to the specified path (default: standard output)
-      --format=FORMAT                Format of requested reports (multiple values allowed)
-  -w, --warning                      Also show warnings
-      --memory-limit=MEMORY-LIMIT    Memory limit for analysis
-      --ignore-exit-code             Ignore exit codes so there are no "failure" exit code even when no files processed
-      --bootstrap=BOOTSTRAP          A PHP script that is included before the linter run
-  -h, --help                         Display help for the given command. When no command is given display help for the lint command
-      --silent                       Do not output any message
-  -q, --quiet                        Only errors are displayed. All other output is suppressed
-  -V, --version                      Display this application version
-      --ansi|--no-ansi               Force (or disable --no-ansi) ANSI output
-  -n, --no-interaction               Do not ask any interactive question
-  -v|vv|vvv, --verbose               Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
-```
+For details on individual settings, see
+[the configuration documentation](../configuration.md).
