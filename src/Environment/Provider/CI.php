@@ -50,7 +50,10 @@ class CI implements ProviderInterface, LoggerAwareInterface
         if (!$ciDetector->isCiDetected()) {
             $this->logger->warning(
                 'Package "{packageName}" does not detect any CI environment.',
-                ['packageName' => $packageName]
+                [
+                    '__section__' => SectionEnum::DEPENDENCY->label(),
+                    'packageName' => $packageName
+                ]
             );
             return null;
         }
