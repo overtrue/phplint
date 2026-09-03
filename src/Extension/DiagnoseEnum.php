@@ -19,7 +19,6 @@ namespace Overtrue\PHPLint\Extension;
  */
 enum DiagnoseEnum: string
 {
-    case ALL = 'all';
     case AUTO = 'auto';
     case ALWAYS = 'always';
     case CI = 'ci';
