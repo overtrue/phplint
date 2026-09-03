@@ -1,0 +1,5 @@
+{
+    "require-dev": {
+        "ondram/ci-detector": "^4.2"
+    }
+}
