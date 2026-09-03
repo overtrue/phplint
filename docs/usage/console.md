@@ -40,6 +40,11 @@ PHPLint 9.8 also supports configuration discovery modes:
 - `--no-configuration` is retained for 9.7 compatibility but is deprecated in
   favor of `--configuration never`.
 
+> [!CAUTION]
+>
+> Configuration file candidates in format PHP and JSON are reserved for future implementation. 
+> Only YAML (yml) format is currently supported.
+
 A basic YAML configuration can still look like:
 
 ```yaml
