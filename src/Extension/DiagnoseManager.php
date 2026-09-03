@@ -14,18 +14,18 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Extension;
 
 use Overtrue\PHPLint\Command\DiagnoseCommand;
-use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Console\SectionEnum;
+use Overtrue\PHPLint\Environment\EnvConfig;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\Console\Input\InputDefinition;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Throwable;
 
+use function explode;
 use function in_array;
 
 /**
@@ -36,7 +36,7 @@ final class DiagnoseManager extends AbstractManager implements
     ExtensionInterface,
     EventSubscriberInterface
 {
-    private string $whenDiagnosed = '';
+    private array $diagnostics = [];
 
     public function getName(): string
     {
@@ -45,15 +45,7 @@ final class DiagnoseManager extends AbstractManager implements
 
     public static function getDefinition(): InputDefinition
     {
-        return new InputDefinition([
-            new InputOption(
-                OptionDefinition::DIAGNOSTIC,
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'Control the use of providers to diagnose the system',
-                DiagnoseEnum::AUTO->value
-            )
-        ]);
+        return new InputDefinition([]);
     }
 
     public static function getSubscribedEvents(): array
@@ -72,11 +64,18 @@ final class DiagnoseManager extends AbstractManager implements
             return;
         }
 
+        $application = $event->getCommand()->getApplication();
+
+        $envConfig = $application instanceof ApplicationInterface ? $application->getEnvConfig() : new EnvConfig();
+
         $input = $event->getInput();
+        $output = $event->getOutput();
 
-        $this->whenDiagnosed = $input->getOption(OptionDefinition::DIAGNOSTIC) ?? DiagnoseEnum::AUTO->value;
+        $diagnostics = $envConfig->get('diagnostic', DiagnoseEnum::AUTO->value);
+        $this->diagnostics = explode(',', $diagnostics);
 
-        if ($this->whenDiagnosed === DiagnoseEnum::NEVER->value) {
+        if (in_array(DiagnoseEnum::NEVER->value, $this->diagnostics, true) || $output->isQuiet()) {
+            $this->diagnostics = [];
             return;
         }
 
@@ -89,7 +88,7 @@ final class DiagnoseManager extends AbstractManager implements
         $this->logger->notice($message, [
             '__section__' => SectionEnum::PLUGIN->label(),
             '__style__' => SectionEnum::PLUGIN->value,
-            'kind' => $this->whenDiagnosed,
+            'kind' => $diagnostics,
         ]);
     }
 
@@ -97,15 +96,9 @@ final class DiagnoseManager extends AbstractManager implements
     {
         $this->describeEvent($event);
 
-        if (!$this->allowEvent($event)) {
+        if (!$this->allowEvent($event) || empty($this->diagnostics)) {
             return;
         }
-
-        if ($this->whenDiagnosed === DiagnoseEnum::NEVER->value) {
-            return;
-        }
-
-        $command = $event->getCommand();
 
         $input = $event->getInput();
         $output = $event->getOutput();
@@ -113,13 +106,14 @@ final class DiagnoseManager extends AbstractManager implements
         $io = new SymfonyStyle($input, $output);
 
         try {
+            $command = $event->getCommand();
             /** @var ApplicationInterface $application */
             $application = $command->getApplication();
 
             $metadataCollection = $application->getMetadata();
 
             $diagnoseCommand = new DiagnoseCommand();
-            $exitCode = $diagnoseCommand($input, $output, $io, $application, $application->getLogger(), $metadataCollection, $this->whenDiagnosed);
+            $exitCode = $diagnoseCommand($input, $output, $io, $application, $application->getLogger(), $metadataCollection);
 
             if ($exitCode === 0) {
                 $io->success('The Diagnose Manager has finished successfully.');
