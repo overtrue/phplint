@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Command;
 
-use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver\LoggerValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
 use Overtrue\PHPLint\Console\ApplicationInterface;
@@ -41,6 +40,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+use function array_unique;
 use function class_exists;
 use function count;
 use function explode;
@@ -53,6 +53,7 @@ use function json_encode;
 use function sprintf;
 use function str_starts_with;
 use function substr;
+
 use const JSON_PRETTY_PRINT;
 use const JSON_UNESCAPED_SLASHES;
 
@@ -73,68 +74,67 @@ final class DiagnoseCommand
         #[ValueResolver(MetadataValueResolver::class)]
         MetadataCollection $metadataCollection,
     ): int {
-        $whenDiagnosed = $input->getOption(OptionDefinition::DIAGNOSTIC) ?? DiagnoseEnum::NEVER->value;
+        $envConfig = $application instanceof ApplicationInterface ? $application->getEnvConfig() : new EnvConfig();
 
-        if (($whenDiagnosed === DiagnoseEnum::NEVER->value) || $output->isQuiet()) {
+        $diagnostic = explode(',', $envConfig->get('diagnostic', DiagnoseEnum::AUTO->value));
+
+        if (in_array(DiagnoseEnum::NEVER->value, $diagnostic, true) || $output->isQuiet()) {
             return Command::SUCCESS;
+        }
+
+        if (in_array(DiagnoseEnum::AUTO->value, $diagnostic, true)) {
+            $diagnostic[] = 'metadata';
         }
 
         $user = false;
         $filters = [];
 
-        if ($whenDiagnosed === DiagnoseEnum::ALWAYS->value) {
-            $vcs = $php = $uname = $ci = $cpu = $dotenv = $metadata = true;
-        } else { //
-            if ($whenDiagnosed === DiagnoseEnum::AUTO->value) {
-                $envConfig = $application instanceof ApplicationInterface ? $application->getEnvConfig() : new EnvConfig();
-                $what = explode(',', $envConfig->get('diagnostic', 'metadata:current_configuration'));
+        $parts = [];
+        foreach ($diagnostic as $part) {
+            if (str_starts_with($part, 'metadata:')) {
+                $filters[] = substr($part, 9);
+                $parts[] = 'metadata';
             } else {
-                $what = explode(',', $whenDiagnosed);
+                $parts[] = $part;
             }
-            $parts = [];
-            foreach ($what as $pos => $part) {
-                if (str_starts_with($part, 'metadata:')) {
-                    $filters[] = substr($part, 9);
-                    $parts[] = 'metadata';
-                } else {
-                    $parts[] = $part;
-                }
+        }
+        $parts = array_unique($parts);
+
+        $vcs = $php = $uname = $ci = $cpu = $dotenv = $metadata = false;
+
+        foreach ($parts as $part) {
+            if ($part == DiagnoseEnum::VCS->value) {
+                $vcs = true;
             }
-
-            $vcs = $php = $uname = $ci = $cpu = $dotenv = $metadata = false;
-
-            if (!in_array(DiagnoseEnum::NEVER->value, $parts, true)) {
-                foreach ($parts as $part) {
-                    if ($part == DiagnoseEnum::VCS->value) {
-                        $vcs = true;
-                    }
-                    if ($part == DiagnoseEnum::PHP->value) {
-                        $php = true;
-                    }
-                    if ($part == DiagnoseEnum::UNAME->value) {
-                        $uname = true;
-                    }
-                    if ($part == DiagnoseEnum::CI->value) {
-                        $ci = true;
-                    }
-                    if ($part == DiagnoseEnum::CPU->value) {
-                        $cpu = true;
-                    }
-                    if ($part == DiagnoseEnum::DOTENV->value) {
-                        $dotenv = true;
-                    }
-                    if ($part == DiagnoseEnum::METADATA->value) {
-                        $metadata = true;
-                    } else {
-                        if (class_exists($part)) {
-                            $user = new $part();
-                            if (!$user instanceof ProviderInterface) {
-                                $user = false;
-                            }
-                        }
+            if ($part == DiagnoseEnum::PHP->value) {
+                $php = true;
+            }
+            if ($part == DiagnoseEnum::UNAME->value) {
+                $uname = true;
+            }
+            if ($part == DiagnoseEnum::CI->value) {
+                $ci = true;
+            }
+            if ($part == DiagnoseEnum::CPU->value) {
+                $cpu = true;
+            }
+            if ($part == DiagnoseEnum::DOTENV->value) {
+                $dotenv = true;
+            }
+            if ($part == DiagnoseEnum::METADATA->value) {
+                $metadata = true;
+            } else {
+                if (class_exists($part)) {
+                    $user = new $part();
+                    if (!$user instanceof ProviderInterface) {
+                        $user = false;
                     }
                 }
             }
+        }
+
+        if (in_array(DiagnoseEnum::ALWAYS->value, $parts, true)) {
+            $vcs = $php = $uname = $ci = $cpu = $dotenv = $metadata = true;
         }
 
         $environment = new Supplier($logger);
@@ -179,7 +179,7 @@ final class DiagnoseCommand
                 Cpu::class => 'CPU Information',
                 DotEnv::class => 'Environment Variables Information',
                 Metadata::class => 'Metadata Information',
-                default => sprintf('"%s" Information ', $providerId),
+                default => sprintf('"%s" User Information', $providerId),
             };
 
             if ($output->isDebug()) {
