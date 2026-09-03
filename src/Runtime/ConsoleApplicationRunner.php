@@ -146,6 +146,9 @@ class ConsoleApplicationRunner
     public static function getAllowedPlugins(EnvConfigInterface $envConfig, InputInterface $input): array
     {
         $envName = $envConfig->get('env', 'dev');
+        if (true === $input->hasParameterOption(['--env', '-e'], true)) {
+            $envName = $input->getParameterOption(['--env', '-e']);
+        }
 
         $defaultFallback = $envConfig->getDefaultFallback($envName);
 
