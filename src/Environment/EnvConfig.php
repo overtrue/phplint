@@ -61,27 +61,28 @@ class EnvConfig implements EnvConfigInterface
     public function getDefaultFallback(string $envName): array
     {
         $allowPlugins = [
-            ExtensionEnum::DIAGNOSE_MANAGER->value,
-            ExtensionEnum::OUTPUT_MANAGER->value,
-            ExtensionEnum::PROFILE_MANAGER->value,
-            ExtensionEnum::PROGRESS_MANAGER->value,
             ExtensionEnum::CACHE_MANAGER->value,
         ];
-        sort($allowPlugins);
 
         $defaultPlugins = [
             ExtensionEnum::CACHE_MANAGER->value,
         ];
 
         if ('dev' === $envName) {
+            $allowPlugins[] = ExtensionEnum::DIAGNOSE_MANAGER->value;
+            $allowPlugins[] = ExtensionEnum::PROFILE_MANAGER->value;
+            $allowPlugins[] = ExtensionEnum::PROGRESS_MANAGER->value;
+
             $defaultPlugins[] = ExtensionEnum::DIAGNOSE_MANAGER->value;
             $defaultPlugins[] = ExtensionEnum::PROFILE_MANAGER->value;
             $defaultPlugins[] = ExtensionEnum::PROGRESS_MANAGER->value;
 
             if ('cli' === $this->get('frontend', PHP_SAPI)) {
+                $allowPlugins[] = ExtensionEnum::OUTPUT_MANAGER->value;
                 $defaultPlugins[] = ExtensionEnum::OUTPUT_MANAGER->value;
             }
         }
+        sort($allowPlugins);
         sort($defaultPlugins);
 
         return [
