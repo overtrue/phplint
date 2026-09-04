@@ -55,7 +55,7 @@ class EnvConfig implements EnvConfigInterface
     {
         $envKey = $this->prefix . strtoupper(strtr($key, '.-', '__'));
         $envKey = str_replace($this->prefix . $this->prefix, $this->prefix, $envKey);
-        return getenv($envKey) ?: $defaultFallback;
+        return getenv($envKey) ?: ($defaultFallback[$key] ?? $defaultFallback);
     }
 
     public function getDefaultFallback(string $envName): array
