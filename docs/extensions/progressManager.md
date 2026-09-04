@@ -1,4 +1,4 @@
-## ProgressManager
+# Progress Manager
 
 This extension is in charge to handle properly the file checking progression depending on the format supported.
 
@@ -11,42 +11,48 @@ Supported values are:
 - `plain`: Prints the raw build progress in a plaintext format (same as `--vv`: verbose level 2)
 - `bar`: Prints a standard Symfony Progress Bar.
 - `indicator`: Let users know that the `phplint` command isn't stalled.
-- `quiet`: Suppress any progression output (same as `--no-progress`)
+- `quiet`: Suppress any progression output (same as `--no-progress` deprecated flag option)
 
-## With `--progress dots`
+## Default progression display
 
-Here is preview of what it will look like :
-
-![Progress Printer Normal](../../assets/progress-printer-normal.png)
-
-![Progress Printer Verbose](../../assets/progress-printer-verbose.png)
-
-## With `--progress plain`
+With `--progress auto` (or `--progress dots`) flag :
 
 Here is preview of what it will look like :
 
-![Progress Plain](../../assets/progress-plain.png)
+![Progress Printer Normal](../assets/progress-printer-normal.png)
 
-## With `--progress bar`
+## Plain progression display
+
+With `--progress plain` flag :
+
+Here is preview of what it will look like :
+
+![Progress Plain](../assets/progress-plain.png)
+
+## Bar progression display
+
+With `--progress bar` flag :
 
 This flag option is responsible to print progress of file checking with the [Symfony ProgressBar Console Helper][symfony-progressbar]
 
 Here is preview of what it will look like :
 
-![Progress Bar Normal](../../assets/progress-bar-normal.png)
+![Progress Bar Normal](../assets/progress-bar-normal.png)
 
-![Progress Bar Verbose](../../assets/progress-bar-verbose.png)
+![Progress Bar Verbose](../assets/progress-bar-verbose.png)
 
-![Progress Bar Verbose Max](../../assets/progress-bar-verbose-max.png)
+![Progress Bar Verbose Max](../assets/progress-bar-verbose-max.png)
 
-## With `--progress indicator`
+## Indicator progression display
+
+With `--progress indicator` flag :
 
 This flag option is useful to let users know that the `phplint` command isn't stalled.
 Learn more with the official Symfony documentation on [ProgressIndicator Console Helper][symfony-progressindicator]
 
-![Progress Indicator Running](../../assets/progress-indicator-running.png)
+![Progress Indicator Running](../assets/progress-indicator-running.png)
 
-![Progress Indicator Finished](../../assets/progress-indicator-finished.png)
+![Progress Indicator Finished](../assets/progress-indicator-finished.png)
 
 [bartlett/graph-uml]: https://packagist.org/packages/bartlett/graph-uml
 [symfony-progressbar]: https://symfony.com/doc/current/components/console/helpers/progressbar.html
