@@ -68,6 +68,8 @@ class EnvConfig implements EnvConfigInterface
             ExtensionEnum::CACHE_MANAGER->value,
         ];
 
+        $defaultFrontend = PHP_SAPI;
+
         if ('dev' === $envName) {
             $allowPlugins[] = ExtensionEnum::DIAGNOSE_MANAGER->value;
             $allowPlugins[] = ExtensionEnum::PROFILE_MANAGER->value;
@@ -77,7 +79,7 @@ class EnvConfig implements EnvConfigInterface
             $defaultPlugins[] = ExtensionEnum::PROFILE_MANAGER->value;
             $defaultPlugins[] = ExtensionEnum::PROGRESS_MANAGER->value;
 
-            if ('cli' === $this->get('frontend', PHP_SAPI)) {
+            if ('cli' === $this->get('frontend', $defaultFrontend)) {
                 $allowPlugins[] = ExtensionEnum::OUTPUT_MANAGER->value;
                 $defaultPlugins[] = ExtensionEnum::OUTPUT_MANAGER->value;
             }
@@ -89,7 +91,7 @@ class EnvConfig implements EnvConfigInterface
             'allow_plugins' => implode(',', $allowPlugins),
             'default_plugins' => implode(',', $defaultPlugins),
             'mode' => 'off',
-            'frontend' => PHP_SAPI,
+            'frontend' => $defaultFrontend,
         ];
     }
 }
