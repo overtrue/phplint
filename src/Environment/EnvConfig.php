@@ -88,6 +88,8 @@ class EnvConfig implements EnvConfigInterface
         return [
             'allow_plugins' => implode(',', $allowPlugins),
             'default_plugins' => implode(',', $defaultPlugins),
+            'mode' => 'off',
+            'frontend' => PHP_SAPI,
         ];
     }
 }
