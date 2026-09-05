@@ -93,7 +93,7 @@ class EnvConfig implements EnvConfigInterface
             'default_plugins' => implode(',', $defaultPlugins),
             'mode' => 'off',
             'frontend' => $defaultFrontend,
-            'env' => 'dev',
+            'env' => $envName,
             'debug' => false,
             'logger' => ConsoleLogger::class,
         ];
