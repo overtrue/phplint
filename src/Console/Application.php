@@ -75,7 +75,7 @@ final class Application extends BaseApplication implements
 
     private ?Cache $cache = null;
 
-    public function __construct(private EnvConfigInterface $envConfig)
+    public function __construct(private readonly EnvConfigInterface $envConfig)
     {
         parent::__construct();
 
