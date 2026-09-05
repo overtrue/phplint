@@ -159,7 +159,6 @@ class ConsoleApplicationRunner
         if (!self::isFrontendInteractive($envConfig, $input)) {
             $deniedPlugins = [
                 ExtensionEnum::DIAGNOSE_MANAGER->value,
-                ExtensionEnum::OUTPUT_MANAGER->value,
                 ExtensionEnum::PROFILE_MANAGER->value,
                 ExtensionEnum::PROGRESS_MANAGER->value,
             ];
