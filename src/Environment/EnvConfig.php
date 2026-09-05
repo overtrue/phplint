@@ -93,6 +93,7 @@ class EnvConfig implements EnvConfigInterface
             'mode' => 'off',
             'frontend' => $defaultFrontend,
             'env' => 'dev',
+            'debug' => false,
         ];
     }
 }
