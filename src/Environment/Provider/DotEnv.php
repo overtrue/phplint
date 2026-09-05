@@ -20,8 +20,10 @@ use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Overtrue\PHPLint\Environment\ProviderData;
 use Overtrue\PHPLint\Environment\ProviderInterface;
 use Overtrue\PHPLint\Environment\XdgConfig;
+use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Symfony\Component\Console\Input\ArgvInput;
 
 use function array_push;
 use function array_unique;
@@ -73,7 +75,9 @@ class DotEnv implements ProviderInterface, LoggerAwareInterface
 
         $this->envConfig = new EnvConfig($this->envPrefix);
 
-        $this->defaultFallback = $this->envConfig->getDefaultFallback($this->envConfig->get('env', 'dev'));
+        $envName = ConsoleApplicationRunner::getEnvName($this->envConfig, new ArgvInput());
+
+        $this->defaultFallback = $this->envConfig->getDefaultFallback($envName);
         $this->defaultFallback['project_dir'] = $this->projectDirectory;
     }
 
@@ -134,7 +138,7 @@ class DotEnv implements ProviderInterface, LoggerAwareInterface
         ];
 
         foreach ($variables as $key => $desc) {
-            $value = $this->envConfig->get($key, $this->defaultFallback[$key] ?? null);
+            $value = $this->envConfig->get($key, $this->defaultFallback);
 
             if (in_array($key, ['allow_plugins', 'default_plugins'], true)) {
                 $value = explode(',', $value);

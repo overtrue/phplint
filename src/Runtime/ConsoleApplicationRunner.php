@@ -54,13 +54,15 @@ class ConsoleApplicationRunner
 
         $definition = $this->application->getDefinition();
 
+        $envName = self::getEnvName($envConfig, $input);
+
         if (!$definition->hasOption('env') && !$definition->hasOption('e') && !$definition->hasShortcut('e')) {
             $definition->addOption(new InputOption(
                 'env',
                 'e',
                 InputOption::VALUE_REQUIRED,
                 'The Environment name',
-                $envConfig->get('env', 'dev'),
+                $envName,
             ));
         }
 
@@ -145,18 +147,15 @@ class ConsoleApplicationRunner
 
     public static function getAllowedPlugins(EnvConfigInterface $envConfig, InputInterface $input): array
     {
-        $envName = $envConfig->get('env', 'dev');
-        if (true === $input->hasParameterOption(['--env', '-e'], true)) {
-            $envName = $input->getParameterOption(['--env', '-e']);
-        }
+        $envName = self::getEnvName($envConfig, $input);
 
         $defaultFallback = $envConfig->getDefaultFallback($envName);
 
         $key = 'allow_plugins';
-        $allowPlugins = explode(',', $envConfig->get($key, $defaultFallback[$key]));
+        $allowPlugins = explode(',', $envConfig->get($key, $defaultFallback));
 
         $key = 'default_plugins';
-        $defaultPlugins = explode(',', $envConfig->get($key, $defaultFallback[$key]));
+        $defaultPlugins = explode(',', $envConfig->get($key, $defaultFallback));
 
         $extensions = [];
 
@@ -174,5 +173,13 @@ class ConsoleApplicationRunner
     public function run(): int
     {
         return $this->application->run($this->input, $this->output);
+    }
+
+    public static function getEnvName(EnvConfigInterface $envConfig, InputInterface $input): string
+    {
+        if (true === $input->hasParameterOption(['--env', '-e'], true)) {
+            return $input->getParameterOption(['--env', '-e']);
+        }
+        return $envConfig->get('env', 'dev');
     }
 }
