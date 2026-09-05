@@ -22,6 +22,7 @@ use Overtrue\PHPLint\Configuration\Resolver\DefaultValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
 use Overtrue\PHPLint\Console\Application;
 use Overtrue\PHPLint\Environment\EnvConfigInterface;
+use Overtrue\PHPLint\Extension\ExtensionEnum;
 use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Psr\Log\LoggerInterface;
@@ -30,6 +31,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use function array_diff;
 use function array_intersect;
 use function array_merge;
 use function array_values;
@@ -154,6 +156,16 @@ class ConsoleApplicationRunner
         $key = 'allow_plugins';
         $allowPlugins = explode(',', $envConfig->get($key, $defaultFallback));
 
+        if (!self::isFrontendInteractive($envConfig, $input)) {
+            $deniedPlugins = [
+                ExtensionEnum::DIAGNOSE_MANAGER->value,
+                ExtensionEnum::OUTPUT_MANAGER->value,
+                ExtensionEnum::PROFILE_MANAGER->value,
+                ExtensionEnum::PROGRESS_MANAGER->value,
+            ];
+            $allowPlugins = array_diff($allowPlugins, $deniedPlugins);
+        }
+
         $key = 'default_plugins';
         $defaultPlugins = explode(',', $envConfig->get($key, $defaultFallback));
 
@@ -181,5 +193,19 @@ class ConsoleApplicationRunner
             return $input->getParameterOption(['--env', '-e']);
         }
         return $envConfig->get('env', 'dev');
+    }
+
+    public static function isFrontendInteractive(EnvConfigInterface $envConfig, InputInterface $input): bool
+    {
+        $envName = self::getEnvName($envConfig, $input);
+
+        $defaultFallback = $envConfig->getDefaultFallback($envName);
+        $frontend = $envConfig->get('frontend', $defaultFallback);
+
+        if ($frontend == 'cli' && $input->isInteractive()) {
+            return true;
+        }
+        // all other frontend are considered by design as non-interactive
+        return false;
     }
 }
