@@ -157,6 +157,7 @@ final class Linter implements LoggerAwareInterface, Countable
             'hits' => $finalResults->getHits(),
             'misses' => $finalResults->getMisses(),
         ];
+        $this->finalResults = $finalResults;
         return new LinterOutput($results, $finder);
     }
 
