@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Environment;
 
+use Overtrue\PHPLint\Console\ConsoleLogger;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
 use function getenv;
 use function implode;
@@ -94,6 +95,7 @@ class EnvConfig implements EnvConfigInterface
             'frontend' => $defaultFrontend,
             'env' => 'dev',
             'debug' => false,
+            'logger' => ConsoleLogger::class,
         ];
     }
 }
