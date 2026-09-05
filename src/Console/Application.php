@@ -277,8 +277,8 @@ final class Application extends BaseApplication implements
         $logger->notice(
             $message,
             [
-                '__section__' => SectionEnum::PLUGIN->label(),
-                '__style__' => SectionEnum::PLUGIN->value,
+                '__section__' => SectionEnum::COMMAND->label(),
+                '__style__' => SectionEnum::COMMAND->value,
                 'command' => $command->getName(),
                 'extensions' => json_encode($extensions),
             ]
