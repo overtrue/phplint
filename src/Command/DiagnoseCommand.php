@@ -189,7 +189,10 @@ final class DiagnoseCommand
             if (!is_iterable($values)) {
                 $logger->warning(
                     'Provider {provider_id} not correctly implemented or is not applicable, skip it !',
-                    ['provider_id' => $providerId]
+                    [
+                        '__section__' => SectionEnum::ENVIRONMENT->label(),
+                        'provider_id' => $providerId
+                    ]
                 );
                 continue;
             }
@@ -203,6 +206,7 @@ final class DiagnoseCommand
                     $logger->warning(
                         'Provider {provider_id} not correctly implemented. Expected {provider_data} but got {unexpected_data}, skip it !',
                         [
+                            '__section__' => SectionEnum::ENVIRONMENT->label(),
                             'provider_id' => $providerId,
                             'provider_data' => ProviderData::class,
                             'unexpected_data' => get_debug_type($providerData)
