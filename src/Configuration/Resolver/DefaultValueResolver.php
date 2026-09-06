@@ -32,10 +32,17 @@ class DefaultValueResolver implements ContainerInterface
 
     public function __construct(LoggerInterface $logger, EnvConfigInterface $envConfig, array $dynamicValueResolvers = [])
     {
+        $configFileCandidates = $envConfig->get('mode', 'off') === 'legacy'
+            ? [OptionDefinition::DEFAULT_CONFIG_FILE, '.phplint.yml.dist'] : null;
+
         $this->valueResolvers = array_merge($dynamicValueResolvers, [
             LoggerValueResolver::class => fn() => new LoggerValueResolver($logger),
             PluginValueResolver::class => fn() => new PluginValueResolver($envConfig),
-            ConfigValueResolver::class => fn() => new ConfigValueResolver(),
+            ConfigValueResolver::class => fn() => new ConfigValueResolver(
+                [OptionDefinition::CONFIGURATION],
+                [],
+                $configFileCandidates
+            ),
             PathValueResolver::class => fn() => new PathValueResolver(
                 [OptionDefinition::PATH, 'sourcePath'],
                 [OptionDefinition::EXCLUDE, 'excludePath'],

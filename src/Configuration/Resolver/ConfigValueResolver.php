@@ -35,8 +35,8 @@ use const DIRECTORY_SEPARATOR;
 class ConfigValueResolver implements ValueResolverInterface
 {
     public function __construct(
-        protected array $optionNamesAllowed = [OptionDefinition::CONFIGURATION],
-        protected array $defaultValues = [OptionDefinition::CONFIGURATION => OptionDefinition::DEFAULT_CONFIG_FILE],
+        protected array $optionNamesAllowed,
+        protected array $defaultValues,
         protected ?array $configFileCandidates = null,
         private ?XdgConfigInterface $xdgConfig = null,
     ) {
@@ -64,7 +64,8 @@ class ConfigValueResolver implements ValueResolverInterface
             // to keep BC with previous versions 9.7.x
             $value = 'never';
         } else {
-            $value = $input->hasOption($argumentName) ? $input->getOption($argumentName) : ($this->defaultValues[$argumentName] ?? 'auto');
+            $default = $this->defaultValues[$argumentName] ?? 'always';
+            $value = $input->hasOption($argumentName) ? ($input->getOption($argumentName) ?? $default) : $default;
         }
 
         $configFile = match ($value) {
