@@ -1,7 +1,7 @@
 path:
   - src/
 jobs: 10
-extensions:
+file-extensions:
   - php
 exclude:
   - vendor
