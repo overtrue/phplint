@@ -135,6 +135,7 @@ class DotEnv implements ProviderInterface, LoggerAwareInterface
             'mode' => 'This setting controls which PHPLint features are enabled',
             'allow_plugins' => 'List of extensions allowed to be executed',
             'default_plugins' => 'List of extensions loaded for the current command',
+            'config' => 'Path to the configuration file',
         ];
 
         foreach ($variables as $key => $desc) {

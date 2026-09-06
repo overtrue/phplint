@@ -58,6 +58,8 @@ class ConsoleApplicationRunner
 
         $envName = self::getEnvName($envConfig, $input);
 
+        $defaultFallback = $envConfig->getDefaultFallback($envName);
+
         if (!$definition->hasOption('env') && !$definition->hasOption('e') && !$definition->hasShortcut('e')) {
             $definition->addOption(new InputOption(
                 'env',
@@ -94,7 +96,7 @@ class ConsoleApplicationRunner
                 'c',
                 InputOption::VALUE_REQUIRED,
                 'Path to configuration file',
-                OptionDefinition::DEFAULT_CONFIG_FILE,
+                $envConfig->get('config', $defaultFallback),
             ));
             // @todo Will be removed in next API version
             // (that will only support "--configuration never" to disable the feature)

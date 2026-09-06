@@ -28,7 +28,10 @@ The lint path defaults to the current working directory when omitted.
 
 ## Configuration
 
-The default configuration filename remains `.phplint.yml`. Use the global
+When `PLINT_CONFIG` is unset (or set to `auto`), PHPLint behaves like if discovery mode
+was explicitly set to detect only candidate files.
+
+The default configuration filename remains `.phplint.yml` only for legacy mode. Use the global
 `--configuration|-c` option to select another file.
 
 PHPLint 9.8 also supports configuration discovery modes:

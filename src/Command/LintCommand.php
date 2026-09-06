@@ -79,7 +79,7 @@ final class LintCommand
         #[ValueResolver(MetadataValueResolver::class)]
         MetadataCollection $metadataCollection,
         #[ValueResolver(ConfigValueResolver::class)]
-        string $configuration = OptionDefinition::DEFAULT_CONFIG_FILE, // global option
+        ?string $configuration = null, // global option
         #[Argument(
             description: 'Path to file or directory to lint (<comment>default: working directory</comment>)',
             name: OptionDefinition::PATH

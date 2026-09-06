@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Environment;
 
+use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\ConsoleLogger;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
 use function getenv;
@@ -88,14 +89,19 @@ class EnvConfig implements EnvConfigInterface
         sort($allowPlugins);
         sort($defaultPlugins);
 
+        $defaultMode = 'off';
+
+        $config = $this->get('mode', $defaultMode) === 'legacy' ? OptionDefinition::DEFAULT_CONFIG_FILE : 'auto';
+
         return [
             'allow_plugins' => implode(',', $allowPlugins),
             'default_plugins' => implode(',', $defaultPlugins),
-            'mode' => 'off',
+            'mode' => $defaultMode,
             'frontend' => $defaultFrontend,
             'env' => $envName,
             'debug' => false,
             'logger' => ConsoleLogger::class,
+            'config' => $config,
         ];
     }
 }
