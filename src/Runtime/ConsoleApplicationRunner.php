@@ -22,10 +22,12 @@ use Overtrue\PHPLint\Configuration\Resolver\DefaultValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
 use Overtrue\PHPLint\Console\Application;
 use Overtrue\PHPLint\Environment\EnvConfigInterface;
+use Overtrue\PHPLint\Environment\ModeEnum;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
 use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\NullOutput;
@@ -36,6 +38,7 @@ use function array_intersect;
 use function array_merge;
 use function array_values;
 use function explode;
+use function in_array;
 
 /**
  * @author Laurent Laville
@@ -43,20 +46,27 @@ use function explode;
  */
 class ConsoleApplicationRunner
 {
+    protected static EnvConfigInterface $envConfig;
+    protected static InputInterface $input;
+    protected static OutputInterface $output;
     protected Application $application;
 
     public function __construct(
         LoggerInterface $logger,
         EnvConfigInterface $envConfig,
-        protected ?InputInterface $input = null,
-        protected ?OutputInterface $output = null,
+        ?InputInterface $input = null,
+        ?OutputInterface $output = null,
     ) {
-        $this->application = new Application($envConfig);
+        self::$envConfig = $envConfig;
+        self::$input = $input ?? new ArgvInput();
+        self::$output = $output ?? new NullOutput();
+
+        $this->application = new Application($this);
         $this->application->setLogger($logger);
 
         $definition = $this->application->getDefinition();
 
-        $envName = self::getEnvName($envConfig, $input);
+        $envName = self::getEnvName();
 
         $defaultFallback = $envConfig->getDefaultFallback($envName);
 
@@ -86,7 +96,7 @@ class ConsoleApplicationRunner
                 'x',
                 InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
                 'Allows to change/extend features easily with one or more extensions',
-                self::getAllowedPlugins($envConfig, $input),
+                self::getAllowedPlugins(),
             ));
         }
 
@@ -118,14 +128,14 @@ class ConsoleApplicationRunner
 
         $this->application->setMetadata($metadataCollection);
 
-        $defaultCommand = $envConfig->get('mode', 'off') === 'legacy' ? 'lint' : 'list';
+        $defaultCommand = self::hasMode(ModeEnum::LEGACY) ? 'lint' : 'list';
 
         $singleCommand = ($defaultCommand !== 'list');
 
         $commandName = $singleCommand ? $defaultCommand : $input->getFirstArgument();
 
         $dynamicValueResolvers = [
-            CoreValueResolver::class => fn() => new CoreValueResolver($this->application, $this->output ?? new NullOutput(), $commandName),
+            CoreValueResolver::class => fn() => new CoreValueResolver($this->application, self::$output, $commandName),
             MetadataValueResolver::class => fn() => new MetadataValueResolver($this->application)
         ];
 
@@ -149,16 +159,24 @@ class ConsoleApplicationRunner
         return $this->application;
     }
 
-    public static function getAllowedPlugins(EnvConfigInterface $envConfig, InputInterface $input): array
+    public static function getEnvConfig(): EnvConfigInterface
     {
-        $envName = self::getEnvName($envConfig, $input);
+        return self::$envConfig;
+    }
+
+    public static function getAllowedPlugins(): array
+    {
+        $envConfig = self::$envConfig;
+        $input = self::$input;
+
+        $envName = self::getEnvName();
 
         $defaultFallback = $envConfig->getDefaultFallback($envName);
 
         $key = 'allow_plugins';
         $allowPlugins = explode(',', $envConfig->get($key, $defaultFallback));
 
-        if (!self::isFrontendInteractive($envConfig, $input)) {
+        if (!self::isFrontendInteractive()) {
             $deniedPlugins = [
                 ExtensionEnum::DIAGNOSE_MANAGER->value,
                 ExtensionEnum::PROFILE_MANAGER->value,
@@ -185,20 +203,25 @@ class ConsoleApplicationRunner
 
     public function run(): int
     {
-        return $this->application->run($this->input, $this->output);
+        return $this->application->run(self::$input, self::$output);
     }
 
-    public static function getEnvName(EnvConfigInterface $envConfig, InputInterface $input): string
+    public static function getEnvName(): string
     {
+        $envConfig = self::$envConfig;
+        $input = self::$input;
+
         if (true === $input->hasParameterOption(['--env', '-e'], true)) {
             return $input->getParameterOption(['--env', '-e']);
         }
         return $envConfig->get('env', 'dev');
     }
 
-    public static function isFrontendInteractive(EnvConfigInterface $envConfig, InputInterface $input): bool
+    public static function isFrontendInteractive(): bool
     {
-        $envName = self::getEnvName($envConfig, $input);
+        $envConfig = self::$envConfig;
+        $input = self::$input;
+        $envName = self::getEnvName();
 
         $defaultFallback = $envConfig->getDefaultFallback($envName);
         $frontend = $envConfig->get('frontend', $defaultFallback);
@@ -208,5 +231,17 @@ class ConsoleApplicationRunner
         }
         // all other frontend are considered by design as non-interactive
         return false;
+    }
+
+    public static function hasMode(ModeEnum $needle): bool
+    {
+        $envConfig = self::$envConfig;
+        $envName = self::getEnvName();
+
+        $defaultFallback = $envConfig->getDefaultFallback($envName);
+
+        $mode = explode(',', $envConfig->get('mode', $defaultFallback));
+
+        return in_array($needle->value, $mode, true);
     }
 }
