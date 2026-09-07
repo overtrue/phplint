@@ -15,8 +15,12 @@ namespace Overtrue\PHPLint\Configuration\Resolver;
 
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
+use Overtrue\PHPLint\Environment\EnvConfig;
+use Overtrue\PHPLint\Environment\EnvConfigInterface;
+use Overtrue\PHPLint\Environment\ModeEnum;
 use Overtrue\PHPLint\Environment\XdgConfig;
 use Overtrue\PHPLint\Environment\XdgConfigInterface;
+use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Dotenv\Dotenv as SymfonyDotenv;
@@ -37,10 +41,10 @@ class ConfigValueResolver implements ValueResolverInterface
     public function __construct(
         protected array $optionNamesAllowed,
         protected array $defaultValues,
-        protected ?array $configFileCandidates = null,
+        private ?EnvConfigInterface $envConfig = null,
         private ?XdgConfigInterface $xdgConfig = null,
     ) {
-        $this->configFileCandidates ??= static::getDefaultConfigFileCandidates();
+        $this->envConfig ??= new EnvConfig();
         $this->xdgConfig ??= new XdgConfig();
     }
 
@@ -78,8 +82,12 @@ class ConfigValueResolver implements ValueResolverInterface
         return [$configFile];
     }
 
-    public static function getDefaultConfigFileCandidates(): array
+    public function getConfigFileCandidates(): array
     {
+        if (ConsoleApplicationRunner::hasMode(ModeEnum::LEGACY)) {
+            return [OptionDefinition::DEFAULT_CONFIG_FILE, '.phplint.yml.dist'];
+        }
+
         $basename = '.phplint';
         $fileExt = ['php', 'yaml', 'yml', 'json'];
 
@@ -140,7 +148,7 @@ class ConfigValueResolver implements ValueResolverInterface
     private function scanFile(array $directories): string
     {
         foreach ($directories as $dir) {
-            foreach ($this->configFileCandidates as $fileCandidate) {
+            foreach ($this->getConfigFileCandidates() as $fileCandidate) {
                 $filename = $dir . DIRECTORY_SEPARATOR . $fileCandidate;
                 if (file_exists($filename)) {
                     return $filename;
