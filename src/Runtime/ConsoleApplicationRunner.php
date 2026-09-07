@@ -188,6 +188,16 @@ class ConsoleApplicationRunner
         $key = 'default_plugins';
         $defaultPlugins = explode(',', $envConfig->get($key, $defaultFallback));
 
+        if (self::hasMode(ModeEnum::DEVELOP)) {
+            $defaultPlugins = $allowPlugins = [
+                ExtensionEnum::CACHE_MANAGER->value,
+                ExtensionEnum::DIAGNOSE_MANAGER->value,
+                ExtensionEnum::OUTPUT_MANAGER->value,
+                ExtensionEnum::PROFILE_MANAGER->value,
+                ExtensionEnum::PROGRESS_MANAGER->value,
+            ];
+        }
+
         $extensions = [];
 
         if (true === $input->hasParameterOption(['--' . OptionDefinition::EXTENSIONS, '-x'], true)) {
