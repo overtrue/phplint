@@ -1,7 +1,40 @@
 # Console CLI
 
-PHPLint 9.8 supports two console invocation modes controlled by the `PLINT_MODE`
+PHPLint 9.8 supports multiple console invocation modes controlled by the `PLINT_MODE`
 environment variable.
+
+The following values are accepted:
+
+* `off` (default value when `PLINT_MODE` is unset)
+
+    PHPLint behaves like a normal multi-command Symfony Console Application 
+    where `list` is the default command.
+
+* `legacy`
+
+    PHPLint behaves like a single-command style 
+    where `lint` is the default command.
+
+* `develop`
+
+    All embedded extensions/plugins are allowed and loaded by default.
+    This is the same behavior when you run PHPLint in a `dev` environment 
+    (set by `-e, --env` flag or `PLINT_ENV` environment variable).
+
+* `diagnose`
+
+    Enables Diagnostic, with which you can identify contextual elements of the analysis environment.
+    This is the same behavior, as if you allow and loads the `diagnose_manager` extension.
+
+* `profile`
+
+    Enables Profiling, with which you can analyze performance of the scan analysis process.
+    This is the same behavior, as if you allow and loads the `profile_manager` extension. 
+
+> [!NOTE]
+> You can enable multiple modes at the same time by comma separating their identifiers as value to `PLINT_MODE`
+>
+> For example: `PLINT_MODE=legacy,develop`
 
 ## Default command mode
 
