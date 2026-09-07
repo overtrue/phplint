@@ -77,7 +77,7 @@ final class Application extends BaseApplication implements
 
     private ?Cache $cache = null;
 
-    public function __construct(protected readonly ConsoleApplicationRunner $runner)
+    public function __construct(private readonly ConsoleApplicationRunner $runner)
     {
         parent::__construct();
 
