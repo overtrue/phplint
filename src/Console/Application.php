@@ -214,7 +214,8 @@ final class Application extends BaseApplication implements
      */
     protected function doRunCommand(Command $command, InputInterface $input, OutputInterface $output): int
     {
-        $extensions = ConsoleApplicationRunner::getAllowedPlugins();
+        $runner = $this->getRunner();
+        $extensions = $runner::getAllowedPlugins();
 
         $this->loadPlugins($extensions, $command);
 
@@ -226,9 +227,9 @@ final class Application extends BaseApplication implements
      */
     public function error(ConsoleErrorEvent $event): void
     {
-        $envName = ConsoleApplicationRunner::getEnvName();
-
-        $envConfig = $this->getRunner()->getEnvConfig();
+        $runner = $this->getRunner();
+        $envName = $runner::getEnvName();
+        $envConfig = $runner->getEnvConfig();
 
         if ($envConfig->get('dump', false) || $envName === 'dev') {
             var_dump($event->getError());
