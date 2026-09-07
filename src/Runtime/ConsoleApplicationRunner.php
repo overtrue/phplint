@@ -203,6 +203,11 @@ class ConsoleApplicationRunner
             $allowPlugins[] = ExtensionEnum::DIAGNOSE_MANAGER->value;
         }
 
+        if (self::hasMode(ModeEnum::PROFILE)) {
+            $defaultPlugins[] = ExtensionEnum::PROFILE_MANAGER->value;
+            $allowPlugins[] = ExtensionEnum::PROFILE_MANAGER->value;
+        }
+
         $extensions = [];
 
         if (true === $input->hasParameterOption(['--' . OptionDefinition::EXTENSIONS, '-x'], true)) {
