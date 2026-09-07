@@ -21,7 +21,7 @@ enum ModeEnum: string
 {
     case OFF = 'off';
     case DEVELOP = 'develop';
-    case DIAGNOSTIC = 'diagnostic';
+    case DIAGNOSE = 'diagnose';
     case LEGACY = 'legacy';
     case PROFILE = 'profile';
 }
