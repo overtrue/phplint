@@ -17,6 +17,7 @@ use DateTime;
 use DOMDocument;
 use DOMElement;
 use DOMException;
+use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Overtrue\PHPLint\Metadata\ApplicationVersion;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Metadata\ProfilerOutput;
@@ -40,7 +41,8 @@ final class JunitOutput extends StreamOutput implements OutputInterface
      */
     public function format(
         LinterOutput $results,  // @deprecated since release 9.8.0, and will be removed in next API version
-        MetadataCollection $metadataCollection
+        MetadataCollection $metadataCollection,
+        EnvConfigInterface $envConfig,
     ): void {
         /** @var \Overtrue\PHPLint\Metadata\LinterOutput $results */
         $results = $metadataCollection->getMetadata(\Overtrue\PHPLint\Metadata\LinterOutput::class);

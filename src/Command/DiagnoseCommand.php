@@ -74,7 +74,10 @@ final class DiagnoseCommand
         #[ValueResolver(MetadataValueResolver::class)]
         MetadataCollection $metadataCollection,
     ): int {
-        $envConfig = $application instanceof ApplicationInterface ? $application->getEnvConfig() : new EnvConfig();
+        $envConfig = $application instanceof ApplicationInterface
+            ? $application->getRunner()::getEnvConfig()
+            : new EnvConfig()
+        ;
 
         $diagnostic = explode(',', $envConfig->get('diagnostic', DiagnoseEnum::AUTO->value));
 

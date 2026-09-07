@@ -89,9 +89,12 @@ class EnvConfig implements EnvConfigInterface
         sort($allowPlugins);
         sort($defaultPlugins);
 
-        $defaultMode = 'off';
+        $defaultMode = ModeEnum::OFF->value;
 
-        $config = $this->get('mode', $defaultMode) === 'legacy' ? OptionDefinition::DEFAULT_CONFIG_FILE : 'auto';
+        $config = $this->get('mode', $defaultMode) === ModeEnum::LEGACY->value
+            ? OptionDefinition::DEFAULT_CONFIG_FILE
+            : 'auto'
+        ;
 
         return [
             'allow_plugins' => implode(',', $allowPlugins),

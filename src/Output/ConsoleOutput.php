@@ -13,10 +13,13 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Output;
 
+use Overtrue\PHPLint\Environment\EnvConfigInterface;
+use Overtrue\PHPLint\Environment\ModeEnum;
 use Overtrue\PHPLint\Metadata\ApplicationVersion;
 use Overtrue\PHPLint\Metadata\ConfigurationSettings;
 use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
+use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
 use PHP_Parallel_Lint\PhpConsoleColor\ConsoleColor;
 use PHP_Parallel_Lint\PhpConsoleColor\InvalidStyleException;
 use PHP_Parallel_Lint\PhpConsoleHighlighter\Highlighter;
@@ -61,7 +64,8 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
 
     public function format(
         LinterOutput $results,  // @deprecated since release 9.8.0, and will be removed in next API version
-        MetadataCollection $metadataCollection
+        MetadataCollection $metadataCollection,
+        EnvConfigInterface $envConfig,
     ): void {
         /** @var \Overtrue\PHPLint\Metadata\LinterOutput $results */
         $results = $metadataCollection->getMetadata(\Overtrue\PHPLint\Metadata\LinterOutput::class);
@@ -92,7 +96,7 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
         } else {
             $configFile = $configurationSettings->hasConfigFile() ? $configurationSettings->getConfigFilePath() : '';
 
-            if ($configurationSettings->getMode() === 'legacy') {
+            if (ConsoleApplicationRunner::hasMode(ModeEnum::LEGACY)) {
                 $settings = json_decode($configurationSettings->describe('value'), true);
             }
         }

@@ -11,6 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
+use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Output\LinterOutput;
 use Overtrue\PHPLint\Output\OutputInterface;
@@ -27,7 +28,7 @@ class DumpOutput extends StreamOutput implements OutputInterface
         return 'dump';
     }
 
-    public function format(LinterOutput $results, MetadataCollection $metadataCollection): void
+    public function format(LinterOutput $results, MetadataCollection $metadataCollection, EnvConfigInterface $envConfig): void
     {
         $this->writeln([
             '',

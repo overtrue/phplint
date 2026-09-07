@@ -66,9 +66,11 @@ final class DiagnoseManager extends AbstractManager implements
 
         $application = $event->getCommand()->getApplication();
 
-        $envConfig = $application instanceof ApplicationInterface ? $application->getEnvConfig() : new EnvConfig();
+        $envConfig = $application instanceof ApplicationInterface
+            ? $application->getRunner()::getEnvConfig()
+            : new EnvConfig()
+        ;
 
-        $input = $event->getInput();
         $output = $event->getOutput();
 
         $diagnostics = $envConfig->get('diagnostic', DiagnoseEnum::AUTO->value);

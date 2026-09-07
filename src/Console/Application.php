@@ -18,6 +18,7 @@ use Overtrue\PHPLint\Command\InvokableCommand;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\Resolver\ArgumentResolverInterface;
 use Overtrue\PHPLint\Environment\EnvConfigInterface;
+use Overtrue\PHPLint\Environment\ModeEnum;
 use Overtrue\PHPLint\Extension\CacheManager;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
 use Overtrue\PHPLint\Extension\ExtensionInterface;
@@ -48,9 +49,10 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-
 use Throwable;
+
 use function json_encode;
+use function var_dump;
 
 /**
  * @author Overtrue
@@ -75,7 +77,7 @@ final class Application extends BaseApplication implements
 
     private ?Cache $cache = null;
 
-    public function __construct(private readonly EnvConfigInterface $envConfig)
+    public function __construct(protected readonly ConsoleApplicationRunner $runner)
     {
         parent::__construct();
 
@@ -160,15 +162,16 @@ final class Application extends BaseApplication implements
             Metadata::applicationVersion(),
         );
         if (!empty($settings)) {
-            $settings['mode'] = $this->getEnvConfig()->get('mode', 'off');
+            $envConfig = $this->getRunner()->getEnvConfig();
+            $settings['mode'] = $envConfig->get('mode', ModeEnum::OFF->value);
             $metadataCollection->add(Metadata::configurationSettings($settings));
         }
         return $metadataCollection;
     }
 
-    public function getEnvConfig(): EnvConfigInterface
+    public function getRunner(): ConsoleApplicationRunner
     {
-        return $this->envConfig;
+        return $this->runner;
     }
 
     public static function getSubscribedEvents(): array
@@ -211,7 +214,7 @@ final class Application extends BaseApplication implements
      */
     protected function doRunCommand(Command $command, InputInterface $input, OutputInterface $output): int
     {
-        $extensions = ConsoleApplicationRunner::getAllowedPlugins($this->envConfig, $input);
+        $extensions = ConsoleApplicationRunner::getAllowedPlugins();
 
         $this->loadPlugins($extensions, $command);
 
@@ -223,12 +226,12 @@ final class Application extends BaseApplication implements
      */
     public function error(ConsoleErrorEvent $event): void
     {
-        $error = $event->getError();
+        $envName = ConsoleApplicationRunner::getEnvName();
 
-        if ($this->envConfig->get('PLINT_DUMP', false)) {
-            \var_export($error);
-        } else {
-            \var_dump($error);
+        $envConfig = $this->getRunner()->getEnvConfig();
+
+        if ($envConfig->get('dump', false) || $envName === 'dev') {
+            var_dump($event->getError());
         }
     }
 

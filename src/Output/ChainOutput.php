@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Output;
 
 use InvalidArgumentException;
+use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 
 use function count;
@@ -51,7 +52,7 @@ final class ChainOutput implements OutputInterface
         return 'chain';
     }
 
-    public function format(LinterOutput $results, MetadataCollection $metadataCollection): void
+    public function format(LinterOutput $results, MetadataCollection $metadataCollection, EnvConfigInterface $envConfig): void
     {
         $i = count($this->outputHandlers);
 
@@ -60,7 +61,7 @@ final class ChainOutput implements OutputInterface
         }
 
         while ($i--) {
-            $this->outputHandlers[$i]->format($results, $metadataCollection);
+            $this->outputHandlers[$i]->format($results, $metadataCollection, $envConfig);
         }
 
         // never close STDOUT stream, otherwise we cannot use anymore the ConsoleLogger or other process that use STDOUT

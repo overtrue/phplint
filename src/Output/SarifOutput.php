@@ -16,6 +16,7 @@ namespace Overtrue\PHPLint\Output;
 use Bartlett\Sarif\Contract\ConverterInterface;
 use Bartlett\Sarif\Converter\PhpLintConverter;
 use Bartlett\Sarif\Converter\Reporter\PhpLintReport;
+use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Symfony\Component\Console\Formatter\OutputFormatterInterface;
 use Symfony\Component\Console\Output\StreamOutput;
@@ -55,7 +56,7 @@ class SarifOutput extends StreamOutput implements OutputInterface
         return 'sarif';
     }
 
-    public function format(LinterOutput $results, MetadataCollection $metadataCollection): void
+    public function format(LinterOutput $results, MetadataCollection $metadataCollection, EnvConfigInterface $envConfig): void
     {
         $reporter = new PhpLintReport($this->converter);
         ob_start();

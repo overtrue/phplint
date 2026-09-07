@@ -75,7 +75,7 @@ class DotEnv implements ProviderInterface, LoggerAwareInterface
 
         $this->envConfig = new EnvConfig($this->envPrefix);
 
-        $envName = ConsoleApplicationRunner::getEnvName($this->envConfig, new ArgvInput());
+        $envName = ConsoleApplicationRunner::getEnvName();
 
         $this->defaultFallback = $this->envConfig->getDefaultFallback($envName);
         $this->defaultFallback['project_dir'] = $this->projectDirectory;

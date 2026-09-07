@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Output;
 
+use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Overtrue\PHPLint\Metadata\ApplicationVersion;
 use Overtrue\PHPLint\Metadata\CacheOutput;
 use Overtrue\PHPLint\Metadata\ConfigurationSettings;
@@ -38,7 +39,7 @@ final class JsonOutput extends StreamOutput implements OutputInterface
         return 'json';
     }
 
-    public function format(LinterOutput $results, MetadataCollection $metadataCollection): void
+    public function format(LinterOutput $results, MetadataCollection $metadataCollection, EnvConfigInterface $envConfig): void
     {
         $failures = $results->getFailures();
 

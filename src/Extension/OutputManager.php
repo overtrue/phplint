@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Extension;
 
 use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Console\ApplicationInterface;
+use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\Events;
@@ -135,8 +137,14 @@ final class OutputManager extends AbstractManager implements
             );
         }
 
+        $application = $event->getCommand()->getApplication();
+        $envConfig = $application instanceof ApplicationInterface
+            ? $application->getRunner()::getEnvConfig()
+            : new EnvConfig();
+        ;
+
         $outputHandler = new ChainOutput($this->handlers);
-        $outputHandler->format($results, $metadataCollection);
+        $outputHandler->format($results, $metadataCollection, $envConfig);
     }
 
     public function beforeExecute(BeforeCheckingEvent $event): void

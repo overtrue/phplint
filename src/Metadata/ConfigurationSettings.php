@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Metadata;
 
+use Overtrue\PHPLint\Environment\ModeEnum;
 use function json_encode;
 
 use const JSON_UNESCAPED_SLASHES;
@@ -44,6 +45,6 @@ final class ConfigurationSettings extends Metadata
 
     public function getMode(): string
     {
-        return $this->settings['mode'] ?? 'off';
+        return $this->settings['mode'] ?? ModeEnum::OFF->value;
     }
 }
