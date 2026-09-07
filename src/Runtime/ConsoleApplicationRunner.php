@@ -198,6 +198,11 @@ class ConsoleApplicationRunner
             ];
         }
 
+        if (self::hasMode(ModeEnum::DIAGNOSE)) {
+            $defaultPlugins[] = ExtensionEnum::DIAGNOSE_MANAGER->value;
+            $allowPlugins[] = ExtensionEnum::DIAGNOSE_MANAGER->value;
+        }
+
         $extensions = [];
 
         if (true === $input->hasParameterOption(['--' . OptionDefinition::EXTENSIONS, '-x'], true)) {
