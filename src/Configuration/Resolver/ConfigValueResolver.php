@@ -30,6 +30,7 @@ use function file_exists;
 use function getcwd;
 use function is_readable;
 
+use function realpath;
 use const DIRECTORY_SEPARATOR;
 
 /**
@@ -79,7 +80,7 @@ class ConfigValueResolver implements ValueResolverInterface
             default => $this->defaultDiscovery($value),
         };
 
-        return [$configFile];
+        return empty($configFile) ? [] : [realpath($configFile)];
     }
 
     public function getConfigFileCandidates(): array
