@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Command;
 
+use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver\ConfigValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\DryRunValueResolver;
@@ -160,7 +161,7 @@ final class LintCommand
             ]
         );
 
-        $finder = new Finder(null, $sourcePath, $excludePath, $fileExtensions);
+        $finder = $this->getFinder($sourcePath, $excludePath, $fileExtensions, $parameters, $input);
 
         $message = sprintf(
             '<comment>%s</comment> %s',
@@ -203,5 +204,26 @@ final class LintCommand
         }
 
         return Command::SUCCESS;
+    }
+
+    private function getFinder(
+        array $sourcePath,
+        array $excludePath,
+        array $fileExtensions,
+        array $parameters,
+        InputInterface $input
+    ): Finder {
+        $configResolver = new FileOptionsResolver($input, $parameters);
+        if (empty($sourcePath)) {
+            $sourcePath = $configResolver->getOption(OptionDefinition::PATH);
+        }
+        if (empty($excludePath)) {
+            $excludePath = $configResolver->getOption(OptionDefinition::EXCLUDE);
+        }
+        if (empty($fileExtensions)) {
+            $fileExtensions = $configResolver->getOption(OptionDefinition::FILE_EXTENSIONS);
+        }
+
+        return new Finder(null, $sourcePath, $excludePath, $fileExtensions);
     }
 }
