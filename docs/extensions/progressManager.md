@@ -2,7 +2,7 @@
 
 This extension is in charge to handle properly the file checking progression depending on the format supported.
 
-Set type of progress output (with `--progress` flag)
+Set type of progress output with `--progress` flag.
 
 Supported values are:
 
@@ -12,6 +12,21 @@ Supported values are:
 - `bar`: Prints a standard Symfony Progress Bar.
 - `indicator`: Let users know that the `phplint` command isn't stalled.
 - `quiet`: Suppress any progression output (same as `--no-progress` deprecated flag option)
+
+> [!CAUTION]
+> The `progress_manager` extension/plugin is not allowed/loaded by default on other environment than `dev`,
+> except for the special `legacy` mode.
+>
+> You should consider to enable it explicitly.
+
+```shell
+PLINT_FRONTEND=cli PLINT_ALLOW_PLUGINS=progress_manager phplint lint -x progress_manager /path/to/source/code -e ci --progress auto
+PLINT_FRONTEND=cli PLINT_ALLOW_PLUGINS=progress_manager PLINT_DEFAULT_PLUGINS=progress_manager phplint lint /path/to/source/code -e ci --progress auto
+```
+
+> [!TIP]
+> The `PLINT_MODE=legacy` enabled and activated the `cache_manager`, `output_manager` and `progress_manager` extensions,
+> whatever environment (`-e, --env`, `PLINT_ENV`) you are in.
 
 ## Default progression display
 
