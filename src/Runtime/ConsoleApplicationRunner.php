@@ -220,6 +220,11 @@ class ConsoleApplicationRunner
                 $defaultPlugins[] = ExtensionEnum::PROGRESS_MANAGER->value;
                 $allowPlugins[] = ExtensionEnum::PROGRESS_MANAGER->value;
             }
+
+            if (self::$output->isVerbose()) {
+                $defaultPlugins[] = ExtensionEnum::PROFILE_MANAGER->value;
+                $allowPlugins[] = ExtensionEnum::PROFILE_MANAGER->value;
+            }
         }
 
         $extensions = [];
