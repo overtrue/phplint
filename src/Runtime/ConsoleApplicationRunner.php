@@ -176,7 +176,9 @@ class ConsoleApplicationRunner
         $key = 'allow_plugins';
         $allowPlugins = explode(',', $envConfig->get($key, $defaultFallback));
 
-        if (!self::isFrontendInteractive()) {
+        $interactiveFrontend = self::isFrontendInteractive();
+
+        if (!$interactiveFrontend) {
             $deniedPlugins = [
                 ExtensionEnum::DIAGNOSE_MANAGER->value,
                 ExtensionEnum::PROFILE_MANAGER->value,
@@ -206,6 +208,18 @@ class ConsoleApplicationRunner
         if (self::hasMode(ModeEnum::PROFILE)) {
             $defaultPlugins[] = ExtensionEnum::PROFILE_MANAGER->value;
             $allowPlugins[] = ExtensionEnum::PROFILE_MANAGER->value;
+        }
+
+        if (self::hasMode(ModeEnum::LEGACY)) {
+            $defaultPlugins = $allowPlugins = [
+                ExtensionEnum::CACHE_MANAGER->value,
+                ExtensionEnum::OUTPUT_MANAGER->value,
+            ];
+
+            if ($interactiveFrontend) {
+                $defaultPlugins[] = ExtensionEnum::PROGRESS_MANAGER->value;
+                $allowPlugins[] = ExtensionEnum::PROGRESS_MANAGER->value;
+            }
         }
 
         $extensions = [];
