@@ -32,7 +32,7 @@ jobs:
           coverage: "none"
       -   # https://github.com/docker/setup-qemu-action
         name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
+        uses: docker/setup-qemu-action@v4.3.0
       -   # https://github.com/docker/setup-buildx-action
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
