@@ -62,7 +62,7 @@ jobs:
     steps:
       -   # https://github.com/actions/checkout
         name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7.0.1
 
       -   # https://github.com/shivammathur/setup-php
         name: Setup PHP runtime
