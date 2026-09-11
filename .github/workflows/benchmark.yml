@@ -60,7 +60,7 @@ jobs:
       -   # https://github.com/phpbench/phpbench
         name: Install PHPBench
         run: |
-          curl -Ls https://github.com/phpbench/phpbench/releases/download/1.4.3/phpbench.phar -o /usr/local/bin/phpbench
+          curl -Ls https://github.com/phpbench/phpbench/releases/download/1.7.0/phpbench.phar -o /usr/local/bin/phpbench
           chmod +x /usr/local/bin/phpbench
 
       -   # https://github.com/phpbench/phpbench
