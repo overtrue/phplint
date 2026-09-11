@@ -44,7 +44,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       -   # https://github.com/docker/build-push-action
         name: Build and push Docker images
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v7.3.0
         with:
           push: true
           tags: overtrue/phplint:${{ env.DOCKER_BUILD_TAG }}
