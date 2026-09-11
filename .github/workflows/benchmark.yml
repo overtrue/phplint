@@ -84,7 +84,7 @@ jobs:
 
       -   # https://github.com/actions/upload-artifact
         name: Upload PHPBench report
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: "PHPBench-Report-PHP-${{ matrix.php-version }}"
           path: ".phpbench/html/index.html"
