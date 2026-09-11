@@ -95,7 +95,7 @@ jobs:
       -   # https://github.com/softprops/action-gh-release
         name: Create Release
         if: inputs.tag-name != ''
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@v3.0.3
         with:  # https://github.com/softprops/action-gh-release#-customizing
           prerelease: false
           draft: false
