@@ -19,7 +19,7 @@ class MyPhpLintConverter extends PhpLintConverter
 {
     public function __construct(bool $prettyPrint)
     {
-        parent::__construct(['format_output' => true]);
+        parent::__construct(['format_output' => $prettyPrint]);
     }
 
     public function configure(array $options = []): void

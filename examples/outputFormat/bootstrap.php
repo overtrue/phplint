@@ -16,5 +16,5 @@ declare(strict_types=1);
  * @since Release 9.4.0
  */
 
-require_once dirname(__DIR__, 2) . '/autoload.php';
 require_once __DIR__ . '/MyPhpLintConverter.php';
+require_once __DIR__ . '/DumpOutput.php';

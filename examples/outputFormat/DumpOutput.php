@@ -30,6 +30,10 @@ class DumpOutput extends StreamOutput implements OutputInterface
 
     public function format(LinterOutput $results, MetadataCollection $metadataCollection, EnvConfigInterface $envConfig): void
     {
+        if ($metadataCollection->hasMetadata(\Overtrue\PHPLint\Metadata\LinterOutput::class)) {
+            $results = $metadataCollection->getMetadata(\Overtrue\PHPLint\Metadata\LinterOutput::class);
+        }
+
         $this->writeln([
             '',
             var_export($results, true)

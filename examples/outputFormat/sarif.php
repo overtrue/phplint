@@ -16,52 +16,96 @@ declare(strict_types=1);
  * @since Release 9.4.0
  */
 
-use Overtrue\PHPLint\Command\LintCommand;
-use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
-use Overtrue\PHPLint\Event\EventDispatcher;
+use Bartlett\Sarif\Converter\PhpLintConverter;
+use Overtrue\PHPLint\Cache;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Output\SarifOutput;
-use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Cache\Adapter\NullAdapter;
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-if ($argc > 1 && file_exists($argv[1])) {
-    // specify autoloader that should be used to load resources
-    require_once $argv[1];
+require_once dirname(__DIR__, 2) . '/autoload.php';
+
+$definition = new InputDefinition();
+
+$definition->addOption(new InputOption(
+    'output-class',
+    null,
+    InputOption::VALUE_REQUIRED,
+    'Class to output',
+    SarifOutput::class,
+));
+$definition->addOption(new InputOption(
+    'converter-class',
+    null,
+    InputOption::VALUE_REQUIRED,
+    'Class to convert data format',
+    PhpLintConverter::class,
+));
+$definition->addOption(new InputOption(
+    OptionDefinition::BOOTSTRAP,
+    'b',
+    InputOption::VALUE_REQUIRED,
+    'PHP script that is included before the application run',
+));
+$definition->addOption(new InputOption(
+    '--verbose',
+    '-v|vv|vvv',
+    InputOption::VALUE_NONE,
+    'Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug'
+));
+
+$input = new ArgvInput(null, $definition);
+
+if ($argc === 1) {
+    echo "Using options:" . PHP_EOL;
+    var_export($input->getOptions());
+    exit(0);
 }
 
-$outputClass = $argv[2] ?? '';
+$bootstrap = $input->getOption(OptionDefinition::BOOTSTRAP);
+
+if ($bootstrap && file_exists($bootstrap)) {
+    // specify autoloader that should be used to load resources
+    require_once $bootstrap;
+}
+
+$outputClass = $input->getOption('output-class');
 
 if (empty($outputClass) || !class_exists($outputClass)) {
     // fallback to built-in SARIF output class
     $outputClass = SarifOutput::class;
 }
 
-$converterClass = $argv[3] ?? '';
+$converterClass = $input->getOption('converter-class');
 
-$isVerbose = array_search('-v', $argv) !== false;
+$converter = null;
 
-if (empty($converterClass) || !class_exists($converterClass)) {
-    $converter = null;
-} else {
-    $converter = new $converterClass($isVerbose);
+if (class_exists($converterClass)) {
+    $converter = new $converterClass($input->getOption('verbose'));
 }
 
-$dispatcher = new EventDispatcher([]);
+$sourcePath = [__DIR__ . '/../../src', __DIR__ . '/../../tests'];
 
-$arguments = [
-    'path' => [__DIR__ . '/../../src', __DIR__ . '/../../tests'],
-    '--no-configuration' => true,
-];
-$command = new LintCommand($dispatcher);
-$input = new ArrayInput($arguments, $command->getDefinition());
-$configResolver = new ConsoleOptionsResolver($input);
+$finder = new Finder(null, $sourcePath);
+$linter = new Linter(
+    cache: new Cache(new NullAdapter()),
+);
 
-$finder = new Finder($configResolver);
-$linter = new Linter($configResolver, $dispatcher);
-$results = $linter->lintFiles($finder->getFiles());
+$metadataCollection = new MetadataCollection();
+
+$results = $linter->lintFiles($finder->getFiles(), null, $metadataCollection);
+
+echo "Convert results with : " . $converterClass . PHP_EOL;
 
 $output = new $outputClass(STDOUT, OutputInterface::VERBOSITY_VERBOSE, null, null, $converter);
 if ($output instanceof OutputInterface) {
-    $output->format($results);
+    $envConfig = new EnvConfig();
+    $output->format($results, $metadataCollection, $envConfig);
 }
