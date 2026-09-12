@@ -7,6 +7,13 @@ Since version 9.4.0 PHPLint is able to define and support multiple output format
       --format=FORMAT                      Format of requested reports (multiple values allowed)
 ```
 
+Since version 9.8.0 PHPLint flags were renamed (to avoid conflict with the `help` command options)
+
+```text
+  -o, --output-file=OUTPUT                 Generate an output to the specified path (default: standard output)
+      --output-format=FORMAT               Format of requested reports (multiple values allowed)
+```
+
 All source code are available in [examples outputFormat directory][examples-format-folder]
 
 ## Dump Linter output 
@@ -14,7 +21,7 @@ All source code are available in [examples outputFormat directory][examples-form
 The `DumpOutput` class will print your linter results as valid PHP code representation by PHP function [var_export][var-export].
 
 ```shell
-php examples/outputFormat/sarif.php examples/outputFormat/autoload.php DumpOutput
+php examples/outputFormat/sarif.php --bootstrap examples/outputFormat/bootstrap.php --output-class DumpOutput
 ```
 
 
@@ -34,13 +41,8 @@ composer require --dev bartlett/sarif-php-converters
 
 ### Example 1
 
-> [!WARNING]
-> 
-> You need to fix the absolute path (`/shared/backups/bartlett/sarif-php-converters/`) into the `bootstrap.php` file,
-> once you'll have installed the `bartlett/sarif-php-converters` package.
-
 ```shell
-php examples/outputFormat/sarif.php examples/outputFormat/bootstrap.php
+php examples/outputFormat/sarif.php --bootstrap examples/outputFormat/bootstrap.php
 ```
 
 This example use the default `SarifOutput` class.
@@ -52,7 +54,7 @@ While example 1 used the default `PhpLintConverter` of `bartlett/sarif-php-conve
 E.g: with `MyPhpLintConverter`
 
 ```shell
-php examples/outputFormat/sarif.php examples/outputFormat/bootstrap.php '' 'MyPhpLintConverter' -v
+php examples/outputFormat/sarif.php --bootstrap examples/outputFormat/bootstrap.php --converter-class MyPhpLintConverter --verbose
 ```
 
 [sarifweb]: https://sarifweb.azurewebsites.net/
