@@ -60,6 +60,11 @@ class SarifOutput extends StreamOutput implements OutputInterface
     {
         $reporter = new PhpLintReport($this->converter);
         ob_start();
+
+        if ($metadataCollection->hasMetadata(\Overtrue\PHPLint\Metadata\LinterOutput::class)) {
+            $results = $metadataCollection->getMetadata(\Overtrue\PHPLint\Metadata\LinterOutput::class);
+        }
+
         $reporter->format($results);
         $jsonString = ob_get_clean();
 
