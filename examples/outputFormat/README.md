@@ -59,5 +59,5 @@ php examples/outputFormat/sarif.php --bootstrap examples/outputFormat/bootstrap.
 
 [sarifweb]: https://sarifweb.azurewebsites.net/
 [sarif-php-converters]: https://github.com/llaville/sarif-php-converters
-[examples-format-folder]: https://github.com/overtrue/phplint/tree/9.4/examples/outputFormat
+[examples-format-folder]: https://github.com/overtrue/phplint/tree/9.8/examples/outputFormat
 [var-export]: https://www.php.net/manual/en/function.var-export.php
