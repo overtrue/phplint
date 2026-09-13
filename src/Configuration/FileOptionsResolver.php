@@ -74,7 +74,7 @@ final class FileOptionsResolver extends AbstractOptionsResolver
     private function parseFile(string $filename): array
     {
         $configuration = match (pathinfo($filename, PATHINFO_EXTENSION)) {
-            'yml', 'yaml' => $this->parseYamlConfiguration($filename),
+            'yml', 'yaml', 'dist' => $this->parseYamlConfiguration($filename),
             'json' => $this->parseJsonConfiguration($filename),
             'php' => $this->parsePhpConfiguration($filename),
             default => throw new InvalidOptionsException(sprintf('File format "%s" is not accepted.', $filename))
