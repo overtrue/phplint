@@ -1,20 +1,20 @@
 # Configuration
 
 PHPLint uses the [Symfony OptionsResolver Component][symfony/options-resolver] to validate configuration 
-from console arguments/options and/or YAML file.
+from console arguments/options and/or YAML,JSON,PHP file.
 
-Two Options Resolver exists (`ConsoleOptionsResolver`, `FileOptionsResolver`), 
-each one's implement the [Factory method pattern][factory-method-pattern].
-
-## ConsoleOptionsResolver
-
-This resolver is used if you specify the `--no-configuration` option. In this case, 
-only arguments and options from console command line are used.
+One active Options Resolver exists (`FileOptionsResolver`), 
+and implement the [Factory method pattern][factory-method-pattern].
 
 ## FileOptionsResolver
 
 This resolver is used if you specify the `--configuration` option. 
-When YAML configuration file exists and is loadable, it will be automatically used.
+When configuration file exists, is readable and decodable, it will be automatically used.
+
+> [!WARNING]
+> On legacy mode (`PLINT_MODE=legacy`), only YAML configuration is supported, 
+> while new API 9.8 is able to scans (`PLINT_CONFIG=auto`, `--configuration auto`) 
+> supported `.phplint` and `.phplint.dist` file candidates (php, yaml, yml, and json).
 
 ## UML Diagram
 

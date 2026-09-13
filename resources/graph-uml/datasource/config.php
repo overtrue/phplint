@@ -1,7 +1,6 @@
 <?php
 
 use Overtrue\PHPLint\Configuration\AbstractOptionsResolver;
-use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Options;
@@ -12,7 +11,6 @@ function dataSource(): Generator
 {
     $classes = [
         AbstractOptionsResolver::class,
-        ConsoleOptionsResolver::class,
         FileOptionsResolver::class,
         OptionDefinition::class,
         Options::class,
