@@ -12,8 +12,10 @@
 require_once dirname(__DIR__) . '/autoload.php';
 
 use Overtrue\PHPLint\Cache;
+use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Symfony\Component\Cache\Adapter\NullAdapter;
 
 $sourcePath = [dirname(__DIR__) . '/src', dirname(__DIR__) . '/tests'];
@@ -26,7 +28,10 @@ $linter = new Linter(
     showWarning: true,
 );
 
-$results = $linter->lintFiles($finder->getFiles());
+$envConfig = new EnvConfig();
+$metadataCollection = new MetadataCollection();
+
+$results = $linter->lintFiles($finder->getFiles(), null, $metadataCollection);
 
 var_dump("Files checked :", count($results));
 
