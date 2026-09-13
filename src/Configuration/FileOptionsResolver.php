@@ -57,7 +57,7 @@ final class FileOptionsResolver extends AbstractOptionsResolver
             }
         }
 
-        if (!empty($configFile)) {
+        if (!empty($configFile) && 'auto' !== $configFile) {
             $fileConf = $this->parseFile($configFile);
             $configuration = array_replace(array_filter($fileConf), array_filter($configuration));
             $configuration[OptionDefinition::CONFIGURATION] = $configFile;
