@@ -16,6 +16,7 @@ namespace Overtrue\PHPLint\Environment;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\ConsoleLogger;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
+use function file_exists;
 use function getenv;
 use function implode;
 use function rtrim;
@@ -91,10 +92,16 @@ class EnvConfig implements EnvConfigInterface
 
         $defaultMode = ModeEnum::OFF->value;
 
-        $config = $this->get('mode', $defaultMode) === ModeEnum::LEGACY->value
-            ? OptionDefinition::DEFAULT_CONFIG_FILE
-            : 'auto'
-        ;
+        $config = 'auto';
+
+        if ($this->get('mode', $defaultMode) === ModeEnum::LEGACY->value) {
+            foreach ([OptionDefinition::DEFAULT_CONFIG_FILE, '.phplint.yml.dist'] as $candidate) {
+                if (file_exists($candidate)) {
+                    $config = $candidate;
+                    break;
+                }
+            }
+        }
 
         return [
             'allow_plugins' => implode(',', $allowPlugins),
