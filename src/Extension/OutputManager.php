@@ -26,12 +26,14 @@ use Overtrue\PHPLint\Output\FormatResolver;
 use Overtrue\PHPLint\Output\LinterOutput;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Event\ConsoleEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Finder\Finder;
 
+use function count;
 use function json_decode;
 
 /**
@@ -88,16 +90,8 @@ final class OutputManager extends AbstractManager implements
             return;
         }
 
-        $command = $event->getCommand();
-
-        $application = $command->getApplication();
-
-        $this->metadataCollection = $application->getMetadata();
-
-        $settings = json_decode(
-            $this->metadataCollection->getMetadata(ConfigurationSettings::class)->describe('value'),
-            true
-        );
+        $metadata = $this->metadataCollection->getMetadata(ConfigurationSettings::class);
+        $settings = json_decode($metadata->describe('value'), true);
 
         $this->handlers = (new FormatResolver())->resolve(
             null,
@@ -155,5 +149,24 @@ final class OutputManager extends AbstractManager implements
     public function afterExecute(AfterCheckingEvent $event): void
     {
         $this->describeEvent($event);
+    }
+
+    protected function allowEvent(ConsoleEvent $event): bool
+    {
+        if (!parent::allowEvent($event)) {
+            return false;
+        }
+
+        if ($event instanceof ConsoleTerminateEvent && count($this->handlers) === 0) {
+            return false;
+        }
+
+        $command = $event->getCommand();
+
+        $application = $command->getApplication();
+
+        $this->metadataCollection = $application->getMetadata();
+
+        return (null !== $this->metadataCollection->getMetadata(ConfigurationSettings::class));
     }
 }

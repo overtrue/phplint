@@ -19,11 +19,14 @@ use Overtrue\PHPLint\Console\SectionEnum;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\Events;
 use Overtrue\PHPLint\Metadata\ConfigurationSettings;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Event\ConsoleEvent;
+use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -40,6 +43,8 @@ final class CacheManager extends AbstractManager implements
     ExtensionInterface,
     EventSubscriberInterface
 {
+    private MetadataCollection $metadataCollection;
+
     private static Cache $cache;
 
     public function __construct(private readonly ?AdapterInterface $adapter = null)
@@ -103,16 +108,8 @@ final class CacheManager extends AbstractManager implements
             return;
         }
 
-        $command = $event->getCommand();
-
-        $application = $command->getApplication();
-
-        $metadataCollection = $application->getMetadata();
-
-        $settings = json_decode(
-            $metadataCollection->getMetadata(ConfigurationSettings::class)->describe('value'),
-            true
-        );
+        $metadata = $this->metadataCollection->getMetadata(ConfigurationSettings::class);
+        $settings = json_decode($metadata->describe('value'), true);
 
         $withoutCache = $settings[OptionDefinition::NO_CACHE];
         $defaultLifetime = $settings[OptionDefinition::CACHE_TTL];
@@ -160,5 +157,20 @@ final class CacheManager extends AbstractManager implements
     public static function getCacheInstance(): Cache
     {
         return self::$cache;
+    }
+
+    protected function allowEvent(ConsoleEvent $event): bool
+    {
+        if (!parent::allowEvent($event)) {
+            return false;
+        }
+
+        $command = $event->getCommand();
+
+        $application = $command->getApplication();
+
+        $this->metadataCollection = $application->getMetadata();
+
+        return (null !== $this->metadataCollection->getMetadata(ConfigurationSettings::class));
     }
 }

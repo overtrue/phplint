@@ -17,12 +17,14 @@ use Overtrue\PHPLint\Command\ProfileCommand;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Console\SectionEnum;
+use Overtrue\PHPLint\Environment\ModeEnum;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\Events;
 use Overtrue\PHPLint\Metadata\Metadata;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Event\ConsoleEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
@@ -59,7 +61,7 @@ final class ProfileManager extends AbstractManager implements
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'Display timing and memory usage information',
-                'auto'
+                'never'
             ),
         ]);
     }
@@ -82,19 +84,8 @@ final class ProfileManager extends AbstractManager implements
             return;
         }
 
-        $command = $event->getCommand();
-
-        $input = $event->getInput();
-        $application = $command->getApplication();
-
-        $this->stopwatch = $application->getProfiler();
-
-        $this->whenProfiled = $input->getOption(OptionDefinition::PROFILE) ?? 'auto';
-
-        if ('never' !== $this->whenProfiled) {
-            // when symfony/stopwatch package is installed, start to use it !
-            $this->stopwatch?->start(self::PROFILING_EVENT);
-        }
+        // when symfony/stopwatch package is installed, start to use it !
+        $this->stopwatch?->start(self::PROFILING_EVENT);
     }
 
     /**
@@ -178,5 +169,32 @@ final class ProfileManager extends AbstractManager implements
                 'exit_code' => $exitCode,
             ]
         );
+    }
+
+    protected function allowEvent(ConsoleEvent $event): bool
+    {
+        if (!parent::allowEvent($event)) {
+            return false;
+        }
+
+        $command = $event->getCommand();
+
+        $input = $event->getInput();
+        $application = $command->getApplication();
+
+        $this->stopwatch = $application->getProfiler();
+
+        $runner = $application->getRunner();
+
+        if ($runner::hasMode(ModeEnum::LEGACY)) {
+            $this->whenProfiled = $event->getOutput()->isVerbose() ? 'auto' : 'never';
+        } else {
+            $this->whenProfiled = $input->hasOption(OptionDefinition::PROFILE)
+                ? $input->getOption(OptionDefinition::PROFILE) ?? 'auto'
+                : 'never'
+            ;
+        }
+
+        return ('never' !== $this->whenProfiled);
     }
 }

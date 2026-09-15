@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Extension;
 
+use InvalidArgumentException;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\AfterLintFileEvent;
@@ -27,12 +28,14 @@ use Overtrue\PHPLint\Helper\ProcessHelper;
 use Overtrue\PHPLint\Helper\ProgressHelper;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Event\ConsoleEvent;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use function method_exists;
+use function sprintf;
 
 /**
  * @author Laurent Laville
@@ -46,6 +49,8 @@ final class ProgressManager extends AbstractManager implements
     AfterLintFileInterface
 {
     private ?ExtensionEventInterface $widget = null;
+
+    private ?string $progress = null;
 
     public function getName(): string
     {
@@ -103,27 +108,9 @@ final class ProgressManager extends AbstractManager implements
 
         $input = $event->getInput();
 
-        $progress = ProgressEnum::DOTS->value;
-
-        if (true === $input->getOption(OptionDefinition::NO_PROGRESS)
-            || $output->isQuiet()
-        ) {
-            $progress = ProgressEnum::QUIET->value;
-        }
-
-        if ($output->isVeryVerbose()) {
-            $progress = ProgressEnum::PLAIN->value;
-        }
-
-        if (true === $input->hasParameterOption(['--' . OptionDefinition::PROGRESS, '-p'], true)) {
-            $progress = $input->getParameterOption(['--' . OptionDefinition::PROGRESS, '-p']);
-        }
-
-        $progress ??= OptionDefinition::DEFAULT_PROGRESS_WIDGET;
-
         $newEvent = clone $event;
 
-        if ($progress === ProgressEnum::PLAIN->value) {
+        if ($this->progress === ProgressEnum::PLAIN->value) {
             $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
             $newEvent = new ConsoleCommandEvent(
                 $command,
@@ -132,12 +119,12 @@ final class ProgressManager extends AbstractManager implements
             );
         }
 
-        $this->widget = match ($progress) {
+        $this->widget = match ($this->progress) {
             ProgressEnum::BAR->value => new ProgressBar(),
             ProgressEnum::INDICATOR->value => new ProgressIndicator(),
             ProgressEnum::AUTO->value, ProgressEnum::DOTS->value, ProgressEnum::PLAIN->value, 'printer' => new ProgressPrinter(),
             ProgressEnum::NEVER->value, ProgressEnum::QUIET->value => null,
-            default => throw new \InvalidArgumentException(\sprintf('Unknown progress enum case "%s"', $progress)),
+            default => throw new InvalidArgumentException(sprintf('Unknown progress enum case "%s"', $this->progress)),
         };
 
         if ($this->widget instanceof ExtensionEventInterface) {
@@ -188,5 +175,33 @@ final class ProgressManager extends AbstractManager implements
             return;
         }
         $this->widget->{__FUNCTION__}($event);
+    }
+
+    protected function allowEvent(ConsoleEvent $event): bool
+    {
+        if (!parent::allowEvent($event)) {
+            return false;
+        }
+
+        $input = $event->getInput();
+        $output = $event->getOutput();
+
+        if (true === $input->getOption(OptionDefinition::NO_PROGRESS) || $output->isQuiet()) {
+            return false;
+        }
+
+        if (true === $input->hasParameterOption(['--' . OptionDefinition::PROGRESS, '-p'], true)) {
+            $this->progress = $input->getParameterOption(['--' . OptionDefinition::PROGRESS, '-p']);
+        }
+
+        if (null === $this->progress) {
+            if ($output->isVeryVerbose()) {
+                $this->progress = ProgressEnum::PLAIN->value;
+            } else {
+                $this->progress = ProgressEnum::DOTS->value;
+            }
+        }
+
+        return ($this->progress !== ProgressEnum::QUIET->value);
     }
 }

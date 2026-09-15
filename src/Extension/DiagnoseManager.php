@@ -19,13 +19,16 @@ use Overtrue\PHPLint\Console\SectionEnum;
 use Overtrue\PHPLint\Environment\EnvConfig;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Event\ConsoleEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Throwable;
 
+use function count;
 use function explode;
+use function implode;
 use function in_array;
 
 /**
@@ -36,7 +39,7 @@ final class DiagnoseManager extends AbstractManager implements
     ExtensionInterface,
     EventSubscriberInterface
 {
-    private array $diagnostics = [];
+    private ?array $diagnostics = null;
 
     public function getName(): string
     {
@@ -64,23 +67,6 @@ final class DiagnoseManager extends AbstractManager implements
             return;
         }
 
-        $application = $event->getCommand()->getApplication();
-
-        $envConfig = $application instanceof ApplicationInterface
-            ? $application->getRunner()::getEnvConfig()
-            : new EnvConfig()
-        ;
-
-        $output = $event->getOutput();
-
-        $diagnostics = $envConfig->get('diagnostic', DiagnoseEnum::AUTO->value);
-        $this->diagnostics = explode(',', $diagnostics);
-
-        if (in_array(DiagnoseEnum::NEVER->value, $this->diagnostics, true) || $output->isQuiet()) {
-            $this->diagnostics = [];
-            return;
-        }
-
         $message = sprintf(
             '<comment>%s</comment> %s',
             'The "Diagnose Manager" launched following diagnostic',
@@ -90,7 +76,7 @@ final class DiagnoseManager extends AbstractManager implements
         $this->logger->notice($message, [
             '__section__' => SectionEnum::PLUGIN->label(),
             '__style__' => SectionEnum::PLUGIN->value,
-            'kind' => $diagnostics,
+            'kind' => implode(',', $this->diagnostics),
         ]);
     }
 
@@ -98,7 +84,7 @@ final class DiagnoseManager extends AbstractManager implements
     {
         $this->describeEvent($event);
 
-        if (!$this->allowEvent($event) || empty($this->diagnostics)) {
+        if (!$this->allowEvent($event)) {
             return;
         }
 
@@ -144,5 +130,36 @@ final class DiagnoseManager extends AbstractManager implements
         }
 
         $this->logger->notice($message, $context);
+    }
+
+    protected function allowEvent(ConsoleEvent $event): bool
+    {
+        if (!parent::allowEvent($event)) {
+            return false;
+        }
+
+        // checks if diagnostics list was already initialized
+        if (null !== $this->diagnostics && count($this->diagnostics) === 0) {
+            return false;
+        }
+
+        $application = $event->getCommand()->getApplication();
+
+        $envConfig = $application instanceof ApplicationInterface
+            ? $application->getRunner()::getEnvConfig()
+            : new EnvConfig()
+        ;
+
+        $output = $event->getOutput();
+
+        $diagnostics = $envConfig->get('diagnostic', DiagnoseEnum::AUTO->value);
+        $this->diagnostics = explode(',', $diagnostics);
+
+        if (in_array(DiagnoseEnum::NEVER->value, $this->diagnostics, true) || $output->isQuiet()) {
+            $this->diagnostics = [];
+            return false;
+        }
+
+        return true;
     }
 }
