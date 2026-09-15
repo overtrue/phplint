@@ -94,7 +94,7 @@ $converterClass = $input->getOption('converter-class');
 $converter = null;
 
 if (class_exists($converterClass)) {
-    $converter = new $converterClass($input->getOption('verbose'));
+    $converter = new $converterClass(['format_output' => $input->getOption('verbose')]);
 }
 
 $sourcePath = [__DIR__ . '/../../src', __DIR__ . '/../../tests'];
@@ -107,8 +107,6 @@ $linter = new Linter(
 $metadataCollection = new MetadataCollection();
 
 $results = $linter->lintFiles($finder->getFiles(), null, $metadataCollection);
-
-echo "Convert results with : " . $converterClass . PHP_EOL;
 
 $output = new $outputClass(STDOUT, OutputInterface::VERBOSITY_VERBOSE, null, null, $converter);
 if ($output instanceof OutputInterface) {
