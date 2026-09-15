@@ -24,7 +24,6 @@ The `DumpOutput` class will print your linter results as valid PHP code represen
 php examples/outputFormat/sarif.php --bootstrap examples/outputFormat/bootstrap.php --output-class DumpOutput
 ```
 
-
 ## SARIF Format
 
 The Static Analysis Results Interchange Format ([SARIF][sarifweb]) is supported optionally by PHPLint.
@@ -37,6 +36,26 @@ You'll need to install the package as any other dependency with following comman
 
 ```shell
 composer require --dev bartlett/sarif-php-converters
+```
+
+### Help options (current/available)
+
+```shell
+php examples/outputFormat/sarif.php
+php examples/outputFormat/sarif.php -h
+php examples/outputFormat/sarif.php --help
+```
+
+Will print something like :
+
+```text
+Using options:
+array (
+  'output-class' => 'Overtrue\\PHPLint\\Output\\SarifOutput',
+  'converter-class' => 'Bartlett\\Sarif\\Converter\\PhpLintConverter',
+  'bootstrap' => NULL,
+  'verbose' => false,
+)
 ```
 
 ### Example 1

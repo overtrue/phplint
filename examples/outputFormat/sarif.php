@@ -58,12 +58,18 @@ $definition->addOption(new InputOption(
     '--verbose',
     '-v|vv|vvv',
     InputOption::VALUE_NONE,
-    'Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug'
+    'Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug',
+));
+$definition->addOption(new InputOption(
+    '--help',
+    '-h',
+    InputOption::VALUE_NONE,
+    'Display help for the given command.',
 ));
 
 $input = new ArgvInput(null, $definition);
 
-if ($argc === 1) {
+if ($argc === 1 || $input->getOption('help')) {
     echo "Using options:" . PHP_EOL;
     var_export($input->getOptions());
     exit(0);
