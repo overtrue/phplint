@@ -17,7 +17,6 @@ use Overtrue\PHPLint\Cache;
 use Overtrue\PHPLint\Command\InvokableCommand;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\Resolver\ArgumentResolverInterface;
-use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Overtrue\PHPLint\Environment\ModeEnum;
 use Overtrue\PHPLint\Extension\CacheManager;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
@@ -51,6 +50,7 @@ use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Throwable;
 
+use function class_exists;
 use function json_encode;
 use function var_dump;
 
@@ -296,7 +296,7 @@ final class Application extends BaseApplication implements
                 $this->cache = $extension::getCacheInstance();
             }
 
-            if ($extensionName === ExtensionEnum::PROFILE_MANAGER->value) {
+            if ($extensionName === ExtensionEnum::PROFILE_MANAGER->value && class_exists(Stopwatch::class)) {
                 $this->stopwatch = new Stopwatch(true);
             }
 
