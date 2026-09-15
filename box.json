@@ -1,24 +1,24 @@
 {
-  "compression": "GZ",
-  "chmod": "0700",
-  "banner": [
-    "This file is part of the overtrue/phplint package",
-    "",
-    "(c) overtrue",
-    "",
-    "This source file is subject to the MIT license that is bundled",
-    "with this source code in the file LICENSE."
-  ],
-  "force-autodiscovery": true,
-  "dump-autoload": false,
-  "exclude-dev-files": false,
-  "directories": [
-    "bin",
-    "src",
-    "vendor"
-  ],
-  "files": [
-    "autoload.php",
-    "phplint.php"
-  ]
+    "compression": "GZ",
+    "chmod": "0700",
+    "banner": [
+        "This file is part of the overtrue/phplint package",
+        "",
+        "(c) overtrue",
+        "",
+        "This source file is subject to the MIT license that is bundled",
+        "with this source code in the file LICENSE."
+    ],
+    "force-autodiscovery": true,
+    "dump-autoload": false,
+    "exclude-dev-files": false,
+    "directories": [
+        "bin",
+        "src",
+        "vendor"
+    ],
+    "files": [
+        "autoload.php",
+        "phplint.php"
+    ]
 }

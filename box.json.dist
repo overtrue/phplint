@@ -1,46 +1,46 @@
 {
-  "compression": "GZ",
-  "chmod": "0700",
-  "banner": [
-    "This file is part of the overtrue/phplint package",
-    "",
-    "(c) overtrue",
-    "",
-    "This source file is subject to the MIT license that is bundled",
-    "with this source code in the file LICENSE."
-  ],
-  "force-autodiscovery": true,
-  "dump-autoload": false,
-  "exclude-dev-files": false,
-  "directories": [
-    "bin",
-    "src",
-    "vendor"
-  ],
-  "files": [
-    "autoload.php",
-    "phplint.php"
-  ],
-  "files-bin": [
-    "console-table.txt",
-    "plain.txt",
-    "sbom.json",
-    "pkg.composer.txt",
-    ".box.manifests.bin"
-  ],
-  "map": [
-    {
-      "console-table.txt": ".box.manifests/console-table.txt"
-    },
-    {
-      "plain.txt": ".box.manifests/plain.txt"
-    },
-    {
-      "sbom.json": ".box.manifests/sbom.json"
-    },
-    {
-      "pkg.composer.txt": ".box.manifests/pkg.composer.txt"
-    }
-  ],
-  "stub": "stub.php"
+    "compression": "GZ",
+    "chmod": "0700",
+    "banner": [
+        "This file is part of the overtrue/phplint package",
+        "",
+        "(c) overtrue",
+        "",
+        "This source file is subject to the MIT license that is bundled",
+        "with this source code in the file LICENSE."
+    ],
+    "force-autodiscovery": true,
+    "dump-autoload": false,
+    "exclude-dev-files": false,
+    "directories": [
+        "bin",
+        "src",
+        "vendor"
+    ],
+    "files": [
+        "autoload.php",
+        "phplint.php"
+    ],
+    "files-bin": [
+        "console-table.txt",
+        "plain.txt",
+        "sbom.json",
+        "pkg.composer.txt",
+        ".box.manifests.bin"
+    ],
+    "map": [
+        {
+            "console-table.txt": ".box.manifests/console-table.txt"
+        },
+        {
+            "plain.txt": ".box.manifests/plain.txt"
+        },
+        {
+            "sbom.json": ".box.manifests/sbom.json"
+        },
+        {
+            "pkg.composer.txt": ".box.manifests/pkg.composer.txt"
+        }
+    ],
+    "stub": "stub.php"
 }
