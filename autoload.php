@@ -58,12 +58,14 @@ if (class_exists(__NAMESPACE__ . '\Autoload', false) === false) {
                 $baseDir = Phar::running() ? : __DIR__;
 
                 // checks to register optional autoloader
-                foreach (new DirectoryIterator($baseDir . '/vendor-bin') as $directory) {
-                    if ($directory->isDot()) {
-                        continue;
+                if (file_exists($baseDir . '/vendor-bin')) {
+                    foreach (new DirectoryIterator($baseDir . '/vendor-bin') as $directory) {
+                        if ($directory->isDot()) {
+                            continue;
+                        }
+                        $autoloadFile = $directory->getPathname() . '/vendor/autoload.php';
+                        require $autoloadFile;
                     }
-                    $autoloadFile = $directory->getPathname() . '/vendor/autoload.php';
-                    require $autoloadFile;
                 }
 
                 self::$composerAutoloader = require self::getAutoloadFile($possibleAutoloadPaths, $autoloader);
