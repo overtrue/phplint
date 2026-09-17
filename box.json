@@ -22,6 +22,12 @@
         "vendor-bin/sarif/",
         "vendor-bin/sf-stopwatch/"
     ],
+    "blacklist": [
+        "tests/",
+        "examples/",
+        "resources/",
+        "docs/"
+    ],
     "files": [
         "autoload.php",
         "phplint.php"
