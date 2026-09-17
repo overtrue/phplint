@@ -13,22 +13,19 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint;
 
+use DirectoryIterator;
+use Phar;
 use RuntimeException;
 
 use function basename;
 use function class_exists;
 use function dirname;
 use function file_exists;
-use function glob;
 use function implode;
 use function spl_autoload_register;
 use function sprintf;
 
 use const DIRECTORY_SEPARATOR;
-
-foreach (glob(__DIR__ . '/vendor-bin/*/vendor/autoload.php') as $autoloadFile) {
-    require $autoloadFile;
-}
 
 if (class_exists(__NAMESPACE__ . '\Autoload', false) === false) {
     class Autoload
@@ -37,7 +34,6 @@ if (class_exists(__NAMESPACE__ . '\Autoload', false) === false) {
          * The composer autoloader(s).
          */
         private static ?\Composer\Autoload\ClassLoader $composerAutoloader = null;
-        private static ?\Composer\Autoload\ClassLoader $optionalAutoloader = null;
 
         public static function load(string $class): void
         {
@@ -57,16 +53,23 @@ if (class_exists(__NAMESPACE__ . '\Autoload', false) === false) {
                     $autoloader = 'vendor/autoload.php';
                 }
 
+                // [!CAUTION]
+                // https://www.php.net/manual/en/phar.using.stream.php#104320
+                $baseDir = Phar::running() ? : __DIR__;
+
+                // checks to register optional autoloader
+                foreach (new DirectoryIterator($baseDir . '/vendor-bin') as $directory) {
+                    if ($directory->isDot()) {
+                        continue;
+                    }
+                    $autoloadFile = $directory->getPathname() . '/vendor/autoload.php';
+                    require $autoloadFile;
+                }
+
                 self::$composerAutoloader = require self::getAutoloadFile($possibleAutoloadPaths, $autoloader);
             }
 
-            $classLoaded = self::$composerAutoloader->loadClass($class);
-
-            if ($classLoaded === true) {
-                return;
-            }
-
-            self::$optionalAutoloader?->loadClass($class);
+            self::$composerAutoloader->loadClass($class);
         }
 
         private static function getAutoloadFile(array $possibleAutoloadPaths, string $autoloader): string
