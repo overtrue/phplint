@@ -86,7 +86,8 @@ final class DiagnoseCommand
         }
 
         if (in_array(DiagnoseEnum::AUTO->value, $diagnostic, true)) {
-            $diagnostic[] = 'metadata';
+            $diagnostic[] = 'metadata:application_version';
+            $diagnostic[] = 'metadata:current_configuration';
         }
 
         $user = false;
