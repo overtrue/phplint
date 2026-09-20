@@ -86,7 +86,7 @@ class OptionsFactory implements Options
 
         $resolver->setNormalizer(OptionDefinition::CACHE_TTL, static fn (SymfonyOptions $options, $value) => (int) $value);
 
-        $resolver->setAllowedValues(OptionDefinition::JOBS, static fn (?string $value) => (intval($value) >= 0));
+        $resolver->setAllowedValues(OptionDefinition::JOBS, static fn (?string $value) => (intval($value) > 0));
 
         $resolver->setAllowedValues(OptionDefinition::CACHE_TTL, static fn (string $value) => (intval($value) >= 0));
     }

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Tests\EndToEnd;
 
+use Overtrue\PHPLint\Command\InvokableCommand;
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Tests\TestCase;
@@ -30,7 +31,7 @@ final class LintCommandTest extends TestCase
 {
     private ?CommandTester $commandTester;
 
-    private $invokableCommand;
+    private InvokableCommand $invokableCommand;
 
     protected function setUp(): void
     {
@@ -39,6 +40,7 @@ final class LintCommandTest extends TestCase
         $application = $this->getApplication();
 
         $command = $application->find('lint');
+        $command->mergeApplicationDefinition();
 
         $this->invokableCommand = $command->getCode();
 

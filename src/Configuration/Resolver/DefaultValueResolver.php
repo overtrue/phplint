@@ -20,6 +20,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\ArgumentResolver\ValueResolver\ValueResolverInterface as SymfonyValueResolverInterface;
 
+use function array_key_exists;
 use function array_merge;
 
 /**
@@ -32,7 +33,7 @@ class DefaultValueResolver implements ContainerInterface
 
     public function __construct(LoggerInterface $logger, EnvConfigInterface $envConfig, array $dynamicValueResolvers = [])
     {
-        $this->valueResolvers = array_merge($dynamicValueResolvers, [
+        $this->valueResolvers = array_merge([
             LoggerValueResolver::class => fn() => new LoggerValueResolver($logger),
             PluginValueResolver::class => fn() => new PluginValueResolver($envConfig),
             ConfigValueResolver::class => fn() => new ConfigValueResolver(
@@ -59,7 +60,6 @@ class DefaultValueResolver implements ContainerInterface
                     'fileExtensions' => OptionDefinition::DEFAULT_EXTENSIONS,
                 ]
             ),
-            JobValueResolver::class => fn() => new JobValueResolver(),
             ShowWarningsValueResolver::class => fn() => new ShowWarningsValueResolver(),
             MemoryLimitValueResolver::class => fn() => new MemoryLimitValueResolver(),
             IgnoreExitCodeValueResolver::class => fn() => new IgnoreExitCodeValueResolver(),
@@ -70,12 +70,16 @@ class DefaultValueResolver implements ContainerInterface
             OutputFileResolver::class => fn() => new OutputFileResolver([
                 OptionDefinition::OUTPUT_FILE => OptionDefinition::DEFAULT_STANDARD_OUTPUT
             ]),
-        ]);
+        ], $dynamicValueResolvers);
     }
 
     final public function get(string $id): null|ValueResolverInterface|SymfonyValueResolverInterface
     {
-        $resolver = $this->valueResolvers[$id] ?? null;
+        if (!$this->has($id)) {
+            return null;
+        }
+
+        $resolver = $this->valueResolvers[$id];
         if ($resolver instanceof Closure) {
             $resolver = ($resolver)();
         }
@@ -85,6 +89,6 @@ class DefaultValueResolver implements ContainerInterface
 
     final public function has(string $id): bool
     {
-        return isset($this->valueResolvers[$id]);
+        return array_key_exists($id, $this->valueResolvers);
     }
 }

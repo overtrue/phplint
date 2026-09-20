@@ -15,14 +15,9 @@ namespace Overtrue\PHPLint\Tests\Finder;
 
 use Iterator;
 use LogicException;
-use Overtrue\PHPLint\Command\InvokableCommand;
-use Overtrue\PHPLint\Configuration\FileOptionsResolver;
-use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\BufferedOutput;
 
 use function array_keys;
 use function array_map;
@@ -41,14 +36,7 @@ final class FinderTest extends TestCase
     {
         $basePath = dirname(__DIR__);
 
-        $arguments =                 [
-            OptionDefinition::PATH => [$basePath],
-            '--' . OptionDefinition::CONFIGURATION => 'never',
-            '--' . OptionDefinition::EXCLUDE => [],
-            '--' . OptionDefinition::FILE_EXTENSIONS => ['php'],
-        ];
-
-        $finder = $this->getFinder($arguments);
+        $finder = new Finder(null, [$basePath], [], ['php']);
 
         foreach ($finder->getFiles() as $file) {
             $this->assertFileExists($file->getRealPath());
@@ -61,12 +49,7 @@ final class FinderTest extends TestCase
 
         $basePath = dirname(__DIR__);
 
-        $arguments = [
-            OptionDefinition::PATH => [$basePath . '/fixtures/missing_dir'],
-            '--' . OptionDefinition::CONFIGURATION => 'never',
-        ];
-
-        $finder = $this->getFinder($arguments);
+        $finder = new Finder(null, [$basePath . '/fixtures/missing_dir'], [], ['php']);
 
         $this->assertGreaterThan(0, count($finder->getFiles()));
     }
@@ -75,14 +58,7 @@ final class FinderTest extends TestCase
     {
         $basePath = dirname(__DIR__);
 
-        $arguments = [
-            OptionDefinition::PATH => [$basePath],
-            '--' . OptionDefinition::CONFIGURATION => 'never',
-            '--' . OptionDefinition::EXCLUDE => ['fixtures', 'Benchmark'],
-            '--' . OptionDefinition::FILE_EXTENSIONS => ['php']
-        ];
-
-        $finder = $this->getFinder($arguments);
+        $finder = new Finder(null, [$basePath], ['fixtures', 'Benchmark'], ['php']);
 
         $this->assertEqualsCanonicalizing(
             [
@@ -109,27 +85,5 @@ final class FinderTest extends TestCase
             static fn (string $filename) => str_replace($basePath . '/', '', $filename),
             array_keys(iterator_to_array($iterator))
         );
-    }
-
-    private function getFinder(array $arguments): Finder
-    {
-        $application = $this->getApplication();
-
-        $command = $application->find('lint');
-        $command->mergeApplicationDefinition();
-
-        $input = new ArrayInput($arguments);
-        $input->bind($command->getDefinition());
-
-        $output = new BufferedOutput();
-
-        /** @var InvokableCommand $invokableCommand */
-        $invokableCommand = $command->getCode();
-
-        $parameters = $invokableCommand->getArguments($input, $output);
-
-        $resolver = new FileOptionsResolver($input, $parameters);
-
-        return new Finder($resolver);
     }
 }

@@ -73,9 +73,6 @@ final class DefaultArgumentResolver implements ArgumentResolverInterface, Logger
 
         $arguments = [];
 
-        $argumentValueResolvers = $this->argumentValueResolvers;
-        $disabledResolvers = [];
-
         foreach ($reflector->getParameters() as $param) {
             $argumentName = $param->getName();
             $member = new ReflectionMember($param);
@@ -104,31 +101,33 @@ final class DefaultArgumentResolver implements ArgumentResolverInterface, Logger
                 $resolverName = CoreValueResolver::class;
             }
 
-            if ($this->namedResolvers && $attributes = $member->getAttributes(ValueResolver::class)) {
-                foreach ($attributes as $attribute) {
-                    if ($attribute->disabled) {
-                        $disabledResolvers[$attribute->resolver] = true;
-                    } elseif ($resolverName) {
-                        throw new LogicException(
-                            sprintf(
-                                'You can only pin one resolver per argument, but argument "$%s" of "%s()" has more.',
-                                $member->getName(),
-                                $member->getSourceName()
-                            )
-                        );
-                    } else {
-                        $resolverName = $attribute->resolver;
-                    }
+            $argumentValueResolvers = $this->argumentValueResolvers;
+            $disabledResolvers = [];
+
+            foreach ($member->getAttributes(ValueResolver::class) as $attribute) {
+                if ($attribute->disabled) {
+                    $disabledResolvers[$attribute->resolver] = true;
+                } elseif ($resolverName) {
+                    throw new LogicException(
+                        sprintf(
+                            'You can only pin one resolver per argument, but argument "$%s" of "%s()" has more.',
+                            $member->getName(),
+                            $member->getSourceName()
+                        )
+                    );
+                } else {
+                    $resolverName = $attribute->resolver;
                 }
             }
 
-            if ($this->namedResolvers && $resolverName) {
+            // fallback to service container if the resolver asked ($resolverName) is not provided
+            if (!isset($this->argumentValueResolvers[$resolverName]) && $this->namedResolvers && $resolverName) {
                 if (!$this->namedResolvers->has($resolverName)) {
                     throw new ResolverNotFoundException($resolverName);
                 }
 
                 $argumentValueResolvers = [
-                    $this->namedResolvers->get($resolverName),
+                    $this->namedResolvers->get($resolverName)
                 ];
             }
 

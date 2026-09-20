@@ -66,7 +66,7 @@ final class CoreValueResolverTest extends TestCase
         $this->output = new NullOutput();
         $this->input = new ArrayInput(['output' => $this->output, 'application' => $this->application]);
 
-        $this->resolver = new CoreValueResolver($this->application, $this->output);
+        $this->resolver = new CoreValueResolver($this->application, $this->output, 'lint');
     }
 
     public function testInputDependencyInjectionUsage(): void

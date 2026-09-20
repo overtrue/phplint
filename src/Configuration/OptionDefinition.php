@@ -43,7 +43,7 @@ interface OptionDefinition
     public const PROFILE = 'profile';
     public const DRY_RUN = 'dry-run';
 
-    public const DEFAULT_JOBS = 5;
+    public const DEFAULT_JOBS = 1;
     public const DEFAULT_PATH = '.';
     public const DEFAULT_EXCLUDES = [];
     public const DEFAULT_EXTENSIONS = ['php'];

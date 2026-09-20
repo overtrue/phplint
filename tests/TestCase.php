@@ -15,18 +15,13 @@ namespace Overtrue\PHPLint\Tests;
 
 use Overtrue\PHPLint\Command\InvokableCommand;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
-use Overtrue\PHPLint\Configuration\Resolver\CoreValueResolver;
-use Overtrue\PHPLint\Configuration\Resolver\DefaultArgumentResolver;
-use Overtrue\PHPLint\Configuration\Resolver\DefaultValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\JobValueResolver;
-use Overtrue\PHPLint\Console\Application;
+use Overtrue\PHPLint\Configuration\Resolver\UnitTestValueResolver;
 use Overtrue\PHPLint\Environment\EnvConfig;
-use Overtrue\PHPLint\Extension\OutputManager;
 use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
-use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\BufferedOutput;
 
 /**
  * @author Laurent Laville
@@ -34,37 +29,27 @@ use Symfony\Component\Console\Output\BufferedOutput;
  */
 abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
-    protected \Symfony\Component\Console\Application $application;
+    protected Application $application;
 
     protected function setUp(): void
     {
         $envConfig = new EnvConfig();
 
-        $application = new Application($envConfig);
-
         $logger = new NullLogger();
 
-        $valueResolver = new class(
-            $logger,
-            [new CoreValueResolver($application, new BufferedOutput())]
-        ) extends DefaultValueResolver {
-            public function __construct(LoggerInterface $logger, array $dynamicValueResolvers = [])
-            {
-                parent::__construct($logger, $dynamicValueResolvers);
-                // to avoid auto CPU detection
-                $this->valueResolvers[JobValueResolver::class] = new JobValueResolver(10);
-            }
-        };
+        $commandName = 'lint';
+        $input = new ArrayInput(['command' => $commandName]);
 
-        $runner = new ConsoleApplicationRunner($logger, $envConfig);
+        $argumentValueResolvers = [
+            // to avoid auto CPU detection
+            JobValueResolver::class => new JobValueResolver(10),
+        ];
+
+        $runner = new ConsoleApplicationRunner($logger, $envConfig, $input, null, $argumentValueResolvers);
         $this->application = $runner->getApplication();
-
-        // adds special ArgumentResolver for unit tests
-        $argumentResolver = new DefaultArgumentResolver([], $valueResolver);
-        $this->application->setArgResolver($argumentResolver);
     }
 
-    protected function getApplication(): \Symfony\Component\Console\Application
+    protected function getApplication(): Application
     {
         return $this->application;
     }
@@ -76,15 +61,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         $command = $application->find('lint');
         $command->mergeApplicationDefinition();
 
-        // add this extension (when necessary) for --output-format and --output-file additional options
-        $outputManager = new OutputManager();
-        $extensionDefinition = $outputManager->getDefinition();
         $definition = $command->getDefinition();
-        foreach ($extensionDefinition->getOptions() as $option) {
-            if (!$definition->hasOption($option->getName())) {
-                $definition->addOption($option);
-            }
-        }
 
         $input = new ArrayInput($arguments);
         $input->bind($definition);

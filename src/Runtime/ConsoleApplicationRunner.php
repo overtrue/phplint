@@ -16,9 +16,11 @@ namespace Overtrue\PHPLint\Runtime;
 use Overtrue\PHPLint\Command\DiagnoseCommand;
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Configuration\Resolver\ArgumentResolverInterface;
 use Overtrue\PHPLint\Configuration\Resolver\CoreValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\DefaultArgumentResolver;
 use Overtrue\PHPLint\Configuration\Resolver\DefaultValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\JobValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
 use Overtrue\PHPLint\Console\Application;
 use Overtrue\PHPLint\Environment\EnvConfigInterface;
@@ -56,6 +58,7 @@ class ConsoleApplicationRunner
         EnvConfigInterface $envConfig,
         ?InputInterface $input = null,
         ?OutputInterface $output = null,
+        iterable $argumentValueResolvers = [],
     ) {
         self::$envConfig = $envConfig;
         self::$input = $input ?? new ArgvInput();
@@ -132,15 +135,15 @@ class ConsoleApplicationRunner
 
         $singleCommand = ($defaultCommand !== 'list');
 
-        $commandName = $singleCommand ? $defaultCommand : $input->getFirstArgument();
+        $commandName = $singleCommand ? $defaultCommand : self::$input->getFirstArgument();
 
         $dynamicValueResolvers = [
             CoreValueResolver::class => fn() => new CoreValueResolver($this->application, self::$output, $commandName),
-            MetadataValueResolver::class => fn() => new MetadataValueResolver($this->application)
+            MetadataValueResolver::class => fn() => new MetadataValueResolver($this->application),
+            JobValueResolver::class => fn() => new JobValueResolver(),
         ];
-
         $argumentResolver = new DefaultArgumentResolver(
-            [],
+            $argumentValueResolvers,
             new DefaultValueResolver($logger, $envConfig, $dynamicValueResolvers),
         );
         $argumentResolver->setLogger($logger);

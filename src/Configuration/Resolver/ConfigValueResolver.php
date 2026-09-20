@@ -80,7 +80,7 @@ class ConfigValueResolver implements ValueResolverInterface
             default => $this->defaultDiscovery($value),
         };
 
-        return empty($configFile) ? [] : [realpath($configFile)];
+        return empty($configFile) ? [''] : [realpath($configFile)];
     }
 
     public function getConfigFileCandidates(): array

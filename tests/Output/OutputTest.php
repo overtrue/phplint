@@ -15,6 +15,7 @@ namespace Overtrue\PHPLint\Tests\Output;
 
 use Overtrue\PHPLint\Cache;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
@@ -43,6 +44,8 @@ final class OutputTest extends TestCase
 
     private MetadataCollection $metadataCollection;
 
+    private EnvConfigInterface $envConfig;
+
     /**
      * @throws Throwable
      */
@@ -52,23 +55,15 @@ final class OutputTest extends TestCase
 
         $basePath = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'fixtures';
 
-        $arguments = [
-            OptionDefinition::PATH => [$basePath],
-            '--' . OptionDefinition::NO_CONFIGURATION => true,
-            '--' . OptionDefinition::WARNING => true,
-            '--' . OptionDefinition::FILE_EXTENSIONS => ['php']
-        ];
-
-        $configResolver = $this->getOptionsResolver($arguments);
-
-        $finder = new Finder($configResolver);
-
-        $cache = new Cache(new NullAdapter());
-
-        $linter = new Linter($configResolver, new EventDispatcher(), null, null, null, $cache);
+        $finder = new Finder(null, [$basePath], [], ['php']);
+        $linter = new Linter(
+            cache: new Cache(new NullAdapter()),
+            showWarning: true,
+        );
 
         $application = $this->getApplication();
         $this->metadataCollection = $application->getMetadata();
+        $this->envConfig = $application->getRunner()->getEnvConfig();
 
         $this->linterOutput = $linter->lintFiles($finder->getFiles(), null, $this->metadataCollection);
     }
@@ -77,7 +72,7 @@ final class OutputTest extends TestCase
     {
         $stream = fopen('php://memory', 'w+');
         $output = new JunitOutput($stream, OutputInterface::VERBOSITY_VERBOSE, false);
-        $output->format($this->linterOutput, $this->metadataCollection);
+        $output->format($this->linterOutput, $this->metadataCollection, $this->envConfig);
 
         rewind($stream);
         $xml = stream_get_contents($stream);

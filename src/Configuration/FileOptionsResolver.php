@@ -23,6 +23,7 @@ use Symfony\Component\Yaml\Yaml;
 use function array_filter;
 use function array_replace;
 use function file_get_contents;
+use function in_array;
 use function is_array;
 use function is_file;
 use function is_readable;
@@ -57,7 +58,7 @@ final class FileOptionsResolver extends AbstractOptionsResolver
             }
         }
 
-        if (!empty($configFile) && 'auto' !== $configFile) {
+        if (!empty($configFile) && !in_array($configFile, ['auto', 'never'])) {
             $fileConf = $this->parseFile($configFile);
             $configuration = array_replace(array_filter($fileConf), array_filter($configuration));
             $configuration[OptionDefinition::CONFIGURATION] = $configFile;

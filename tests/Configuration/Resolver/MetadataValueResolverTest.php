@@ -13,8 +13,10 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Tests\Configuration\Resolver;
 
+use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
 use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
+use Overtrue\PHPLint\Environment\ModeEnum;
 use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Tests\TestCase;
@@ -56,9 +58,13 @@ final class MetadataValueResolverTest extends TestCase
 
     public function testDefaultApplicationMetadata(): void
     {
+        $input = new ArrayInput([]);
+        $settings = (new FileOptionsResolver($input, $this->parameters))->getOptions();
+        $settings['mode'] = ModeEnum::OFF->value;
+
         $metadataCollection = new MetadataCollection(
             Metadata::applicationVersion(),
-            Metadata::configurationSettings(['mode' => 'off'])
+            Metadata::configurationSettings($settings)
         );
 
         $expected = [$metadataCollection];
