@@ -64,7 +64,9 @@ if (class_exists(__NAMESPACE__ . '\Autoload', false) === false) {
                             continue;
                         }
                         $autoloadFile = $directory->getPathname() . '/vendor/autoload.php';
-                        require $autoloadFile;
+                        if (file_exists($autoloadFile)) {
+                            require $autoloadFile;
+                        }
                     }
                 }
 
