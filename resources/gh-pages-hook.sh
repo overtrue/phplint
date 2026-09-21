@@ -16,4 +16,5 @@ php "$SCRIPT_DIR"/graph-uml/build.php helper $ASSETS_IMAGE_DIR
 php "$SCRIPT_DIR"/graph-uml/build.php linter $ASSETS_IMAGE_DIR
 php "$SCRIPT_DIR"/graph-uml/build.php output $ASSETS_IMAGE_DIR
 php "$SCRIPT_DIR"/graph-uml/build.php process $ASSETS_IMAGE_DIR
+php "$SCRIPT_DIR"/graph-uml/build.php profile $ASSETS_IMAGE_DIR
 php "$SCRIPT_DIR"/graph-uml/build.php progress $ASSETS_IMAGE_DIR
