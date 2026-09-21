@@ -69,6 +69,5 @@ Learn more with the official Symfony documentation on [ProgressIndicator Console
 
 ![Progress Indicator Finished](../assets/progress-indicator-finished.png)
 
-[bartlett/graph-uml]: https://packagist.org/packages/bartlett/graph-uml
 [symfony-progressbar]: https://symfony.com/doc/current/components/console/helpers/progressbar.html
 [symfony-progressindicator]: https://symfony.com/doc/current/components/console/helpers/progressindicator.html
