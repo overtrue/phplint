@@ -97,7 +97,7 @@
 <text text-anchor="start" x="341" y="-638.8" font-family="Times,serif" font-size="14.00">+ «static» DIAGNOSTIC : string = &quot;diagnostic&quot; {readOnly}</text>
 <text text-anchor="start" x="341" y="-619.8" font-family="Times,serif" font-size="14.00">+ «static» PROFILE : string = &quot;profile&quot; {readOnly}</text>
 <text text-anchor="start" x="341" y="-600.8" font-family="Times,serif" font-size="14.00">+ «static» DRY_RUN : string = &quot;dry\&#45;run&quot; {readOnly}</text>
-<text text-anchor="start" x="341" y="-581.8" font-family="Times,serif" font-size="14.00">+ «static» DEFAULT_JOBS : int = 5 {readOnly}</text>
+<text text-anchor="start" x="341" y="-581.8" font-family="Times,serif" font-size="14.00">+ «static» DEFAULT_JOBS : int = 1 {readOnly}</text>
 <text text-anchor="start" x="341" y="-562.8" font-family="Times,serif" font-size="14.00">+ «static» DEFAULT_PATH : string = &quot;\.&quot; {readOnly}</text>
 <text text-anchor="start" x="341" y="-543.8" font-family="Times,serif" font-size="14.00">+ «static» DEFAULT_EXCLUDES : array = [] {readOnly}</text>
 <text text-anchor="start" x="341" y="-524.8" font-family="Times,serif" font-size="14.00">+ «static» DEFAULT_EXTENSIONS : array = […] {readOnly}</text>
