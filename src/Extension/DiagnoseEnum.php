@@ -27,6 +27,7 @@ enum DiagnoseEnum: string
     case METADATA = 'metadata';
     case NEVER = 'never';
     case PHP = 'php';
+    case PROFILER = 'profiler';
     case UNAME = 'uname';
     case VCS = 'vcs';
 }

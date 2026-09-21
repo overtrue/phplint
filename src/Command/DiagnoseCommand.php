@@ -25,6 +25,7 @@ use Overtrue\PHPLint\Environment\Provider\DotEnv;
 use Overtrue\PHPLint\Environment\Provider\Git;
 use Overtrue\PHPLint\Environment\Provider\Metadata;
 use Overtrue\PHPLint\Environment\Provider\Php;
+use Overtrue\PHPLint\Environment\Provider\Profiler;
 use Overtrue\PHPLint\Environment\Provider\Uname;
 use Overtrue\PHPLint\Environment\ProviderData;
 use Overtrue\PHPLint\Environment\ProviderInterface;
@@ -104,7 +105,7 @@ final class DiagnoseCommand
         }
         $parts = array_unique($parts);
 
-        $vcs = $php = $uname = $ci = $cpu = $dotenv = $metadata = false;
+        $vcs = $php = $uname = $ci = $cpu = $dotenv = $profiler = $metadata = false;
 
         foreach ($parts as $part) {
             if ($part == DiagnoseEnum::VCS->value) {
@@ -125,6 +126,9 @@ final class DiagnoseCommand
             if ($part == DiagnoseEnum::DOTENV->value) {
                 $dotenv = true;
             }
+            if ($part == DiagnoseEnum::PROFILER->value) {
+                $profiler = true;
+            }
             if ($part == DiagnoseEnum::METADATA->value) {
                 $metadata = true;
             } else {
@@ -138,7 +142,7 @@ final class DiagnoseCommand
         }
 
         if (in_array(DiagnoseEnum::ALWAYS->value, $parts, true)) {
-            $vcs = $php = $uname = $ci = $cpu = $dotenv = $metadata = true;
+            $vcs = $php = $uname = $ci = $cpu = $dotenv = $profiler = $metadata = true;
         }
 
         $environment = new Supplier($logger);
@@ -161,6 +165,9 @@ final class DiagnoseCommand
         if ($dotenv) {
             $environment->addProvider(new DotEnv());
         }
+        if ($profiler) {
+            $environment->addProvider(new Profiler());
+        }
         if ($metadata) {
             $environment->addProvider(new Metadata($metadataCollection, $filters));
         }
@@ -182,6 +189,7 @@ final class DiagnoseCommand
                 CI::class => 'CI Information',
                 Cpu::class => 'CPU Information',
                 DotEnv::class => 'Environment Variables Information',
+                Profiler::class => 'Profiler Information',
                 Metadata::class => 'Metadata Information',
                 default => sprintf('"%s" User Information', $providerId),
             };

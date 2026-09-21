@@ -178,6 +178,21 @@ For example :
 
 ![Uname diagnostic](../assets/diagnostic-uname.png)
 
+## Profiler diagnostic
+
+As the profiler is not a mandatory package, we should know if it's installed or not,
+when we used the `ProfileManager` extension with either the `diagnose` or `lint` commands.
+
+```shell
+PLINT_DIAGNOSTIC=profiler phplint diagnose
+PLINT_DIAGNOSTIC=profiler phplint lint
+```
+
+For example :
+
+![Profiler diagnostic](../assets/diagnostic-profiler.png)
+
 [ondram/ci-detector]: https://github.com/ondram/ci-detector
 [fidry/cpu-core-counter]: https://github.com/theofidry/cpu-core-counter
+[symfony/stopwatch]: https://github.com/symfony/stopwatch
 [symfony/dotenv]: https://github.com/symfony/dotenv
