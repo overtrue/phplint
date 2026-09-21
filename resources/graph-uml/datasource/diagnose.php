@@ -23,6 +23,7 @@ function dataSource(): Generator
         Provider\Git::class,
         Provider\Metadata::class,
         Provider\Php::class,
+        Provider\Profiler::class,
         Provider\Uname::class,
     ];
     foreach ($classes as $class) {
