@@ -68,7 +68,7 @@ final class PluginValueResolverTest extends TestCase
      */
     public function testBuiltinPluginUsage(): void
     {
-        $command = new class {
+        $command = new class () {
             public function __invoke(
                 #[Option]
                 ExtensionEnum ...$extensions,
@@ -103,8 +103,7 @@ final class PluginValueResolverTest extends TestCase
      */
     public function testCustomPluginUsage(): void
     {
-        $pluginOne = new class implements ExtensionInterface
-        {
+        $pluginOne = new class () implements ExtensionInterface {
             public function initialize(ConsoleCommandEvent $event): void
             {
             }
@@ -121,7 +120,7 @@ final class PluginValueResolverTest extends TestCase
             }
         };
 
-        $command = new class {
+        $command = new class () {
             public function __invoke(
                 #[Option]
                 ExtensionTestAllowed ...$extensions,

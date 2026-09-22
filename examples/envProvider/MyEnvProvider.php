@@ -27,8 +27,8 @@ class MyEnvProvider implements ProviderInterface
 
             $directives = opcache_get_configuration()['directives'];
 
-            $data[] = new ProviderData('opcache_enable', $directives['opcache.enable'] ? 'yes': 'no', 'OPCache enabled');
-            $data[] = new ProviderData('opcache_enable_cli', $directives['opcache.enable_cli'] ? 'yes': 'no', 'OPCache enabled in CLI');
+            $data[] = new ProviderData('opcache_enable', $directives['opcache.enable'] ? 'yes' : 'no', 'OPCache enabled');
+            $data[] = new ProviderData('opcache_enable_cli', $directives['opcache.enable_cli'] ? 'yes' : 'no', 'OPCache enabled in CLI');
             $data[] = new ProviderData('opcache_preload', $directives['opcache.preload'], 'OPCache preloader script');
             $data[] = new ProviderData('opcache_jit', $directives['opcache.jit'], 'OPCache JIT');
         }

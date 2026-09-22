@@ -16,7 +16,6 @@ namespace Overtrue\PHPLint\Tests;
 use Overtrue\PHPLint\Command\InvokableCommand;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\Resolver\JobValueResolver;
-use Overtrue\PHPLint\Configuration\Resolver\UnitTestValueResolver;
 use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
 use Psr\Log\NullLogger;

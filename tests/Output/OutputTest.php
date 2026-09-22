@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Tests\Output;
 
 use Overtrue\PHPLint\Cache;
-use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
@@ -25,7 +24,6 @@ use Overtrue\PHPLint\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 use Throwable;
 
 use function fopen;

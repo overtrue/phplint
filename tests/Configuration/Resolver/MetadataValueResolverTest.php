@@ -45,7 +45,7 @@ final class MetadataValueResolverTest extends TestCase
     {
         parent::setUp();
 
-        $command = new class {
+        $command = new class () {
             public function __invoke(
                 MetadataCollection $metadataCollection,
             ) {

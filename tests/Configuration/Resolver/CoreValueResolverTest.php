@@ -51,7 +51,7 @@ final class CoreValueResolverTest extends TestCase
     {
         parent::setUp();
 
-        $command = new class {
+        $command = new class () {
             public function __invoke(
                 InputInterface $input,
                 OutputInterface $output,

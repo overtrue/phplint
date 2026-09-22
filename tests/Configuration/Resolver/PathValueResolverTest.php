@@ -50,7 +50,7 @@ final class PathValueResolverTest extends TestCase
      */
     protected function setUp(): void
     {
-        $command = new class {
+        $command = new class () {
             public function __invoke(
                 #[Argument]
                 ?array $sourcePath = null,
