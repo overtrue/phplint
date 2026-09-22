@@ -80,7 +80,7 @@ abstract class AbstractManager implements LoggerAwareInterface
         $context['__section__'] = SectionEnum::EVENT->label();
         $context['__style__'] = SectionEnum::EVENT->value;
 
-        $this->logger->debug($message, $context,);
+        $this->logger->debug($message, $context);
 
         return $context;
     }

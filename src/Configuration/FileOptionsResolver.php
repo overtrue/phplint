@@ -71,7 +71,6 @@ final class FileOptionsResolver extends AbstractOptionsResolver
         return new OptionsFactory($this->defaults);
     }
 
-
     private function parseFile(string $filename): array
     {
         $configuration = match (pathinfo($filename, PATHINFO_EXTENSION)) {

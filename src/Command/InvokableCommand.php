@@ -94,7 +94,7 @@ final class InvokableCommand extends \Symfony\Component\Console\Command\Invokabl
             if (null === $argumentAttributes) {
                 $argumentAttributes = $member->getAttribute(Option::class);
             }
-            $argumentName = $argumentAttributes?->name ? : $param->getName();
+            $argumentName = $argumentAttributes?->name ?: $param->getName();
 
             $parameterNames[$index] = $argumentName;
         }

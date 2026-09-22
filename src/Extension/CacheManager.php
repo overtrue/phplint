@@ -26,7 +26,6 @@ use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleEvent;
-use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -75,7 +74,6 @@ final class CacheManager extends AbstractManager implements
                 InputOption::VALUE_REQUIRED,
                 'Adapter ' .
                 ' (<info>auto, never, Filesystem, Apcu, ...</info>)',
-
             ),
             new InputOption(
                 OptionDefinition::CACHE_DIR,
@@ -138,7 +136,7 @@ final class CacheManager extends AbstractManager implements
             [
                 '__section__' => SectionEnum::PLUGIN->label(),
                 '__style__' => SectionEnum::PLUGIN->value,
-                'adapter' => is_object($adapter) ? get_class($adapter): $adapter
+                'adapter' => is_object($adapter) ? get_class($adapter) : $adapter
             ]
         );
 

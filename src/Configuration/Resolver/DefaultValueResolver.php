@@ -34,14 +34,14 @@ class DefaultValueResolver implements ContainerInterface
     public function __construct(LoggerInterface $logger, EnvConfigInterface $envConfig, array $dynamicValueResolvers = [])
     {
         $this->valueResolvers = array_merge([
-            LoggerValueResolver::class => fn() => new LoggerValueResolver($logger),
-            PluginValueResolver::class => fn() => new PluginValueResolver($envConfig),
-            ConfigValueResolver::class => fn() => new ConfigValueResolver(
+            LoggerValueResolver::class => fn () => new LoggerValueResolver($logger),
+            PluginValueResolver::class => fn () => new PluginValueResolver($envConfig),
+            ConfigValueResolver::class => fn () => new ConfigValueResolver(
                 [OptionDefinition::CONFIGURATION],
                 [],
                 $envConfig,
             ),
-            PathValueResolver::class => fn() => new PathValueResolver(
+            PathValueResolver::class => fn () => new PathValueResolver(
                 [OptionDefinition::PATH, 'sourcePath'],
                 [OptionDefinition::EXCLUDE, 'excludePath'],
                 [
@@ -52,7 +52,7 @@ class DefaultValueResolver implements ContainerInterface
                     'excludePath' => OptionDefinition::DEFAULT_EXCLUDES,
                 ]
             ),
-            FileExtensionValueResolver::class => fn() => new FileExtensionValueResolver(
+            FileExtensionValueResolver::class => fn () => new FileExtensionValueResolver(
                 OptionDefinition::DEFAULT_EXTENSIONS,
                 [
                     OptionDefinition::FILE_EXTENSIONS => OptionDefinition::DEFAULT_EXTENSIONS,
@@ -60,14 +60,14 @@ class DefaultValueResolver implements ContainerInterface
                     'fileExtensions' => OptionDefinition::DEFAULT_EXTENSIONS,
                 ]
             ),
-            ShowWarningsValueResolver::class => fn() => new ShowWarningsValueResolver(),
-            MemoryLimitValueResolver::class => fn() => new MemoryLimitValueResolver(),
-            IgnoreExitCodeValueResolver::class => fn() => new IgnoreExitCodeValueResolver(),
-            DryRunValueResolver::class => fn() => new DryRunValueResolver(),
-            OutputFormatResolver::class => fn() => new OutputFormatResolver([
+            ShowWarningsValueResolver::class => fn () => new ShowWarningsValueResolver(),
+            MemoryLimitValueResolver::class => fn () => new MemoryLimitValueResolver(),
+            IgnoreExitCodeValueResolver::class => fn () => new IgnoreExitCodeValueResolver(),
+            DryRunValueResolver::class => fn () => new DryRunValueResolver(),
+            OutputFormatResolver::class => fn () => new OutputFormatResolver([
                 OptionDefinition::OUTPUT_FORMAT => OptionDefinition::DEFAULT_FORMATS,
             ]),
-            OutputFileResolver::class => fn() => new OutputFileResolver([
+            OutputFileResolver::class => fn () => new OutputFileResolver([
                 OptionDefinition::OUTPUT_FILE => OptionDefinition::DEFAULT_STANDARD_OUTPUT
             ]),
         ], $dynamicValueResolvers);

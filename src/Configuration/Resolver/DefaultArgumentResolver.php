@@ -171,9 +171,9 @@ final class DefaultArgumentResolver implements ArgumentResolverInterface, Logger
 
             throw new RuntimeException(
                 sprintf(
-                    'Could not resolve parameter "$%s" of command "%s".'."\n\n".
-                    'Possible reasons:'."\n".
-                    '  • '. implode("\n  • ", $reasons),
+                    'Could not resolve parameter "$%s" of command "%s".' . "\n\n" .
+                    'Possible reasons:' . "\n" .
+                    '  • ' . implode("\n  • ", $reasons),
                     $member->getName(),
                     $member->getSourceName()
                 )
@@ -187,7 +187,7 @@ final class DefaultArgumentResolver implements ArgumentResolverInterface, Logger
     {
         $valueResolvedDump = is_scalar($argument)
             ? $argument
-            : (is_object($argument) ? get_debug_type($argument): json_encode($argument, JSON_UNESCAPED_SLASHES));
+            : (is_object($argument) ? get_debug_type($argument) : json_encode($argument, JSON_UNESCAPED_SLASHES));
 
         $message = sprintf(
             '<comment>%s</comment> %s',

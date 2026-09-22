@@ -43,7 +43,7 @@ class FileExtensionValueResolver implements ValueResolverInterface
 
         $argumentAttributes = $member->getAttribute(Option::class);
         // retrieve the argument name defined by the #[Option(name:)] attribute, or fallback to PHP variable name
-        $argumentName = $argumentAttributes?->name ? : $argumentName;
+        $argumentName = $argumentAttributes?->name ?: $argumentName;
 
         $values = $input->hasOption($argumentName) ? $input->getOption($argumentName) : '';
 

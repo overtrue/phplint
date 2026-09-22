@@ -35,8 +35,9 @@ use function sprintf;
 final readonly class Finder implements JsonSerializable
 {
     public function __construct(
-        ?Resolver $configResolver = null, // @deprecated keep only for API compatibility with previous version 9.7.x
-                                          // will be removed in next API version
+        // @deprecated $configResolver
+        // keep only for API compatibility with previous version 9.7.x, and will be removed in next API version
+        ?Resolver $configResolver = null,
         private array $paths = [],
         private array $excludes = [],
         private array $fileExtensions = [],

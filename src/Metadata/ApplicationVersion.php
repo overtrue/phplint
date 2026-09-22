@@ -74,7 +74,9 @@ final class ApplicationVersion extends Metadata
             ? 'PHPLint'
             : sprintf(
                 '%s version <info>%s</info> <comment>(%s)</comment> by overtrue and contributors.',
-                $appName, $version, $shortRef
+                $appName,
+                $version,
+                $shortRef,
             )
         ;
     }

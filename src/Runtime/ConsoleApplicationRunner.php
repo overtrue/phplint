@@ -16,7 +16,6 @@ namespace Overtrue\PHPLint\Runtime;
 use Overtrue\PHPLint\Command\DiagnoseCommand;
 use Overtrue\PHPLint\Command\LintCommand;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
-use Overtrue\PHPLint\Configuration\Resolver\ArgumentResolverInterface;
 use Overtrue\PHPLint\Configuration\Resolver\CoreValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\DefaultArgumentResolver;
 use Overtrue\PHPLint\Configuration\Resolver\DefaultValueResolver;
@@ -138,9 +137,9 @@ class ConsoleApplicationRunner
         $commandName = $singleCommand ? $defaultCommand : self::$input->getFirstArgument();
 
         $dynamicValueResolvers = [
-            CoreValueResolver::class => fn() => new CoreValueResolver($this->application, self::$output, $commandName),
-            MetadataValueResolver::class => fn() => new MetadataValueResolver($this->application),
-            JobValueResolver::class => fn() => new JobValueResolver(),
+            CoreValueResolver::class => fn () => new CoreValueResolver($this->application, self::$output, $commandName),
+            MetadataValueResolver::class => fn () => new MetadataValueResolver($this->application),
+            JobValueResolver::class => fn () => new JobValueResolver(),
         ];
         $argumentResolver = new DefaultArgumentResolver(
             $argumentValueResolvers,

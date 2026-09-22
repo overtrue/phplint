@@ -16,6 +16,7 @@ namespace Overtrue\PHPLint\Environment;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\ConsoleLogger;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
+
 use function file_exists;
 use function getenv;
 use function implode;
@@ -24,6 +25,7 @@ use function sort;
 use function str_replace;
 use function strtoupper;
 use function strtr;
+
 use const PHP_SAPI;
 
 /**

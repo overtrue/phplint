@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Console;
 
-use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;

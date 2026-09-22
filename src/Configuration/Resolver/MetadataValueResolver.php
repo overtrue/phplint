@@ -41,7 +41,7 @@ class MetadataValueResolver implements ValueResolverInterface
 
         $parameters = [];
 
-        foreach([OptionDefinition::NO_CONFIGURATION, OptionDefinition::CONFIGURATION] as $name) {
+        foreach ([OptionDefinition::NO_CONFIGURATION, OptionDefinition::CONFIGURATION] as $name) {
             if ($input->hasOption($name)) {
                 $parameters[$name] = $input->getOption($name);
             }

@@ -44,8 +44,7 @@ final class ProfileCommand
         string $when,
         LoggerInterface $logger,
         MetadataCollection $metadataCollection,
-    ): int
-    {
+    ): int {
         /** @var ProfilerOutput $profilerResults */
         $profilerResults = $metadataCollection->getMetadata(ProfilerOutput::class);
         if (null === $profilerResults) {
@@ -108,7 +107,7 @@ final class ProfileCommand
         $style = $output->getFormatter()->hasStyle($style) ? $style : SectionEnum::DEFAULT->value;
 
         foreach ($lines as $line) {
-            list ($kind, $section, $message, $comment) = $line;
+            list($kind, $section, $message, $comment) = $line;
 
             if (!in_array($when, [$kind, 'auto'])) {
                 continue;

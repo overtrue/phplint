@@ -44,7 +44,7 @@ enum ExtensionEnum: string implements ExtensionEnumInterface
         $className = (new UnicodeString($manager))->pascal()->toString();
 
         if (!str_starts_with($manager, '\\')) {
-            $className = __NAMESPACE__ . '\\'. $className;
+            $className = __NAMESPACE__ . '\\' . $className;
         }
 
         if (!class_exists($className)) {

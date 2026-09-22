@@ -131,10 +131,10 @@ final class LintCommand
         )]
         #[ValueResolver(DryRunValueResolver::class)]
         bool $dryRun = false,
-        #[Option(name: OptionDefinition::OUTPUT_FORMAT)]  // option dynamically added by the "output_manager" extension
+        #[Option(name: OptionDefinition::OUTPUT_FORMAT)] // option dynamically added by the "output_manager" extension
         #[ValueResolver(OutputFormatResolver::class)]
         ?array $outputFormat = null,
-        #[Option(name: OptionDefinition::OUTPUT_FILE)]  // option dynamically added by the "output_manager" extension
+        #[Option(name: OptionDefinition::OUTPUT_FILE)] // option dynamically added by the "output_manager" extension
         #[ValueResolver(OutputFileResolver::class)]
         ?string $outputFile = null,
     ): int {
@@ -149,7 +149,7 @@ final class LintCommand
 
         $valueResolvedDump = is_scalar($parameters)
             ? $parameters
-            : (is_object($parameters) ? get_debug_type($parameters): json_encode($parameters, JSON_UNESCAPED_SLASHES));
+            : (is_object($parameters) ? get_debug_type($parameters) : json_encode($parameters, JSON_UNESCAPED_SLASHES));
 
         $logger->notice(
             $message,

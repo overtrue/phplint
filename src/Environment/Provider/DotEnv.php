@@ -23,7 +23,6 @@ use Overtrue\PHPLint\Environment\XdgConfig;
 use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Symfony\Component\Console\Input\ArgvInput;
 
 use function array_push;
 use function array_unique;
@@ -65,7 +64,7 @@ class DotEnv implements ProviderInterface, LoggerAwareInterface
     {
         $this->envPrefix = $options['env_prefix'] ?? 'PLINT';
 
-        $this->envKey = $options['env_var_name'] ??= $this->envPrefix .'_ENV';
+        $this->envKey = $options['env_var_name'] ??= $this->envPrefix . '_ENV';
         $this->debugKey = $options['debug_var_name'] ??= $this->envPrefix . '_DEBUG';
 
         $this->disableDotEnvLookup = $options['disable_dotenv'] ?? false;

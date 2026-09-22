@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Configuration\Resolver;
 
-use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Input\InputInterface;
@@ -39,7 +38,7 @@ class OutputFileResolver implements ValueResolverInterface
 
         $argumentAttributes = $member->getAttribute(Option::class);
         // retrieve the argument name defined by the #[Option(name:)] attribute, or fallback to PHP variable name
-        $argumentName = $argumentAttributes?->name ? : $argumentName;
+        $argumentName = $argumentAttributes?->name ?: $argumentName;
 
         $value = $input->hasOption($argumentName) ? $input->getOption($argumentName) : $this->defaultValues[$argumentName];
 

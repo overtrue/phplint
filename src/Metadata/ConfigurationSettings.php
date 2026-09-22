@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Metadata;
 
 use Overtrue\PHPLint\Environment\ModeEnum;
+
 use function json_encode;
 
 use const JSON_UNESCAPED_SLASHES;
@@ -25,7 +26,6 @@ use const JSON_UNESCAPED_SLASHES;
 final class ConfigurationSettings extends Metadata
 {
     public const METADATA_ID = 'current_configuration';
-
 
     public function __construct(private readonly array $settings)
     {

@@ -21,7 +21,7 @@ return (new PhpCsFixer\Config())
         'declare_parentheses' => true,
         'method_argument_space' => ['on_multiline' => 'ensure_fully_multiline'],
         'new_with_parentheses' => true,
-        'no_empty_statement' => true,
+        'no_empty_statement' => false,
         'no_extra_blank_lines' => true,
         'no_leading_import_slash' => true,
         'no_leading_namespace_whitespace' => true,

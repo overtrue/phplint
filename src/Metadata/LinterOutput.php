@@ -15,6 +15,7 @@ namespace Overtrue\PHPLint\Metadata;
 
 use Countable;
 use Symfony\Component\Finder\Finder;
+
 use function array_merge;
 use function count;
 use function json_encode;

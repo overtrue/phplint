@@ -31,6 +31,7 @@ use function getcwd;
 use function is_readable;
 
 use function realpath;
+
 use const DIRECTORY_SEPARATOR;
 
 /**
@@ -59,7 +60,7 @@ class ConfigValueResolver implements ValueResolverInterface
 
         $argumentAttributes = $member->getAttribute(Option::class);
         // retrieve the argument name defined by the #[Option(name:)] attribute, or fallback to PHP variable name
-        $argumentName = $argumentAttributes?->name ? : $argumentName;
+        $argumentName = $argumentAttributes?->name ?: $argumentName;
 
         if (!in_array($argumentName, $this->optionNamesAllowed, true)) {
             return [];
@@ -143,7 +144,7 @@ class ConfigValueResolver implements ValueResolverInterface
 
     private function defaultDiscovery(string $filename): string
     {
-        return (!file_exists($filename) || !is_readable($filename)) ? '' : ($filename ? : '');
+        return (!file_exists($filename) || !is_readable($filename)) ? '' : ($filename ?: '');
     }
 
     private function scanFile(array $directories): string

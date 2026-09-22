@@ -40,7 +40,7 @@ final class ProfilerOutput extends Metadata
         $lintFilesEvent = $stopwatch->getEvent(ProfileManager::LINT_FILES_EVENT);
         $lintingTime = $lintFilesEvent->getDuration();
 
-        $initializationTime = Helper::formatTime( ($totalTime - $lintingTime) / 1000);
+        $initializationTime = Helper::formatTime(($totalTime - $lintingTime) / 1000);
         $timeUsage = Helper::formatTime($lintingTime / 1000);
         $memoryUsage = Helper::formatMemory($lintFilesEvent->getMemory());
 

@@ -67,11 +67,13 @@ final class Linter implements LoggerAwareInterface, Countable
     private \Overtrue\PHPLint\Metadata\LinterOutput $finalResults;
 
     public function __construct(
-        private readonly ?Resolver $configResolver = null,  // @deprecated keep only for API compatibility with previous version 9.7.x
-                                                            // will be removed in next API version
+        // @deprecated $configResolver
+        // keep only for API compatibility with previous version 9.7.x, and will be removed in next API version
+        private readonly ?Resolver $configResolver = null,
         ?EventDispatcherInterface $dispatcher = null,
-        private readonly ?Application $client = null,   // @deprecated keep only for API compatibility with previous version 9.7.x
-                                                        // will be removed in next API version
+        // @deprecated $client
+        // keep only for API compatibility with previous version 9.7.x, and will be removed in next API version
+        private readonly ?Application $client = null,
         private readonly ?HelperSet $helperSet = null,
         private readonly ?OutputInterface $output = null,
         ?Cache $cache = null,
