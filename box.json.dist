@@ -15,7 +15,18 @@
     "directories": [
         "bin",
         "src",
-        "vendor"
+        "vendor",
+        "vendor-bin/ci-detector/",
+        "vendor-bin/console-highlighter/",
+        "vendor-bin/cpu-detector/",
+        "vendor-bin/sarif/",
+        "vendor-bin/sf-stopwatch/"
+    ],
+    "blacklist": [
+        "tests/",
+        "examples/",
+        "resources/",
+        "docs/"
     ],
     "files": [
         "autoload.php",
