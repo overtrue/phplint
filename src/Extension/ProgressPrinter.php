@@ -68,6 +68,7 @@ final class ProgressPrinter implements
             return;
         }
 
+        // @phpstan-ignore-next-line
         $this->progressHelper->progressPrinterAdvance(
             $this->maxSteps,
             $event->getArgument($event::FILE_STATUS),

@@ -27,6 +27,7 @@ use Overtrue\PHPLint\Configuration\Resolver\OutputFileResolver;
 use Overtrue\PHPLint\Configuration\Resolver\OutputFormatResolver;
 use Overtrue\PHPLint\Configuration\Resolver\PathValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\ShowWarningsValueResolver;
+use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Console\Attribute\ValueResolver;
 use Overtrue\PHPLint\Console\SectionEnum;
 use Overtrue\PHPLint\Finder;
@@ -144,12 +145,9 @@ final class LintCommand
             ': {parameters}'
         );
 
+        /** @var InvokableCommand|null $invokableCommand */
         $invokableCommand = $command->getCode();
         $parameters = $invokableCommand?->getArguments($input) ?? [];
-
-        $valueResolvedDump = is_scalar($parameters)
-            ? $parameters
-            : (is_object($parameters) ? get_debug_type($parameters) : json_encode($parameters, JSON_UNESCAPED_SLASHES));
 
         $logger->notice(
             $message,
@@ -157,7 +155,7 @@ final class LintCommand
                 '__section__' => SectionEnum::COMMAND->label(),
                 '__style__' => SectionEnum::COMMAND->value,
                 'command' => $command->getName(),
-                'parameters' => $valueResolvedDump
+                'parameters' => json_encode($parameters, JSON_UNESCAPED_SLASHES)
             ]
         );
 
@@ -180,9 +178,13 @@ final class LintCommand
 
         $application = $command->getApplication();
 
+        if (!$application instanceof ApplicationInterface) {
+            return Command::INVALID;
+        }
+
         $linter = new Linter(
             null,
-            $application->getDispatcher(),   // @phpstan-ignore method.notFound
+            $application->getDispatcher(),
             $application,
             $application->getHelperSet(),
             $output,
@@ -224,6 +226,6 @@ final class LintCommand
             $fileExtensions = $configResolver->getOption(OptionDefinition::FILE_EXTENSIONS);
         }
 
-        return new Finder(null, $sourcePath, $excludePath, $fileExtensions);
+        return new Finder(paths: $sourcePath, excludes: $excludePath, fileExtensions: $fileExtensions);
     }
 }

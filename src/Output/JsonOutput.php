@@ -48,7 +48,7 @@ final class JsonOutput extends StreamOutput implements OutputInterface
             'failures' => $failures,
         ];
 
-        /** @var ApplicationVersion $applicationVersion */
+        /** @var ApplicationVersion|null $applicationVersion */
         $applicationVersion = $metadataCollection->getMetadata(ApplicationVersion::class);
 
         if (null !== $applicationVersion) {
@@ -58,10 +58,11 @@ final class JsonOutput extends StreamOutput implements OutputInterface
             ];
         }
 
-        /** @var ProfilerOutput $profilerResults */
+        /** @var ProfilerOutput|null $profilerResults */
         $profilerResults = $metadataCollection->getMetadata(ProfilerOutput::class);
 
         if (null != $profilerResults) {
+            // @phpstan-ignore offsetAccess.nonOffsetAccessible
             $results['initialization_time'] = $profilerResults->getInitializationTimeUsage();
             $results['total_execution_time'] = $profilerResults->getTotalExecutionTimeUsage();
             $results['total_memory_usage'] = $profilerResults->getTotalMemoryUsage();
@@ -69,6 +70,7 @@ final class JsonOutput extends StreamOutput implements OutputInterface
             $result['memory_usage'] = $profilerResults->getMemoryUsage();
         }
 
+        /** @var \Overtrue\PHPLint\Metadata\LinterOutput|null $linterResults */
         $linterResults = $metadataCollection->getMetadata(\Overtrue\PHPLint\Metadata\LinterOutput::class);
 
         if (null != $linterResults) {
@@ -93,7 +95,7 @@ final class JsonOutput extends StreamOutput implements OutputInterface
             $result['cache_usage'] = $message;
         }
 
-        /** @var ConfigurationSettings $config */
+        /** @var ConfigurationSettings|null $config */
         $config = $metadataCollection->getMetadata(ConfigurationSettings::class);
 
         if (null !== $config) {

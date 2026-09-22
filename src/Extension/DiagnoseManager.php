@@ -95,8 +95,12 @@ final class DiagnoseManager extends AbstractManager implements
 
         try {
             $command = $event->getCommand();
-            /** @var ApplicationInterface $application */
+
             $application = $command->getApplication();
+
+            if (!$application instanceof ApplicationInterface) {
+                return;
+            }
 
             $metadataCollection = $application->getMetadata();
 

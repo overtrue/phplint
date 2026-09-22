@@ -13,16 +13,19 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Configuration\Resolver;
 
-use function class_exists;
+use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
+use Symfony\Component\Console\Input\InputInterface;
 
-if (class_exists('\Symfony\Component\Console\ArgumentResolver\ValueResolver\ValueResolverInterface')) {
-    // be ready to use with Symfony Console 8.1+ that include the new ArgumentResolver
-    interface ValueResolverInterface extends \Symfony\Component\Console\ArgumentResolver\ValueResolver\ValueResolverInterface
-    {
-    }
-} else {
-    // be compatible with previous versions of Symfony Console that did not accept the ArgumentResolver
-    interface ValueResolverInterface
-    {
-    }
+/**
+ * Responsible for resolving the value of a Command argument based on its
+ * parameter metadata and the Command MapInput.
+ *
+ * Force compatibility with previous versions of Symfony Console that did not accept the ArgumentResolver
+ */
+interface ValueResolverInterface
+{
+    /**
+     * Returns the possible value(s) for the argument.
+     */
+    public function resolve(string $argumentName, InputInterface $input, ReflectionMember $member): iterable;
 }

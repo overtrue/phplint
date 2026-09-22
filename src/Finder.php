@@ -34,6 +34,7 @@ use function sprintf;
  */
 final readonly class Finder implements JsonSerializable
 {
+    // @phpstan-ignore-next-line
     public function __construct(
         // @deprecated $configResolver
         // keep only for API compatibility with previous version 9.7.x, and will be removed in next API version

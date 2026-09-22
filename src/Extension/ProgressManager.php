@@ -144,7 +144,10 @@ final class ProgressManager extends AbstractManager implements
     {
         $this->describeEvent($event);
 
-        $this->widget?->finish($event);
+        if (null === $this->widget || !method_exists($this->widget, __FUNCTION__)) {
+            return;
+        }
+        $this->widget->{__FUNCTION__}($event);
     }
 
     public function beforeChecking(BeforeCheckingEvent $event): void

@@ -67,7 +67,7 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
         MetadataCollection $metadataCollection,
         EnvConfigInterface $envConfig,
     ): void {
-        /** @var \Overtrue\PHPLint\Metadata\LinterOutput $results */
+        /** @var \Overtrue\PHPLint\Metadata\LinterOutput|null $results */
         $results = $metadataCollection->getMetadata(\Overtrue\PHPLint\Metadata\LinterOutput::class);
 
         if (null === $results) {
@@ -82,13 +82,14 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
             return;
         }
 
+        /** @var ApplicationVersion|null $applicationVersion */
         $applicationVersion = $metadataCollection->getMetadata(ApplicationVersion::class);
         if (null === $applicationVersion) {
             // fallback strategy, just in case the metadata collection was not properly initialized
             $applicationVersion = Metadata::applicationVersion();
         }
 
-        /** @var ConfigurationSettings $configurationSettings */
+        /** @var ConfigurationSettings|null $configurationSettings */
         $configurationSettings = $metadataCollection->getMetadata(ConfigurationSettings::class);
         $settings = [];
         if (null === $configurationSettings) {

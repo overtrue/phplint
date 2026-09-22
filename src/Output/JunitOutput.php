@@ -44,7 +44,7 @@ final class JunitOutput extends StreamOutput implements OutputInterface
         MetadataCollection $metadataCollection,
         EnvConfigInterface $envConfig,
     ): void {
-        /** @var \Overtrue\PHPLint\Metadata\LinterOutput $results */
+        /** @var \Overtrue\PHPLint\Metadata\LinterOutput|null $results */
         $results = $metadataCollection->getMetadata(\Overtrue\PHPLint\Metadata\LinterOutput::class);
 
         if (null === $results) {
@@ -52,6 +52,7 @@ final class JunitOutput extends StreamOutput implements OutputInterface
             return;
         }
 
+        /** @var ApplicationVersion|null $applicationVersion */
         $applicationVersion = $metadataCollection->getMetadata(ApplicationVersion::class);
         $appName = 'PHP Linter';
 
@@ -59,6 +60,7 @@ final class JunitOutput extends StreamOutput implements OutputInterface
             $appName .= ' ' . $applicationVersion->getVersion();
         }
 
+        /** @var ProfilerOutput|null $profiling */
         $profiling = $metadataCollection->getMetadata(ProfilerOutput::class);
 
         if (null === $profiling) {

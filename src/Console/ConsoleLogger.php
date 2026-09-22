@@ -24,10 +24,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class ConsoleLogger extends SymfonyConsoleLogger
 {
-    private HelperInterface $formatter;
-
     private OutputInterface $output;
-    private HelperInterface $helper;
 
     public function __construct(OutputInterface $output, array $verbosityLevelMap = [], array $formatLevelMap = [])
     {

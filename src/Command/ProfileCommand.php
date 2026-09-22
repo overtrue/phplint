@@ -45,7 +45,7 @@ final class ProfileCommand
         LoggerInterface $logger,
         MetadataCollection $metadataCollection,
     ): int {
-        /** @var ProfilerOutput $profilerResults */
+        /** @var ProfilerOutput|null $profilerResults */
         $profilerResults = $metadataCollection->getMetadata(ProfilerOutput::class);
         if (null === $profilerResults) {
             return 127;
@@ -122,6 +122,7 @@ final class ProfileCommand
             );
         }
 
+        /** @var CacheOutput|null $cacheResults */
         $cacheResults = $metadataCollection->getMetadata(CacheOutput::class);
 
         if (null !== $cacheResults && in_array($when, ['cache', 'auto'])) {

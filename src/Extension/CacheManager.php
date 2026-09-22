@@ -15,6 +15,7 @@ namespace Overtrue\PHPLint\Extension;
 
 use Overtrue\PHPLint\Cache;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Console\SectionEnum;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\Events;
@@ -166,6 +167,10 @@ final class CacheManager extends AbstractManager implements
         $command = $event->getCommand();
 
         $application = $command->getApplication();
+
+        if (!$application instanceof ApplicationInterface) {
+            return false;
+        }
 
         $this->metadataCollection = $application->getMetadata();
 

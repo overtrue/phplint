@@ -16,6 +16,7 @@ namespace Overtrue\PHPLint\Extension;
 use BackedEnum;
 use ReflectionEnum;
 use Symfony\Component\String\UnicodeString;
+use UnitEnum;
 
 use function class_exists;
 use function in_array;
@@ -70,7 +71,7 @@ enum ExtensionEnum: string implements ExtensionEnumInterface
             }
             $cases[] = $case->getValue();
         }
-        return $cases;
+        return $cases; // @phpstan-ignore return.type
     }
 
     public static function isAllowed(string $value, string $frontend): bool

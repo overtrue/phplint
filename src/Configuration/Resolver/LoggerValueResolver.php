@@ -32,7 +32,7 @@ class LoggerValueResolver implements ValueResolverInterface
 
     public function resolve(string $argumentName, InputInterface $input, ReflectionMember $member): iterable
     {
-        $argumentType = $member->getType()?->getName();
+        $argumentType = $member->getType()?->getName(); // @phpstan-ignore method.notFound
 
         if ($argumentType !== LoggerInterface::class) {
             return [];

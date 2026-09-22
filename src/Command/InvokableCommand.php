@@ -15,6 +15,7 @@ namespace Overtrue\PHPLint\Command;
 
 use Overtrue\PHPLint\Configuration\Resolver\ArgumentResolverInterface;
 use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
+use ReflectionAttribute;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
@@ -39,8 +40,8 @@ final class InvokableCommand extends \Symfony\Component\Console\Command\Invokabl
 
     protected ?array $parameters = null;
 
-    private string $name;
-    private string $description;
+    private string $name = '';
+    private string $description = '';
 
     public function __construct(
         protected readonly Command $command,
@@ -52,10 +53,14 @@ final class InvokableCommand extends \Symfony\Component\Console\Command\Invokabl
         $this->invokable = new \ReflectionFunction($this->getClosure($code));
 
         $class = $this->invokable->getClosureScopeClass();
-        $attribute = ($class->getAttributes(AsCommand::class)[0] ?? null)?->newInstance();
 
-        $this->name = $attribute?->name ?? '';
-        $this->description = $attribute?->description ?? '';
+        $reflection = $class->getAttributes(AsCommand::class)[0] ?? null;
+
+        if ($reflection instanceof ReflectionAttribute) {
+            $attribute = $reflection->newInstance();
+            $this->name = $attribute->name ?? '';
+            $this->description = $attribute->description ?? '';
+        }
     }
 
     public function __invoke(InputInterface $input, OutputInterface $output): int
@@ -122,7 +127,7 @@ final class InvokableCommand extends \Symfony\Component\Console\Command\Invokabl
             return $code;
         }
 
-        set_error_handler(static function () {});
+        set_error_handler(static function () {}); // @phpstan-ignore argument.type
         try {
             if ($c = \Closure::bind($code, $this->command)) {
                 $code = $c;

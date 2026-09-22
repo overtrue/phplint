@@ -111,7 +111,7 @@ final class OutputManager extends AbstractManager implements
 
         $metadataCollection = $this->metadataCollection ?? new MetadataCollection();
 
-        /** @var \Overtrue\PHPLint\Metadata\LinterOutput $results */
+        /** @var \Overtrue\PHPLint\Metadata\LinterOutput|null $finalResults */
         $finalResults = $metadataCollection->getMetadata(\Overtrue\PHPLint\Metadata\LinterOutput::class);
 
         // Only to keep API Backward Compatible with version 9.7.x
@@ -164,6 +164,10 @@ final class OutputManager extends AbstractManager implements
         $command = $event->getCommand();
 
         $application = $command->getApplication();
+
+        if (!$application instanceof ApplicationInterface) {
+            return false;
+        }
 
         $this->metadataCollection = $application->getMetadata();
 

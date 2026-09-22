@@ -38,7 +38,7 @@ readonly class CoreValueResolver implements ValueResolverInterface
 
     public function resolve(string $argumentName, InputInterface $input, ReflectionMember $member): iterable
     {
-        $argumentType = $member->getType()?->getName();
+        $argumentType = $member->getType()?->getName(); // @phpstan-ignore method.notFound
 
         if ($argumentType === InputInterface::class || $argumentType === RawInputInterface::class) {
             return [$input];
@@ -59,7 +59,7 @@ readonly class CoreValueResolver implements ValueResolverInterface
         }
 
         if ($argumentType === Cursor::class) {
-            return [new Cursor($this->output, $input)];
+            return [new Cursor($this->output)];
         }
 
         if ($argumentType === Application::class) {

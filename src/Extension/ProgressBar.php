@@ -58,6 +58,7 @@ final class ProgressBar implements
      */
     public function finish(AfterCheckingEvent $event): void
     {
+        // @phpstan-ignore-next-line
         $this->progressHelper->progressFinish();
     }
 
@@ -68,15 +69,18 @@ final class ProgressBar implements
             return;
         }
 
+        // @phpstan-ignore-next-line
         $this->progressHelper->progressStart($event->getArgument($event::FILE_COUNT));
     }
 
     public function beforeLintFile(BeforeLintFileEvent $event): void
     {
+        // @phpstan-ignore-next-line
         $this->progressHelper->progressMessage('Checking file ...');
 
         $filename = $event->getArgument($event::FILE_INFO)->getRelativePathname();
         $width = min(strlen($filename), 70);
+        // @phpstan-ignore-next-line
         $this->progressHelper->progressMessage(mb_strimwidth($filename, -$width, $width), 'filename');
     }
 
@@ -87,6 +91,7 @@ final class ProgressBar implements
             return;
         }
 
+        // @phpstan-ignore-next-line
         $this->progressHelper->progressAdvance();
     }
 }

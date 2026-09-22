@@ -75,8 +75,10 @@ final class FormatResolver
                 // use built-in formatter
                 $formatterClass = self::FORMATTERS[$requestedFormat];
                 if ($requestedFormat === 'console') {
+                    // @phpstan-ignore-next-line
                     $formatter = new $formatterClass($output->getVerbosity(), $decorated, $output->getFormatter());
                 } else {
+                    // @phpstan-ignore-next-line
                     $formatter = new $formatterClass($stream, $output->getVerbosity(), $decorated, $output->getFormatter());
                 }
                 $handlers[$formatter->getName()] = $formatter;

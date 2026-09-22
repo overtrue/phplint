@@ -31,6 +31,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
+
 use Throwable;
 
 /**
@@ -133,8 +134,11 @@ final class ProfileManager extends AbstractManager implements
 
         $command = $event->getCommand();
 
-        /** @var ApplicationInterface $application */
         $application = $command->getApplication();
+
+        if (!$application instanceof ApplicationInterface) {
+            return;
+        }
 
         $metadataCollection = $application->getMetadata();
 
@@ -180,7 +184,12 @@ final class ProfileManager extends AbstractManager implements
         $command = $event->getCommand();
 
         $input = $event->getInput();
+
         $application = $command->getApplication();
+
+        if (!$application instanceof ApplicationInterface) {
+            return false;
+        }
 
         $this->stopwatch = $application->getProfiler();
 

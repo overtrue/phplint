@@ -53,7 +53,7 @@ class Php implements ProviderInterface
 
         $data = [
             new ProviderData('binary_path', $binaryPath, 'The PHP interpreter binary path'),
-            new ProviderData('sapi', php_sapi_name() ?? 'UNKNOWN', 'The server API for this build of the PHP interpreter'),
+            new ProviderData('sapi', php_sapi_name() ? : 'UNKNOWN', 'The server API for this build of the PHP interpreter'),
             new ProviderData('version', PHP_VERSION, 'The PHP interpreter'),
             new ProviderData('php_64bit', (PHP_INT_SIZE === 8 ? 'yes' : 'no'), 'The PHP interpreter, with 64 bit support'),
             new ProviderData('debug', (PHP_DEBUG ? 'yes' : 'no'), 'The PHP interpreter, with debugging symbols'),

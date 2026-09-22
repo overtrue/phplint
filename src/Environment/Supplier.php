@@ -59,7 +59,7 @@ final class Supplier
         );
     }
 
-    public function describe(?ProviderInterface $provider = null, ?string $part = null): null|string|array
+    public function describe(?ProviderInterface $provider = null, ?string $part = null): null|array
     {
         $filtered = false;
 

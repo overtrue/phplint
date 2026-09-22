@@ -22,4 +22,6 @@ interface EnvConfigInterface
     public function getUser(): string;
 
     public function get(string $key, mixed $defaultFallback = null): mixed;
+
+    public function getDefaultFallback(string $envName): array;
 }

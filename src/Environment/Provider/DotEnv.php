@@ -104,8 +104,11 @@ class DotEnv implements ProviderInterface, LoggerAwareInterface
                 $envFile = $this->lookupDotEnvFile($this->dotEnvPath, $dirs);
 
                 if (null !== $envFile) {
+                    // @phpstan-ignore class.notFound
                     $dotenv = new \Symfony\Component\Dotenv\Dotenv($this->envKey, $this->debugKey);
+                    // @phpstan-ignore class.notFound
                     $dotenv->usePutenv();
+                    // @phpstan-ignore class.notFound
                     $dotenv->loadEnv($envFile, overrideExistingVars: $this->overrideExistingVars);
                     $data[] = $this->providerData('dotEnvPath', $envFile, 'The path to the dotenv file');
                 } else {

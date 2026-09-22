@@ -73,8 +73,6 @@ final class Application extends BaseApplication implements
 
     private ?MetadataCollection $metadataCollection = null;
 
-    private ExtensionEnum $extensions;
-
     private ?Cache $cache = null;
 
     public function __construct(private readonly ConsoleApplicationRunner $runner)
@@ -104,7 +102,7 @@ final class Application extends BaseApplication implements
     /**
      * @throws ReflectionException
      */
-    public function addCommand(callable|SymfonyCommand $command): ?SymfonyCommand
+    public function addCommand(callable|SymfonyCommand $command): SymfonyCommand
     {
         if (!$command instanceof SymfonyCommand) {
             $code = $command;
@@ -151,7 +149,7 @@ final class Application extends BaseApplication implements
      * Officially introduced with version 8.1 of Symfony Console Component
      * @link https://github.com/symfony/console/blob/2b468472ec5d0e4acbe00f97e62f6cd552509894/Application.php#L115-L118
      */
-    public function getDispatcher(): ?EventDispatcherInterface
+    public function getDispatcher(): EventDispatcherInterface
     {
         return $this->dispatcher;
     }
@@ -244,6 +242,7 @@ final class Application extends BaseApplication implements
         $command = $event->getCommand();
         $input  = $event->getInput();
 
+        /** @var InvokableCommand|null $invokableCommand */
         $invokableCommand = $command->getCode();
         $parameters = $invokableCommand?->getArguments($input) ?? [];
         $configResolver = new FileOptionsResolver($input, $parameters);
@@ -292,7 +291,9 @@ final class Application extends BaseApplication implements
         foreach ($extensions as $extensionName) {
             $extension = ExtensionEnum::factory($extensionName);
 
-            if ($extensionName == ExtensionEnum::CACHE_MANAGER->value) {
+            if ($extensionName == ExtensionEnum::CACHE_MANAGER->value
+                && $extension instanceof CacheManager
+            ) {
                 $this->cache = $extension::getCacheInstance();
             }
 
@@ -304,7 +305,9 @@ final class Application extends BaseApplication implements
                 $extension->setLogger($logger);
             }
 
-            if ($extension instanceof EventSubscriberInterface) {
+            if ($extension instanceof EventSubscriberInterface
+                && $dispatcher instanceof \Symfony\Component\EventDispatcher\EventDispatcherInterface
+            ) {
                 $dispatcher->addSubscriber($extension);
             }
 

@@ -58,12 +58,14 @@ final class MetadataCollection implements Countable, IteratorAggregate
 
     public function getMetadata(string $id): ?Metadata
     {
+        /** @var ArrayIterator $iterator */
         $iterator = $this->getIterator();
         return $iterator->offsetExists($id) ? $iterator->offsetGet($id) : null;
     }
 
     public function hasMetadata(string $id): bool
     {
+        /** @var ArrayIterator $iterator */
         $iterator = $this->getIterator();
         return $iterator->offsetExists($id);
     }

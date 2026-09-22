@@ -27,7 +27,10 @@ final class Profiler implements ProviderInterface, LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    public function describe(): ?array
+    /**
+     * @return ProviderData[]
+     */
+    public function describe(): array
     {
         $packageName = 'symfony/stopwatch';
         $installed = true;

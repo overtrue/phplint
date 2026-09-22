@@ -69,10 +69,12 @@ final class Linter implements LoggerAwareInterface, Countable
     public function __construct(
         // @deprecated $configResolver
         // keep only for API compatibility with previous version 9.7.x, and will be removed in next API version
+        // @phpstan-ignore property.onlyWritten
         private readonly ?Resolver $configResolver = null,
         ?EventDispatcherInterface $dispatcher = null,
         // @deprecated $client
         // keep only for API compatibility with previous version 9.7.x, and will be removed in next API version
+        // @phpstan-ignore property.onlyWritten
         private readonly ?Application $client = null,
         private readonly ?HelperSet $helperSet = null,
         private readonly ?OutputInterface $output = null,
@@ -106,6 +108,7 @@ final class Linter implements LoggerAwareInterface, Countable
     ): LinterOutput {
         $metadataCollection = $metadataCollection ?? new MetadataCollection();
 
+        /** @var ProfilerOutput|null $profiling */
         $profiling = $metadataCollection->getMetadata(ProfilerOutput::class);
         $this->stopwatch = $profiling?->getStopwatch();
 

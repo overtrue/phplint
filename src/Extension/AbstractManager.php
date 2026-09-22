@@ -43,10 +43,12 @@ abstract class AbstractManager implements LoggerAwareInterface
      *
      * @return array{
      *     command?: Command,
-     *     arguments?: string[],
+     *     arguments?: non-empty-string|false,
      *     eventType: string,
-     *     listener: string,
-     *     stopPropagation: string
+     *     listener: non-falsy-string,
+     *     stopPropagation: 'continue'|'stop',
+     *     __section__: string,
+     *     __style__: 'event'
      * }
      */
     protected function describeEvent(Event $event): array

@@ -32,7 +32,7 @@ abstract class Metadata
     public function describe(?string $part = null): stdClass|string|null
     {
         $metadata = new stdClass();
-        $metadata->name = static::METADATA_ID;
+        $metadata->name = static::METADATA_ID; // @phpstan-ignore classConstant.notFound
         $metadata->value = $this->value;
         $metadata->description = $this->description;
 
