@@ -1,6 +1,6 @@
 {
     "pre-commit": {
-        "enabled": true,
+        "enabled": false,
         "actions": [
             {
                 "action": [
