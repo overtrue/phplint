@@ -10,7 +10,8 @@
 
 | Version | Status                 | Requirements   |
 |:--------|:-----------------------|:---------------|
-| **9.x** | **Active development** | **PHP >= 8.1** |
+| **9.8** | **Active development** | **PHP >= 8.2** |
+| 9.7     | Life support           | PHP >= 8.1     |
 | 6.x     | End Of Life            | PHP >= 8.2     |
 | 5.x     | End Of Life            | PHP >= 8.1     |
 | 4.x     | End Of Life            | PHP >= 8.0     |
@@ -28,7 +29,10 @@ The preferred method of installation is to use the PHPLint PHAR which can be dow
 You can install `phplint` with [Docker][docker]
 
 ```shell
+// version 9.7.2 until version 9.8.0 is available
 docker pull overtrue/phplint:latest
+// pre-version 9.8.0
+docker pull overtrue/phplint:9.8.0-rc.1
 ```
 
 ## Phive
@@ -47,6 +51,8 @@ phive update overtrue/phplint --force-accept-unsigned
 
 You can also install `phplint` locally to your project with [Phive][phive] and configuration file `.phive/phars.xml`
 
+When final stable version 9.8 will be available
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <phive xmlns="https://phar.io/phive">
@@ -63,7 +69,11 @@ phive install --force-accept-unsigned
 You can install `phplint` with [Composer][composer]
 
 ```shell
+// when final stable version 9.8 will be available
 composer global require overtrue/phplint ^9.8
+
+// pre-version 9.8
+composer global require overtrue/phplint 9.8.x-dev
 ```
 
 If you cannot install it because of a dependency conflict, or you prefer to install it for your project, we recommend
