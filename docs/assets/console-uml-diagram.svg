@@ -14,7 +14,7 @@
 </g>
 <g id="clust2" class="cluster">
 <title>cluster_1</title>
-<polygon fill="#cdaa7d" stroke="black" points="5044,-470 5044,-1397 6240,-1397 6240,-470 5044,-470"/>
+<polygon fill="#cdaa7d" stroke="black" points="5044,-432 5044,-1397 6240,-1397 6240,-432 5044,-432"/>
 <text text-anchor="middle" x="5642" y="-1381.8" font-family="Times,serif" font-size="14.00">Overtrue\PHPLint\Console</text>
 </g>
 <g id="clust3" class="cluster">
@@ -71,12 +71,12 @@
 <text text-anchor="start" x="5066" y="-1305.8" font-family="Times,serif" font-size="14.00">+ __construct(runner : Overtrue\PHPLint\Runtime\ConsoleApplicationRunner)</text>
 <text text-anchor="start" x="5066" y="-1286.8" font-family="Times,serif" font-size="14.00">+ setArgResolver(argumentResolver : Overtrue\PHPLint\Configuration\Resolver\ArgumentResolverInterface) : void</text>
 <text text-anchor="start" x="5066" y="-1267.8" font-family="Times,serif" font-size="14.00">+ setMetadata(metadataCollection : Overtrue\PHPLint\Metadata\MetadataCollection) : void</text>
-<text text-anchor="start" x="5066" y="-1248.8" font-family="Times,serif" font-size="14.00">+ addCommand(command) : ?Symfony\Component\Console\Command\Command</text>
+<text text-anchor="start" x="5066" y="-1248.8" font-family="Times,serif" font-size="14.00">+ addCommand(command) : Symfony\Component\Console\Command\Command</text>
 <text text-anchor="start" x="5066" y="-1229.8" font-family="Times,serif" font-size="14.00">+ getLongVersion() : string</text>
 <text text-anchor="start" x="5066" y="-1210.8" font-family="Times,serif" font-size="14.00">+ getLogger() : Psr\Log\LoggerInterface</text>
 <text text-anchor="start" x="5066" y="-1191.8" font-family="Times,serif" font-size="14.00">+ getCache() : Overtrue\PHPLint\Cache</text>
 <text text-anchor="start" x="5066" y="-1172.8" font-family="Times,serif" font-size="14.00">+ getProfiler() : ?Symfony\Component\Stopwatch\Stopwatch</text>
-<text text-anchor="start" x="5066" y="-1153.8" font-family="Times,serif" font-size="14.00">+ getDispatcher() : ?Symfony\Contracts\EventDispatcher\EventDispatcherInterface</text>
+<text text-anchor="start" x="5066" y="-1153.8" font-family="Times,serif" font-size="14.00">+ getDispatcher() : Symfony\Contracts\EventDispatcher\EventDispatcherInterface</text>
 <text text-anchor="start" x="5066" y="-1134.8" font-family="Times,serif" font-size="14.00">+ getMetadata(settings : array = []) : Overtrue\PHPLint\Metadata\MetadataCollection</text>
 <text text-anchor="start" x="5066" y="-1115.8" font-family="Times,serif" font-size="14.00">+ getRunner() : Overtrue\PHPLint\Runtime\ConsoleApplicationRunner</text>
 <text text-anchor="start" x="5066" y="-1096.8" font-family="Times,serif" font-size="14.00">+ «static» getSubscribedEvents() : array</text>
@@ -88,24 +88,28 @@
 <!-- Overtrue\\PHPLint\\Console\\ApplicationInterface -->
 <g id="node4" class="node">
 <title>Overtrue\\PHPLint\\Console\\ApplicationInterface</title>
-<polygon fill="#fefece" stroke="transparent" points="5995,-627 5289,-627 5289,-478 5995,-478 5995,-627"/>
-<polygon fill="#eeeeee" stroke="transparent" points="5297,-588.5 5297,-622.5 5987,-622.5 5987,-588.5 5297,-588.5"/>
-<polygon fill="none" stroke="black" points="5297,-588.5 5297,-622.5 5987,-622.5 5987,-588.5 5297,-588.5"/>
-<text text-anchor="start" x="5597" y="-609.3" font-family="Times,serif" font-weight="bold" font-size="14.00">«interface»</text>
-<text text-anchor="start" x="5560.5" y="-595.3" font-family="Times,serif" font-weight="bold" font-size="14.00">ApplicationInterface</text>
-<polygon fill="none" stroke="black" points="5297,-582.5 5297,-588.5 5987,-588.5 5987,-582.5 5297,-582.5"/>
-<polygon fill="none" stroke="black" points="5297,-481.5 5297,-582.5 5987,-582.5 5987,-481.5 5297,-481.5"/>
-<text text-anchor="start" x="5302" y="-566.3" font-family="Times,serif" font-size="14.00">+ «abstract» getLogger() : Psr\Log\LoggerInterface</text>
-<text text-anchor="start" x="5302" y="-547.3" font-family="Times,serif" font-size="14.00">+ «abstract» getDispatcher() : ?Symfony\Contracts\EventDispatcher\EventDispatcherInterface</text>
-<text text-anchor="start" x="5302" y="-528.3" font-family="Times,serif" font-size="14.00">+ «abstract» getRunner() : Overtrue\PHPLint\Runtime\ConsoleApplicationRunner</text>
-<text text-anchor="start" x="5302" y="-509.3" font-family="Times,serif" font-size="14.00">+ «abstract» getLongVersion() : string</text>
-<text text-anchor="start" x="5302" y="-490.3" font-family="Times,serif" font-size="14.00">+ «abstract» getVersion() : string</text>
+<polygon fill="#fefece" stroke="transparent" points="6024.5,-665 5259.5,-665 5259.5,-440 6024.5,-440 6024.5,-665"/>
+<polygon fill="#eeeeee" stroke="transparent" points="5268,-626.5 5268,-660.5 6017,-660.5 6017,-626.5 5268,-626.5"/>
+<polygon fill="none" stroke="black" points="5268,-626.5 5268,-660.5 6017,-660.5 6017,-626.5 5268,-626.5"/>
+<text text-anchor="start" x="5597.5" y="-647.3" font-family="Times,serif" font-weight="bold" font-size="14.00">«interface»</text>
+<text text-anchor="start" x="5561" y="-633.3" font-family="Times,serif" font-weight="bold" font-size="14.00">ApplicationInterface</text>
+<polygon fill="none" stroke="black" points="5268,-620.5 5268,-626.5 6017,-626.5 6017,-620.5 5268,-620.5"/>
+<polygon fill="none" stroke="black" points="5268,-443.5 5268,-620.5 6017,-620.5 6017,-443.5 5268,-443.5"/>
+<text text-anchor="start" x="5273" y="-604.3" font-family="Times,serif" font-size="14.00">+ «abstract» getLogger() : Psr\Log\LoggerInterface</text>
+<text text-anchor="start" x="5273" y="-585.3" font-family="Times,serif" font-size="14.00">+ «abstract» getDispatcher() : ?Symfony\Contracts\EventDispatcher\EventDispatcherInterface</text>
+<text text-anchor="start" x="5273" y="-566.3" font-family="Times,serif" font-size="14.00">+ «abstract» getCache() : Overtrue\PHPLint\Cache</text>
+<text text-anchor="start" x="5273" y="-547.3" font-family="Times,serif" font-size="14.00">+ «abstract» getProfiler() : ?Symfony\Component\Stopwatch\Stopwatch</text>
+<text text-anchor="start" x="5273" y="-528.3" font-family="Times,serif" font-size="14.00">+ «abstract» getRunner() : Overtrue\PHPLint\Runtime\ConsoleApplicationRunner</text>
+<text text-anchor="start" x="5273" y="-509.3" font-family="Times,serif" font-size="14.00">+ «abstract» getLongVersion() : string</text>
+<text text-anchor="start" x="5273" y="-490.3" font-family="Times,serif" font-size="14.00">+ «abstract» getVersion() : string</text>
+<text text-anchor="start" x="5273" y="-471.3" font-family="Times,serif" font-size="14.00">+ «abstract» getMetadata(settings : array = []) : Overtrue\PHPLint\Metadata\MetadataCollection</text>
+<text text-anchor="start" x="5273" y="-452.3" font-family="Times,serif" font-size="14.00">+ «abstract» setMetadata(metadataCollection : Overtrue\PHPLint\Metadata\MetadataCollection) : void</text>
 </g>
 <!-- Overtrue\\PHPLint\\Console\\Application&#45;&gt;Overtrue\\PHPLint\\Console\\ApplicationInterface -->
 <g id="edge3" class="edge">
 <title>Overtrue\\PHPLint\\Console\\Application&#45;&gt;Overtrue\\PHPLint\\Console\\ApplicationInterface</title>
-<path fill="none" stroke="black" stroke-dasharray="5,2" d="M5642,-1007.71C5642,-886.27 5642,-731.08 5642,-637.14"/>
-<polygon fill="none" stroke="black" points="5645.5,-637.12 5642,-627.12 5638.5,-637.12 5645.5,-637.12"/>
+<path fill="none" stroke="black" stroke-dasharray="5,2" d="M5642,-1007.71C5642,-901.61 5642,-769.73 5642,-675.46"/>
+<polygon fill="none" stroke="black" points="5645.5,-675.31 5642,-665.31 5638.5,-675.31 5645.5,-675.31"/>
 </g>
 <!-- Symfony\\Component\\Console\\Application -->
 <g id="node5" class="node">
