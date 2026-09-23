@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Console;
 
 use Symfony\Component\Console\Helper\FormatterHelper;
-use Symfony\Component\Console\Helper\HelperInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger as SymfonyConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 

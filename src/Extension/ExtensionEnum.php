@@ -16,7 +16,6 @@ namespace Overtrue\PHPLint\Extension;
 use BackedEnum;
 use ReflectionEnum;
 use Symfony\Component\String\UnicodeString;
-use UnitEnum;
 
 use function class_exists;
 use function in_array;
