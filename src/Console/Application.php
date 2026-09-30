@@ -24,7 +24,6 @@ use Overtrue\PHPLint\Extension\ExtensionInterface;
 use Overtrue\PHPLint\Metadata\ApplicationVersion;
 use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
-use Overtrue\PHPLint\Output\ConsoleOutput;
 use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -39,7 +38,6 @@ use Symfony\Component\Console\Command\ListCommand;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\InputInterface;
@@ -52,7 +50,6 @@ use Throwable;
 
 use function class_exists;
 use function json_encode;
-use function var_dump;
 
 /**
  * @author Overtrue
@@ -178,32 +175,6 @@ final class Application extends BaseApplication implements
             ConsoleEvents::COMMAND => ['initialize', 200],
             ConsoleEvents::ERROR => 'error',
         ];
-    }
-
-    public function run(?InputInterface $input = null, ?OutputInterface $output = null): int
-    {
-        $output ??= new ConsoleOutput();
-
-        // Default colors skin :
-        // If you want to override, use the bootstrapping feature
-        $styles = [
-            SectionEnum::DEFAULT->value => new OutputFormatterStyle('black', 'cyan'),
-            SectionEnum::COMMAND->value => new OutputFormatterStyle('white', 'blue'),
-            SectionEnum::ARGUMENT->value => new OutputFormatterStyle('yellow', 'blue'),
-            SectionEnum::PLUGIN->value => new OutputFormatterStyle('white', 'red'),
-            SectionEnum::PROFILE->value => new OutputFormatterStyle('black', 'gray'),
-            SectionEnum::ENVIRONMENT->value => new OutputFormatterStyle('yellow', 'blue'),
-            SectionEnum::EVENT->value => new OutputFormatterStyle('white', 'magenta'),
-            SectionEnum::METADATA->value => new OutputFormatterStyle('black', 'yellow'),
-        ];
-
-        foreach ($styles as $name => $style) {
-            if (!$output->getFormatter()->hasStyle($name)) {
-                $output->getFormatter()->setStyle($name, $style);
-            }
-        }
-
-        return parent::run($input, $output);
     }
 
     /**
