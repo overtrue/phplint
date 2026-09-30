@@ -63,8 +63,7 @@ class ConsoleApplicationRunner
         self::$input = $input ?? new ArgvInput();
         self::$output = $output ?? new NullOutput();
 
-        $this->application = new Application($this);
-        $this->application->setLogger($logger);
+        $this->application = new Application($this, $logger);
 
         $definition = $this->application->getDefinition();
 

@@ -72,9 +72,13 @@ final class Application extends BaseApplication implements
 
     private ?Cache $cache = null;
 
-    public function __construct(private readonly ConsoleApplicationRunner $runner)
-    {
+    public function __construct(
+        private readonly ConsoleApplicationRunner $runner,
+        LoggerInterface $logger,
+    ) {
         parent::__construct();
+
+        $this->setLogger($logger);
 
         $this->dispatcher = new EventDispatcher();
         $this->dispatcher->addSubscriber($this);
