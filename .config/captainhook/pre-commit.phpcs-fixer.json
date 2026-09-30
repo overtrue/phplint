@@ -11,6 +11,7 @@
                     "--using-cache=no",
                     "--show-progress=none",
                     "--verbose",
+                    "--diff",
                     "{$ENV|value-of:\\Bartlett\\CaptainHookBinPlugin\\BinPlugin.colors-flag|cache:false}",
                     "{$STAGED_FILES|of-type:php|separated-by: }"
                 ],
