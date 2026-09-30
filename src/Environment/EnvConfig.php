@@ -112,6 +112,7 @@ class EnvConfig implements EnvConfigInterface
             'frontend' => $defaultFrontend,
             'env' => $envName,
             'debug' => false,
+            'dump' => false,
             'logger' => ConsoleLogger::class,
             'config' => $config,
         ];

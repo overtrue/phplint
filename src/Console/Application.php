@@ -21,6 +21,7 @@ use Overtrue\PHPLint\Environment\ModeEnum;
 use Overtrue\PHPLint\Extension\CacheManager;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
 use Overtrue\PHPLint\Extension\ExtensionInterface;
+use Overtrue\PHPLint\Helper\VarDumpHelper;
 use Overtrue\PHPLint\Metadata\ApplicationVersion;
 use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
@@ -79,6 +80,14 @@ final class Application extends BaseApplication implements
         parent::__construct();
 
         $this->setLogger($logger);
+
+        $envName = $runner::getEnvName();
+        $envConfig = $runner->getEnvConfig();
+        $defaultFallback = $envConfig->getDefaultFallback($envName);
+
+        if ($envConfig->get('dump', $defaultFallback)) {
+            $this->getHelperSet()->set(new VarDumpHelper($logger));
+        }
 
         $this->dispatcher = new EventDispatcher();
         $this->dispatcher->addSubscriber($this);
@@ -200,13 +209,12 @@ final class Application extends BaseApplication implements
      */
     public function error(ConsoleErrorEvent $event): void
     {
-        $runner = $this->getRunner();
-        $envName = $runner::getEnvName();
-        $envConfig = $runner->getEnvConfig();
-
-        if ($envConfig->get('dump', false) || $envName === 'dev') {
-            var_dump($event->getError());
+        if (!$this->getHelperSet()->has('var_dumper')) {
+            return;
         }
+
+        $helper = $this->getHelperSet()->get('var_dumper');
+        $helper->dump($event);
     }
 
     /**
