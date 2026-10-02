@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Command;
 
-use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver\ConfigValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\DryRunValueResolver;
@@ -32,6 +31,7 @@ use Overtrue\PHPLint\Console\Attribute\ValueResolver;
 use Overtrue\PHPLint\Console\SectionEnum;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
+use Overtrue\PHPLint\Metadata\ConfigurationSettings;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Output\LinterOutput;
 use Psr\Log\LoggerInterface;
@@ -44,6 +44,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder as SymfonyFinder;
 use Throwable;
 
+use function json_decode;
 use function json_encode;
 
 use const JSON_UNESCAPED_SLASHES;
@@ -145,9 +146,9 @@ final class LintCommand
             ': {parameters}'
         );
 
-        /** @var InvokableCommand|null $invokableCommand */
-        $invokableCommand = $command->getCode();
-        $parameters = $invokableCommand?->getArguments($input) ?? [];
+        // retrieved configuration initialized from the ConsoleEvents::COMMAND hook
+        $configurationSettings = $metadataCollection->getMetadata(ConfigurationSettings::class);
+        $parameters = json_decode($configurationSettings->describe('value'), true);
 
         $logger->notice(
             $message,
@@ -159,7 +160,7 @@ final class LintCommand
             ]
         );
 
-        $finder = $this->getFinder($sourcePath, $excludePath, $fileExtensions, $parameters, $input);
+        $finder = $this->getFinder($sourcePath, $excludePath, $fileExtensions, $parameters);
 
         $message = sprintf(
             '<comment>%s</comment> %s',
@@ -213,17 +214,15 @@ final class LintCommand
         array $excludePath,
         array $fileExtensions,
         array $parameters,
-        InputInterface $input
     ): Finder {
-        $configResolver = new FileOptionsResolver($input, $parameters);
         if (empty($sourcePath)) {
-            $sourcePath = $configResolver->getOption(OptionDefinition::PATH);
+            $sourcePath = $parameters[OptionDefinition::PATH];
         }
         if (empty($excludePath)) {
-            $excludePath = $configResolver->getOption(OptionDefinition::EXCLUDE);
+            $excludePath = $parameters[OptionDefinition::EXCLUDE];
         }
         if (empty($fileExtensions)) {
-            $fileExtensions = $configResolver->getOption(OptionDefinition::FILE_EXTENSIONS);
+            $fileExtensions = $parameters[OptionDefinition::FILE_EXTENSIONS];
         }
 
         return new Finder(paths: $sourcePath, excludes: $excludePath, fileExtensions: $fileExtensions);
