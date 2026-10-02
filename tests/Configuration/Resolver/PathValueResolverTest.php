@@ -99,9 +99,9 @@ final class PathValueResolverTest extends TestCase
 
     public function testPathOption(): void
     {
-        $excludes = ['vendor'];
+        $excludes = 'vendor';
 
-        $expected = [array_map('realpath', $excludes)];
+        $expected = [[$excludes]];
 
         $arguments = ['--exclude' => $excludes];
 

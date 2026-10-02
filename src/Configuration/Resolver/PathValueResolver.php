@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Configuration\Resolver;
 
+use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\Option;
@@ -68,7 +69,8 @@ class PathValueResolver implements ValueResolverInterface
             $values = [$values];
         }
 
-        $paths = array_map('realpath', $values);
+        $paths = ($argumentName === OptionDefinition::EXCLUDE) ? $values : array_map('realpath', $values);
+
         return [array_values(array_unique(array_filter($paths)))];
     }
 }
