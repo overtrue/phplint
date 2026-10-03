@@ -28,7 +28,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 
-use function array_map;
 use function dirname;
 use function iterator_to_array;
 use function realpath;
