@@ -39,10 +39,12 @@ use Symfony\Component\Console\Command\ListCommand;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
+use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
@@ -51,6 +53,7 @@ use Throwable;
 
 use function class_exists;
 use function json_encode;
+use function sprintf;
 
 /**
  * @author Overtrue
@@ -188,6 +191,55 @@ final class Application extends BaseApplication implements
             ConsoleEvents::COMMAND => ['initialize', 200],
             ConsoleEvents::ERROR => 'error',
         ];
+    }
+
+    public function run(?InputInterface $input = null, ?OutputInterface $output = null): int
+    {
+        $runner = $this->getRunner();
+
+        if (!$runner::hasMode(ModeEnum::LEGACY)) {
+            $name = $this->getCommandName($input);
+
+            $envConfig = $runner::getEnvConfig();
+            $envName = $runner::getEnvName();
+            $defaultFallback = $envConfig->getDefaultFallback($envName);
+
+            try {
+                $this->find($name);
+            } catch (CommandNotFoundException $e) {
+                $logger = $this->getLogger();
+                $logger->warning(
+                    $e->getMessage(),
+                    [
+                        '__section__' => SectionEnum::COMMAND->label(),
+                        '__style__' => SectionEnum::COMMAND->value,
+                    ]
+                );
+
+                $reasons = [];
+                $reasons[] = sprintf(
+                    'You are currently in "%s" mode.',
+                    $envConfig->get('mode', $defaultFallback)
+                );
+                $reasons[] = 'Consider to specify explicitly the "lint" command.';
+                $reasons[] = 'Consider to activate the "legacy" mode if you do not want to specify the "lint" command.';
+
+                $io = new SymfonyStyle($input, $output);
+
+                $io->caution(
+                    sprintf(
+                        'Could not execute command "%s".' . "\n\n" .
+                        'Possible reasons:' . "\n" .
+                        '  • ' . implode("\n  • ", $reasons),
+                        $input,
+                    )
+                );
+
+                return Command::FAILURE;
+            }
+        }
+
+        parent::run($input, $output);
     }
 
     /**
