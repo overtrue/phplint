@@ -17,6 +17,7 @@ use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Overtrue\PHPLint\Environment\ModeEnum;
 use Overtrue\PHPLint\Metadata\ApplicationVersion;
 use Overtrue\PHPLint\Metadata\ConfigurationSettings;
+use Overtrue\PHPLint\Metadata\DeprecatedFeatures;
 use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
@@ -75,12 +76,9 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
             return;
         }
 
-        $fileCount = $results->count();
-
-        if ($fileCount === 0) {
-            $this->warningBlock();
-            return;
-        }
+        /** @var DeprecatedFeatures $deprecatedFeatures */
+        $deprecatedFeatures = $metadataCollection->getMetadata(DeprecatedFeatures::class);
+        $deprecationCount = $deprecatedFeatures?->count() ?? 0;
 
         /** @var ApplicationVersion|null $applicationVersion */
         $applicationVersion = $metadataCollection->getMetadata(ApplicationVersion::class);
@@ -108,16 +106,28 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
             $this->configBlock($settings);
         }
 
-        $errCount = count($results->getErrors());
+        $fileCount = $results->count();
+
+        $failures = $results->getFailures();
+        $errCount = count($failures);
+
+        $helperMethod = $fileCount > 0 ? ($errCount > 0 ? 'error' : 'success') : 'warning';
+
+        $style = new SymfonyStyle(new ArrayInput([]), $this);
+        $style->{$helperMethod}(
+            $this->formatSummaryMessage($fileCount, $errCount, $deprecationCount)
+        );
 
         if ($errCount > 0) {
-            $this->errorBlock($fileCount, $errCount);
             try {
-                $this->showErrors($results->getFailures());
+                $this->showErrors($failures);
             } catch (InvalidStyleException) {
             }
-        } else {
-            $this->successBlock($fileCount);
+        }
+
+        if ($deprecationCount > 0) {
+            $deprecations = $deprecatedFeatures->getDeprecations();
+            $this->showDeprecations($deprecations);
         }
     }
 
@@ -193,6 +203,9 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
         $this->writeln($message);
     }
 
+    /**
+     * @deprecated since Release 9.8.0, will be removed in next API version
+     */
     public function errorBlock(int $fileCount, int $errorCount): void
     {
         $message = sprintf(
@@ -207,6 +220,9 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
         $style->error($message);
     }
 
+    /**
+     * @deprecated since Release 9.8.0, will be removed in next API version
+     */
     public function successBlock(int $fileCount): void
     {
         $message = sprintf(
@@ -219,6 +235,9 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
         $style->success($message);
     }
 
+    /**
+     * @deprecated since Release 9.8.0, will be removed in next API version
+     */
     public function warningBlock(string $message = self::NO_FILE_TO_LINT): void
     {
         $style = new SymfonyStyle(new ArrayInput([]), $this);
@@ -230,13 +249,32 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
         $this->write(str_repeat(PHP_EOL, $count));
     }
 
+    private function formatSummaryMessage(int $fileCount, int $errorCount, int $deprecationCount): string
+    {
+        $filePart = $fileCount > 0
+            ? sprintf('%d file%s', $fileCount, $fileCount > 1 ? 's' : '')
+            : self::NO_FILE_TO_LINT
+        ;
+
+        $errorPart = $errorCount > 0
+            ? sprintf(', %d failure%s', $errorCount, $errorCount > 1 ? 's' : '')
+            : ''
+        ;
+
+        $deprecationPart = $deprecationCount > 0
+            ? sprintf(', %d deprecated feature%s used', $deprecationCount, $deprecationCount > 1 ? 's' : '')
+            : ''
+        ;
+
+        return sprintf('%s%s%s', $filePart, $errorPart, $deprecationPart);
+    }
+
     /**
      * @throws InvalidStyleException
      */
     private function showErrors(array $errors): void
     {
         $i = 0;
-        $this->writeln(PHP_EOL . "There was " . count($errors) . ' errors:');
         foreach ($errors as $filename => $error) {
             $this->writeln('<comment>' . ++$i . ". {$filename}:{$error['line']}" . '</comment>');
             $this->writeln($this->getHighlightedCodeSnippet($filename, $error['line']));
@@ -244,6 +282,15 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
         }
 
         $this->newLine();
+    }
+
+    private function showDeprecations(array $deprecations): void
+    {
+        $style = new SymfonyStyle(new ArrayInput([]), $this);
+
+        foreach ($deprecations as $deprecation) {
+            $style->warning($deprecation);
+        }
     }
 
     private function getCodeSnippet(string $filePath, int $lineNumber, int $linesBefore = 3, int $linesAfter = 3): string
