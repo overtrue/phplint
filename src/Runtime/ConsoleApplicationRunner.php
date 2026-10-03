@@ -25,6 +25,7 @@ use Overtrue\PHPLint\Console\Application;
 use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Overtrue\PHPLint\Environment\ModeEnum;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
+use Overtrue\PHPLint\Metadata\DeprecatedFeatures;
 use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Psr\Log\LoggerInterface;
@@ -40,6 +41,10 @@ use function array_merge;
 use function array_values;
 use function explode;
 use function in_array;
+use function restore_error_handler;
+use function set_error_handler;
+
+use const E_USER_DEPRECATED;
 
 /**
  * @author Laurent Laville
@@ -243,7 +248,27 @@ class ConsoleApplicationRunner
 
     public function run(): int
     {
-        return $this->application->run(self::$input, self::$output);
+        $application = $this->getApplication();
+        $metadataCollection = $application->getMetadata();
+        // initialize deprecated features usage
+        $metadataCollection->add(Metadata::deprecationResults([]));
+
+        $prevErrorHandler = set_error_handler(static function ($level, $message, $fileName, $line) use (&$prevErrorHandler, &$application) {
+            if (E_USER_DEPRECATED === $level) {
+                $metadataCollection = $application->getMetadata();
+                /** @var DeprecatedFeatures $deprecated */
+                $deprecated = $metadataCollection->getMetadata(DeprecatedFeatures::class);
+                $deprecated?->add($message);
+                return true;
+            }
+
+            return $prevErrorHandler ? $prevErrorHandler($level, $message, $fileName, $line) : false;
+        });
+
+        $exitCode = $this->application->run(self::$input, self::$output);
+
+        restore_error_handler();
+        return $exitCode;
     }
 
     public static function getEnvName(): string
