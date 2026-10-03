@@ -17,6 +17,7 @@ use Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 
+use function array_filter;
 use function array_key_exists;
 use function in_array;
 use function ini_get;
@@ -37,6 +38,15 @@ abstract class AbstractOptionsResolver implements Resolver
         array $configuration = []
     ) {
         $options = $configuration;
+        $cacheDir = $input->getOption(OptionDefinition::CACHE) ?? null;
+
+        if (null !== $cacheDir) {
+            // "cache" option is deprecated since 9.6.2, use instead "cache-dir" automagically
+            $options[OptionDefinition::CACHE] = $cacheDir;
+            $options[OptionDefinition::CACHE_DIR] = $cacheDir;
+        }
+        // user options given only
+        $this->options = array_filter($options);
 
         $optionDefaults = [
             OptionDefinition::PATH => realpath(OptionDefinition::DEFAULT_PATH),
@@ -104,7 +114,7 @@ abstract class AbstractOptionsResolver implements Resolver
     public function getOptions(): array
     {
         $optionsFactory = $this->factory();
-        return $this->options = $optionsFactory->resolve();
+        return $this->options = $optionsFactory->resolve($this->options);
     }
 
     public function getOption(string $name): mixed

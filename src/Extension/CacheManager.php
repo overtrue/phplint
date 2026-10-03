@@ -76,6 +76,12 @@ final class CacheManager extends AbstractManager implements
                 'Adapter ' .
                 ' (<info>auto, never, Filesystem, Apcu, ...</info>)',
             ),
+            new inputOption(
+                OptionDefinition::CACHE,
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Path to the cache directory (<comment>Deprecated option, use "cache-dir" instead</comment>)'
+            ),
             new InputOption(
                 OptionDefinition::CACHE_DIR,
                 null,
