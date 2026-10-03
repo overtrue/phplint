@@ -200,13 +200,17 @@ final class Application extends BaseApplication implements
         if (!$runner::hasMode(ModeEnum::LEGACY)) {
             $name = $this->getCommandName($input);
 
-            $envConfig = $runner::getEnvConfig();
-            $envName = $runner::getEnvName();
-            $defaultFallback = $envConfig->getDefaultFallback($envName);
+            if (null === $name) {
+                return parent::run($input, $output);
+            }
 
             try {
                 $this->find($name);
             } catch (CommandNotFoundException $e) {
+                $envConfig = $runner::getEnvConfig();
+                $envName = $runner::getEnvName();
+                $defaultFallback = $envConfig->getDefaultFallback($envName);
+
                 $logger = $this->getLogger();
                 $logger->warning(
                     $e->getMessage(),
@@ -239,7 +243,7 @@ final class Application extends BaseApplication implements
             }
         }
 
-        parent::run($input, $output);
+        return parent::run($input, $output);
     }
 
     /**
