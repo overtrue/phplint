@@ -23,13 +23,10 @@ use function intval;
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-class OptionsFactory implements Options
+readonly class OptionsFactory implements Options
 {
-    private array $defaults;
-
-    public function __construct(array $defaults)
+    public function __construct(private array $defaults)
     {
-        $this->defaults = $defaults;
     }
 
     public function resolve(array $options = []): array
