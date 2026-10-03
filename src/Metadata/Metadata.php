@@ -67,4 +67,9 @@ abstract class Metadata
     {
         return new CacheOutput($cache);
     }
+
+    public static function deprecationResults(array $deprecations): DeprecatedFeatures
+    {
+        return new DeprecatedFeatures($deprecations);
+    }
 }
