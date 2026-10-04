@@ -11,6 +11,7 @@
     ],
     "force-autodiscovery": true,
     "dump-autoload": false,
+    "check-requirements": false,
     "exclude-dev-files": false,
     "directories": [
         "bin",

@@ -29,7 +29,7 @@ on:
         # https://github.com/llaville/box-manifest
         description: "BOX Manifest runtime version in semver format"
         required: false
-        default: "4.4.0"
+        default: "4.5.0"
         type: string
       box-manifest-options:
         description: "Additional options to pass to BOX Manifest (e.g. `--bootstrap bootstrap.php -r plain.txt -r sbom.json`)"
