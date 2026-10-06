@@ -2,7 +2,7 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-BOX_MANIFEST_VERSION="4.4.0"
+BOX_MANIFEST_VERSION="4.5.1"
 curl -Ls "https://github.com/llaville/box-manifest/releases/download/$BOX_MANIFEST_VERSION/box-manifest.phar" -o $SCRIPT_DIR/box-manifest
 chmod +x $SCRIPT_DIR/box-manifest
 
