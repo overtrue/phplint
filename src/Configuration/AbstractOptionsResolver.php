@@ -38,7 +38,10 @@ abstract class AbstractOptionsResolver implements Resolver
         array $configuration = []
     ) {
         $options = $configuration;
-        $cacheDir = $input->getOption(OptionDefinition::CACHE) ?? null;
+        $cacheDir = $input->hasOption(OptionDefinition::CACHE)
+            ? $input->getOption(OptionDefinition::CACHE) ?? null
+            : null
+        ;
 
         if (null !== $cacheDir) {
             // "cache" option is deprecated since 9.6.2, use instead "cache-dir" automagically
