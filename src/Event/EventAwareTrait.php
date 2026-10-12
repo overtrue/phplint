@@ -28,6 +28,10 @@ use function sprintf;
 use const DEBUG_BACKTRACE_IGNORE_ARGS;
 use const JSON_UNESCAPED_SLASHES;
 
+/**
+ * @author Laurent Laville
+ * @since Release 9.8.0
+ */
 trait EventAwareTrait
 {
     public function describeEvent(Event $event): array

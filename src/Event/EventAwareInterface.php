@@ -16,6 +16,10 @@ namespace Overtrue\PHPLint\Event;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Contracts\EventDispatcher\Event;
 
+/**
+ * @author Laurent Laville
+ * @since Release 9.8.0
+ */
 interface EventAwareInterface
 {
     /**
