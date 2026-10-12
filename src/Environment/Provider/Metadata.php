@@ -27,16 +27,16 @@ readonly class Metadata implements ProviderInterface
 {
     private MetadataCollection $metadataCollection;
 
-    public function __construct(MetadataCollection $metadataCollection, array $filters = [])
+    public function __construct(MetadataCollection $metadataCollection, array $filters = [], array $excludes = [])
     {
-        if (empty($filters)) {
-            $this->metadataCollection = $metadataCollection;
-        } else {
-            $this->metadataCollection = new MetadataCollection();
-            foreach ($metadataCollection as $metadata) {
-                if (in_array($metadata->describe()->name, $filters, true)) {
-                    $this->metadataCollection->add($metadata);
-                }
+        $this->metadataCollection = new MetadataCollection();
+        foreach ($metadataCollection as $metadata) {
+            $name = $metadata->describe()->name;
+            if (in_array($name, $excludes, true)) {
+                continue;
+            }
+            if (empty($filters) || in_array($name, $filters, true)) {
+                $this->metadataCollection->add($metadata);
             }
         }
     }
