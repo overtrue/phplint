@@ -18,6 +18,8 @@ use Overtrue\PHPLint\Command\InvokableCommand;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\Resolver\ArgumentResolverInterface;
 use Overtrue\PHPLint\Environment\ModeEnum;
+use Overtrue\PHPLint\Event\EventAwareInterface;
+use Overtrue\PHPLint\Event\EventAwareTrait;
 use Overtrue\PHPLint\Extension\CacheManager;
 use Overtrue\PHPLint\Extension\ExtensionEnum;
 use Overtrue\PHPLint\Extension\ExtensionInterface;
@@ -62,9 +64,11 @@ use function sprintf;
 final class Application extends BaseApplication implements
     ApplicationInterface,
     LoggerAwareInterface,
+    EventAwareInterface,
     EventSubscriberInterface
 {
     use LoggerAwareTrait;
+    use EventAwareTrait;
 
     private ArgumentResolverInterface $argumentResolver;
 
@@ -265,6 +269,8 @@ final class Application extends BaseApplication implements
      */
     public function error(ConsoleErrorEvent $event): void
     {
+        $this->describeEvent($event);
+
         if (!$this->getHelperSet()->has('var_dumper')) {
             return;
         }
@@ -278,6 +284,8 @@ final class Application extends BaseApplication implements
      */
     public function initialize(ConsoleCommandEvent $event): void
     {
+        $this->describeEvent($event);
+
         $command = $event->getCommand();
         $input  = $event->getInput();
 
