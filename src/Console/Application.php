@@ -33,6 +33,7 @@ use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use ReflectionException;
+use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Console\Application as BaseApplication;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
@@ -54,6 +55,7 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Throwable;
 
 use function class_exists;
+use function in_array;
 use function json_encode;
 use function sprintf;
 
@@ -77,8 +79,6 @@ final class Application extends BaseApplication implements
     private ?Stopwatch $stopwatch = null;
 
     private ?MetadataCollection $metadataCollection = null;
-
-    private ?Cache $cache = null;
 
     public function __construct(
         private readonly ConsoleApplicationRunner $runner,
@@ -154,7 +154,16 @@ final class Application extends BaseApplication implements
 
     public function getCache(): Cache
     {
-        return $this->cache ?? (new CacheManager())->getCacheInstance();
+        $runner = $this->getRunner();
+        $plugins = $runner::getAllowedPlugins();
+
+        if (in_array(ExtensionEnum::CACHE_MANAGER->value, $plugins, true)) {
+            $cache = CacheManager::getCacheInstance();
+        } else {
+            $cache = new Cache(new NullAdapter());
+        }
+
+        return $cache;
     }
 
     public function getProfiler(): ?Stopwatch
@@ -337,12 +346,6 @@ final class Application extends BaseApplication implements
         // loads all valid extension on fly, invalid ones will be reported by the Console ArgumentResolver component
         foreach ($extensions as $extensionName) {
             $extension = ExtensionEnum::factory($extensionName);
-
-            if ($extensionName == ExtensionEnum::CACHE_MANAGER->value
-                && $extension instanceof CacheManager
-            ) {
-                $this->cache = $extension::getCacheInstance();
-            }
 
             if ($extensionName === ExtensionEnum::PROFILE_MANAGER->value && class_exists(Stopwatch::class)) {
                 $this->stopwatch = new Stopwatch(true);

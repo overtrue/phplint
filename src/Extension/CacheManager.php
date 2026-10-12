@@ -21,7 +21,6 @@ use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\Events;
 use Overtrue\PHPLint\Metadata\ConfigurationSettings;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Console\ConsoleEvents;
@@ -46,12 +45,6 @@ final class CacheManager extends AbstractManager implements
     private MetadataCollection $metadataCollection;
 
     private static Cache $cache;
-
-    public function __construct(private readonly ?AdapterInterface $adapter = null)
-    {
-        $adapter ??= new NullAdapter();
-        self::$cache = new Cache($adapter);
-    }
 
     public function getName(): string
     {
@@ -161,7 +154,7 @@ final class CacheManager extends AbstractManager implements
 
     public static function getCacheInstance(): Cache
     {
-        return self::$cache;
+        return self::$cache ?? new Cache(new NullAdapter());
     }
 
     protected function allowEvent(ConsoleEvent $event): bool

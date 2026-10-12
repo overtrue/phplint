@@ -19,6 +19,7 @@ use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 
 use function array_filter;
 use function array_key_exists;
+use function array_merge;
 use function in_array;
 use function ini_get;
 use function realpath;
@@ -37,7 +38,7 @@ abstract class AbstractOptionsResolver implements Resolver
         protected InputInterface $input,  // @deprecated since Release 9.8.0, will be removed in next API version
         array $configuration = []
     ) {
-        $options = $configuration;
+        $options = array_merge($input->getOptions(), $configuration);
         $cacheDir = $input->hasOption(OptionDefinition::CACHE)
             ? $input->getOption(OptionDefinition::CACHE) ?? null
             : null
@@ -58,7 +59,6 @@ abstract class AbstractOptionsResolver implements Resolver
             OptionDefinition::EXCLUDE => OptionDefinition::DEFAULT_EXCLUDES,
             OptionDefinition::FILE_EXTENSIONS => OptionDefinition::DEFAULT_EXTENSIONS,
             OptionDefinition::JOBS => OptionDefinition::DEFAULT_JOBS,
-            OptionDefinition::CACHE => OptionDefinition::DEFAULT_CACHE_DIR,
             OptionDefinition::CACHE_DIR => OptionDefinition::DEFAULT_CACHE_DIR,
             OptionDefinition::NO_CACHE => false,
             OptionDefinition::CACHE_TTL => OptionDefinition::DEFAULT_CACHE_TTL,
@@ -91,7 +91,6 @@ abstract class AbstractOptionsResolver implements Resolver
             OptionDefinition::FILE_EXTENSIONS,
             OptionDefinition::JOBS,
             OptionDefinition::NO_CACHE,
-            OptionDefinition::CACHE,
             OptionDefinition::CACHE_DIR,
             OptionDefinition::CACHE_TTL,
             OptionDefinition::CACHE_ADAPTER,
@@ -106,7 +105,7 @@ abstract class AbstractOptionsResolver implements Resolver
             OptionDefinition::DRY_RUN,
         ];
         foreach ($names as $name) {
-            $defaults[$name] = $options[$name] ?? $optionDefaults[$name];
+            $defaults[$name] = $options[$name] ?? $optionDefaults[$name] ?? null;
         }
 
         $this->defaults = $defaults;
