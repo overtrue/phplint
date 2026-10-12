@@ -13,79 +13,22 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Extension;
 
-use Overtrue\PHPLint\Console\SectionEnum;
+use Overtrue\PHPLint\Event\EventAwareInterface;
+use Overtrue\PHPLint\Event\EventAwareTrait;
+
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Symfony\Component\Console\Command\Command;
+
 use Symfony\Component\Console\Event\ConsoleEvent;
-use Symfony\Component\EventDispatcher\GenericEvent;
-use Symfony\Contracts\EventDispatcher\Event;
-
-use function debug_backtrace;
-use function end;
-use function get_debug_type;
-use function json_encode;
-use function sprintf;
-
-use const DEBUG_BACKTRACE_IGNORE_ARGS;
-use const JSON_UNESCAPED_SLASHES;
 
 /**
  * @author Laurent Laville
  * @since Release 9.8.0
  */
-abstract class AbstractManager implements LoggerAwareInterface
+abstract class AbstractManager implements LoggerAwareInterface, EventAwareInterface
 {
     use LoggerAwareTrait;
-
-    /**
-     * Describes the contextual event and write a line to the current Logger instance (if available)
-     *
-     * @return array{
-     *     command?: Command,
-     *     arguments?: non-empty-string|false,
-     *     eventType: string,
-     *     listener: non-falsy-string,
-     *     stopPropagation: 'continue'|'stop',
-     *     __section__: string,
-     *     __style__: 'event'
-     * }
-     */
-    protected function describeEvent(Event $event): array
-    {
-        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-        $trace = end($trace);
-
-        $context = [
-            'eventType' => get_debug_type($event),
-            'listener' => sprintf('%s::%s', $trace['class'], $trace['function']),
-            'stopPropagation' => $event->isPropagationStopped() ? 'stop' : 'continue',
-        ];
-
-        if ($event instanceof ConsoleEvent) {
-            $context['command'] = $event->getCommand();
-        }
-
-        $message = sprintf(
-            '<comment>%s</comment> %s',
-            '"{eventType}" event {stopPropagation} propagation and was proceeded by following listener',
-            ': {listener}'
-        );
-
-        if ($event instanceof GenericEvent) {
-            $arguments = $event->getArguments();
-            $valueResolvedDump = json_encode($arguments, JSON_UNESCAPED_SLASHES);
-            $context['arguments'] = $valueResolvedDump;
-            $message .= ' {arguments}';
-        }
-
-        $context['__section__'] = SectionEnum::EVENT->label();
-        $context['__style__'] = SectionEnum::EVENT->value;
-
-        $this->logger->debug($message, $context);
-
-        return $context;
-    }
+    use EventAwareTrait;
 
     protected function allowEvent(ConsoleEvent $event): bool
     {
