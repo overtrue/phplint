@@ -121,12 +121,10 @@ abstract class AbstractOptionsResolver implements Resolver
 
     public function getOption(string $name): mixed
     {
-        if (!isset($this->options)) {
-            try {
-                $this->getOptions();
-            } catch (Exception) {
-                return null;
-            }
+        try {
+            $this->getOptions();
+        } catch (Exception) {
+            return null;
         }
 
         if (array_key_exists($name, $this->options)) {
