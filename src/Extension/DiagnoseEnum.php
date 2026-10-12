@@ -21,6 +21,7 @@ enum DiagnoseEnum: string
 {
     case AUTO = 'auto';
     case ALWAYS = 'always';
+    case CACHE = 'cache';
     case CI = 'ci';
     case CPU = 'cpu';
     case DOTENV = 'dotenv';

@@ -19,6 +19,7 @@ use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Console\Attribute\ValueResolver;
 use Overtrue\PHPLint\Console\SectionEnum;
 use Overtrue\PHPLint\Environment\EnvConfig;
+use Overtrue\PHPLint\Environment\Provider\Cache;
 use Overtrue\PHPLint\Environment\Provider\CI;
 use Overtrue\PHPLint\Environment\Provider\Cpu;
 use Overtrue\PHPLint\Environment\Provider\DotEnv;
@@ -31,6 +32,7 @@ use Overtrue\PHPLint\Environment\ProviderData;
 use Overtrue\PHPLint\Environment\ProviderInterface;
 use Overtrue\PHPLint\Environment\Supplier;
 use Overtrue\PHPLint\Extension\DiagnoseEnum;
+use Overtrue\PHPLint\Metadata\CacheOutput;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Application;
@@ -105,7 +107,7 @@ final class DiagnoseCommand
         }
         $parts = array_unique($parts);
 
-        $vcs = $php = $uname = $ci = $cpu = $dotenv = $profiler = $metadata = false;
+        $vcs = $php = $uname = $cache = $ci = $cpu = $dotenv = $profiler = $metadata = false;
 
         foreach ($parts as $part) {
             if ($part == DiagnoseEnum::VCS->value) {
@@ -116,6 +118,9 @@ final class DiagnoseCommand
             }
             if ($part == DiagnoseEnum::UNAME->value) {
                 $uname = true;
+            }
+            if ($part == DiagnoseEnum::CACHE->value) {
+                $cache = true;
             }
             if ($part == DiagnoseEnum::CI->value) {
                 $ci = true;
@@ -142,7 +147,7 @@ final class DiagnoseCommand
         }
 
         if (in_array(DiagnoseEnum::ALWAYS->value, $parts, true)) {
-            $vcs = $php = $uname = $ci = $cpu = $dotenv = $profiler = $metadata = true;
+            $vcs = $php = $uname = $cache = $ci = $cpu = $dotenv = $profiler = $metadata = true;
         }
 
         $environment = new Supplier($logger);
@@ -155,6 +160,9 @@ final class DiagnoseCommand
         }
         if ($uname) {
             $environment->addProvider(new Uname());
+        }
+        if ($cache) {
+            $environment->addProvider(new Cache($application->getCache()));
         }
         if ($ci) {
             $environment->addProvider(new CI());
@@ -169,7 +177,8 @@ final class DiagnoseCommand
             $environment->addProvider(new Profiler());
         }
         if ($metadata) {
-            $environment->addProvider(new Metadata($metadataCollection, $filters));
+            // never display the "cache_results" metadata; use environment variable "PLINT_DIAGNOSTIC=cache" instead
+            $environment->addProvider(new Metadata($metadataCollection, $filters, [CacheOutput::METADATA_ID]));
         }
         if ($user) {
             $environment->addProvider($user);
@@ -186,6 +195,7 @@ final class DiagnoseCommand
                 Git::class => 'VCS Information',
                 Php::class => 'PHP Information',
                 Uname::class => 'OS Information',
+                Cache::class => 'Cache Information',
                 CI::class => 'CI Information',
                 Cpu::class => 'CPU Information',
                 DotEnv::class => 'Environment Variables Information',
