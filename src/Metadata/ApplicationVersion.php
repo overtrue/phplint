@@ -96,7 +96,7 @@ final class ApplicationVersion extends Metadata
     {
         $appVersion = json_decode($this->value, true);
 
-        return $appVersion['pretty_version'] ?? self::UNKNOWN_VERSION;
+        return $appVersion['semantic_version'] ?? self::UNKNOWN_VERSION;
     }
 
     /**
