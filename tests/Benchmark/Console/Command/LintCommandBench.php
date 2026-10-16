@@ -79,7 +79,7 @@ final class LintCommandBench
         $defaultCommand = new LintCommand($dispatcher);
 
         $application = new Application();
-        $application->add($defaultCommand);
+        $application->addCommand($defaultCommand);
         $application->setDefaultCommand($defaultCommand->getName());
         $application->setDispatcher($dispatcher);
 
