@@ -37,14 +37,6 @@ final class LintCommandBench
     /**
      * @throws Throwable
      */
-    public function benchDefaultConfiguration(): void
-    {
-        $this->runCommand([]);
-    }
-
-    /**
-     * @throws Throwable
-     */
     public function benchJobs1(): void
     {
         $this->runCommand(['--jobs' => 1]);
