@@ -18,6 +18,11 @@ on:
         description: "Application Reference Branch"
         required: false
         default: "9.8"
+      phpbench-options:
+        description: "PHPBench options"
+        required: false
+        default: "--progress=none  --output=html"
+        type: string
 
 jobs:
   benchmark:
@@ -70,7 +75,7 @@ jobs:
       -   # https://github.com/phpbench/phpbench
         name: Benchmark Baseline
         run: |
-          vendor/bin/phpbench run tests/Benchmark --progress=none --tag=baseline 
+          vendor/bin/phpbench run tests/Benchmark ${{ inputs.phpbench-options }} --tag=baseline 
 
       -   # https://github.com/actions/checkout
         name: Checkout Code
@@ -84,10 +89,11 @@ jobs:
       -   # https://github.com/phpbench/phpbench
         name: Benchmark Report
         run: |
-          vendor/bin/phpbench run tests/Benchmark --progress=none --tag=fixed --ref=baseline --report=benchmark_compare --output=html
+          vendor/bin/phpbench run tests/Benchmark ${{ inputs.phpbench-options }} --tag=fixed --ref=baseline --report=benchmark_compare
 
       -   # https://github.com/actions/upload-artifact
         name: Upload PHPBench report
+        if: contains('--output=html', inputs.phpbench-options)
         uses: actions/upload-artifact@v7.0.1
         with:
           name: "PHPBench-Report-PHP-${{ matrix.php-version }}"
