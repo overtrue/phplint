@@ -60,13 +60,12 @@ jobs:
       -   # https://github.com/phpbench/phpbench
         name: Install PHPBench
         run: |
-          curl -Ls https://github.com/phpbench/phpbench/releases/download/1.7.0/phpbench.phar -o /usr/local/bin/phpbench
-          chmod +x /usr/local/bin/phpbench
+          composer bin phpbench update
 
       -   # https://github.com/phpbench/phpbench
         name: Benchmark Baseline
         run: |
-          phpbench run tests/Benchmark --progress=none --tag=baseline 
+          vendor/bin/phpbench run tests/Benchmark --progress=none --tag=baseline 
 
       -   # https://github.com/actions/checkout
         name: Checkout Code
@@ -80,7 +79,7 @@ jobs:
       -   # https://github.com/phpbench/phpbench
         name: Benchmark Report
         run: |
-          phpbench run tests/Benchmark --progress=none --tag=fixed --ref=baseline --report=benchmark_compare --output=html
+          vendor/bin/phpbench run tests/Benchmark --progress=none --tag=fixed --ref=baseline --report=benchmark_compare --output=html
 
       -   # https://github.com/actions/upload-artifact
         name: Upload PHPBench report
