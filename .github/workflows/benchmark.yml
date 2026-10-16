@@ -13,11 +13,11 @@ on:
       app-ref-version:
         description: "Application Reference Version"
         required: false
-        default: "9.7.2"
+        default: "9.8.0-rc.3"
       app-ref-branch:
         description: "Application Reference Branch"
         required: false
-        default: "9.7"
+        default: "9.8"
 
 jobs:
   benchmark:
