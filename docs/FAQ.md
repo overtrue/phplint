@@ -1,6 +1,6 @@
-# FAQ
+# Frequently Asked Questions
 
-## I do not want to lose to my time with new PHPLint 9.8 features, what can I do to use the new version as a 9.7 version ?
+## I do not want to lose my time with new PHPLint 9.8 features, what can I do to use the new version as a 9.7 version ?
 
 - Define globally or locally the `PLINT_MODE` environment variable and set its value to `legacy`
 - You can also define it on the `phplint` binary invocation.
