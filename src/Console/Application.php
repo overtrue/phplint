@@ -25,10 +25,15 @@ use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 
 use function array_keys;
+use function dirname;
+use function file_exists;
 use function in_array;
 use function sprintf;
+use function substr;
+use function trim;
 
 use const STDOUT;
 
@@ -41,10 +46,57 @@ final class Application extends BaseApplication
     public const NAME = 'phplint';
 
     private const PACKAGE_NAME = 'overtrue/phplint';
+    private const UNKNOWN_VERSION = 'UNKNOWN';
+
+    private array $versionInfo;
 
     public function __construct()
     {
-        parent::__construct(self::NAME, self::getPrettyVersion());
+        $installed = InstalledVersions::getAllRawData()[0];
+
+        if (!isset($installed['versions'][self::PACKAGE_NAME])) {
+            throw new OutOfBoundsException(sprintf('Package "%s" is not installed', self::PACKAGE_NAME));
+        }
+
+        $prettyVersion = $this->getPrettyVersion(
+            $installed['versions'][self::PACKAGE_NAME]['pretty_version'] ?? self::UNKNOWN_VERSION
+        );
+
+        $version = $installed['versions'][self::PACKAGE_NAME]['version'] ?? 'dev';
+
+        $aliases = $installed['versions'][self::PACKAGE_NAME]['aliases'] ?? [];
+
+        $reference = $installed['versions'][self::PACKAGE_NAME]['reference'];
+        if (null === $reference) {
+            $reference = $aliases[0] ?? self::UNKNOWN_VERSION;
+        }
+
+        $this->versionInfo = [
+            'semantic_version' => $version,
+            'pretty_version' => $prettyVersion,
+            'reference' => $reference,
+        ];
+
+        parent::__construct(self::NAME, $this->versionInfo['pretty_version']);
+    }
+
+    public function getLongVersion(): string
+    {
+        $appName = self::NAME;
+        $appVersion = $this->versionInfo;
+
+        $version = (self::UNKNOWN_VERSION !== $appVersion['pretty_version'])
+            ? $appVersion['pretty_version']
+            : $appVersion['semantic_version']
+        ;
+        $shortRef = substr($appVersion['reference'], 0, 7);
+
+        return sprintf(
+            '%s version <info>%s</info> <comment>(%s)</comment> by overtrue and contributors.',
+            $appName,
+            $version,
+            $shortRef,
+        );
     }
 
     public function run(?InputInterface $input = null, ?OutputInterface $output = null): int
@@ -74,32 +126,25 @@ final class Application extends BaseApplication
         return in_array($name, array_keys(parent::all())) ? $name : null;
     }
 
-    private static function getPrettyVersion(): string
+    /**
+     * Provide same information, as `sebastian/version` package will do, but without adding extra dependency.
+     *
+     * @link https://github.com/sebastianbergmann/version
+     * @link https://git-scm.com/docs/git-describe
+     */
+    private function getPrettyVersion(string $fallback): string
     {
-        foreach (InstalledVersions::getAllRawData() as $installed) {
-            if (!isset($installed['versions'][self::PACKAGE_NAME])) {
-                continue;
-            }
-
-            $version = $installed['versions'][self::PACKAGE_NAME]['pretty_version']
-                ?? $installed['versions'][self::PACKAGE_NAME]['version']
-                ?? 'dev'
-            ;
-
-            $aliases = $installed['versions'][self::PACKAGE_NAME]['aliases'] ?? [];
-
-            $reference = $installed['versions'][self::PACKAGE_NAME]['reference'];
-            if (null === $reference) {
-                return sprintf('%s', $aliases[0] ?? $version);
-            }
-
-            return sprintf(
-                '%s@%s',
-                $aliases[0] ?? $version,
-                substr($reference, 0, 7)
-            );
+        if (!file_exists(dirname(__DIR__, 2) . '/.git')) {
+            return $fallback;
         }
 
-        throw new OutOfBoundsException(sprintf('Package "%s" is not installed', self::PACKAGE_NAME));
+        $process = new Process(['git', 'describe', '--tags', '--exact-match']);
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            return self::UNKNOWN_VERSION;
+        }
+
+        return trim($process->getOutput());
     }
 }
