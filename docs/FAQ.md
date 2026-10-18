@@ -2,25 +2,7 @@
 
 ## I do not want to lose my time with new PHPLint 9.8 features, what can I do to use the new version as a 9.7 version ?
 
-- Define globally or locally the `PLINT_MODE` environment variable and set its value to `legacy`
-- You can also define it on the `phplint` binary invocation.
-
-For example:
-
-```shell
-PLINT_MODE=legacy phplint
-```
-
-> [!WARNING]
-> 1. When Symfony Console `-v, --verbose` flag is provided, the current configuration settings is displayed on same format as 9.7 version.
-> 2. Difference came from the profiling information printed between 9.7 and 9.8 versions
-
-> [!CAUTION]
-> If you use a YAML configuration file, three directives were renamed to avoid conflicts :
->
-> - `extensions` should be named `file-extensions`
-> - `output` should be named `output-file`
-> - `format` should be named `output-format`
+Read the dedicated [Migration Guide](migration.md).
 
 ## I do not want to print the diagnostic results after each `lint` command invocation
 
