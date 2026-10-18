@@ -15,11 +15,13 @@ namespace Overtrue\PHPLint\Extension;
 
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\ApplicationInterface;
+use Overtrue\PHPLint\Console\SectionEnum;
 use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\Events;
 use Overtrue\PHPLint\Metadata\ConfigurationSettings;
+use Overtrue\PHPLint\Metadata\DeprecatedFeatures;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Output\ChainOutput;
 use Overtrue\PHPLint\Output\FormatResolver;
@@ -63,11 +65,25 @@ final class OutputManager extends AbstractManager implements
                 'Format of requested reports'
             ),
             new InputOption(
+                'format',
+                null,
+                InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+                'Format of requested reports'
+                . ' (<comment>Deprecated option, use "--output-format" instead</comment>)'
+            ),
+            new InputOption(
                 OptionDefinition::OUTPUT_FILE,
                 'o',
                 InputOption::VALUE_REQUIRED,
                 'Generate an output to the specified path'
                 . ' (<comment>default: ' . OptionDefinition::DEFAULT_STANDARD_OUTPUT_LABEL . '</comment>)'
+            ),
+            new InputOption(
+                'output',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Generate an output to the specified path'
+                . ' (<comment>Deprecated option, use "--output-file" instead</comment>)'
             )
         ]);
     }
@@ -136,6 +152,24 @@ final class OutputManager extends AbstractManager implements
             ? $application->getRunner()::getEnvConfig()
             : new EnvConfig();
         ;
+
+        /** @var DeprecatedFeatures $deprecatedFeatures */
+        $deprecatedFeatures = $metadataCollection->getMetadata(DeprecatedFeatures::class);
+        $deprecationCount = $deprecatedFeatures?->count() ?? 0;
+
+        if ($deprecationCount) {
+            $deprecations = $deprecatedFeatures->getDeprecations();
+            $logger = $application->getLogger();
+            foreach ($deprecations as $deprecation) {
+                $logger->warning(
+                    $deprecation,
+                    [
+                        '__section__' => SectionEnum::DEPRECATION->label(),
+                        '__style__' => SectionEnum::DEPRECATION->value,
+                    ]
+                );
+            }
+        }
 
         $outputHandler = new ChainOutput($this->handlers);
         $outputHandler->format($results, $metadataCollection, $envConfig);

@@ -49,6 +49,29 @@ abstract class AbstractOptionsResolver implements Resolver
             $options[OptionDefinition::CACHE] = $cacheDir;
             $options[OptionDefinition::CACHE_DIR] = $cacheDir;
         }
+
+        $outputFile = $input->hasOption('output')
+            ? $input->getOption('output') ?? null
+            : null
+        ;
+        if (null !== $outputFile) {
+            // "output" option is deprecated since 9.8.0, use instead "output-file" automagically
+            $options[OptionDefinition::OUTPUT_FILE] = $outputFile;
+        } else {
+            // avoid to raise deprecation warning, because we do not explicitly specify `output` option
+            // and its value is an OutputInterface instance
+            unset($options['output']);
+        }
+
+        $outputFormat = $input->hasOption('format')
+            ? $input->getOption('format') ?? null
+            : null
+        ;
+        if (!empty($outputFormat)) {
+            // "format" option is deprecated since 9.8.0, use instead "output-format" automagically
+            $options[OptionDefinition::OUTPUT_FORMAT] = $outputFormat;
+        }
+
         // user options given only
         $this->options = array_filter($options);
 
@@ -116,7 +139,11 @@ abstract class AbstractOptionsResolver implements Resolver
     public function getOptions(): array
     {
         $optionsFactory = $this->factory();
-        return $this->options = $optionsFactory->resolve($this->options);
+
+        $options = $optionsFactory->resolve($this->options);
+        // removed deprecated options from configuration settings
+        unset($options['output'], $options['format']);
+        return $this->options = $options;
     }
 
     public function getOption(string $name): mixed

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Configuration;
 
+use Overtrue\PHPLint\Output\ConsoleOutput;
 use Symfony\Component\OptionsResolver\Options as SymfonyOptions;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -40,6 +41,18 @@ readonly class OptionsFactory implements Options
             '9.6.2',
             'The option "%name%" is deprecated and will be removed in the future, use "cache-dir" instead'
         );
+        $resolver->setDeprecated(
+            'format',
+            'overtrue/phplint',
+            '9.8.0',
+            'The option "%name%" is deprecated, use "output-format" instead'
+        );
+        $resolver->setDeprecated(
+            'output',
+            'overtrue/phplint',
+            '9.8.0',
+            'The option "%name%" is deprecated, use "output-file" instead'
+        );
         $resolver->setIgnoreUndefined();
         return $resolver->resolve($options);
     }
@@ -61,7 +74,9 @@ readonly class OptionsFactory implements Options
             OptionDefinition::PROGRESS => ['null', 'string'],
             OptionDefinition::NO_PROGRESS => 'bool',
             OptionDefinition::OUTPUT_FILE => ['null', 'string'],
+            'output' => ['null', 'string', ConsoleOutput::class],
             OptionDefinition::OUTPUT_FORMAT => ['string', 'string[]'],
+            'format' => ['string', 'string[]'],
             OptionDefinition::WARNING => 'bool',
             OptionDefinition::OPTION_MEMORY_LIMIT => ['null', 'int', 'string'],
             OptionDefinition::IGNORE_EXIT_CODE => 'bool',
