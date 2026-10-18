@@ -53,6 +53,12 @@ readonly class OptionsFactory implements Options
             '9.8.0',
             'The option "%name%" is deprecated, use "output-file" instead'
         );
+        $resolver->setDeprecated(
+            'extensions',
+            'overtrue/phplint',
+            '9.8.0',
+            'The option "%name%" is deprecated, use "file-extensions" instead'
+        );
         $resolver->setIgnoreUndefined();
         return $resolver->resolve($options);
     }
@@ -63,6 +69,7 @@ readonly class OptionsFactory implements Options
             OptionDefinition::PATH => ['null', 'string', 'string[]'],
             OptionDefinition::EXCLUDE => ['string[]'],
             OptionDefinition::FILE_EXTENSIONS => ['string[]'],
+            'extensions' => ['string[]'],
             OptionDefinition::JOBS => ['null', 'int', 'string'],
             OptionDefinition::CONFIGURATION => 'string',
             OptionDefinition::NO_CONFIGURATION => 'bool',

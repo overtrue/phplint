@@ -72,6 +72,15 @@ abstract class AbstractOptionsResolver implements Resolver
             $options[OptionDefinition::OUTPUT_FORMAT] = $outputFormat;
         }
 
+        $fileExtensions = $input->hasOption('extensions')
+            ? $input->getOption('extensions') ?? null
+            : null
+        ;
+        if (!empty($fileExtensions)) {
+            // "extensions" option is deprecated since 9.8.0, use instead "file-extensions" automagically
+            $options[OptionDefinition::FILE_EXTENSIONS] = $fileExtensions;
+        }
+
         // user options given only
         $this->options = array_filter($options);
 
@@ -142,7 +151,7 @@ abstract class AbstractOptionsResolver implements Resolver
 
         $options = $optionsFactory->resolve($this->options);
         // removed deprecated options from configuration settings
-        unset($options['output'], $options['format']);
+        unset($options['output'], $options['format'], $options['extensions']);
         return $this->options = $options;
     }
 
