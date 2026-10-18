@@ -220,16 +220,12 @@ class ConsoleApplicationRunner
             $defaultPlugins = $allowPlugins = [
                 ExtensionEnum::CACHE_MANAGER->value,
                 ExtensionEnum::OUTPUT_MANAGER->value,
+                ExtensionEnum::PROFILE_MANAGER->value,
             ];
 
             if ($interactiveFrontend) {
                 $defaultPlugins[] = ExtensionEnum::PROGRESS_MANAGER->value;
                 $allowPlugins[] = ExtensionEnum::PROGRESS_MANAGER->value;
-            }
-
-            if (self::$output->isVerbose()) {
-                $defaultPlugins[] = ExtensionEnum::PROFILE_MANAGER->value;
-                $allowPlugins[] = ExtensionEnum::PROFILE_MANAGER->value;
             }
         }
 

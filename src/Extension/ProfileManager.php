@@ -17,7 +17,6 @@ use Overtrue\PHPLint\Command\ProfileCommand;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Console\SectionEnum;
-use Overtrue\PHPLint\Environment\ModeEnum;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\Events;
@@ -62,7 +61,7 @@ final class ProfileManager extends AbstractManager implements
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'Display timing and memory usage information',
-                'never'
+                'auto'
             ),
         ]);
     }
@@ -193,16 +192,10 @@ final class ProfileManager extends AbstractManager implements
 
         $this->stopwatch = $application->getProfiler();
 
-        $runner = $application->getRunner();
-
-        if ($runner::hasMode(ModeEnum::LEGACY)) {
-            $this->whenProfiled = $event->getOutput()->isVerbose() ? 'auto' : 'never';
-        } else {
-            $this->whenProfiled = $input->hasOption(OptionDefinition::PROFILE)
-                ? $input->getOption(OptionDefinition::PROFILE) ?? 'auto'
-                : 'never'
-            ;
-        }
+        $this->whenProfiled = $input->hasOption(OptionDefinition::PROFILE)
+            ? $input->getOption(OptionDefinition::PROFILE) ?? 'auto'
+            : 'never'
+        ;
 
         return ('never' !== $this->whenProfiled);
     }

@@ -25,3 +25,28 @@ PLINT_MODE=legacy phplint
 > - `format` should be named `output-format`
 >
 > If you still used them, you'll get deprecations displayed, on standard output and/or through the logger
+
+> [!IMPORTANT]
+> If you use your own logger or never use it (`PLINT_LOGGER='Psr\Log\NullLogger'`), you won't be notified of any deprecations.
+
+## Use or Not the `profile_manager`
+
+With PHPLint 9.7, the profiler was always displayed. There is no capacity to disable it !
+
+For example:
+
+![legacy profiler](assets/profiler-legacy.png)
+
+With PHPLint 9.8, we have now ability to disable the profiler, even if the `legacy` mode is activated.
+
+For example:
+
+```shell
+PLINT_MODE=legacy phplint /path/to/source/code --profile never
+```
+
+By default, the profiler is in `auto` mode, and print all information.
+
+For example:
+
+![standard profiler](assets/profiler-standard.png)
