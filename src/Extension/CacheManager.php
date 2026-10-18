@@ -121,7 +121,7 @@ final class CacheManager extends AbstractManager implements
         if ($withoutCache) {
             $adapter = new NullAdapter();
         } else {
-            $adapter = $this->adapter ?? $adapterAlias ?? new FilesystemAdapter('paths', $defaultLifetime, $cacheDir);
+            $adapter = $adapterAlias ?? new FilesystemAdapter('paths', $defaultLifetime, $cacheDir);
         }
         self::$cache = new Cache($adapter);
 
