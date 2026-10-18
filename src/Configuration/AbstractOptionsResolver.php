@@ -24,6 +24,7 @@ use function in_array;
 use function ini_get;
 use function realpath;
 use function sprintf;
+use function str_ends_with;
 
 /**
  * @author Laurent Laville
@@ -72,13 +73,20 @@ abstract class AbstractOptionsResolver implements Resolver
             $options[OptionDefinition::OUTPUT_FORMAT] = $outputFormat;
         }
 
-        $fileExtensions = $input->hasOption('extensions')
-            ? $input->getOption('extensions') ?? null
-            : null
-        ;
+        $fileExtensions = [];
+        $extensions = $input->hasOption('extensions') ? $input->getOption('extensions') : [];
+        foreach ($extensions as $extension) {
+            if (!str_ends_with($extension, '_manager')) {
+                $fileExtensions[] = $extension;
+            }
+        }
         if (!empty($fileExtensions)) {
             // "extensions" option is deprecated since 9.8.0, use instead "file-extensions" automagically
             $options[OptionDefinition::FILE_EXTENSIONS] = $fileExtensions;
+        } else {
+            // avoid to raise deprecation warning, because we do not explicitly specify `extensions` option
+            // and its value is a list of 9.8 Plugins/Extensions
+            unset($options['extensions']);
         }
 
         // user options given only
