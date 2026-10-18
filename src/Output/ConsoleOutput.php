@@ -76,7 +76,7 @@ final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputI
             return;
         }
 
-        /** @var DeprecatedFeatures $deprecatedFeatures */
+        /** @var DeprecatedFeatures|null $deprecatedFeatures */
         $deprecatedFeatures = $metadataCollection->getMetadata(DeprecatedFeatures::class);
         $deprecationCount = $deprecatedFeatures?->count() ?? 0;
 

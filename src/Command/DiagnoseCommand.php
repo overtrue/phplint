@@ -161,7 +161,7 @@ final class DiagnoseCommand
         if ($uname) {
             $environment->addProvider(new Uname());
         }
-        if ($cache) {
+        if ($cache && $application instanceof ApplicationInterface) {
             $environment->addProvider(new Cache($application->getCache()));
         }
         if ($ci) {

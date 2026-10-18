@@ -153,11 +153,11 @@ final class OutputManager extends AbstractManager implements
             : new EnvConfig();
         ;
 
-        /** @var DeprecatedFeatures $deprecatedFeatures */
+        /** @var DeprecatedFeatures|null $deprecatedFeatures */
         $deprecatedFeatures = $metadataCollection->getMetadata(DeprecatedFeatures::class);
         $deprecationCount = $deprecatedFeatures?->count() ?? 0;
 
-        if ($deprecationCount) {
+        if ($deprecationCount && $application instanceof ApplicationInterface) {
             $deprecations = $deprecatedFeatures->getDeprecations();
             $logger = $application->getLogger();
             foreach ($deprecations as $deprecation) {

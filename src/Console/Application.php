@@ -284,6 +284,7 @@ final class Application extends BaseApplication implements
             return;
         }
 
+        /** @var VarDumpHelper $helper */
         $helper = $this->getHelperSet()->get('var_dumper');
         $helper->dump($event);
     }

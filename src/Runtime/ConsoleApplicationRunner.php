@@ -256,7 +256,7 @@ class ConsoleApplicationRunner
         $prevErrorHandler = set_error_handler(static function ($level, $message, $fileName, $line) use (&$prevErrorHandler, &$application) {
             if (E_USER_DEPRECATED === $level) {
                 $metadataCollection = $application->getMetadata();
-                /** @var DeprecatedFeatures $deprecated */
+                /** @var DeprecatedFeatures|null $deprecated */
                 $deprecated = $metadataCollection->getMetadata(DeprecatedFeatures::class);
                 $deprecated?->add($message);
                 return true;
