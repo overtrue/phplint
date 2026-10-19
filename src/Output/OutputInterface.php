@@ -13,6 +13,9 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Output;
 
+use Overtrue\PHPLint\Environment\EnvConfigInterface;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
+
 /**
  * @author Laurent Laville
  * @since Release 9.0.0
@@ -21,6 +24,5 @@ interface OutputInterface
 {
     public function getName(): string;
 
-    public function format(LinterOutput $results): void;
-
+    public function format(LinterOutput $results, MetadataCollection $metadataCollection, EnvConfigInterface $envConfig): void;
 }

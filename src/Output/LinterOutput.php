@@ -28,6 +28,7 @@ use function sprintf;
 /**
  * @author Laurent Laville
  * @since Release 9.0.0
+ * @deprecated since release 9.8.0, and will be removed in API next version; replaced by "\Overtrue\PHPLint\Metadata\LinterOutput"
  */
 final class LinterOutput implements Countable
 {

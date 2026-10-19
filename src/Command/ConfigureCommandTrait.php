@@ -21,6 +21,8 @@ use Symfony\Component\Console\Input\InputOption;
 /**
  * @author Laurent Laville
  * @since Release 9.0.0
+ * @deprecated Since version 9.8.0, and will be removed in next major version 10.0
+ * @phpstan-ignore trait.unused
  */
 trait ConfigureCommandTrait
 {
@@ -88,30 +90,6 @@ trait ConfigureCommandTrait
                 null,
                 InputOption::VALUE_NONE,
                 'Ignore cached data'
-            )
-            ->addOption(
-                'progress',
-                'p',
-                InputOption::VALUE_REQUIRED,
-                'Show the progress output'
-            )
-            ->addOption(
-                'no-progress',
-                null,
-                InputOption::VALUE_NONE,
-                'Hide the progress output'
-            )
-            ->addOption(
-                'output',
-                'o',
-                InputOption::VALUE_REQUIRED,
-                'Generate an output to the specified path (<comment>default: ' . OptionDefinition::DEFAULT_STANDARD_OUTPUT_LABEL . '</comment>)'
-            )
-            ->addOption(
-                'format',
-                null,
-                InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
-                'Format of requested reports'
             )
             ->addOption(
                 'warning',

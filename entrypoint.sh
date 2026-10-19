@@ -21,7 +21,7 @@ then
 fi
 
 if [ ! -z "${INPUT_PATH}" ]; then
-  sh -c "cd $APP_WORKSPACE; $COMPOSER_HOME/vendor/bin/phplint ${INPUT_PATH} ${INPUT_OPTIONS}"
+  sh -c "cd $APP_WORKSPACE; $COMPOSER_HOME/vendor/bin/phplint lint ${INPUT_PATH} ${INPUT_OPTIONS}"
 else
-  sh -c "cd $APP_WORKSPACE; $COMPOSER_HOME/vendor/bin/phplint $*"
+  sh -c "cd $APP_WORKSPACE; $COMPOSER_HOME/vendor/bin/phplint lint $*"
 fi

@@ -1,31 +1,24 @@
-# Installation
+# Installation Guide
 
-1. [Requirements](#requirements)
-2. [PHAR](#phar)
-3. [Docker](#docker) 
-4. [Phive](#phive)
-5. [Composer](#composer)
+> [!NOTE]
+> Latest and old versions compatibility are listed on a [dedicated page](supported_versions.md).
 
-## Requirements
-
-| Version | Status                 | Requirements   |
-|:--------|:-----------------------|:---------------|
-| **9.x** | **Active development** | **PHP >= 8.1** |
-| 6.x     | End Of Life            | PHP >= 8.2     |
-| 5.x     | End Of Life            | PHP >= 8.1     |
-| 4.x     | End Of Life            | PHP >= 8.0     |
-| 3.x     | End Of Life            | PHP >= 7.4     |
+1. [PHAR](#phar)
+2. [Docker](#docker) 
+3. [Phive](#phive)
+4. [Composer](#composer)
 
 ## PHAR
 
-The preferred method of installation is to use the PHPLint PHAR which can be downloaded from the most recent
+The preferred method of installation is to use the **PHPLint** PHAR which can be downloaded from the most recent
 [Github Release][releases]. This method ensures you will not have any dependency conflict issue.
 
-**IMPORTANT** : Embedded with Composer dependencies that are PHP 8.2 compatible !
+> [!IMPORTANT]
+> Dependencies included in PHAR distribution are PHP 8.2 compatible !
 
 ## Docker
 
-You can install `phplint` with [Docker][docker]
+You can install **PHPLint** with [Docker][docker] images available on the [Docker Hub][docker-hub].
 
 ```shell
 docker pull overtrue/phplint:latest
@@ -33,24 +26,24 @@ docker pull overtrue/phplint:latest
 
 ## Phive
 
-You can install `phplint` globally with [Phive][phive]
+You can install **PHPLint** globally with [Phive][phive]
 
 ```shell
 phive install overtrue/phplint --force-accept-unsigned
 ```
 
-To upgrade global `phplint` use the following command:
+To upgrade global installation, use the following command:
 
 ```shell
 phive update overtrue/phplint --force-accept-unsigned
 ```
 
-You can also install `phplint` locally to your project with [Phive][phive] and configuration file `.phive/phars.xml`
+You can also install **PHPLint** locally to your project with [Phive][phive] and configuration file `.phive/phars.xml`
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <phive xmlns="https://phar.io/phive">
-    <phar name="overtrue/phplint" version="^9.7" copy="false" />
+    <phar name="overtrue/phplint" version="^9.8" copy="false" />
 </phive>
 ```
 
@@ -60,14 +53,16 @@ phive install --force-accept-unsigned
 
 ## Composer
 
-You can install `phplint` with [Composer][composer]
+You can install **PHPLint** with [Composer][composer]
 
 ```shell
-composer global require overtrue/phplint ^9.7
+composer global require overtrue/phplint ^9.8
 ```
 
 If you cannot install it because of a dependency conflict, or you prefer to install it for your project, we recommend
-you to take a look at [bamarni/composer-bin-plugin][bamarni/composer-bin-plugin]. Example:
+you to take a look at [bamarni/composer-bin-plugin][bamarni/composer-bin-plugin]. 
+
+For example:
 
 ```shell
 composer require --dev bamarni/composer-bin-plugin
@@ -81,3 +76,4 @@ vendor/bin/phplint
 [bamarni/composer-bin-plugin]: https://github.com/bamarni/composer-bin-plugin
 [phive]: https://github.com/phar-io/phive
 [docker]: https://docs.docker.com/get-docker/
+[docker-hub]: https://hub.docker.com/r/overtrue/phplint

@@ -56,9 +56,9 @@ final class CacheTest extends TestCase
         // initialize cache value(s)
         $values = [
             // considered as hit
-            __FILE__ => function ($filename) { return md5_file($filename); },
+            __FILE__ => md5_file(...),
             // considered as missed (wrong fingerprint)
-            $testsDir . '/Configuration/YamlConfigTest.php' => function ($filename) { return sha1_file($filename); },
+            $testsDir . '/Configuration/YamlConfigTest.php' => sha1_file(...),
             // considered as purely missed
             $testsDir . '/End2End/LintCommandTest.php' => null,
         ];
@@ -76,7 +76,7 @@ final class CacheTest extends TestCase
     public function testGetItem(): void
     {
         // expected
-        $item = $this->generateItems([__FILE__ => function ($filename) { return md5_file($filename); }])->current();
+        $item = $this->generateItems([__FILE__ => md5_file(...)])->current();
         // actual
         $cacheItem = self::$cache->getItem(__FILE__);
 

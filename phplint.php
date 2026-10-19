@@ -11,52 +11,50 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-use Overtrue\PHPLint\Command\LintCommand;
-use Overtrue\PHPLint\Console\Application;
-use Overtrue\PHPLint\Event\EventDispatcher;
-use Overtrue\PHPLint\Extension\OutputFormat;
-use Overtrue\PHPLint\Extension\ProgressBar;
-use Overtrue\PHPLint\Extension\ProgressIndicator;
-use Overtrue\PHPLint\Extension\ProgressPrinter;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Console\ConsoleLogger;
+use Overtrue\PHPLint\Console\SectionEnum;
+use Overtrue\PHPLint\Environment\EnvConfig;
+use Overtrue\PHPLint\Output\ConsoleOutput;
+use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Input\ArgvInput;
 
 $input = new ArgvInput();
 
-if (true === $input->hasParameterOption(['--no-progress'], true)) {
-    $progress = 'no';
-} else {
-    $progress = 'printer';
+$output = new ConsoleOutput();
+
+// Default colors skin :
+// If you want to override, use the bootstrapping feature
+$styles = [
+    SectionEnum::DEFAULT->value => new OutputFormatterStyle('black', 'cyan'),
+    SectionEnum::COMMAND->value => new OutputFormatterStyle('white', 'blue'),
+    SectionEnum::ARGUMENT->value => new OutputFormatterStyle('yellow', 'blue'),
+    SectionEnum::PLUGIN->value => new OutputFormatterStyle('white', 'red'),
+    SectionEnum::PROFILE->value => new OutputFormatterStyle('black', 'gray'),
+    SectionEnum::ENVIRONMENT->value => new OutputFormatterStyle('yellow', 'blue'),
+    SectionEnum::EVENT->value => new OutputFormatterStyle('white', 'magenta'),
+    SectionEnum::METADATA->value => new OutputFormatterStyle('black', 'yellow'),
+];
+
+foreach ($styles as $name => $style) {
+    if (!$output->getFormatter()->hasStyle($name)) {
+        $output->getFormatter()->setStyle($name, $style);
+    }
 }
 
-if (true === $input->hasParameterOption(['--progress'], true)) {
-    $progress = $input->getParameterOption('--progress');
-}
-if (true === $input->hasParameterOption(['-p'], true)) {
-    $progress = $input->getParameterOption('-p');
-}
+$envConfig = new EnvConfig();
 
-$extensions = match ($progress) {
-    'bar' => [new ProgressBar()],
-    'indicator' => [new ProgressIndicator()],
-    'printer' => [new ProgressPrinter()],
-    default => [],
-};
+$loggerClass = $envConfig->get('logger', ConsoleLogger::class);
 
-if (true === $input->hasParameterOption(['--bootstrap'], true)) {
-    $bootstrap = $input->getParameterOption('--bootstrap');
+if (true === $input->hasParameterOption(['--' . OptionDefinition::BOOTSTRAP, '-b'], true)) {
+    $bootstrap = $input->getParameterOption(['--' . OptionDefinition::BOOTSTRAP, '-b']);
     if ($bootstrap) {
         require_once $bootstrap;
     }
 }
 
-$extensions[] = new OutputFormat();
+$logger = new $loggerClass($output);
 
-$dispatcher = new EventDispatcher($extensions);
-
-$defaultCommand = new LintCommand($dispatcher);
-
-$application = new Application();
-$application->addCommand($defaultCommand);
-$application->setDefaultCommand($defaultCommand->getName());
-$application->setDispatcher($dispatcher);
-$application->run($input);
+$runner = new ConsoleApplicationRunner($logger, $envConfig, $input, $output);
+$runner->run();

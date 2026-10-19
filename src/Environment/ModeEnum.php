@@ -11,10 +11,17 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-/*
- * @author Laurent Laville
- * @since Release 9.4.0
- */
+namespace Overtrue\PHPLint\Environment;
 
-require_once dirname(__DIR__, 2) . '/autoload.php';
-require_once __DIR__ . '/DumpOutput.php';
+/**
+ * @author Laurent Laville
+ * @since Release 9.8.0
+ */
+enum ModeEnum: string
+{
+    case OFF = 'off';
+    case DEVELOP = 'develop';
+    case DIAGNOSE = 'diagnose';
+    case LEGACY = 'legacy';
+    case PROFILE = 'profile';
+}

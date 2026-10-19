@@ -72,7 +72,7 @@ final class DebugFormatterHelper extends Helper
             }
         }
 
-        array_walk($messages, function (&$item, $key, $prefix) {
+        array_walk($messages, static function (&$item, $key, $prefix) {
             $item = $prefix . $item . "\n";
         }, $prefixed);
 

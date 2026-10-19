@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Output;
 
+use Overtrue\PHPLint\Configuration\FormatEnum;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
 use Symfony\Component\Console\Output\ConsoleOutputInterface as SymfonyConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface as SymfonyOutputInterface;
@@ -22,6 +24,7 @@ use function array_key_exists;
 use function array_values;
 use function class_exists;
 use function fopen;
+use function is_string;
 
 use const STDOUT;
 
@@ -32,21 +35,28 @@ use const STDOUT;
 final class FormatResolver
 {
     private const FORMATTERS = [
-        'checkstyle' => CheckstyleOutput::class,
-        'console' => ConsoleOutput::class,
-        'json' => JsonOutput::class,
-        'junit' => JunitOutput::class,
+        FormatEnum::CHECKSTYLE->value => CheckstyleOutput::class,
+        FormatEnum::TXT->value => ConsoleOutput::class,
+        FormatEnum::JSON->value => JsonOutput::class,
+        FormatEnum::JUNIT->value => JunitOutput::class,
+        FormatEnum::SARIF->value => SarifOutput::class,
     ];
 
     /**
      * @return OutputInterface[]
      */
-    public function resolve(Resolver $configResolver, SymfonyOutputInterface $output): array
-    {
+    public function resolve(
+        // @deprecated $configResolver
+        // keep only for API compatibility with previous version 9.7.x, and will be removed in next API version
+        ?Resolver $configResolver = null,
+        ?SymfonyOutputInterface $output = null,
+        ?string $outputFile = null,
+        ?array $requestedFormats = [],
+    ): array {
         $decorated = $output->isDecorated();
 
-        $filename = $configResolver->getOption('output');
-        if ($filename) {
+        $filename = $outputFile;
+        if (is_string($filename)) {
             $stream = fopen($filename, 'w');
             $decorated = false;
         } else {
@@ -58,15 +68,19 @@ final class FormatResolver
             }
         }
 
-        $requestedFormats = $configResolver->getOption('format');
-
         $handlers = [];
 
         foreach ($requestedFormats as $requestedFormat) {
             if (array_key_exists($requestedFormat, self::FORMATTERS)) {
                 // use built-in formatter
                 $formatterClass = self::FORMATTERS[$requestedFormat];
-                $formatter = new $formatterClass($stream, $output->getVerbosity(), $decorated, $output->getFormatter());
+                if ($requestedFormat === 'console') {
+                    // @phpstan-ignore-next-line
+                    $formatter = new $formatterClass($output->getVerbosity(), $decorated, $output->getFormatter());
+                } else {
+                    // @phpstan-ignore-next-line
+                    $formatter = new $formatterClass($stream, $output->getVerbosity(), $decorated, $output->getFormatter());
+                }
                 $handlers[$formatter->getName()] = $formatter;
                 continue;
             }
@@ -83,10 +97,12 @@ final class FormatResolver
             }
         }
 
-        // Be sure to always have console output printed first (@see \Overtrue\PHPLint\Output\ChainOutput::format)
-        if (isset($handlers['console'])) {
-            $consoleHandler = $handlers['console'];
-            unset($handlers['console']);
+        // Be sure to always have ($defaultHandler) console output printed first
+        // (@see \Overtrue\PHPLint\Output\ChainOutput::format)
+        $defaultHandler = OptionDefinition::DEFAULT_FORMATS[0];
+        if (isset($handlers[$defaultHandler])) {
+            $consoleHandler = $handlers[$defaultHandler];
+            unset($handlers[$defaultHandler]);
 
             $handlers = array_values($handlers);
             $handlers[] = $consoleHandler;

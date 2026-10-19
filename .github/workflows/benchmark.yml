@@ -3,20 +3,37 @@ name: Benchmarking
 
 on:
   workflow_dispatch:
+    # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#onworkflow_dispatchinputs
+    inputs:
+      operating-system:
+        description: "OS name and version runtime"
+        required: false
+        default: "ubuntu-24.04"
+        type: string
+      app-ref-version:
+        description: "Application Reference Version"
+        required: false
+        default: "9.8.0-rc.3"
+      app-ref-branch:
+        description: "Application Reference Branch"
+        required: false
+        default: "9.8"
+      phpbench-options:
+        description: "PHPBench options"
+        required: false
+        default: "--progress=none  --output=html"
+        type: string
 
 jobs:
   benchmark:
     name: "Benchmark"
 
-    runs-on: "${{ matrix.operating-system }}"
+    runs-on: "${{ inputs.operating-system }}"
 
     strategy:
       fail-fast: false
 
       matrix:
-        operating-system:
-          - "ubuntu-22.04"
-
         php-version:
           - "8.2"
           - "8.3"
@@ -26,53 +43,58 @@ jobs:
     steps:
       -   # https://github.com/actions/checkout
         name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
-          ref: "9.6.3"
+          ref: "${{ inputs.app-ref-version }}"
           repository: "overtrue/phplint"
 
       -   # https://github.com/shivammathur/setup-php
         name: Setup PHP runtime
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@2.37.2
         with:
           php-version: "${{ matrix.php-version }}"
           coverage: "none"
 
       -   # https://github.com/ramsey/composer-install
         name: Install Composer dependencies
-        uses: ramsey/composer-install@v3
+        uses: ramsey/composer-install@4.0.0
         with:
           composer-options: "--prefer-dist"
 
       -   # https://github.com/phpbench/phpbench
         name: Install PHPBench
         run: |
-          curl -Ls https://github.com/phpbench/phpbench/releases/download/1.4.3/phpbench.phar -o /usr/local/bin/phpbench
-          chmod +x /usr/local/bin/phpbench
+          composer bin phpbench update
+
+      -   # https://github.com/llaville/sarif-php-converters
+        name: Install baseline source code
+        run: |
+          composer bin sarif update
 
       -   # https://github.com/phpbench/phpbench
         name: Benchmark Baseline
         run: |
-          phpbench run tests/Benchmark --progress=none --tag=baseline 
+          vendor/bin/phpbench run tests/Benchmark ${{ inputs.phpbench-options }} --tag=baseline 
 
       -   # https://github.com/actions/checkout
         name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
-          ref: "9.6"
+          ref: "${{ inputs.app-ref-branch }}"
           repository: "overtrue/phplint"
           clean: false
 
       -   # https://github.com/phpbench/phpbench
         name: Benchmark Report
         run: |
-          phpbench run tests/Benchmark --progress=none --tag=fixed --ref=baseline --report=benchmark_compare --output=html
+          vendor/bin/phpbench run tests/Benchmark ${{ inputs.phpbench-options }} --tag=fixed --ref=baseline --report=benchmark_compare
 
       -   # https://github.com/actions/upload-artifact
         name: Upload PHPBench report
-        uses: actions/upload-artifact@v4
+        if: contains('--output=html', inputs.phpbench-options)
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: "PHPBench-Report-PHP-${{ matrix.php-version }}"
           path: ".phpbench/html/index.html"

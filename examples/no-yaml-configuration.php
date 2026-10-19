@@ -9,34 +9,29 @@
  * with this source code in the file LICENSE.
  */
 
-require_once dirname(__DIR__) . '/vendor/autoload.php';
+require_once dirname(__DIR__) . '/autoload.php';
 
-use Overtrue\PHPLint\Command\LintCommand;
-use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
-use Overtrue\PHPLint\Event\EventDispatcher;
+use Overtrue\PHPLint\Cache;
+use Overtrue\PHPLint\Environment\EnvConfig;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
-use Symfony\Component\Console\Input\ArrayInput;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
+use Symfony\Component\Cache\Adapter\NullAdapter;
 
-$dispatcher = new EventDispatcher([]);
+$sourcePath = [dirname(__DIR__) . '/src', dirname(__DIR__) . '/tests'];
+$excludePath = ['vendor'];
+$fileExtensions = ['php'];
 
-$arguments = [
-    'path' => [dirname(__DIR__) . '/src', dirname(__DIR__) . '/tests'],
-    '--no-configuration' => true,
-    '--no-cache' => true,
-    '--exclude' => ['vendor'],
-    '--extensions' => ['php'],
-    '--warning' => true,
-];
-$command = new LintCommand($dispatcher);
-$definition = $command->getDefinition();
-$input = new ArrayInput($arguments, $definition);
+$finder = new Finder(paths: $sourcePath, excludes: $excludePath, fileExtensions: $fileExtensions);
+$linter = new Linter(
+    cache: new Cache(new NullAdapter()),
+    showWarning: true,
+);
 
-$configResolver = new ConsoleOptionsResolver($input);
+$envConfig = new EnvConfig();
+$metadataCollection = new MetadataCollection();
 
-$finder = new Finder($configResolver);
-$linter = new Linter($configResolver, $dispatcher);
-$results = $linter->lintFiles($finder->getFiles());
+$results = $linter->lintFiles($finder->getFiles(), null, $metadataCollection);
 
 var_dump("Files checked :", count($results));
 

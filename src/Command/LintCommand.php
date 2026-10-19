@@ -13,96 +13,218 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Command;
 
-use Overtrue\PHPLint\Client;
-use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
-use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Configuration\Resolver\ConfigValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\DryRunValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\FileExtensionValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\IgnoreExitCodeValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\JobValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\LoggerValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\MemoryLimitValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\OutputFileResolver;
+use Overtrue\PHPLint\Configuration\Resolver\OutputFormatResolver;
+use Overtrue\PHPLint\Configuration\Resolver\PathValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\ShowWarningsValueResolver;
+use Overtrue\PHPLint\Console\ApplicationInterface;
+use Overtrue\PHPLint\Console\Attribute\ValueResolver;
+use Overtrue\PHPLint\Console\SectionEnum;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Linter;
+use Overtrue\PHPLint\Metadata\ConfigurationSettings;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Output\LinterOutput;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Attribute\Argument;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder as SymfonyFinder;
 use Throwable;
 
-use function array_unshift;
-use function count;
-use function microtime;
+use function json_decode;
+use function json_encode;
+
+use const JSON_UNESCAPED_SLASHES;
 
 /**
  * @author Overtrue
  * @author Laurent Laville (since v9.0)
  */
-final class LintCommand extends Command
+#[AsCommand(name: 'lint', description: 'Files syntax check only')]
+final class LintCommand
 {
-    use ConfigureCommandTrait;
-
     private LinterOutput $results;
 
-    public function __construct(private readonly EventDispatcherInterface $dispatcher, string $name = 'lint')
-    {
-        parent::__construct($name);
-        $this->results = new LinterOutput([], new SymfonyFinder());
-    }
-
+    /**
+     * @deprecated since release 9.8.0, and will be removed in API next version;
+     *             replaced by "\Overtrue\PHPLint\Metadata\LinterOutput"
+     */
     public function getResults(): LinterOutput
     {
-        return $this->results;
-    }
-
-    protected function configure(): void
-    {
-        $this->setDescription('Files syntax check only');
-        $this->configureCommand($this);
-    }
-
-    protected function initialize(InputInterface $input, OutputInterface $output): void
-    {
-        // initializes correctly command and path arguments when lint is set as default command
-        $cmd = $input->getArgument('command');
-        $paths = $input->getArgument('path');
-        if ($cmd !== $this->getName()) {
-            array_unshift($paths, $cmd);
+        if (!isset($this->results)) {
+            $this->results = new LinterOutput([], new SymfonyFinder());
         }
-        $input->setArgument('path', $paths);
-        $input->setArgument('command', $this->getName());
+        return $this->results;
     }
 
     /**
      * @throws Throwable
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $startTime = microtime(true);
-
-        if (true === $input->hasParameterOption(['--no-configuration'], true)) {
-            $configResolver = new ConsoleOptionsResolver($input);
-        } else {
-            $configResolver = new FileOptionsResolver($input);
-        }
-
-        $finder = (new Finder($configResolver))->getFiles();
-        $linter = new Linter(
-            $configResolver,
-            $this->dispatcher,
-            new Client($this->getApplication()),
-            $this->getHelperSet(),
-            $output
+    public function __invoke(
+        InputInterface $input,
+        OutputInterface $output,
+        Command $command,
+        #[ValueResolver(LoggerValueResolver::class)]
+        LoggerInterface $logger,
+        #[ValueResolver(MetadataValueResolver::class)]
+        MetadataCollection $metadataCollection,
+        #[ValueResolver(ConfigValueResolver::class)]
+        ?string $configuration = null, // global option
+        #[Argument(
+            description: 'Path to file or directory to lint (<comment>default: working directory</comment>)',
+            name: OptionDefinition::PATH
+        )]
+        #[ValueResolver(PathValueResolver::class)]
+        ?array $sourcePath = null,
+        #[Option(
+            description: 'Path to file or directory to exclude from linting',
+            name: OptionDefinition::EXCLUDE,
+        )]
+        #[ValueResolver(PathValueResolver::class)]
+        ?array $excludePath = null,
+        #[Option(
+            description: 'Check only files with selected extensions',
+            name: OptionDefinition::FILE_EXTENSIONS,
+        )]
+        #[ValueResolver(FileExtensionValueResolver::class)]
+        ?array $fileExtensions = null,
+        #[Option(
+            description: 'Number of paralleled jobs to run',
+            name: OptionDefinition::JOBS,
+            shortcut: 'j',
+        )]
+        #[ValueResolver(JobValueResolver::class)]
+        ?int $parallelJob = null,
+        #[Option(
+            description: 'Also show warnings',
+            name: OptionDefinition::WARNING,
+            shortcut: 'w',
+        )]
+        #[ValueResolver(ShowWarningsValueResolver::class)]
+        bool $showWarning = false,
+        #[Option(
+            description: 'Memory limit for analysis',
+            name: OptionDefinition::OPTION_MEMORY_LIMIT,
+        )]
+        #[ValueResolver(MemoryLimitValueResolver::class)]
+        ?int $memoryLimit = null,
+        #[Option(
+            description: 'Ignore exit codes so there are no "failure" exit code even when no files processed',
+            name: OptionDefinition::IGNORE_EXIT_CODE,
+        )]
+        #[ValueResolver(IgnoreExitCodeValueResolver::class)]
+        bool $ignoreExitCode = false,
+        #[Option(
+            description: 'Only shows which files would have been analysed',
+            name: OptionDefinition::DRY_RUN,
+        )]
+        #[ValueResolver(DryRunValueResolver::class)]
+        bool $dryRun = false,
+        #[Option(name: OptionDefinition::OUTPUT_FORMAT)] // option dynamically added by the "output_manager" extension
+        #[ValueResolver(OutputFormatResolver::class)]
+        ?array $outputFormat = null,
+        #[Option(name: OptionDefinition::OUTPUT_FILE)] // option dynamically added by the "output_manager" extension
+        #[ValueResolver(OutputFileResolver::class)]
+        ?string $outputFile = null,
+    ): int {
+        $message = sprintf(
+            '<comment>%s</comment> %s',
+            'The "{command}" command was invoked with following parameters',
+            ': {parameters}'
         );
-        $this->results = $linter->lintFiles($finder, $startTime);
 
-        $data = $this->results->getFailures();
+        // retrieved configuration initialized from the ConsoleEvents::COMMAND hook
+        $configurationSettings = $metadataCollection->getMetadata(ConfigurationSettings::class);
+        $parameters = json_decode($configurationSettings->describe('value'), true);
 
-        if ($configResolver->getOption(OptionDefinition::IGNORE_EXIT_CODE)) {
-            return self::SUCCESS;
+        $logger->notice(
+            $message,
+            [
+                '__section__' => SectionEnum::COMMAND->label(),
+                '__style__' => SectionEnum::COMMAND->value,
+                'command' => $command->getName(),
+                'parameters' => json_encode($parameters, JSON_UNESCAPED_SLASHES)
+            ]
+        );
+
+        $finder = $this->getFinder($sourcePath, $excludePath, $fileExtensions, $parameters);
+
+        $message = sprintf(
+            '<comment>%s</comment> %s',
+            'The "Finder" rules was applied',
+            ': {rules}'
+        );
+        $logger->debug(
+            $message,
+            [
+                '__section__' => SectionEnum::COMMAND->label(),
+                '__style__' => SectionEnum::COMMAND->value,
+                'rules' => json_encode($finder, JSON_UNESCAPED_SLASHES)
+            ]
+        );
+        $finder = $finder->getFiles();
+
+        $application = $command->getApplication();
+
+        if (!$application instanceof ApplicationInterface) {
+            return Command::INVALID;
         }
 
-        if (count($this->results) === 0 || count($data)) {
-            return self::FAILURE;
+        $linter = new Linter(
+            null,
+            $application->getDispatcher(),
+            $application,
+            $application->getHelperSet(),
+            $output,
+            $application->getCache(),
+            $parallelJob,
+            $dryRun,
+            $showWarning,
+            $memoryLimit,
+        );
+        $linter->setLogger($logger);
+        $this->results = $linter->lintFiles($finder, null, $metadataCollection);
+
+        if ($ignoreExitCode) {
+            return Command::SUCCESS;
         }
 
-        return self::SUCCESS;
+        if ($linter->count() === 0 || $linter->hasFailures()) {
+            return Command::FAILURE;
+        }
+
+        return Command::SUCCESS;
+    }
+
+    private function getFinder(
+        array $sourcePath,
+        array $excludePath,
+        array $fileExtensions,
+        array $parameters,
+    ): Finder {
+        if (empty($sourcePath)) {
+            $sourcePath = $parameters[OptionDefinition::PATH];
+        }
+        if (empty($excludePath)) {
+            $excludePath = $parameters[OptionDefinition::EXCLUDE];
+        }
+        if (empty($fileExtensions)) {
+            $fileExtensions = $parameters[OptionDefinition::FILE_EXTENSIONS];
+        }
+
+        return new Finder(paths: $sourcePath, excludes: $excludePath, fileExtensions: $fileExtensions);
     }
 }

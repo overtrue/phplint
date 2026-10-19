@@ -13,42 +13,42 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Output;
 
+use Overtrue\PHPLint\Environment\EnvConfigInterface;
+use Overtrue\PHPLint\Environment\ModeEnum;
+use Overtrue\PHPLint\Metadata\ApplicationVersion;
+use Overtrue\PHPLint\Metadata\ConfigurationSettings;
+use Overtrue\PHPLint\Metadata\DeprecatedFeatures;
+use Overtrue\PHPLint\Metadata\Metadata;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
+use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
 use PHP_Parallel_Lint\PhpConsoleColor\ConsoleColor;
 use PHP_Parallel_Lint\PhpConsoleColor\InvalidStyleException;
 use PHP_Parallel_Lint\PhpConsoleHighlighter\Highlighter;
-use Symfony\Component\Console\Formatter\OutputFormatterInterface;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\StreamOutput;
+use Symfony\Component\Console\Output\ConsoleOutput as SymfonyConsoleOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Console\Terminal;
-use Symfony\Component\Finder\SplFileInfo;
 
 use function abs;
-use function array_filter;
 use function array_slice;
+use function array_unshift;
 use function class_exists;
 use function count;
 use function end;
 use function file;
 use function file_get_contents;
-use function getenv;
-use function in_array;
+use function json_decode;
 use function json_encode;
 use function key;
 use function max;
-use function mb_strimwidth;
-use function min;
 use function realpath;
 use function rtrim;
 use function str_pad;
 use function str_repeat;
 use function strlen;
 
-use const ARRAY_FILTER_USE_KEY;
-use const DIRECTORY_SEPARATOR;
+use const JSON_UNESCAPED_SLASHES;
 use const PHP_EOL;
 use const STR_PAD_LEFT;
 
@@ -56,214 +56,123 @@ use const STR_PAD_LEFT;
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-final class ConsoleOutput extends StreamOutput implements OutputInterface, ConsoleOutputInterface
+final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputInterface, OutputInterface
 {
-    public const MAX_LINE_LENGTH = 120;
-
-    private ?ProgressBar $progressBar = null;
-
-    private int $lineLength;
-
-    public function __construct(
-        $stream,
-        int $verbosity = parent::VERBOSITY_NORMAL,
-        ?bool $decorated = null,
-        ?OutputFormatterInterface $formatter = null
-    ) {
-        parent::__construct($stream, $verbosity, $decorated, $formatter);
-        $width = (new Terminal())->getWidth() ?: self::MAX_LINE_LENGTH;
-        $this->lineLength = min($width - (int) (DIRECTORY_SEPARATOR === '\\'), self::MAX_LINE_LENGTH);
-    }
-
     public function getName(): string
     {
         return 'console';
     }
 
-    public function format(LinterOutput $results): void
-    {
-        $data = $results->getFailures();
-        $context = $results->getContext();
+    public function format(
+        LinterOutput $results,  // @deprecated since release 9.8.0, and will be removed in next API version
+        MetadataCollection $metadataCollection,
+        EnvConfigInterface $envConfig,
+    ): void {
+        /** @var \Overtrue\PHPLint\Metadata\LinterOutput|null $results */
+        $results = $metadataCollection->getMetadata(\Overtrue\PHPLint\Metadata\LinterOutput::class);
 
-        $errCount = count($data);
-
-        if ($context['files_count'] === 0) {
-            $this->warningBlock();
+        if (null === $results) {
+            // no result available
             return;
         }
 
-        $options = $context['options_used'] ?? [];
-        $configFile = $options['no-configuration'] ? '' : $options['configuration'];
-        $this->headerBlock($context['application_version']['long'], $configFile);
-        $this->configBlock($options);
+        /** @var DeprecatedFeatures|null $deprecatedFeatures */
+        $deprecatedFeatures = $metadataCollection->getMetadata(DeprecatedFeatures::class);
+        $deprecationCount = $deprecatedFeatures?->count() ?? 0;
 
-        $this->consumeBlock($context['time_usage'], $context['memory_usage'], $context['cache_usage'], $context['process_count']);
+        /** @var ApplicationVersion|null $applicationVersion */
+        $applicationVersion = $metadataCollection->getMetadata(ApplicationVersion::class);
+        if (null === $applicationVersion) {
+            // fallback strategy, just in case the metadata collection was not properly initialized
+            $applicationVersion = Metadata::applicationVersion();
+        }
+
+        /** @var ConfigurationSettings|null $configurationSettings */
+        $configurationSettings = $metadataCollection->getMetadata(ConfigurationSettings::class);
+        $settings = [];
+        if (null === $configurationSettings) {
+            $configFile = '';
+        } else {
+            $configFile = $configurationSettings->hasConfigFile() ? $configurationSettings->getConfigFilePath() : '';
+
+            if (ConsoleApplicationRunner::hasMode(ModeEnum::LEGACY)) {
+                $settings = json_decode($configurationSettings->describe('value'), true);
+            }
+        }
+
+        $this->headerBlock($applicationVersion->getLongVersion(), $configFile);
+
+        if (count($settings) && $this->isVerbose()) {
+            $this->configBlock($settings);
+        }
+
+        $fileCount = $results->count();
+
+        $failures = $results->getFailures();
+        $errCount = count($failures);
+
+        $helperMethod = $fileCount > 0 ? ($errCount > 0 ? 'error' : 'success') : 'warning';
+
+        $style = new SymfonyStyle(new ArrayInput([]), $this);
+        $style->{$helperMethod}(
+            $this->formatSummaryMessage($fileCount, $errCount, $deprecationCount)
+        );
 
         if ($errCount > 0) {
-            $this->errorBlock($context['files_count'], $errCount);
             try {
-                $this->showErrors($data);
-            } catch (InvalidStyleException $e) {
-            }
-        } else {
-            $this->successBlock($context['files_count']);
-        }
-    }
-
-    public function createProgressBar($max = 0): ProgressBar
-    {
-        $progressBar = new ProgressBar($this, $max);
-        if ('\\' !== DIRECTORY_SEPARATOR || 'Hyper' === getenv('TERM_PROGRAM')) {
-            $progressBar->setEmptyBarCharacter('░'); // light shade character \u2591
-            $progressBar->setProgressCharacter('');
-            $progressBar->setBarCharacter('▓'); // dark shade character \u2593
-        }
-
-        $formats = [
-            'very_verbose' => ' %current%/%max% %percent:3s%% %elapsed:6s% %message% %filename%',
-            'very_verbose_nomax' => ' %current% %elapsed:6s% %message% %filename%',
-
-            'debug' => ' %current%/%max% %percent:3s%% %elapsed:6s% %memory:6s% %message% %filename%',
-            'debug_nomax' => ' %current% %elapsed:6s% %memory:6s% %message% %filename%',
-        ];
-        foreach ($formats as $name => $format) {
-            $progressBar::setFormatDefinition($name, $format);
-        }
-
-        $progressBar->setMessage('Checking ...');
-        $progressBar->setMessage('', 'filename');
-        $this->progressBar = $progressBar;
-        return $progressBar;
-    }
-
-    public function progressStart(int $max = 0): void
-    {
-        $this->progressBar = $this->createProgressBar($max);
-        $this->progressBar->start();
-    }
-
-    public function progressAdvance(int $step = 1): void
-    {
-        $this->progressBar?->advance($step);
-    }
-
-    public function progressFinish(): void
-    {
-        $this->progressBar?->finish();
-        $this->progressBar?->clear();
-        $this->newLine();
-        unset($this->progressBar);
-    }
-
-    public function progressMessage(string $message, string $name = 'message'): void
-    {
-        $this->progressBar?->setMessage($message, $name);
-    }
-
-    public function progressPrinterAdvance(int $maxSteps, string $status, SplFileInfo $fileInfo, int $step = 1): void
-    {
-        static $i = 1;
-
-        $percent = floor(($i / $maxSteps) * 100);
-        $maxStepsLen = strlen((string) $maxSteps);
-        $process = sprintf('%' . $maxStepsLen . 'd / %' . $maxStepsLen . 'd (%3s%%)', $i, $maxSteps, $percent);
-
-        $maxColumn = $this->lineLength - 2 - strlen('[ XX ]') - strlen(' / (XXX%)') - (2 * $maxStepsLen);
-
-        $withColor = function (string $color, string $indicator) {
-            return sprintf('<%s>%s</>', $color, $indicator);
-        };
-
-        if ($this->isDebug()) {
-            $filename = $fileInfo->getRelativePathname();
-            $width = min(strlen($filename), $maxColumn);
-            $filename = str_pad(mb_strimwidth($filename, -1 * $width, $width), $maxColumn);
-
-            if ($status === 'ok') {
-                $st = $withColor('fg=green', ' OK ');
-            } elseif ($status === 'error') {
-                $st = $withColor('bg=red;fg=white', 'ERR ');
-            } else {
-                $st = $withColor('fg=yellow', 'WARN');
-            }
-
-            $this->writeln(sprintf("[ %s ] %s %" . strlen($process) . "s", $st, $filename, $process));
-        } else {
-            if ($i && 0 === $i % $maxColumn) {
-                $this->writeln($process);
-            }
-
-            if ($status === 'ok') {
-                $this->write($withColor('fg=green', '.'));
-            } elseif ($status === 'error') {
-                $this->write($withColor('bg=red;fg=white', 'E'));
-            } else {
-                $this->write($withColor('fg=yellow', 'W'));
-            }
-
-            if ($i == $maxSteps) {
-                $this->newLine();
+                $this->showErrors($failures);
+            } catch (InvalidStyleException) {
             }
         }
 
-        $i += $step;
+        if ($deprecationCount > 0) {
+            $deprecations = $deprecatedFeatures->getDeprecations();
+            $this->showDeprecations($deprecations);
+        }
     }
 
     public function headerBlock(string $appVersion, string $configFile): void
     {
-        $this->writeln($appVersion . " by overtrue and contributors.");
+        $this->newLine();
+        $this->writeln($appVersion);
         $this->newLine();
 
-        $this->writeln(sprintf('Runtime       : PHP <comment>%s</comment>', phpversion()));
+        $this->writeln(sprintf('Runtime       : PHP <info>%s</info>', phpversion()));
 
         $this->writeln(sprintf(
-            'Configuration : <comment>%s</comment>',
+            'Configuration : <info>%s</info>',
             (!realpath($configFile) || empty($configFile)) ? 'No config file loaded' : realpath($configFile)
         ));
 
         $this->newLine();
     }
 
+    /**
+     * Used only for legacy environment, for smooth migration from version 9.7 to 9.8
+     * @deprecated Will be removed in next API version
+     *
+     * @param array<string, mixed> $options Contents of current configuration applied
+     */
     public function configBlock(array $options): void
     {
-        if ($this->isDebug()) {
-            // see all options from application and command
-            $forbidden = [];
-        } elseif ($this->isVerbose()) {
-            // see only some options
-            $forbidden = [
-                // from command
-                'command',
-                // from application
-                'ansi',
-                'help',
-                'no-interaction',
-                'quiet',
-                'verbose',
-                'version',
-            ];
-        } else {
-            // do not display config block on normal or quiet mode
-            return;
-        }
-
-        $filtered = array_filter(
-            $options,
-            static fn ($name) => !in_array($name, $forbidden),
-            ARRAY_FILTER_USE_KEY
-        );
-
         $headers = ['Name', 'Value'];
 
         $normalize = fn ($value) => json_encode($value, JSON_UNESCAPED_SLASHES);
 
         $rows = [];
 
-        foreach ($filtered as $name => $value) {
-            $rows[] = [sprintf('<comment>%s</comment>', $name), $normalize($value)];
+        foreach ($options as $name => $value) {
             if ('path' == $name) {
-                $rows[] = new TableSeparator();
+                $position = count($rows);
             }
+            $rows[] = [sprintf('<comment>%s</comment>', $name), $normalize($value)];
+        }
+
+        if (isset($position)) {
+            // make the path always visible at top of settings list
+            $pathRow = $rows[$position];
+            unset($rows[$position]);
+            array_unshift($rows, $pathRow, new TableSeparator());
         }
 
         $table = new Table($this);
@@ -277,6 +186,9 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
         $this->newLine();
     }
 
+    /**
+     * @deprecated since Release 9.8.0 in favour of the ProfilerManager extension
+     */
     public function consumeBlock(string $timeUsage, string $memUsage, string $cacheUsage, int $processCount): void
     {
         $message = sprintf(
@@ -291,6 +203,9 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
         $this->writeln($message);
     }
 
+    /**
+     * @deprecated since Release 9.8.0, will be removed in next API version
+     */
     public function errorBlock(int $fileCount, int $errorCount): void
     {
         $message = sprintf(
@@ -305,6 +220,9 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
         $style->error($message);
     }
 
+    /**
+     * @deprecated since Release 9.8.0, will be removed in next API version
+     */
     public function successBlock(int $fileCount): void
     {
         $message = sprintf(
@@ -317,6 +235,9 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
         $style->success($message);
     }
 
+    /**
+     * @deprecated since Release 9.8.0, will be removed in next API version
+     */
     public function warningBlock(string $message = self::NO_FILE_TO_LINT): void
     {
         $style = new SymfonyStyle(new ArrayInput([]), $this);
@@ -328,17 +249,47 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
         $this->write(str_repeat(PHP_EOL, $count));
     }
 
+    private function formatSummaryMessage(int $fileCount, int $errorCount, int $deprecationCount): string
+    {
+        $filePart = $fileCount > 0
+            ? sprintf('%d file%s', $fileCount, $fileCount > 1 ? 's' : '')
+            : self::NO_FILE_TO_LINT
+        ;
+
+        $errorPart = $errorCount > 0
+            ? sprintf(', %d failure%s', $errorCount, $errorCount > 1 ? 's' : '')
+            : ''
+        ;
+
+        $deprecationPart = $deprecationCount > 0
+            ? sprintf(', %d deprecated feature%s used', $deprecationCount, $deprecationCount > 1 ? 's' : '')
+            : ''
+        ;
+
+        return sprintf('%s%s%s', $filePart, $errorPart, $deprecationPart);
+    }
+
     /**
      * @throws InvalidStyleException
      */
     private function showErrors(array $errors): void
     {
         $i = 0;
-        $this->writeln(PHP_EOL . "There was " . count($errors) . ' errors:');
         foreach ($errors as $filename => $error) {
-            $this->writeln('<comment>' . ++$i . ". $filename:{$error['line']}" . '</comment>');
+            $this->writeln('<comment>' . ++$i . ". {$filename}:{$error['line']}" . '</comment>');
             $this->writeln($this->getHighlightedCodeSnippet($filename, $error['line']));
             $this->writeln("<error> {$error['error']}</error>");
+        }
+
+        $this->newLine();
+    }
+
+    private function showDeprecations(array $deprecations): void
+    {
+        $style = new SymfonyStyle(new ArrayInput([]), $this);
+
+        foreach ($deprecations as $deprecation) {
+            $style->warning($deprecation);
         }
     }
 
@@ -354,7 +305,7 @@ final class ConsoleOutput extends StreamOutput implements OutputInterface, Conso
         $snippet = '';
 
         foreach ($lines as $i => $line) {
-            $snippet .= (abs($lineNumber) === $i + 1 ? '  > ' : '    ');
+            $snippet .= abs($lineNumber) === $i + 1 ? '  > ' : '    ';
             $snippet .= str_pad((string) ($i + 1), $lineLength, ' ', STR_PAD_LEFT) . '| ' . rtrim($line) . PHP_EOL;
         }
 

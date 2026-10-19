@@ -13,45 +13,299 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Console;
 
-use Composer\InstalledVersions;
-use OutOfBoundsException;
-use Overtrue\PHPLint\Helper\DebugFormatterHelper;
-use Overtrue\PHPLint\Helper\ProcessHelper;
-use Overtrue\PHPLint\Output\ConsoleOutput;
+use Overtrue\PHPLint\Cache;
+use Overtrue\PHPLint\Command\InvokableCommand;
+use Overtrue\PHPLint\Configuration\FileOptionsResolver;
+use Overtrue\PHPLint\Configuration\Resolver\ArgumentResolverInterface;
+use Overtrue\PHPLint\Environment\ModeEnum;
+use Overtrue\PHPLint\Event\EventAwareInterface;
+use Overtrue\PHPLint\Event\EventAwareTrait;
+use Overtrue\PHPLint\Extension\CacheManager;
+use Overtrue\PHPLint\Extension\ExtensionEnum;
+use Overtrue\PHPLint\Extension\ExtensionInterface;
+use Overtrue\PHPLint\Helper\VarDumpHelper;
+use Overtrue\PHPLint\Metadata\ApplicationVersion;
+use Overtrue\PHPLint\Metadata\Metadata;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
+use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use ReflectionException;
+use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Console\Application as BaseApplication;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Command\HelpCommand;
 use Symfony\Component\Console\Command\ListCommand;
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Event\ConsoleErrorEvent;
+use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Stopwatch\Stopwatch;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Throwable;
 
-use function array_keys;
+use function class_exists;
 use function in_array;
+use function json_encode;
 use function sprintf;
-
-use const STDOUT;
 
 /**
  * @author Overtrue
  * @author Laurent Laville (since v9.0)
  */
-final class Application extends BaseApplication
+final class Application extends BaseApplication implements
+    ApplicationInterface,
+    LoggerAwareInterface,
+    EventAwareInterface,
+    EventSubscriberInterface
 {
-    public const NAME = 'phplint';
+    use LoggerAwareTrait;
+    use EventAwareTrait;
 
-    private const PACKAGE_NAME = 'overtrue/phplint';
+    private ArgumentResolverInterface $argumentResolver;
 
-    public function __construct()
+    private EventDispatcherInterface $dispatcher;
+
+    private ?Stopwatch $stopwatch = null;
+
+    private ?MetadataCollection $metadataCollection = null;
+
+    public function __construct(
+        private readonly ConsoleApplicationRunner $runner,
+        LoggerInterface $logger,
+    ) {
+        parent::__construct();
+
+        $this->setLogger($logger);
+
+        $envName = $runner::getEnvName();
+        $envConfig = $runner::getEnvConfig();
+        $defaultFallback = $envConfig->getDefaultFallback($envName);
+
+        if ($envConfig->get('dump', $defaultFallback)) {
+            $this->getHelperSet()->set(new VarDumpHelper($logger));
+        }
+
+        $this->dispatcher = new EventDispatcher();
+        $this->dispatcher->addSubscriber($this);
+        // mandatory because $dispatcher instance of BaseApplication is private
+        // and native getDispatcher() method is only available with release 8.1.0 of Symfony/Console
+        $this->setDispatcher($this->dispatcher);
+    }
+
+    /**
+     * Equivalent to setArgumentResolver() on Symfony 8.1 Console Component with compatible contract
+     */
+    public function setArgResolver(ArgumentResolverInterface $argumentResolver): void
     {
-        parent::__construct(self::NAME, self::getPrettyVersion());
+        $this->argumentResolver = $argumentResolver;
+    }
+
+    public function setMetadata(MetadataCollection $metadataCollection): void
+    {
+        $this->metadataCollection = $metadataCollection;
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public function addCommand(callable|SymfonyCommand $command): SymfonyCommand
+    {
+        if (!$command instanceof SymfonyCommand) {
+            $code = $command;
+            $command = new SymfonyCommand();
+            $invokableCommand = new InvokableCommand($command, $code, $this->argumentResolver);
+            $command->setName($invokableCommand->getName());
+            $command->setDescription($invokableCommand->getDescription());
+            $command->setCode($invokableCommand);
+
+            $definition = $command->getDefinition();
+            // mandatory, otherwise arguments and options of the $command won't be added
+            $invokableCommand->configure($definition);
+        }
+        parent::addCommand($command);
+        return $command;
+    }
+
+    public function getLongVersion(): string
+    {
+        /** @var ApplicationVersion $applicationVersion */
+        $applicationVersion = $this->metadataCollection->getMetadata(ApplicationVersion::class);
+        return $applicationVersion->getLongVersion();
+    }
+
+    public function getLogger(): LoggerInterface
+    {
+        if (null === $this->logger) {
+            return new NullLogger();
+        }
+        return $this->logger;
+    }
+
+    public function getCache(): Cache
+    {
+        $runner = $this->getRunner();
+        $plugins = $runner::getAllowedPlugins();
+
+        if (in_array(ExtensionEnum::CACHE_MANAGER->value, $plugins, true)) {
+            $cache = CacheManager::getCacheInstance();
+        } else {
+            $cache = new Cache(new NullAdapter());
+        }
+
+        return $cache;
+    }
+
+    public function getProfiler(): ?Stopwatch
+    {
+        return $this->stopwatch;
+    }
+
+    /**
+     * Officially introduced with version 8.1 of Symfony Console Component
+     * @link https://github.com/symfony/console/blob/2b468472ec5d0e4acbe00f97e62f6cd552509894/Application.php#L115-L118
+     */
+    public function getDispatcher(): EventDispatcherInterface
+    {
+        return $this->dispatcher;
+    }
+
+    public function getMetadata(array $settings = []): MetadataCollection
+    {
+        $metadataCollection =  $this->metadataCollection ?? new MetadataCollection(
+            Metadata::applicationVersion(),
+        );
+        if (!empty($settings)) {
+            $envConfig = $this->getRunner()->getEnvConfig();
+            $settings['mode'] = $envConfig->get('mode', ModeEnum::OFF->value);
+            $metadataCollection->add(Metadata::configurationSettings($settings));
+        }
+        return $metadataCollection;
+    }
+
+    public function getRunner(): ConsoleApplicationRunner
+    {
+        return $this->runner;
+    }
+
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            ConsoleEvents::COMMAND => ['initialize', 200],
+            ConsoleEvents::ERROR => 'error',
+        ];
     }
 
     public function run(?InputInterface $input = null, ?OutputInterface $output = null): int
     {
-        $output ??= new ConsoleOutput(STDOUT);
+        $runner = $this->getRunner();
+
+        if (!$runner::hasMode(ModeEnum::LEGACY)) {
+            $name = $this->getCommandName($input);
+
+            if (null === $name) {
+                return parent::run($input, $output);
+            }
+
+            try {
+                $this->find($name);
+            } catch (CommandNotFoundException $e) {
+                $envConfig = $runner::getEnvConfig();
+                $envName = $runner::getEnvName();
+                $defaultFallback = $envConfig->getDefaultFallback($envName);
+
+                $logger = $this->getLogger();
+                $logger->warning(
+                    $e->getMessage(),
+                    [
+                        '__section__' => SectionEnum::COMMAND->label(),
+                        '__style__' => SectionEnum::COMMAND->value,
+                    ]
+                );
+
+                $reasons = [];
+                $reasons[] = sprintf(
+                    'You are currently in "%s" mode.',
+                    $envConfig->get('mode', $defaultFallback)
+                );
+                $reasons[] = 'Consider to specify explicitly the "lint" command.';
+                $reasons[] = 'Consider to activate the "legacy" mode if you do not want to specify the "lint" command.';
+
+                $io = new SymfonyStyle($input, $output);
+
+                $io->caution(
+                    sprintf(
+                        'Could not execute command "%s".' . "\n\n" .
+                        'Possible reasons:' . "\n" .
+                        '  • ' . implode("\n  • ", $reasons),
+                        $input,
+                    )
+                );
+
+                return Command::FAILURE;
+            }
+        }
 
         return parent::run($input, $output);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Throwable
+     */
+    protected function doRunCommand(Command $command, InputInterface $input, OutputInterface $output): int
+    {
+        $runner = $this->getRunner();
+        $extensions = $runner::getAllowedPlugins();
+
+        $this->loadPlugins($extensions, $command);
+
+        return parent::doRunCommand($command, $input, $output);
+    }
+
+    /**
+     * @internal For debugging purpose only, until 9.8.0-rc.1 was released
+     */
+    public function error(ConsoleErrorEvent $event): void
+    {
+        $this->describeEvent($event);
+
+        if (!$this->getHelperSet()->has('var_dumper')) {
+            return;
+        }
+
+        /** @var VarDumpHelper $helper */
+        $helper = $this->getHelperSet()->get('var_dumper');
+        $helper->dump($event);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public function initialize(ConsoleCommandEvent $event): void
+    {
+        $this->describeEvent($event);
+
+        $command = $event->getCommand();
+        $input  = $event->getInput();
+
+        /** @var InvokableCommand|null $invokableCommand */
+        $invokableCommand = $command->getCode();
+        $parameters = $invokableCommand?->getArguments($input) ?? [];
+        $configResolver = new FileOptionsResolver($input, $parameters);
+
+        $metadataCollection = $this->getMetadata($configResolver->getOptions());
+        $metadataCollection->describe($this->getLogger());
     }
 
     protected function getDefaultCommands(): array
@@ -63,43 +317,61 @@ final class Application extends BaseApplication
     {
         return new HelperSet([
             new FormatterHelper(),
-            new DebugFormatterHelper(),
-            new ProcessHelper(),
         ]);
     }
 
-    protected function getCommandName(InputInterface $input): ?string
+    /**
+     * @throws ReflectionException
+     */
+    private function loadPlugins(array $extensions, SymfonyCommand $command): void
     {
-        $name = parent::getCommandName($input);
-        return in_array($name, array_keys(parent::all())) ? $name : null;
-    }
+        $dispatcher = $this->getDispatcher();
+        $logger = $this->getLogger();
 
-    private static function getPrettyVersion(): string
-    {
-        foreach (InstalledVersions::getAllRawData() as $installed) {
-            if (!isset($installed['versions'][self::PACKAGE_NAME])) {
-                continue;
+        $message = sprintf(
+            '<comment>%s</comment> %s',
+            'The "{command}" command load the following extensions',
+            ': {extensions}'
+        );
+
+        $logger->notice(
+            $message,
+            [
+                '__section__' => SectionEnum::COMMAND->label(),
+                '__style__' => SectionEnum::COMMAND->value,
+                'command' => $command->getName(),
+                'extensions' => json_encode($extensions),
+            ]
+        );
+
+        // loads all valid extension on fly, invalid ones will be reported by the Console ArgumentResolver component
+        foreach ($extensions as $extensionName) {
+            $extension = ExtensionEnum::factory($extensionName);
+
+            if ($extensionName === ExtensionEnum::PROFILE_MANAGER->value && class_exists(Stopwatch::class)) {
+                $this->stopwatch = new Stopwatch(true);
             }
 
-            $version = $installed['versions'][self::PACKAGE_NAME]['pretty_version']
-                ?? $installed['versions'][self::PACKAGE_NAME]['version']
-                ?? 'dev'
-            ;
-
-            $aliases = $installed['versions'][self::PACKAGE_NAME]['aliases'] ?? [];
-
-            $reference = $installed['versions'][self::PACKAGE_NAME]['reference'];
-            if (null === $reference) {
-                return sprintf('%s', $aliases[0] ?? $version);
+            if ($extension instanceof LoggerAwareInterface) {
+                $extension->setLogger($logger);
             }
 
-            return sprintf(
-                '%s@%s',
-                $aliases[0] ?? $version,
-                substr($reference, 0, 7)
-            );
+            if ($extension instanceof EventSubscriberInterface
+                && $dispatcher instanceof \Symfony\Component\EventDispatcher\EventDispatcherInterface
+            ) {
+                $dispatcher->addSubscriber($extension);
+            }
+
+            if ($extension instanceof ExtensionInterface) {
+                $definition = $command->getDefinition();
+                // adds new options defined by this $extension to the current $command
+                foreach ($extension::getDefinition()->getOptions() as $option) {
+                    if (!$definition->hasOption($option->getName())) {
+                        $definition->addOption($option);
+                    }
+                }
+                $command->setDefinition($definition);
+            }
         }
-
-        throw new OutOfBoundsException(sprintf('Package "%s" is not installed', self::PACKAGE_NAME));
     }
 }

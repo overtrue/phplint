@@ -1,4 +1,4 @@
 {
-  "runner.bootstrap": "vendor/autoload.php",
+  "runner.bootstrap": "autoload.php",
   "runner.php_disable_ini": true
 }

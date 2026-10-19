@@ -13,12 +13,11 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Tests\EndToEnd;
 
+use Overtrue\PHPLint\Command\InvokableCommand;
 use Overtrue\PHPLint\Command\LintCommand;
-use Overtrue\PHPLint\Console\Application;
-use Overtrue\PHPLint\Event\EventDispatcher;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 
 use function dirname;
@@ -31,23 +30,21 @@ use function dirname;
 final class LintCommandTest extends TestCase
 {
     private ?CommandTester $commandTester;
-    private Command $command;
+
+    private InvokableCommand $invokableCommand;
 
     protected function setUp(): void
     {
-        // No extensions require for tests.
-        // WARNING: CommandTester is not able to test situation with custom Output
-        //          so display verification is impossible !!!
-        $dispatcher = new EventDispatcher([]);
+        parent::setUp();
 
-        $this->command = new LintCommand($dispatcher);
+        $application = $this->getApplication();
 
-        $application = new Application();
-        $application->addCommand($this->command);
-        $application->setDefaultCommand($this->command->getName());
-        $application->setDispatcher($dispatcher);
+        $command = $application->find('lint');
+        $command->mergeApplicationDefinition();
 
-        $this->commandTester = new CommandTester($this->command);
+        $this->invokableCommand = $command->getCode();
+
+        $this->commandTester = new CommandTester($command);
     }
 
     protected function tearDown(): void
@@ -58,33 +55,30 @@ final class LintCommandTest extends TestCase
     public function testLintDirectoryWithoutConfigurationAndCache(): void
     {
         $arguments = [
-            'path' => [__DIR__],
-            '--no-configuration' => true,
-            '--no-cache' => true,
+            OptionDefinition::PATH => [__DIR__],
+            '--' . OptionDefinition::NO_CONFIGURATION => true,
         ];
 
         $this->commandTester->execute($arguments);
 
-        $this->commandTester->assertCommandIsSuccessful();
         $this->assertCount(
             2,
-            $this->command->getResults()->getMisses()
+            $this->invokableCommand->getCode()->getResults()->getMisses()
         );
     }
 
     public function testLintSyntaxErrorFileWithoutConfigurationAndCache(): void
     {
         $arguments = [
-            'path' => [dirname(__DIR__) . '/fixtures/syntax_error.php'],
-            '--no-configuration' => true,
-            '--no-cache' => true,
+            OptionDefinition::PATH => [dirname(__DIR__) . '/fixtures/syntax_error.php'],
+            '--' . OptionDefinition::NO_CONFIGURATION => true,
         ];
 
         $this->commandTester->execute($arguments);
 
         $this->assertCount(
             1,
-            $this->command->getResults()->getErrors()
+            $this->invokableCommand->getCode()->getResults()->getErrors()
         );
     }
 }

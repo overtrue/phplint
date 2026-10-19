@@ -2,7 +2,7 @@
 
 This guide is dedicated to all PHP developers that want to learn more about each PHPLint components.
 
-## [Cache](cache.md#cache) 
+## [Cache](extension/cache.md#cache) 
 
 To learn how PHPLint is able to improve speed analysis on multiple runs.
 

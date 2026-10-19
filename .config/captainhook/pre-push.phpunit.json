@@ -3,9 +3,23 @@
         "enabled": true,
         "actions": [
             {
-                "action": "{$ENV|value-of:VENDOR_BIN_DIR|default:vendor/bin/}phpunit --configuration phpunit.xml.dist",
+                "action": [
+                    "{$ENV|value-of:XDG_BIN_HOME}phpunit",
+                    "--config {$ENV|value-of:\\Bartlett\\CaptainHookBinPlugin\\BinPlugin.config-file|cache:false}",
+                    "--do-not-fail-on-phpunit-warning",
+                    "--no-progress",
+                    "{$ENV|value-of:\\Bartlett\\CaptainHookBinPlugin\\BinPlugin.colors-flag|cache:false}"
+                ],
                 "config": {
                     "label": "Unit Tests (with PHPUnit)"
+                },
+                "options": {
+                    "colors": "always",
+                    "config-file": "./phpunit.xml.dist",
+                    "package-require": [
+                        "phpunit/phpunit",
+                        "^11.5 || ^12.5 || ^13.0"
+                    ]
                 }
             }
         ]

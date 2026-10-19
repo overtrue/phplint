@@ -19,5 +19,5 @@ namespace Overtrue\PHPLint\Configuration;
  */
 interface Options
 {
-    public function resolve(): array;
+    public function resolve(array $options = []): array;
 }

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Configuration;
 
+use Overtrue\PHPLint\Output\ConsoleOutput;
 use Symfony\Component\OptionsResolver\Options as SymfonyOptions;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -23,16 +24,13 @@ use function intval;
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-class OptionsFactory implements Options
+readonly class OptionsFactory implements Options
 {
-    private array $defaults;
-
-    public function __construct(array $defaults)
+    public function __construct(private array $defaults)
     {
-        $this->defaults = $defaults;
     }
 
-    public function resolve(): array
+    public function resolve(array $options = []): array
     {
         $resolver = new OptionsResolver();
         $this->configureOptions($resolver);
@@ -43,7 +41,26 @@ class OptionsFactory implements Options
             '9.6.2',
             'The option "%name%" is deprecated and will be removed in the future, use "cache-dir" instead'
         );
-        return $resolver->resolve();
+        $resolver->setDeprecated(
+            'format',
+            'overtrue/phplint',
+            '9.8.0',
+            'The option "%name%" is deprecated, use "output-format" instead'
+        );
+        $resolver->setDeprecated(
+            'output',
+            'overtrue/phplint',
+            '9.8.0',
+            'The option "%name%" is deprecated, use "output-file" instead'
+        );
+        $resolver->setDeprecated(
+            'extensions',
+            'overtrue/phplint',
+            '9.8.0',
+            'The option "%name%" is deprecated, use "file-extensions" instead'
+        );
+        $resolver->setIgnoreUndefined();
+        return $resolver->resolve($options);
     }
 
     protected function configureOptions(OptionsResolver $resolver): void
@@ -51,10 +68,12 @@ class OptionsFactory implements Options
         $definitions = [
             OptionDefinition::PATH => ['null', 'string', 'string[]'],
             OptionDefinition::EXCLUDE => ['string[]'],
-            OptionDefinition::EXTENSIONS => ['string[]'],
-            OptionDefinition::JOBS => ['int', 'string'],
+            OptionDefinition::FILE_EXTENSIONS => ['string[]'],
+            'extensions' => ['string[]'],
+            OptionDefinition::JOBS => ['null', 'int', 'string'],
             OptionDefinition::CONFIGURATION => 'string',
             OptionDefinition::NO_CONFIGURATION => 'bool',
+            OptionDefinition::CACHE_ADAPTER => ['null', 'string'],
             OptionDefinition::CACHE => ['null', 'string'],
             OptionDefinition::CACHE_DIR => ['null', 'string'],
             OptionDefinition::CACHE_TTL => ['int', 'string'],
@@ -62,19 +81,14 @@ class OptionsFactory implements Options
             OptionDefinition::PROGRESS => ['null', 'string'],
             OptionDefinition::NO_PROGRESS => 'bool',
             OptionDefinition::OUTPUT_FILE => ['null', 'string'],
+            'output' => ['null', 'string', ConsoleOutput::class],
             OptionDefinition::OUTPUT_FORMAT => ['string', 'string[]'],
+            'format' => ['string', 'string[]'],
             OptionDefinition::WARNING => 'bool',
-            OptionDefinition::OPTION_MEMORY_LIMIT => ['int', 'string'],
+            OptionDefinition::OPTION_MEMORY_LIMIT => ['null', 'int', 'string'],
             OptionDefinition::IGNORE_EXIT_CODE => 'bool',
             OptionDefinition::BOOTSTRAP => ['null', 'string'],
-
-            'ansi' => ['null', 'bool'],
-            'help' => ['null', 'bool'],
-            'no-interaction' => 'bool',
-            'quiet' => ['null', 'bool'],
-            'verbose' => ['null', 'bool'],
-            'version' => ['null', 'bool'],
-            'command' => ['null', 'string'],
+            OptionDefinition::DRY_RUN => 'bool',
         ];
 
         $resolver->setDefined(array_keys($definitions));
@@ -83,24 +97,16 @@ class OptionsFactory implements Options
             $resolver->setAllowedTypes($option, $allowedTypes);
         }
 
-        $resolver->setNormalizer(OptionDefinition::PATH, function (SymfonyOptions $options, $value) {
-            return (array) $value;
-        });
+        $resolver->setNormalizer(OptionDefinition::PATH, static fn (SymfonyOptions $options, $value) => (array) $value);
 
-        $resolver->setNormalizer(OptionDefinition::JOBS, function (SymfonyOptions $options, $value) {
-            return (int) $value;
-        });
+        $resolver->setNormalizer(OptionDefinition::JOBS, static fn (SymfonyOptions $options, $value) => (int) $value);
 
-        $resolver->setNormalizer(OptionDefinition::OUTPUT_FORMAT, function (SymfonyOptions $options, $value) {
-            return (array) $value;
-        });
+        $resolver->setNormalizer(OptionDefinition::OUTPUT_FORMAT, static fn (SymfonyOptions $options, $value) => (array) $value);
 
-        $resolver->setNormalizer(OptionDefinition::CACHE_TTL, function (SymfonyOptions $options, $value) {
-            return (int) $value;
-        });
+        $resolver->setNormalizer(OptionDefinition::CACHE_TTL, static fn (SymfonyOptions $options, $value) => (int) $value);
 
-        $resolver->setAllowedValues(OptionDefinition::CACHE_TTL, function (string $value) {
-            return (intval($value) > 0);
-        });
+        $resolver->setAllowedValues(OptionDefinition::JOBS, static fn (?string $value) => (intval($value) > 0));
+
+        $resolver->setAllowedValues(OptionDefinition::CACHE_TTL, static fn (string $value) => (intval($value) >= 0));
     }
 }

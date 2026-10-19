@@ -13,90 +13,68 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Extension;
 
-use LogicException;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
-use Overtrue\PHPLint\Event\AfterCheckingInterface;
 use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\AfterLintFileInterface;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingInterface;
-use Overtrue\PHPLint\Output\ConsoleOutputInterface;
-use Symfony\Component\Console\ConsoleEvents;
+use Overtrue\PHPLint\Helper\ProgressHelper;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Helper\HelperInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-
-use function get_class;
-use function sprintf;
 
 /**
  * @author Laurent Laville
  * @since Release 9.0.0
  */
 final class ProgressPrinter implements
-    EventSubscriberInterface,
+    ExtensionEventInterface,
     BeforeCheckingInterface,
-    AfterCheckingInterface,
     AfterLintFileInterface
 {
-    private ConsoleOutputInterface $output;
+    private OutputInterface $output;
 
     private int $maxSteps = 0;
     private bool $hasProcessHelper;
+    private ProgressHelper|HelperInterface $progressHelper;
 
-    public static function getSubscribedEvents(): array
+    /**
+     * Initializes the progress dots widget (default legacy behavior)
+     */
+    public function initialize(ConsoleCommandEvent $event): void
     {
-        return [
-            ConsoleEvents::COMMAND => 'initProgress',
-            BeforeCheckingEvent::class => 'beforeChecking',
-            AfterCheckingEvent::class => 'afterChecking',
-            AfterLintFileEvent::class => 'afterLintFile',
-        ];
+        $this->hasProcessHelper = $event->getCommand()->getHelperSet()->has('process');
+        $this->progressHelper = $event->getCommand()->getHelperSet()->get('progress');
+        $this->output = $event->getOutput();
     }
 
     /**
-     * Initialize progress printer extension (default legacy behavior)
+     * Finishes the progress dots widget
      */
-    public function initProgress(ConsoleCommandEvent $event): void
-    {
-        $this->hasProcessHelper = $event->getCommand()->getHelperSet()->has('process');
-
-        $output = $event->getOutput();
-
-        if (!$output instanceof ConsoleOutputInterface) {
-            throw new LogicException(
-                sprintf(
-                    'Extension %s must implement %s',
-                    get_class($this),
-                    ConsoleOutputInterface::class
-                )
-            );
-        }
-
-        $this->output = $output;
-    }
-
-    public function beforeChecking(BeforeCheckingEvent $event): void
-    {
-        $this->maxSteps = $event->getArgument('fileCount');
-    }
-
-    public function afterChecking(AfterCheckingEvent $event): void
+    public function finish(AfterCheckingEvent $event): void
     {
         $this->output->writeln('');
     }
 
+    public function beforeChecking(BeforeCheckingEvent $event): void
+    {
+        $this->maxSteps = $event->getArgument($event::FILE_COUNT);
+    }
+
     public function afterLintFile(AfterLintFileEvent $event): void
     {
-        if ($this->hasProcessHelper && $this->output->getVerbosity() == OutputInterface::VERBOSITY_VERY_VERBOSE) {
+        if ($this->hasProcessHelper && $this->output->getVerbosity() === OutputInterface::VERBOSITY_VERY_VERBOSE) {
             // ProgressPrinter extension make some noise that break output when ProcessHelper is active in verbose level 2
             return;
         }
 
-        $this->output->progressPrinterAdvance(
+        // @phpstan-ignore-next-line
+        $this->progressHelper->progressPrinterAdvance(
             $this->maxSteps,
-            $event->getArgument('status'),
-            $event->getArgument('file')
+            $event->getArgument($event::FILE_STATUS),
+            $event->getArgument($event::FILE_INFO),
+            1,
+            $this->output
         );
     }
 }

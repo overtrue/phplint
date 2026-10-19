@@ -9,7 +9,7 @@ We look forward to your contributions! Here are some examples how you can contri
 ## Workflow for Pull Requests
 
 1. Fork the repository.
-2. Create your branch from `9.7` if you plan to implement new functionality or change existing code significantly.
+2. Create your branch from `9.8` if you plan to implement new functionality or change existing code significantly.
 3. Implement your change and add tests for it.
 4. Ensure the test suite passes.
 5. Ensure the code complies with our coding guidelines.
@@ -20,7 +20,7 @@ We look forward to your contributions! Here are some examples how you can contri
 Before starting to contribute to this project, you first need to install code from GitHub:
 
 ```shell 
-git clone --branch 9.7 https://github.com/overtrue/phplint.git
+git clone --branch 9.8 https://github.com/overtrue/phplint.git
 cd phplint 
 composer update
 ```
@@ -28,7 +28,7 @@ composer update
 In an effort to maintain a homogeneous code base, we strongly encourage contributors to run 
 [PHPStan][phpstan], [PHP-CS-Fixer][php-cs-fixer] and [PHPUnit][phpunit] before submitting a Pull Request.
 
-All dev tools (`phpstan`, `php-cs-fixer`, `phpunit`) are under control of [bamarni/composer-bin-plugin][bamarni/composer-bin-plugin].
+All dev tools (`captainhook`, `mago`, `phpstan`, `php-cs-fixer`, `phpunit`) are under control of [bamarni/composer-bin-plugin][bamarni/composer-bin-plugin].
 
 ## Static Code Analysis
 
@@ -57,8 +57,8 @@ Coding standards are enforced using [PHP-CS-Fixer][php-cs-fixer]
 composer bin php-cs-fixer update
 ```
 
-This project comes with a configuration file (located at `/.php-cs-fixer.dist.php` in the repository) 
-and an executable for PHP CS Fixer (located at `vendor/bin/php-cs-fixer`) that you can use to check source code standard violation, 
+This project comes with a configuration file (located at `/.php-cs-fixer.dist.php` in the repository)
+and an executable for PHP CS Fixer (located at `vendor/bin/php-cs-fixer`) that you can use to check source code standard violation,
 without apply changes:
 
 ```shell

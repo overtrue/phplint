@@ -41,10 +41,12 @@ jobs:
         php-version:
           - "8.2"
           - "8.3"
+          - "8.4"
+          - "8.5"
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           repository: sebastianbergmann/phpunit
@@ -59,7 +61,7 @@ jobs:
         run: |
           curl -Ls https://github.com/overtrue/phplint/releases/latest/download/phplint.phar -o /usr/local/bin/phplint
           chmod +x /usr/local/bin/phplint
-          /usr/local/bin/phplint --no-cache --no-progress -v
+          /usr/local/bin/phplint lint --cache-adapter never --progress quiet -v
 ```
 
 Follows steps: 

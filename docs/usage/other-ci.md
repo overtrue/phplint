@@ -3,5 +3,5 @@
 Run this command using `overtrue/phplint:latest` Docker image:
 
 ```shell
-/root/.composer/vendor/bin/phplint ./ --exclude=vendor
+/root/.composer/vendor/bin/phplint lint ./ --exclude=vendor
 ```

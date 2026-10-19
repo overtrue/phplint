@@ -21,16 +21,18 @@ use Symfony\Component\Finder\SplFileInfo;
  */
 final class LintProcessItem
 {
-    protected bool $hasSyntaxError = false;
-    protected bool $hasSyntaxWarning = false;
-    protected string $message;
-    protected int $line;
-    protected SplFileInfo $fileInfo;
+    private bool $hasSyntaxError = false;
+    private bool $hasSyntaxWarning = false;
+    private string $message = '';
+    private int $line = 0;
+    /** @phpstan-ignore property.onlyRead */
+    private SplFileInfo $fileInfo;
 
     public function hasSyntaxError(): bool
     {
         return $this->hasSyntaxError;
     }
+
     public function hasSyntaxWarning(): bool
     {
         return $this->hasSyntaxWarning;

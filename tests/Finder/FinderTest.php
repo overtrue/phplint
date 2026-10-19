@@ -15,14 +15,9 @@ namespace Overtrue\PHPLint\Tests\Finder;
 
 use Iterator;
 use LogicException;
-use Overtrue\PHPLint\Command\LintCommand;
-use Overtrue\PHPLint\Configuration\ConsoleOptionsResolver;
-use Overtrue\PHPLint\Configuration\OptionDefinition;
-use Overtrue\PHPLint\Event\EventDispatcher;
 use Overtrue\PHPLint\Finder;
 use Overtrue\PHPLint\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Symfony\Component\Console\Input\ArrayInput;
 
 use function array_keys;
 use function array_map;
@@ -39,22 +34,9 @@ final class FinderTest extends TestCase
 {
     public function testAllPhpFilesFoundShouldExists(): void
     {
-        $dispatcher = new EventDispatcher([]);
-
         $basePath = dirname(__DIR__);
 
-        $arguments = [
-            OptionDefinition::PATH => [$basePath],
-            '--no-configuration' => true,
-            '--' . OptionDefinition::EXCLUDE => [],
-            '--' . OptionDefinition::EXTENSIONS => ['php'],
-        ];
-        $definition = (new LintCommand($dispatcher))->getDefinition();
-        $input = new ArrayInput($arguments, $definition);
-
-        $configResolver = new ConsoleOptionsResolver($input);
-
-        $finder = new Finder($configResolver);
+        $finder = new Finder(null, [$basePath], [], ['php']);
 
         foreach ($finder->getFiles() as $file) {
             $this->assertFileExists($file->getRealPath());
@@ -65,45 +47,26 @@ final class FinderTest extends TestCase
     {
         $this->expectException(LogicException::class);
 
-        $dispatcher = new EventDispatcher([]);
+        $basePath = dirname(__DIR__);
 
-        $basePath = dirname(__DIR__) . '/fixtures/missing_dir';
+        $finder = new Finder(null, [$basePath . '/fixtures/missing_dir'], [], ['php']);
 
-        $arguments = [
-            OptionDefinition::PATH => [$basePath],
-            '--no-configuration' => true,
-        ];
-        $definition = (new LintCommand($dispatcher))->getDefinition();
-        $input = new ArrayInput($arguments, $definition);
-
-        $configResolver = new ConsoleOptionsResolver($input);
-
-        $finder = new Finder($configResolver);
-        count($finder->getFiles());
+        $this->assertGreaterThan(0, count($finder->getFiles()));
     }
 
     public function testSearchPhpFilesWithCondition(): void
     {
-        $dispatcher = new EventDispatcher([]);
-
         $basePath = dirname(__DIR__);
 
-        $arguments = [
-            OptionDefinition::PATH => [$basePath],
-            '--no-configuration' => true,
-            '--' . OptionDefinition::EXCLUDE => ['fixtures', 'Benchmark'],
-            '--' . OptionDefinition::EXTENSIONS => ['php']
-        ];
-        $definition = (new LintCommand($dispatcher))->getDefinition();
-        $input = new ArrayInput($arguments, $definition);
-
-        $configResolver = new ConsoleOptionsResolver($input);
-
-        $finder = new Finder($configResolver);
+        $finder = new Finder(null, [$basePath], ['fixtures', 'Benchmark'], ['php']);
 
         $this->assertEqualsCanonicalizing(
             [
                 'Cache/CacheTest.php',
+                'Configuration/Resolver/CoreValueResolverTest.php',
+                'Configuration/Resolver/MetadataValueResolverTest.php',
+                'Configuration/Resolver/PathValueResolverTest.php',
+                'Configuration/Resolver/PluginValueResolverTest.php',
                 'Configuration/ConsoleConfigTest.php',
                 'Configuration/YamlConfigTest.php',
                 'EndToEnd/LintCommandTest.php',
@@ -119,9 +82,7 @@ final class FinderTest extends TestCase
     private function getRelativePathFiles(Iterator $iterator, string $basePath): array
     {
         return array_map(
-            function (string $filename) use ($basePath) {
-                return str_replace($basePath . '/', '', $filename);
-            },
+            static fn (string $filename) => str_replace($basePath . '/', '', $filename),
             array_keys(iterator_to_array($iterator))
         );
     }

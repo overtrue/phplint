@@ -7,6 +7,8 @@ ASSETS_IMAGE_DIR="docs/assets"
 php "$SCRIPT_DIR"/graph-uml/build.php cache $ASSETS_IMAGE_DIR
 php "$SCRIPT_DIR"/graph-uml/build.php config $ASSETS_IMAGE_DIR
 php "$SCRIPT_DIR"/graph-uml/build.php console $ASSETS_IMAGE_DIR
+php "$SCRIPT_DIR"/graph-uml/build.php diagnose $ASSETS_IMAGE_DIR
+php "$SCRIPT_DIR"/graph-uml/build.php environment $ASSETS_IMAGE_DIR
 php "$SCRIPT_DIR"/graph-uml/build.php event $ASSETS_IMAGE_DIR
 php "$SCRIPT_DIR"/graph-uml/build.php extension $ASSETS_IMAGE_DIR
 php "$SCRIPT_DIR"/graph-uml/build.php finder $ASSETS_IMAGE_DIR
@@ -14,3 +16,5 @@ php "$SCRIPT_DIR"/graph-uml/build.php helper $ASSETS_IMAGE_DIR
 php "$SCRIPT_DIR"/graph-uml/build.php linter $ASSETS_IMAGE_DIR
 php "$SCRIPT_DIR"/graph-uml/build.php output $ASSETS_IMAGE_DIR
 php "$SCRIPT_DIR"/graph-uml/build.php process $ASSETS_IMAGE_DIR
+php "$SCRIPT_DIR"/graph-uml/build.php profile $ASSETS_IMAGE_DIR
+php "$SCRIPT_DIR"/graph-uml/build.php progress $ASSETS_IMAGE_DIR

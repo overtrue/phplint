@@ -1,0 +1,266 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+ * This file is part of the overtrue/phplint package
+ *
+ * (c) overtrue
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
+namespace Overtrue\PHPLint\Command;
+
+use Overtrue\PHPLint\Configuration\Resolver\LoggerValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
+use Overtrue\PHPLint\Console\ApplicationInterface;
+use Overtrue\PHPLint\Console\Attribute\ValueResolver;
+use Overtrue\PHPLint\Console\SectionEnum;
+use Overtrue\PHPLint\Environment\EnvConfig;
+use Overtrue\PHPLint\Environment\Provider\Cache;
+use Overtrue\PHPLint\Environment\Provider\CI;
+use Overtrue\PHPLint\Environment\Provider\Cpu;
+use Overtrue\PHPLint\Environment\Provider\DotEnv;
+use Overtrue\PHPLint\Environment\Provider\Git;
+use Overtrue\PHPLint\Environment\Provider\Metadata;
+use Overtrue\PHPLint\Environment\Provider\Php;
+use Overtrue\PHPLint\Environment\Provider\Profiler;
+use Overtrue\PHPLint\Environment\Provider\Uname;
+use Overtrue\PHPLint\Environment\ProviderData;
+use Overtrue\PHPLint\Environment\ProviderInterface;
+use Overtrue\PHPLint\Environment\Supplier;
+use Overtrue\PHPLint\Extension\DiagnoseEnum;
+use Overtrue\PHPLint\Metadata\CacheOutput;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\FormatterHelper;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+
+use function array_unique;
+use function class_exists;
+use function count;
+use function explode;
+use function get_debug_type;
+use function in_array;
+use function is_iterable;
+use function is_null;
+use function json_decode;
+use function json_encode;
+use function sprintf;
+use function str_starts_with;
+use function substr;
+
+use const JSON_PRETTY_PRINT;
+use const JSON_UNESCAPED_SLASHES;
+
+/**
+ * @author Laurent Laville
+ * @since Release 9.8.0
+ */
+#[AsCommand(name: 'diagnose', description: 'Diagnoses the system to provide useful information for issue reports')]
+final class DiagnoseCommand
+{
+    public function __invoke(
+        InputInterface $input,
+        OutputInterface $output,
+        SymfonyStyle $io,
+        Application $application,
+        #[ValueResolver(LoggerValueResolver::class)]
+        LoggerInterface $logger,
+        #[ValueResolver(MetadataValueResolver::class)]
+        MetadataCollection $metadataCollection,
+    ): int {
+        $envConfig = $application instanceof ApplicationInterface
+            ? $application->getRunner()::getEnvConfig()
+            : new EnvConfig()
+        ;
+
+        $diagnostic = explode(',', $envConfig->get('diagnostic', DiagnoseEnum::AUTO->value));
+
+        if (in_array(DiagnoseEnum::NEVER->value, $diagnostic, true) || $output->isQuiet()) {
+            return Command::SUCCESS;
+        }
+
+        if (in_array(DiagnoseEnum::AUTO->value, $diagnostic, true)) {
+            $diagnostic[] = 'metadata:application_version';
+            $diagnostic[] = 'metadata:current_configuration';
+        }
+
+        $user = false;
+        $filters = [];
+
+        $parts = [];
+        foreach ($diagnostic as $part) {
+            if (str_starts_with($part, 'metadata:')) {
+                $filters[] = substr($part, 9);
+                $parts[] = 'metadata';
+            } else {
+                $parts[] = $part;
+            }
+        }
+        $parts = array_unique($parts);
+
+        $vcs = $php = $uname = $cache = $ci = $cpu = $dotenv = $profiler = $metadata = false;
+
+        foreach ($parts as $part) {
+            if ($part == DiagnoseEnum::VCS->value) {
+                $vcs = true;
+            }
+            if ($part == DiagnoseEnum::PHP->value) {
+                $php = true;
+            }
+            if ($part == DiagnoseEnum::UNAME->value) {
+                $uname = true;
+            }
+            if ($part == DiagnoseEnum::CACHE->value) {
+                $cache = true;
+            }
+            if ($part == DiagnoseEnum::CI->value) {
+                $ci = true;
+            }
+            if ($part == DiagnoseEnum::CPU->value) {
+                $cpu = true;
+            }
+            if ($part == DiagnoseEnum::DOTENV->value) {
+                $dotenv = true;
+            }
+            if ($part == DiagnoseEnum::PROFILER->value) {
+                $profiler = true;
+            }
+            if ($part == DiagnoseEnum::METADATA->value) {
+                $metadata = true;
+            } else {
+                if (class_exists($part)) {
+                    $user = new $part();
+                    if (!$user instanceof ProviderInterface) {
+                        $user = false;
+                    }
+                }
+            }
+        }
+
+        if (in_array(DiagnoseEnum::ALWAYS->value, $parts, true)) {
+            $vcs = $php = $uname = $cache = $ci = $cpu = $dotenv = $profiler = $metadata = true;
+        }
+
+        $environment = new Supplier($logger);
+
+        if ($vcs) {
+            $environment->addProvider(new Git());
+        }
+        if ($php) {
+            $environment->addProvider(new Php());
+        }
+        if ($uname) {
+            $environment->addProvider(new Uname());
+        }
+        if ($cache && $application instanceof ApplicationInterface) {
+            $environment->addProvider(new Cache($application->getCache()));
+        }
+        if ($ci) {
+            $environment->addProvider(new CI());
+        }
+        if ($cpu) {
+            $environment->addProvider(new Cpu());
+        }
+        if ($dotenv) {
+            $environment->addProvider(new DotEnv());
+        }
+        if ($profiler) {
+            $environment->addProvider(new Profiler());
+        }
+        if ($metadata) {
+            // never display the "cache_results" metadata; use environment variable "PLINT_DIAGNOSTIC=cache" instead
+            $environment->addProvider(new Metadata($metadataCollection, $filters, [CacheOutput::METADATA_ID]));
+        }
+        if ($user) {
+            $environment->addProvider($user);
+        }
+
+        $providerDataList = $environment->describe();
+
+        if (count($providerDataList) === 0) {
+            return 127;
+        }
+
+        foreach ($providerDataList as $providerId => $values) {
+            $title = match ($providerId) {
+                Git::class => 'VCS Information',
+                Php::class => 'PHP Information',
+                Uname::class => 'OS Information',
+                Cache::class => 'Cache Information',
+                CI::class => 'CI Information',
+                Cpu::class => 'CPU Information',
+                DotEnv::class => 'Environment Variables Information',
+                Profiler::class => 'Profiler Information',
+                Metadata::class => 'Metadata Information',
+                default => sprintf('"%s" User Information', $providerId),
+            };
+
+            if ($output->isDebug()) {
+                $title .= sprintf(' (%s)', $providerId);
+            }
+
+            if (!is_iterable($values)) {
+                $logger->warning(
+                    'Provider {provider_id} not correctly implemented or is not applicable, skip it !',
+                    [
+                        '__section__' => SectionEnum::ENVIRONMENT->label(),
+                        'provider_id' => $providerId
+                    ]
+                );
+                continue;
+            }
+
+            $io->section($title);
+
+            $formatter = new FormatterHelper();
+
+            foreach ($values as $providerData) {
+                if (!$providerData instanceof ProviderData) {
+                    $logger->warning(
+                        'Provider {provider_id} not correctly implemented. Expected {provider_data} but got {unexpected_data}, skip it !',
+                        [
+                            '__section__' => SectionEnum::ENVIRONMENT->label(),
+                            'provider_id' => $providerId,
+                            'provider_data' => ProviderData::class,
+                            'unexpected_data' => get_debug_type($providerData)
+                        ]
+                    );
+                    continue;
+                }
+                $info = $providerData->describe();
+
+                $jsonEncodedValue = json_decode($info['value']);
+
+                $value = $output->isVerbose() && !is_null($jsonEncodedValue)
+                    ? json_encode($jsonEncodedValue, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+                    : $info['value']
+                ;
+
+                $style = SectionEnum::ENVIRONMENT->value;
+                // when style is not available, fallback to default style defined by \Overtrue\PHPLint\Console\Application::run
+                $style = $output->getFormatter()->hasStyle($style) ? $style : SectionEnum::DEFAULT->value;
+
+                $io->writeln(
+                    $formatter->formatSection(
+                        $info['setting'],
+                        sprintf('<comment>%s</comment> %s', $info['description'], $value),
+                        $style,
+                    )
+                );
+            }
+
+            $io->newLine();
+        }
+
+        return Command::SUCCESS;
+    }
+}

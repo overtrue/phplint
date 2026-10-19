@@ -32,25 +32,30 @@ use function sprintf;
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-final class Finder implements JsonSerializable
+final readonly class Finder implements JsonSerializable
 {
-    private array $paths;
-    private array $excludes;
-    private array $extensions;
+    // @phpstan-ignore-next-line
+    public function __construct(
+        // @deprecated $configResolver
+        // keep only for API compatibility with previous version 9.7.x, and will be removed in next API version
+        ?Resolver $configResolver = null,
+        private array $paths = [],
+        private array $excludes = [],
+        private array $fileExtensions = [],
+    ) {
+    }
 
-    public function __construct(Resolver $configResolver)
+    public function describe(): array
     {
-        $this->paths = $configResolver->getOption(OptionDefinition::PATH);
-        $this->excludes = $configResolver->getOption(OptionDefinition::EXCLUDE);
-        $this->extensions = $configResolver->getOption(OptionDefinition::EXTENSIONS);
+        return $this->jsonSerialize();
     }
 
     public function jsonSerialize(): array
     {
         return [
-            'paths' => $this->paths,
-            'excludes' => $this->excludes,
-            'extensions' => $this->extensions,
+            OptionDefinition::PATH => $this->paths,
+            OptionDefinition::EXCLUDE => $this->excludes,
+            OptionDefinition::FILE_EXTENSIONS => $this->fileExtensions,
         ];
     }
 
@@ -69,15 +74,14 @@ final class Finder implements JsonSerializable
         }
         return $finder;
     }
+
     private function getFilesFromDir(string $dir): SymfonyFinder
     {
         $finder = new SymfonyFinder();
         $finder->files()
             ->ignoreUnreadableDirs()
-            ->filter(function (SplFileInfo $file) {
-                return $file->isReadable();
-            })
-            ->name(sprintf('/\\.(%s)$/', implode('|', $this->extensions)))
+            ->filter(static fn (SplFileInfo $file) => $file->isReadable())
+            ->name(sprintf('/\\.(%s)$/', implode('|', $this->fileExtensions)))
             ->notPath($this->excludes)
             ->in(realpath($dir));
 

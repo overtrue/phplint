@@ -1,0 +1,5 @@
+{
+    "require-dev": {
+        "fidry/cpu-core-counter": "^1.3"
+    }
+}

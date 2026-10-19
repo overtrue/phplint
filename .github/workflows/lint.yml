@@ -16,7 +16,7 @@ jobs:
 
       matrix:
         operating-system:
-          - "ubuntu-22.04"
+          - "ubuntu-24.04"
 
         php-version:
           - "8.2"
@@ -27,11 +27,11 @@ jobs:
     steps:
       -   # https://github.com/actions/checkout
         name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7.0.1
 
       -   # https://github.com/shivammathur/setup-php
         name: Setup PHP runtime
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@2.37.2
         with:
           php-version: "${{ matrix.php-version }}"
           coverage: "none"
@@ -39,7 +39,7 @@ jobs:
 
       -   # https://github.com/ramsey/composer-install
         name: Install Composer dependencies
-        uses: ramsey/composer-install@v3
+        uses: ramsey/composer-install@4.0.0
         with:
           composer-options: "--prefer-dist --no-scripts"
 

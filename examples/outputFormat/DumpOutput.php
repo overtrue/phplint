@@ -11,6 +11,8 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
+use Overtrue\PHPLint\Environment\EnvConfigInterface;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Output\LinterOutput;
 use Overtrue\PHPLint\Output\OutputInterface;
 use Symfony\Component\Console\Output\StreamOutput;
@@ -26,8 +28,12 @@ class DumpOutput extends StreamOutput implements OutputInterface
         return 'dump';
     }
 
-    public function format(LinterOutput $results): void
+    public function format(LinterOutput $results, MetadataCollection $metadataCollection, EnvConfigInterface $envConfig): void
     {
+        if ($metadataCollection->hasMetadata(\Overtrue\PHPLint\Metadata\LinterOutput::class)) {
+            $results = $metadataCollection->getMetadata(\Overtrue\PHPLint\Metadata\LinterOutput::class);
+        }
+
         $this->writeln([
             '',
             var_export($results, true)

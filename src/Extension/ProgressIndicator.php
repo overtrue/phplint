@@ -13,18 +13,14 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Extension;
 
-use LogicException;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
-use Overtrue\PHPLint\Event\AfterCheckingInterface;
 use Overtrue\PHPLint\Event\AfterLintFileEvent;
 use Overtrue\PHPLint\Event\AfterLintFileInterface;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingInterface;
-use Overtrue\PHPLint\Output\ConsoleOutputInterface;
-use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Helper\ProgressIndicator as ProgressIndicatorHelper;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @link https://symfony.com/doc/current/components/console/helpers/progressindicator.html
@@ -33,56 +29,42 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * @since Release 9.1.0
  */
 final class ProgressIndicator implements
-    EventSubscriberInterface,
+    ExtensionEventInterface,
     BeforeCheckingInterface,
-    AfterCheckingInterface,
     AfterLintFileInterface
 {
-    private ConsoleOutputInterface $output;
+    private OutputInterface $output;
     private bool $hasProcessHelper;
 
     private ?ProgressIndicatorHelper $progressIndicator;
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            ConsoleEvents::COMMAND => 'initProgress',
-            BeforeCheckingEvent::class => 'beforeChecking',
-            AfterCheckingEvent::class => 'afterChecking',
-            AfterLintFileEvent::class => 'afterLintFile',
-        ];
-    }
 
     /**
-     * Initialize progress indicator extension
+     * Initializes the progress indicator widget
      */
-    public function initProgress(ConsoleCommandEvent $event): void
+    public function initialize(ConsoleCommandEvent $event): void
     {
         $this->hasProcessHelper = $event->getCommand()->getHelperSet()->has('process');
 
-        $output = $event->getOutput();
-
-        if (!$output instanceof ConsoleOutputInterface) {
-            throw new LogicException(
-                sprintf(
-                    'Extension %s must implement %s',
-                    get_class($this),
-                    ConsoleOutputInterface::class
-                )
-            );
-        }
-
-        $this->output = $output;
+        $this->output = $event->getOutput();
 
         if ($this->hasProcessHelper && $this->output->isVeryVerbose()) {
             $this->progressIndicator = null;
         } else {
             $this->progressIndicator = new ProgressIndicatorHelper(
-                $output,
+                $this->output,
                 'normal',
                 100,
                 ['⠏', '⠛', '⠹', '⢸', '⣰', '⣤', '⣆', '⡇']
             );
         }
+    }
+
+    /**
+     * Finishes the progress indicator widget
+     */
+    public function finish(AfterCheckingEvent $event): void
+    {
+        $this->progressIndicator?->finish('Finished');
     }
 
     public function beforeChecking(BeforeCheckingEvent $event): void
@@ -93,11 +75,6 @@ final class ProgressIndicator implements
         }
 
         $this->progressIndicator?->start('Linting files ...');
-    }
-
-    public function afterChecking(AfterCheckingEvent $event): void
-    {
-        $this->progressIndicator?->finish('Finished');
     }
 
     public function afterLintFile(AfterLintFileEvent $event): void

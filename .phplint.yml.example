@@ -2,7 +2,7 @@ path:
   - src/
   - tests/
 jobs: 10
-extensions:
+file-extensions:
   - php
 exclude:
   - vendor

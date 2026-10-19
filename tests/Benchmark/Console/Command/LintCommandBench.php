@@ -13,15 +13,18 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Tests\Benchmark\Console\Command;
 
-use Overtrue\PHPLint\Command\LintCommand;
-use Overtrue\PHPLint\Console\Application;
-use Overtrue\PHPLint\Event\EventDispatcher;
+use Overtrue\PHPLint\Environment\EnvConfig;
+use Overtrue\PHPLint\Output\ConsoleOutput;
+use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
 use PhpBench\Attributes as Bench;
+use Psr\Log\NullLogger;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Tester\CommandTester;
 use Throwable;
 
 use function array_merge;
 use function dirname;
+use function putenv;
 
 /**
  * @author Laurent Laville
@@ -34,9 +37,17 @@ final class LintCommandBench
     /**
      * @throws Throwable
      */
-    public function benchDefaultConfiguration(): void
+    public function benchJobs1(): void
     {
-        $this->runCommand([]);
+        $this->runCommand(['--jobs' => 1]);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function benchJobs5(): void
+    {
+        $this->runCommand(['--jobs' => 5]);
     }
 
     /**
@@ -50,40 +61,32 @@ final class LintCommandBench
     /**
      * @throws Throwable
      */
-    public function benchJobs100(): void
-    {
-        $this->runCommand(['--jobs' => 100]);
-    }
-
-    /**
-     * @throws Throwable
-     */
-    public function benchJobs1000(): void
-    {
-        $this->runCommand(['--jobs' => 1000]);
-    }
-
-    /**
-     * @throws Throwable
-     */
     private function runCommand(array $arguments): void
     {
+        putenv("PLINT_LOGGER='Psr\Log\NullLogger'");
+        putenv("PLINT_DIAGNOSTIC=never");
+        putenv("PLINT_ALLOW_PLUGINS=output_manager");
+        putenv("PLINT_DEFAULT_PLUGINS=output_manager");
+
         $arguments = array_merge([
-            'path' => [dirname(__DIR__, 4) . '/vendor-bin/phpunit/vendor/phpunit/phpunit/src'],
-            '--no-cache' => true,
-            '--no-configuration' => true,
+            'command' => 'lint',
+            'path' => [dirname(__DIR__, 4) . '/vendor-bin/sarif/vendor/bartlett/sarif-php-converters/src'],
+            '--configuration' => 'never',
+            '--output-format' => 'json',
+            '--verbose' => true,
+            '--ignore-exit-code' => true,
         ], $arguments);
 
-        $dispatcher = new EventDispatcher([]);
+        $logger = new NullLogger();
+        $envConfig = new EnvConfig();
+        $input = new ArrayInput($arguments);
+        $output = new ConsoleOutput();
 
-        $defaultCommand = new LintCommand($dispatcher);
+        $runner = new ConsoleApplicationRunner($logger, $envConfig, $input, $output);
+        $application = $runner->getApplication();
+        $command = $application->find($arguments['command']);
 
-        $application = new Application();
-        $application->add($defaultCommand);
-        $application->setDefaultCommand($defaultCommand->getName());
-        $application->setDispatcher($dispatcher);
-
-        $commandTester = new CommandTester($defaultCommand);
+        $commandTester = new CommandTester($command);
         $commandTester->execute($arguments);
     }
 }

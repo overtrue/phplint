@@ -1,0 +1,5 @@
+{
+    "require-dev": {
+        "php-parallel-lint/php-console-highlighter": "^1.0"
+    }
+}

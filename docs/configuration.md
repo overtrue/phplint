@@ -35,7 +35,7 @@ All files listed inside these paths won't be scanned by PHPLint.
 
 ## Extensions
 
-The `extensions` (`string[]` default `[php]`) setting will check only files with selected extensions.
+The `file-extensions` (`string[]` default `[php]`) setting will check only files with selected extensions.
 
 ## Show Warnings
 
@@ -49,7 +49,7 @@ Script above generate `PHP Warning:  declare(encoding=...) ignored because Zend 
 
 ## Jobs
 
-The `jobs` (`int`|`string` default `5`) setting declare the maximum number of paralleled jobs to run (depend on your computer infrastructure).
+The `jobs` (`int`|`string` default `1`) setting declare the maximum number of paralleled jobs to run (depend on your computer infrastructure).
 
 ## Cache
 
@@ -103,7 +103,7 @@ Use `-1` if you want to have no memory limit.
 
 ## JSON output
 
-The `format` setting with value `json` allow to write results in a JSON format.
+The `output-format` setting with value `json` allow to write results in a JSON format.
 
 For example:
 
@@ -171,7 +171,7 @@ For example:
 
 ## Junit output
 
-The `format` setting with value `junit` allow to write results in a JUnit XML format.
+The `output-format` setting with value `junit` allow to write results in a JUnit XML format.
 
 For example:
 
@@ -188,7 +188,7 @@ For example:
 
 ## Checkstyle output
 
-The `format` setting with value `checkstyle` allow to write results in a Checkstyle XML format.
+The `output-format` setting with value `checkstyle` allow to write results in a Checkstyle XML format.
 
 For example:
 
@@ -215,7 +215,7 @@ For example:
 >
 > ```composer require --dev bartlett/sarif-php-converters```
 
-The `format` setting with value `'\Overtrue\PHPLint\Output\SarifOutput'` allow to write results in a SARIF 2.1.0 JSON format.
+The `output-format` setting with value `'\Overtrue\PHPLint\Output\SarifOutput'` allow to write results in a SARIF 2.1.0 JSON format.
 
 For example:
 

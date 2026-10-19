@@ -1,0 +1,210 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+ * This file is part of the overtrue/phplint package
+ *
+ * (c) overtrue
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
+namespace Overtrue\PHPLint\Extension;
+
+use InvalidArgumentException;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Event\AfterCheckingEvent;
+use Overtrue\PHPLint\Event\AfterLintFileEvent;
+use Overtrue\PHPLint\Event\AfterLintFileInterface;
+use Overtrue\PHPLint\Event\BeforeCheckingEvent;
+use Overtrue\PHPLint\Event\BeforeCheckingInterface;
+use Overtrue\PHPLint\Event\BeforeLintFileEvent;
+use Overtrue\PHPLint\Event\BeforeLintFileInterface;
+use Overtrue\PHPLint\Event\Events;
+use Overtrue\PHPLint\Helper\DebugFormatterHelper;
+use Overtrue\PHPLint\Helper\ProcessHelper;
+use Overtrue\PHPLint\Helper\ProgressHelper;
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Event\ConsoleEvent;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+use function method_exists;
+use function sprintf;
+
+/**
+ * @author Laurent Laville
+ * @since Release 9.8.0
+ */
+final class ProgressManager extends AbstractManager implements
+    ExtensionInterface,
+    EventSubscriberInterface,
+    BeforeCheckingInterface,
+    BeforeLintFileInterface,
+    AfterLintFileInterface
+{
+    private ?ExtensionEventInterface $widget = null;
+
+    private ?string $progress = null;
+
+    public function getName(): string
+    {
+        return ExtensionEnum::PROGRESS_MANAGER->value;
+    }
+
+    public static function getDefinition(): InputDefinition
+    {
+        return new InputDefinition([
+            new InputOption(
+                OptionDefinition::PROGRESS,
+                'p',
+                InputOption::VALUE_OPTIONAL,
+                'Set type of progress output' .
+                ' (<info>auto, quiet, plain, dots</info>)',
+                OptionDefinition::DEFAULT_PROGRESS_WIDGET
+            ),
+            new InputOption(
+                OptionDefinition::NO_PROGRESS,
+                null,
+                InputOption::VALUE_NONE,
+                'Suppress the progress output (<comment>Deprecated option, use "--progress quiet" instead</comment>)'
+            )
+        ]);
+    }
+
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            ConsoleEvents::COMMAND => 'initialize',
+            Events::AFTER_CHECKING => 'finish',
+            Events::BEFORE_CHECKING => 'beforeChecking',
+            Events::BEFORE_LINT_FILE => 'beforeLintFile',
+            Events::AFTER_LINT_FILE => 'afterLintFile',
+        ];
+    }
+
+    /**
+     * Initializes the progress output.
+     */
+    public function initialize(ConsoleCommandEvent $event): void
+    {
+        $this->describeEvent($event);
+
+        if (!$this->allowEvent($event)) {
+            return;
+        }
+
+        $command = $event->getCommand();
+
+        $output = $event->getOutput();
+
+        $helperSet = $command->getHelperSet();
+        $helperSet?->set(new ProgressHelper($output));
+
+        $input = $event->getInput();
+
+        $newEvent = clone $event;
+
+        if ($this->progress === ProgressEnum::PLAIN->value) {
+            $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
+            $newEvent = new ConsoleCommandEvent(
+                $command,
+                $input,
+                $output
+            );
+        }
+
+        $this->widget = match ($this->progress) {
+            ProgressEnum::BAR->value => new ProgressBar(),
+            ProgressEnum::INDICATOR->value => new ProgressIndicator(),
+            ProgressEnum::AUTO->value, ProgressEnum::DOTS->value, ProgressEnum::PLAIN->value, 'printer' => new ProgressPrinter(),
+            ProgressEnum::NEVER->value, ProgressEnum::QUIET->value => null,
+            default => throw new InvalidArgumentException(sprintf('Unknown progress enum case "%s"', $this->progress)),
+        };
+
+        if ($this->widget instanceof ExtensionEventInterface) {
+            if ($this->widget instanceof ProgressPrinter) {
+                // these helpers are only necessary when using the `--progress plain` flag
+                $helperSet?->set(new ProcessHelper());
+                $helperSet?->set(new DebugFormatterHelper());
+            }
+            $this->widget->initialize($newEvent);
+        }
+    }
+
+    /**
+     * Finishes the progress output.
+     */
+    public function finish(AfterCheckingEvent $event): void
+    {
+        $this->describeEvent($event);
+
+        if (null === $this->widget || !method_exists($this->widget, __FUNCTION__)) {
+            return;
+        }
+        $this->widget->{__FUNCTION__}($event);
+    }
+
+    public function beforeChecking(BeforeCheckingEvent $event): void
+    {
+        $this->describeEvent($event);
+
+        if (null === $this->widget || !method_exists($this->widget, __FUNCTION__)) {
+            return;
+        }
+        $this->widget->{__FUNCTION__}($event);
+    }
+
+    public function beforeLintFile(BeforeLintFileEvent $event): void
+    {
+        $this->describeEvent($event);
+
+        if (null === $this->widget || !method_exists($this->widget, __FUNCTION__)) {
+            return;
+        }
+        $this->widget->{__FUNCTION__}($event);
+    }
+
+    public function afterLintFile(AfterLintFileEvent $event): void
+    {
+        $this->describeEvent($event);
+
+        if (null === $this->widget || !method_exists($this->widget, __FUNCTION__)) {
+            return;
+        }
+        $this->widget->{__FUNCTION__}($event);
+    }
+
+    protected function allowEvent(ConsoleEvent $event): bool
+    {
+        if (!parent::allowEvent($event)) {
+            return false;
+        }
+
+        $input = $event->getInput();
+        $output = $event->getOutput();
+
+        if (true === $input->getOption(OptionDefinition::NO_PROGRESS) || $output->isQuiet()) {
+            return false;
+        }
+
+        if (true === $input->hasParameterOption(['--' . OptionDefinition::PROGRESS, '-p'], true)) {
+            $this->progress = $input->getParameterOption(['--' . OptionDefinition::PROGRESS, '-p']);
+        }
+
+        if (null === $this->progress) {
+            if ($output->isVeryVerbose()) {
+                $this->progress = ProgressEnum::PLAIN->value;
+            } else {
+                $this->progress = ProgressEnum::DOTS->value;
+            }
+        }
+
+        return ($this->progress !== ProgressEnum::QUIET->value);
+    }
+}

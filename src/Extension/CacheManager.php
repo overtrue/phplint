@@ -1,0 +1,178 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+ * This file is part of the overtrue/phplint package
+ *
+ * (c) overtrue
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
+namespace Overtrue\PHPLint\Extension;
+
+use Overtrue\PHPLint\Cache;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Console\ApplicationInterface;
+use Overtrue\PHPLint\Console\SectionEnum;
+use Overtrue\PHPLint\Event\AfterCheckingEvent;
+use Overtrue\PHPLint\Event\Events;
+use Overtrue\PHPLint\Metadata\ConfigurationSettings;
+use Overtrue\PHPLint\Metadata\MetadataCollection;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Cache\Adapter\NullAdapter;
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Event\ConsoleEvent;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+use function get_class;
+use function is_object;
+use function json_decode;
+
+/**
+ * @author Laurent Laville
+ * @since Release 9.8.0
+ */
+final class CacheManager extends AbstractManager implements
+    ExtensionInterface,
+    EventSubscriberInterface
+{
+    private MetadataCollection $metadataCollection;
+
+    private static Cache $cache;
+
+    public function getName(): string
+    {
+        return ExtensionEnum::CACHE_MANAGER->value;
+    }
+
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            ConsoleEvents::COMMAND => ['initialize', 90],
+            Events::AFTER_CHECKING => ['afterExecute', 90],
+        ];
+    }
+
+    public static function getDefinition(): InputDefinition
+    {
+        return new InputDefinition([
+            new InputOption(
+                OptionDefinition::CACHE_ADAPTER,
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Adapter ' .
+                ' (<info>auto, never, Filesystem, Apcu, ...</info>)',
+            ),
+            new inputOption(
+                OptionDefinition::CACHE,
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Path to the cache directory (<comment>Deprecated option, use "cache-dir" instead</comment>)'
+            ),
+            new InputOption(
+                OptionDefinition::CACHE_DIR,
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Path to the cache directory'
+            ),
+            new InputOption(
+                OptionDefinition::CACHE_TTL,
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Limit cached data for a period of time'
+                . ' (<info>>0: time to live in seconds</info>)',
+                OptionDefinition::DEFAULT_CACHE_TTL
+            ),
+            new InputOption(
+                OptionDefinition::NO_CACHE,
+                null,
+                InputOption::VALUE_NONE,
+                'Ignore cached data (<comment>Deprecated option, use "--cache-adapter never" instead</comment>)'
+            )
+        ]);
+    }
+
+    public function initialize(ConsoleCommandEvent $event): void
+    {
+        $this->describeEvent($event);
+
+        if (!$this->allowEvent($event)) {
+            return;
+        }
+
+        $metadata = $this->metadataCollection->getMetadata(ConfigurationSettings::class);
+        $settings = json_decode($metadata->describe('value'), true);
+
+        $withoutCache = $settings[OptionDefinition::NO_CACHE];
+        $defaultLifetime = $settings[OptionDefinition::CACHE_TTL];
+        $cacheDir = $settings[OptionDefinition::CACHE_DIR];
+        $adapterAlias = $settings[OptionDefinition::CACHE_ADAPTER];
+
+        if (!$withoutCache && $adapterAlias === 'never') {
+            $withoutCache = true;
+        }
+
+        if ($withoutCache) {
+            $adapter = new NullAdapter();
+        } else {
+            $adapter = $adapterAlias ?? new FilesystemAdapter('paths', $defaultLifetime, $cacheDir);
+        }
+        self::$cache = new Cache($adapter);
+
+        $message = sprintf(
+            '<comment>%s</comment> %s',
+            'The "Cache" was initialized with following adapter"',
+            ': {adapter}'
+        );
+
+        $this->logger->notice(
+            $message,
+            [
+                '__section__' => SectionEnum::PLUGIN->label(),
+                '__style__' => SectionEnum::PLUGIN->value,
+                'adapter' => is_object($adapter) ? get_class($adapter) : $adapter
+            ]
+        );
+
+        if ($defaultLifetime < OptionDefinition::DEFAULT_CACHE_TTL) {
+            self::$cache->clear();
+        }
+    }
+
+    public function afterExecute(AfterCheckingEvent $event): void
+    {
+        $this->describeEvent($event);
+
+        self::$cache->prune();
+    }
+
+    public static function getCacheInstance(): Cache
+    {
+        return self::$cache ?? new Cache(new NullAdapter());
+    }
+
+    protected function allowEvent(ConsoleEvent $event): bool
+    {
+        if (!parent::allowEvent($event)) {
+            return false;
+        }
+
+        $command = $event->getCommand();
+
+        $application = $command->getApplication();
+
+        if (!$application instanceof ApplicationInterface) {
+            return false;
+        }
+
+        $this->metadataCollection = $application->getMetadata();
+
+        return (null !== $this->metadataCollection->getMetadata(ConfigurationSettings::class));
+    }
+}
