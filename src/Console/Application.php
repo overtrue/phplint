@@ -89,7 +89,7 @@ final class Application extends BaseApplication implements
         $this->setLogger($logger);
 
         $envName = $runner::getEnvName();
-        $envConfig = $runner->getEnvConfig();
+        $envConfig = $runner::getEnvConfig();
         $defaultFallback = $envConfig->getDefaultFallback($envName);
 
         if ($envConfig->get('dump', $defaultFallback)) {
