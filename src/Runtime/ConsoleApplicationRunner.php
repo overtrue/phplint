@@ -38,6 +38,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use function array_diff;
 use function array_intersect;
 use function array_merge;
+use function array_unique;
 use function array_values;
 use function explode;
 use function in_array;
@@ -184,19 +185,10 @@ class ConsoleApplicationRunner
 
         $interactiveFrontend = self::isFrontendInteractive();
 
-        if (!$interactiveFrontend) {
-            $deniedPlugins = [
-                ExtensionEnum::DIAGNOSE_MANAGER->value,
-                ExtensionEnum::PROFILE_MANAGER->value,
-                ExtensionEnum::PROGRESS_MANAGER->value,
-            ];
-            $allowPlugins = array_diff($allowPlugins, $deniedPlugins);
-        }
-
         $key = 'default_plugins';
         $defaultPlugins = explode(',', $envConfig->get($key, $defaultFallback));
 
-        if (self::hasMode(ModeEnum::DEVELOP)) {
+        if (self::hasMode(ModeEnum::DEVELOP) || self::hasMode(ModeEnum::LEGACY)) {
             $defaultPlugins = $allowPlugins = [
                 ExtensionEnum::CACHE_MANAGER->value,
                 ExtensionEnum::DIAGNOSE_MANAGER->value,
@@ -216,17 +208,13 @@ class ConsoleApplicationRunner
             $allowPlugins[] = ExtensionEnum::PROFILE_MANAGER->value;
         }
 
-        if (self::hasMode(ModeEnum::LEGACY)) {
-            $defaultPlugins = $allowPlugins = [
-                ExtensionEnum::CACHE_MANAGER->value,
-                ExtensionEnum::OUTPUT_MANAGER->value,
+        if (!$interactiveFrontend) {
+            $deniedPlugins = [
+                ExtensionEnum::DIAGNOSE_MANAGER->value,
                 ExtensionEnum::PROFILE_MANAGER->value,
+                ExtensionEnum::PROGRESS_MANAGER->value,
             ];
-
-            if ($interactiveFrontend) {
-                $defaultPlugins[] = ExtensionEnum::PROGRESS_MANAGER->value;
-                $allowPlugins[] = ExtensionEnum::PROGRESS_MANAGER->value;
-            }
+            $allowPlugins = array_diff($allowPlugins, $deniedPlugins);
         }
 
         $extensions = [];
@@ -237,9 +225,10 @@ class ConsoleApplicationRunner
 
         $extensions = array_merge($defaultPlugins, $extensions);
 
-        return array_values(
+        $plugins = array_values(
             array_intersect($extensions, $allowPlugins)
         );
+        return array_unique($plugins);
     }
 
     public function run(): int
