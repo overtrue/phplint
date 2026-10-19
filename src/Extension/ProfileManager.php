@@ -17,6 +17,7 @@ use Overtrue\PHPLint\Command\ProfileCommand;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Console\SectionEnum;
+use Overtrue\PHPLint\Environment\ModeEnum;
 use Overtrue\PHPLint\Event\AfterCheckingEvent;
 use Overtrue\PHPLint\Event\BeforeCheckingEvent;
 use Overtrue\PHPLint\Event\Events;
@@ -190,12 +191,18 @@ final class ProfileManager extends AbstractManager implements
             return false;
         }
 
-        $this->stopwatch = $application->getProfiler();
+        $runner = $application->getRunner();
 
-        $this->whenProfiled = $input->hasOption(OptionDefinition::PROFILE)
-            ? $input->getOption(OptionDefinition::PROFILE) ?? 'auto'
-            : 'never'
-        ;
+        $this->whenProfiled = $runner::hasMode(ModeEnum::PROFILE) ? 'auto' : 'never';
+
+        if ($this->whenProfiled === 'auto') {
+            $this->stopwatch = $application->getProfiler();
+
+            $this->whenProfiled = $input->hasOption(OptionDefinition::PROFILE)
+                ? $input->getOption(OptionDefinition::PROFILE) ?? 'auto'
+                : 'never'
+            ;
+        }
 
         return ('never' !== $this->whenProfiled);
     }
