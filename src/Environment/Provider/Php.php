@@ -15,9 +15,11 @@ namespace Overtrue\PHPLint\Environment\Provider;
 
 use Overtrue\PHPLint\Environment\ProviderData;
 use Overtrue\PHPLint\Environment\ProviderInterface;
+
 use Symfony\Component\Process\ExecutableFinder;
 
 use function extension_loaded;
+use function ini_get;
 use function php_ini_loaded_file;
 use function php_sapi_name;
 use function phpversion;
@@ -70,6 +72,11 @@ class Php implements ProviderInterface
             ),
             new ProviderData('ini', php_ini_loaded_file() ?: 'none', 'Path to the loaded "php.ini" file'),
         ];
+
+        $memoryLimit = ini_get('memory_limit');
+        if (false !== $memoryLimit) {
+            $data[] = new ProviderData('memory_limit', $memoryLimit, 'Maximum amount of memory in bytes that a script is allowed to allocate');
+        }
 
         foreach (['dom', 'json', 'mbstring', 'xdebug', 'Zend OPcache'] as $extension) {
             $data[] = new ProviderData(
