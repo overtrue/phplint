@@ -19,8 +19,7 @@ use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Input\InputInterface;
 
 use function ini_get;
-use function preg_match;
-use function strtolower;
+use function ini_parse_quantity;
 
 /**
  * @author Laurent Laville
@@ -40,25 +39,13 @@ class MemoryLimitValueResolver implements ValueResolverInterface
         // retrieve the argument name defined by the #[Option(name:)] attribute, or fallback to PHP variable name
         $argumentName = $argumentAttributes?->name ?: $argumentName;
 
-        $value = $input->hasOption($argumentName) ? $input->getOption($argumentName) : null;
+        $memoryLimit = $input->hasOption($argumentName) ? $input->getOption($argumentName) : null;
 
-        if (null === $value) {
-            $value = ini_get('memory_limit');
+        if (null === $memoryLimit) {
+            $memoryLimit = ini_get('memory_limit');
         }
 
-        // @link https://www.php.net/manual/en/function.ini-get.php#126324
-        preg_match('/([0-9]+)[\s]*([a-zA-Z]+)/', $value, $matches);
-
-        $value = (isset($matches[1])) ? $matches[1] : 0;
-        $metric = (isset($matches[2])) ? strtolower($matches[2]) : 'b';
-
-        $value *= match ($metric) {
-            'k', 'kb' => 1024,
-            'm', 'mb' => (1024 ** 2),
-            'g', 'gb' => (1024 ** 3),
-            't', 'tb' => (1024 ** 4),
-            default => 0
-        };
+        $value = ini_parse_quantity($memoryLimit);
 
         return [$value];
     }
