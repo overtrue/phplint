@@ -14,11 +14,13 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Configuration\Resolver;
 
 use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
+
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Input\InputInterface;
 
 use function ini_get;
-use function str_ends_with;
+use function preg_match;
+use function strtolower;
 
 /**
  * @author Laurent Laville
@@ -42,13 +44,20 @@ class MemoryLimitValueResolver implements ValueResolverInterface
 
         if (null === $value) {
             $value = ini_get('memory_limit');
-            if (str_ends_with($value, 'G')) {
-                $value = intval($value) * 1024 * 1024 * 1024;
-            } elseif (str_ends_with($value, 'M')) {
-                $value = intval($value) * 1024 * 1024;
-            } elseif (str_ends_with($value, 'K')) {
-                $value = intval($value) * 1024;
-            }
+
+            // @link https://www.php.net/manual/en/function.ini-get.php#126324
+            preg_match('/([0-9]+)[\s]*([a-zA-Z]+)/', $value, $matches);
+
+            $value = (isset($matches[1])) ? $matches[1] : 0;
+            $metric = (isset($matches[2])) ? strtolower($matches[2]) : 'b';
+
+            $value *= match ($metric) {
+                'k', 'kb' => 1024,
+                'm', 'mb' => (1024 ** 2),
+                'g', 'gb' => (1024 ** 3),
+                't', 'tb' => (1024 ** 4),
+                default => 0
+            };
         }
 
         return [$value];
