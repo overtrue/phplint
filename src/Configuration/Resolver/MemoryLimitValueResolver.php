@@ -44,21 +44,21 @@ class MemoryLimitValueResolver implements ValueResolverInterface
 
         if (null === $value) {
             $value = ini_get('memory_limit');
-
-            // @link https://www.php.net/manual/en/function.ini-get.php#126324
-            preg_match('/([0-9]+)[\s]*([a-zA-Z]+)/', $value, $matches);
-
-            $value = (isset($matches[1])) ? $matches[1] : 0;
-            $metric = (isset($matches[2])) ? strtolower($matches[2]) : 'b';
-
-            $value *= match ($metric) {
-                'k', 'kb' => 1024,
-                'm', 'mb' => (1024 ** 2),
-                'g', 'gb' => (1024 ** 3),
-                't', 'tb' => (1024 ** 4),
-                default => 0
-            };
         }
+
+        // @link https://www.php.net/manual/en/function.ini-get.php#126324
+        preg_match('/([0-9]+)[\s]*([a-zA-Z]+)/', $value, $matches);
+
+        $value = (isset($matches[1])) ? $matches[1] : 0;
+        $metric = (isset($matches[2])) ? strtolower($matches[2]) : 'b';
+
+        $value *= match ($metric) {
+            'k', 'kb' => 1024,
+            'm', 'mb' => (1024 ** 2),
+            'g', 'gb' => (1024 ** 3),
+            't', 'tb' => (1024 ** 4),
+            default => 0
+        };
 
         return [$value];
     }
