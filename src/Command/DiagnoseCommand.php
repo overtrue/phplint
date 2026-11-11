@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Command;
 
 use Overtrue\PHPLint\Configuration\Resolver\LoggerValueResolver;
-use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
 use Overtrue\PHPLint\Console\ApplicationInterface;
 use Overtrue\PHPLint\Console\Attribute\ValueResolver;
 use Overtrue\PHPLint\Console\SectionEnum;
@@ -32,9 +31,12 @@ use Overtrue\PHPLint\Environment\ProviderData;
 use Overtrue\PHPLint\Environment\ProviderInterface;
 use Overtrue\PHPLint\Environment\Supplier;
 use Overtrue\PHPLint\Extension\DiagnoseEnum;
+use Overtrue\PHPLint\Metadata\ApplicationVersion;
 use Overtrue\PHPLint\Metadata\CacheOutput;
-use Overtrue\PHPLint\Metadata\MetadataCollection;
+use Overtrue\PHPLint\Metadata\ConfigurationSettings;
+
 use Psr\Log\LoggerInterface;
+
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -74,8 +76,6 @@ final class DiagnoseCommand
         Application $application,
         #[ValueResolver(LoggerValueResolver::class)]
         LoggerInterface $logger,
-        #[ValueResolver(MetadataValueResolver::class)]
-        MetadataCollection $metadataCollection,
     ): int {
         $envConfig = $application instanceof ApplicationInterface
             ? $application->getRunner()::getEnvConfig()
@@ -89,8 +89,8 @@ final class DiagnoseCommand
         }
 
         if (in_array(DiagnoseEnum::AUTO->value, $diagnostic, true)) {
-            $diagnostic[] = 'metadata:application_version';
-            $diagnostic[] = 'metadata:current_configuration';
+            $diagnostic[] = 'metadata:' . ApplicationVersion::METADATA_ID;
+            $diagnostic[] = 'metadata:' . ConfigurationSettings::METADATA_ID;
         }
 
         $user = false;
@@ -178,7 +178,7 @@ final class DiagnoseCommand
         }
         if ($metadata) {
             // never display the "cache_results" metadata; use environment variable "PLINT_DIAGNOSTIC=cache" instead
-            $environment->addProvider(new Metadata($metadataCollection, $filters, [CacheOutput::METADATA_ID]));
+            $environment->addProvider(new Metadata($application->getMetadata(), $filters, [CacheOutput::METADATA_ID]));
         }
         if ($user) {
             $environment->addProvider($user);
