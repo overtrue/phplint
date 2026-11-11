@@ -17,14 +17,21 @@ use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
 use Overtrue\PHPLint\Tests\TestCase;
+
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
+
+use ReflectionException;
 
 #[CoversClass(FileOptionsResolver::class)]
 final class YamlConfigTest extends TestCase
 {
-    public function _testInvalidYamlFile(): void
+    /**
+     * @throws ReflectionException
+     */
+    public function testInvalidYamlFile(): void
     {
         $this->expectException(InvalidOptionsException::class);
 
@@ -33,21 +40,12 @@ final class YamlConfigTest extends TestCase
         $this->getOptionsResolver($arguments);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[DataProvider('commandInputProvider')]
-    public function _testYamlConfig(array $arguments, callable $fetchExpected): void
+    public function testYamlConfig(array $arguments, callable $fetchExpected): void
     {
-        $resolver = $this->getOptionsResolver($arguments);
-
-        $this->assertSame($fetchExpected($resolver), $resolver->getOptions());
-    }
-
-    public function testYamlConfig(): void
-    {
-        $baseConfDir = 'tests/Configuration/';
-        $arguments = ['--configuration' => $baseConfDir . 'jobs.yaml'];
-
-        $fetchExpected = __CLASS__ . '::expectedJobsModified';
-
         $resolver = $this->getOptionsResolver($arguments);
 
         $this->assertSame($fetchExpected($resolver), $resolver->getOptions());
@@ -89,30 +87,23 @@ final class YamlConfigTest extends TestCase
     protected static function expectedJsonOutputFormat(Resolver $resolver): array
     {
         $expected = self::getExpectedValues($resolver);
-        $expected['output'] = OptionDefinition::DEFAULT_STANDARD_OUTPUT;  // see 'log-json.yaml' contents
-        $expected['format'] = ['json'];
+        $expected['output-file'] = OptionDefinition::DEFAULT_STANDARD_OUTPUT;  // see 'log-json.yaml' contents
+        $expected['output-format'] = ['json'];
         return $expected;
     }
 
     protected static function expectedXmlOutputFormat(Resolver $resolver): array
     {
         $expected = self::getExpectedValues($resolver);
-        $expected['output'] = '/tmp/phplint-results.xml';    // see 'log-junit.yaml' contents
-        $expected['format'] = ['junit'];
+        $expected['output-file'] = '/tmp/phplint-results.xml';    // see 'log-junit.yaml' contents
+        $expected['output-format'] = ['junit'];
         return $expected;
     }
 
     protected static function expectedExternalConfigReadable(Resolver $resolver): array
     {
         // expected command line and yaml file arguments/options combination (see 'custom.yaml' contents)
-        $expected = self::getExpectedValues($resolver);
-        $expected['path'] = ['../../examples'];
-        $expected['jobs'] = 10;
-        $expected['exclude'] = ['vendor', 'tests'];
-        $expected['warning'] = true;
-        $expected['memory-limit'] = -1;
-        $expected['no-cache'] = true;
-        return $expected;
+        return self::getExpectedValues($resolver);
     }
 
     protected static function getExpectedValues(Resolver $resolver): array

@@ -18,8 +18,8 @@ use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Input\InputInterface;
 
-use function ini_get;
 use function ini_parse_quantity;
+use function is_string;
 
 /**
  * @author Laurent Laville
@@ -42,10 +42,10 @@ class MemoryLimitValueResolver implements ValueResolverInterface
         $memoryLimit = $input->hasOption($argumentName) ? $input->getOption($argumentName) : null;
 
         if (null === $memoryLimit) {
-            $memoryLimit = ini_get('memory_limit');
+            return [];
         }
 
-        $value = ini_parse_quantity($memoryLimit);
+        $value = is_string($memoryLimit) ? ini_parse_quantity($memoryLimit) : $memoryLimit;
 
         return [$value];
     }

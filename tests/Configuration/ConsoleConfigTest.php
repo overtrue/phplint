@@ -17,14 +17,20 @@ use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver;
 use Overtrue\PHPLint\Tests\TestCase;
+
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+
+use ReflectionException;
 
 use function dirname;
 
 #[CoversClass(FileOptionsResolver::class)]
 final class ConsoleConfigTest extends TestCase
 {
+    /**
+     * @throws ReflectionException
+     */
     public function testConfigFileNotReadable(): void
     {
         $arguments = ['--configuration' => 'does-not-exists.yaml'];
@@ -34,6 +40,9 @@ final class ConsoleConfigTest extends TestCase
         $this->assertEmpty($resolver->getOption(OptionDefinition::CONFIGURATION));
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[DataProvider('commandInputProvider')]
     public function testCommandConfig(array $arguments, callable $fetchExpected): void
     {
@@ -41,7 +50,7 @@ final class ConsoleConfigTest extends TestCase
 
         $resolver = $this->getOptionsResolver($arguments);
 
-        $this->assertSame($fetchExpected($resolver, $arguments), $resolver->getOptions());
+        $this->assertSame($fetchExpected($resolver), $resolver->getOptions());
     }
 
     public static function commandInputProvider(): array
@@ -61,14 +70,12 @@ final class ConsoleConfigTest extends TestCase
 
     protected static function expectedOnlyDefaults(Resolver $resolver): array
     {
-        return self::getExpectedValues($resolver);
+        return self::getExpectedValues($resolver);  // expected only default arguments/options from command line
     }
 
-    protected static function expectedPathModified(Resolver $resolver, array $arguments): array
+    protected static function expectedPathModified(Resolver $resolver): array
     {
-        $expected = self::getExpectedValues($resolver);
-        $expected['path'] = (array) $arguments['path'];
-        return $expected;
+        return self::getExpectedValues($resolver);  // expected only default arguments/options from command line
     }
 
     protected static function expectedExternalConfigNotFetched(Resolver $resolver): array
@@ -76,17 +83,17 @@ final class ConsoleConfigTest extends TestCase
         return self::getExpectedValues($resolver);  // expected only default arguments/options from command line
     }
 
-    protected static function expectedExternalEmptyConfig(Resolver $resolver, array $arguments): array
+    protected static function expectedExternalEmptyConfig(Resolver $resolver): array
     {
         return self::getExpectedValues($resolver);  // expected only default arguments/options from command line
     }
 
-    protected static function expectedJsonOutputFormat(Resolver $resolver, array $arguments): array
+    protected static function expectedJsonOutputFormat(Resolver $resolver): array
     {
         return self::getExpectedValues($resolver);  // expected only default arguments/options from command line
     }
 
-    protected static function expectedXmlOutputFormat(Resolver $resolver, array $arguments): array
+    protected static function expectedXmlOutputFormat(Resolver $resolver): array
     {
         return self::getExpectedValues($resolver);  // expected only default arguments/options from command line
     }

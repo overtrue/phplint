@@ -13,20 +13,24 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Tests\Configuration\Resolver;
 
-use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
+use Overtrue\PHPLint\Console\Application;
 use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
-use Overtrue\PHPLint\Environment\ModeEnum;
+use Overtrue\PHPLint\Metadata\ConfigurationSettings;
 use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Tests\TestCase;
+
 use PHPUnit\Framework\Attributes\CoversClass;
+
+use Symfony\Component\Console\Input\ArrayInput;
+
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
-use Symfony\Component\Console\Input\ArrayInput;
 
 use function iterator_to_array;
+use function json_decode;
 
 /**
  * @author Laurent Laville
@@ -58,9 +62,12 @@ final class MetadataValueResolverTest extends TestCase
 
     public function testDefaultApplicationMetadata(): void
     {
-        $input = new ArrayInput([]);
-        $settings = (new FileOptionsResolver($input, $this->parameters))->getOptions();
-        $settings['mode'] = ModeEnum::OFF->value;
+        /** @var Application $application */
+        $application = $this->getApplication();
+        $metadataCollection = $application->getMetadata();
+
+        $metadata = $metadataCollection->getMetadata(ConfigurationSettings::class);
+        $settings = json_decode($metadata->describe('value'), true);
 
         $metadataCollection = new MetadataCollection(
             Metadata::applicationVersion(),
@@ -71,7 +78,7 @@ final class MetadataValueResolverTest extends TestCase
 
         $input = new ArrayInput(['metadataCollection' => $metadataCollection]);
 
-        $resolver = new MetadataValueResolver($this->getApplication());
+        $resolver = new MetadataValueResolver($application);
 
         $member = new ReflectionMember($this->parameters[0]);
 

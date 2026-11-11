@@ -14,16 +14,30 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Command;
 
 use Overtrue\PHPLint\Configuration\Resolver\ArgumentResolverInterface;
+use Overtrue\PHPLint\Console\Attribute\MapInput;
+
 use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
-use ReflectionAttribute;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use function array_combine;
+use Closure;
+use ReflectionAttribute;
+use ReflectionFunction;
+use TypeError;
+
+use function array_map;
+use function is_int;
+use function iterator_to_array;
+use function restore_error_handler;
+use function set_error_handler;
+use function sprintf;
+use function usort;
 
 /**
  * Represents an invokable command.
@@ -35,7 +49,7 @@ use function array_combine;
  */
 final class InvokableCommand extends \Symfony\Component\Console\Command\InvokableCommand
 {
-    protected readonly \ReflectionFunction $invokable;
+    protected readonly ReflectionFunction $invokable;
     protected $code;
 
     protected ?array $parameters = null;
@@ -50,7 +64,7 @@ final class InvokableCommand extends \Symfony\Component\Console\Command\Invokabl
     ) {
         parent::__construct($command, $code);
 
-        $this->invokable = new \ReflectionFunction($this->getClosure($code));
+        $this->invokable = new ReflectionFunction($this->getClosure($code));
 
         $class = $this->invokable->getClosureScopeClass();
 
@@ -63,12 +77,45 @@ final class InvokableCommand extends \Symfony\Component\Console\Command\Invokabl
         }
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function configure(InputDefinition $definition): void
+    {
+        foreach ($this->invokable->getParameters() as $parameter) {
+            if ($argument = Argument::tryFrom($parameter)) {
+                $definition->addArgument($argument->toInputArgument());
+                continue;
+            }
+
+            if ($option = Option::tryFrom($parameter)) {
+                $definition->addOption($option->toInputOption());
+                continue;
+            }
+
+            if ($input = MapInput::tryFrom($parameter)) {
+                $inputArguments = array_map(static fn (Argument $a) => $a->toInputArgument(), iterator_to_array($input->getArguments(), false));
+
+                // make sure optional arguments are defined after required ones
+                usort($inputArguments, static fn (InputArgument $a, InputArgument $b) => (int) $b->isRequired() - (int) $a->isRequired());
+
+                foreach ($inputArguments as $inputArgument) {
+                    $definition->addArgument($inputArgument);
+                }
+
+                foreach ($input->getOptions() as $option) {
+                    $definition->addOption($option->toInputOption());
+                }
+            }
+        }
+    }
+
     public function __invoke(InputInterface $input, OutputInterface $output): int
     {
         $statusCode = $this->invokable->invoke(...$this->getParameters($this->invokable, $input));
 
-        if (!\is_int($statusCode)) {
-            throw new \TypeError(\sprintf('The command "%s" must return an integer value in the "%s" method, but "%s" was returned.', $this->command->getName(), $this->invokable->getName(), get_debug_type($statusCode)));
+        if (!is_int($statusCode)) {
+            throw new TypeError(sprintf('The command "%s" must return an integer value in the "%s" method, but "%s" was returned.', $this->command->getName(), $this->invokable->getName(), get_debug_type($statusCode)));
         }
 
         return $statusCode;
@@ -108,7 +155,7 @@ final class InvokableCommand extends \Symfony\Component\Console\Command\Invokabl
         return array_combine($parameterNames, $parameters);
     }
 
-    protected function getParameters(\ReflectionFunction $function, InputInterface $input): array
+    private function getParameters(ReflectionFunction $function, InputInterface $input): array
     {
         if (null === $this->parameters) {
             $command = $this->invokable->getClosure();
@@ -117,19 +164,19 @@ final class InvokableCommand extends \Symfony\Component\Console\Command\Invokabl
         return $this->parameters;
     }
 
-    private function getClosure(callable $code): \Closure
+    private function getClosure(callable $code): Closure
     {
-        if (!$code instanceof \Closure) {
+        if (!$code instanceof Closure) {
             return $code(...);
         }
 
-        if (null !== (new \ReflectionFunction($code))->getClosureThis()) {
+        if (null !== (new ReflectionFunction($code))->getClosureThis()) {
             return $code;
         }
 
         set_error_handler(static function () {}); // @phpstan-ignore argument.type
         try {
-            if ($c = \Closure::bind($code, $this->command)) {
+            if ($c = Closure::bind($code, $this->command)) {
                 $code = $c;
             }
         } finally {

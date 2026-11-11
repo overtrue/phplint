@@ -15,7 +15,8 @@ namespace Overtrue\PHPLint\Console;
 
 use Overtrue\PHPLint\Cache;
 use Overtrue\PHPLint\Command\InvokableCommand;
-use Overtrue\PHPLint\Configuration\FileOptionsResolver;
+use Overtrue\PHPLint\Configuration\LintCommandInput;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Configuration\Resolver\ArgumentResolverInterface;
 use Overtrue\PHPLint\Environment\ModeEnum;
 use Overtrue\PHPLint\Event\EventAwareInterface;
@@ -25,14 +26,16 @@ use Overtrue\PHPLint\Extension\ExtensionEnum;
 use Overtrue\PHPLint\Extension\ExtensionInterface;
 use Overtrue\PHPLint\Helper\VarDumpHelper;
 use Overtrue\PHPLint\Metadata\ApplicationVersion;
+use Overtrue\PHPLint\Metadata\ConfigurationSettings;
 use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
+
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use ReflectionException;
+
 use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Console\Application as BaseApplication;
 use Symfony\Component\Console\Command\Command;
@@ -52,6 +55,8 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+
+use ReflectionException;
 use Throwable;
 
 use function class_exists;
@@ -289,9 +294,6 @@ final class Application extends BaseApplication implements
         $helper->dump($event);
     }
 
-    /**
-     * @throws ReflectionException
-     */
     public function initialize(ConsoleCommandEvent $event): void
     {
         $this->describeEvent($event);
@@ -302,9 +304,32 @@ final class Application extends BaseApplication implements
         /** @var InvokableCommand|null $invokableCommand */
         $invokableCommand = $command->getCode();
         $parameters = $invokableCommand?->getArguments($input) ?? [];
-        $configResolver = new FileOptionsResolver($input, $parameters);
 
-        $metadataCollection = $this->getMetadata($configResolver->getOptions());
+        /** @var LintCommandInput|null $userInput */
+        $userInput = $parameters['userInput'] ?? null;
+        if (null === $userInput) {
+            return;
+        }
+
+        $masterSettings = $this->metadataCollection->getMetadata(ConfigurationSettings::class);
+        if (null === $masterSettings) {
+            return;
+        }
+
+        $settings = json_decode($masterSettings->describe('value'), true);
+
+        if (!empty($userInput->sourcePath)) {
+            $settings[OptionDefinition::PATH] = $userInput->sourcePath;
+        }
+        $settings[OptionDefinition::EXCLUDE] = $userInput->excludePath;
+        $settings[OptionDefinition::FILE_EXTENSIONS] = $userInput->fileExtensions;
+        $settings[OptionDefinition::JOBS] = $userInput->parallelJob;
+        $settings[OptionDefinition::WARNING] = $userInput->showWarning;
+        $settings[OptionDefinition::OPTION_MEMORY_LIMIT] = $userInput->memoryLimit;
+        $settings[OptionDefinition::IGNORE_EXIT_CODE] = $userInput->ignoreExitCode;
+        $settings[OptionDefinition::DRY_RUN] = $userInput->dryRun;
+
+        $metadataCollection = $this->getMetadata($settings);
         $metadataCollection->describe($this->getLogger());
     }
 
