@@ -40,6 +40,7 @@ readonly class CoreValueResolver implements ValueResolverInterface
     {
         $argumentType = $member->getType()?->getName(); // @phpstan-ignore method.notFound
 
+        // @phpstan-ignore class.notFound
         if ($argumentType === InputInterface::class || $argumentType === RawInputInterface::class) {
             return [$input];
         }
@@ -49,11 +50,13 @@ readonly class CoreValueResolver implements ValueResolverInterface
         }
 
         if ($argumentType === SymfonyStyle::class) {
+            // @phpstan-ignore arguments.count
             return [new SymfonyStyle(
                 $input,
                 $this->output,
                 // optional argument introduced with Symfony Console 8.1
                 // on commit https://github.com/symfony/console/commit/2b468472ec5d0e4acbe00f97e62f6cd552509894
+                // @phpstan-ignore method.notFound
                 $this->application->getDispatcher()
             )];
         }

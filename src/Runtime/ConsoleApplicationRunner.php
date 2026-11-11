@@ -15,12 +15,13 @@ namespace Overtrue\PHPLint\Runtime;
 
 use Overtrue\PHPLint\Command\DiagnoseCommand;
 use Overtrue\PHPLint\Command\LintCommand;
+use Overtrue\PHPLint\Configuration\FileOptionsResolver;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Configuration\Resolver\CommandValueResolver;
+use Overtrue\PHPLint\Configuration\Resolver\ConfigValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\CoreValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\DefaultArgumentResolver;
 use Overtrue\PHPLint\Configuration\Resolver\DefaultValueResolver;
-use Overtrue\PHPLint\Configuration\Resolver\JobValueResolver;
-use Overtrue\PHPLint\Configuration\Resolver\MetadataValueResolver;
 use Overtrue\PHPLint\Console\Application;
 use Overtrue\PHPLint\Environment\EnvConfigInterface;
 use Overtrue\PHPLint\Environment\ModeEnum;
@@ -28,12 +29,16 @@ use Overtrue\PHPLint\Extension\ExtensionEnum;
 use Overtrue\PHPLint\Metadata\DeprecatedFeatures;
 use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
+
 use Psr\Log\LoggerInterface;
+
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+
+use ReflectionException;
 
 use function array_diff;
 use function array_intersect;
@@ -58,6 +63,11 @@ class ConsoleApplicationRunner
     protected static OutputInterface $output;
     protected Application $application;
 
+    private array $defaultConfiguration;
+
+    /**
+     * @throws ReflectionException
+     */
     public function __construct(
         LoggerInterface $logger,
         EnvConfigInterface $envConfig,
@@ -126,14 +136,7 @@ class ConsoleApplicationRunner
         }
 
         $applicationVersion = Metadata::applicationVersion();
-
         $this->application->setVersion($applicationVersion->getVersion());
-
-        $metadataCollection = new MetadataCollection(
-            $applicationVersion,
-        );
-
-        $this->application->setMetadata($metadataCollection);
 
         $defaultCommand = self::hasMode(ModeEnum::LEGACY) ? 'lint' : 'list';
 
@@ -141,14 +144,53 @@ class ConsoleApplicationRunner
 
         $commandName = $singleCommand ? $defaultCommand : self::$input->getFirstArgument();
 
+        $inputDefinition = $this->application->getDefinition();
+
+        // $input is not yet bound to a command here
+        $withoutConfiguration = $input->getParameterOption(
+            values: '--' . OptionDefinition::NO_CONFIGURATION,
+            onlyParams: true
+        );
+
+        if ($withoutConfiguration) {
+            $configFile = 'never';
+        } else {
+            $configurationOption = $inputDefinition->getOption(OptionDefinition::CONFIGURATION);
+            $configFile = $input->getParameterOption(
+                ['--' . $configurationOption->getName(), '-' . $configurationOption->getShortcut()],
+                $configurationOption->getDefault(),
+                true
+            );
+        }
+
+        $configValueResolver = new ConfigValueResolver(
+            [OptionDefinition::CONFIGURATION],
+            [OptionDefinition::CONFIGURATION => $configFile],
+        );
+
+        $configResolver = new FileOptionsResolver($input, [], $configValueResolver);
+        $this->defaultConfiguration = $configResolver->getOptions();
+
+        $configurationSettings = Metadata::configurationSettings($this->defaultConfiguration);
+
+        $metadataCollection = new MetadataCollection(
+            $applicationVersion,
+            $configurationSettings,
+        );
+        $this->application->setMetadata($metadataCollection);
+
         $dynamicValueResolvers = [
             CoreValueResolver::class => fn () => new CoreValueResolver($this->application, self::$output, $commandName),
-            MetadataValueResolver::class => fn () => new MetadataValueResolver($this->application),
-            JobValueResolver::class => fn () => new JobValueResolver(),
+            ConfigValueResolver::class => $configValueResolver,
         ];
+
+        $namedResolvers = new DefaultValueResolver($logger, $envConfig, $dynamicValueResolvers);
+
+        $argumentValueResolvers[CommandValueResolver::class] = new CommandValueResolver($namedResolvers, $this->defaultConfiguration);
+
         $argumentResolver = new DefaultArgumentResolver(
             $argumentValueResolvers,
-            new DefaultValueResolver($logger, $envConfig, $dynamicValueResolvers),
+            $namedResolvers,
         );
         $argumentResolver->setLogger($logger);
         $this->application->setArgResolver($argumentResolver);

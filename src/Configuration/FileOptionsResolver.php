@@ -13,20 +13,25 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Configuration;
 
-use JsonException;
-use RuntimeException;
+use Overtrue\PHPLint\Configuration\Resolver\ValueResolverInterface;
+use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
+
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
-use function array_filter;
+use JsonException;
+use ReflectionException;
+use ReflectionProperty;
+use RuntimeException;
+
 use function array_replace;
 use function file_get_contents;
-use function in_array;
 use function is_array;
 use function is_file;
 use function is_readable;
+use function iterator_to_array;
 use function json_decode;
 use function pathinfo;
 use function sprintf;
@@ -40,29 +45,32 @@ use const PATHINFO_EXTENSION;
  */
 final class FileOptionsResolver extends AbstractOptionsResolver
 {
+    /**
+     * Don't remove unused property.
+     * Because we used it to resolve locally the default configuration (with the ConfigValueResolver).
+     * @phpstan-ignore property.unused
+     */
+    private string $configuration;
+
+    /**
+     * @throws ReflectionException
+     */
     public function __construct(
         protected InputInterface $input,
-        array $configuration = []
+        array $configuration = [],
+        ?ValueResolverInterface $configValueResolver = null,
     ) {
-        $withoutConfigFile = $configuration[OptionDefinition::NO_CONFIGURATION] ?? false;
+        $member = new ReflectionMember(new ReflectionProperty($this, OptionDefinition::CONFIGURATION));
+        $resolved = $configValueResolver->resolve(OptionDefinition::CONFIGURATION, $input, $member);
 
-        $configFile = $withoutConfigFile
-            ? ''
-            : ($configuration[OptionDefinition::CONFIGURATION] ?? null)
-        ;
-        if (null === $configFile) {
-            if (true === $input->hasOption(OptionDefinition::CONFIGURATION)) {
-                $configFile = $input->getOption(OptionDefinition::CONFIGURATION);
-            } else {
-                $configFile = '';
-            }
-        }
+        $configFile = iterator_to_array($resolved)[0];
 
-        if (!empty($configFile) && !in_array($configFile, ['auto', 'never'])) {
-            $fileConf = $this->parseFile($configFile);
-            $configuration = array_replace(array_filter($fileConf), array_filter($configuration));
-            $configuration[OptionDefinition::CONFIGURATION] = $configFile;
-        }
+        $configuration = array_replace(
+            empty($configFile) ? [] : $this->parseFile($configFile),
+            $configuration
+        );
+        $configuration[OptionDefinition::CONFIGURATION] = $configFile;
+
         parent::__construct($input, $configuration);
     }
 

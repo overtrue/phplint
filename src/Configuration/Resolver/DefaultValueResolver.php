@@ -13,12 +13,15 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Configuration\Resolver;
 
-use Closure;
 use Overtrue\PHPLint\Configuration\OptionDefinition;
 use Overtrue\PHPLint\Environment\EnvConfigInterface;
+
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+
 use Symfony\Component\Console\ArgumentResolver\ValueResolver\ValueResolverInterface as SymfonyValueResolverInterface;
+
+use Closure;
 
 use function array_key_exists;
 use function array_merge;
@@ -36,21 +39,9 @@ class DefaultValueResolver implements ContainerInterface
         $this->valueResolvers = array_merge([
             LoggerValueResolver::class => fn () => new LoggerValueResolver($logger),
             PluginValueResolver::class => fn () => new PluginValueResolver($envConfig),
-            ConfigValueResolver::class => fn () => new ConfigValueResolver(
-                [OptionDefinition::CONFIGURATION],
-                [],
-                $envConfig,
-            ),
             PathValueResolver::class => fn () => new PathValueResolver(
                 [OptionDefinition::PATH, 'sourcePath'],
                 [OptionDefinition::EXCLUDE, 'excludePath'],
-                [
-                    OptionDefinition::PATH => OptionDefinition::DEFAULT_PATH,
-                    OptionDefinition::EXCLUDE => OptionDefinition::DEFAULT_EXCLUDES,
-                    // aliases
-                    'sourcePath' => OptionDefinition::DEFAULT_PATH,
-                    'excludePath' => OptionDefinition::DEFAULT_EXCLUDES,
-                ]
             ),
             FileExtensionValueResolver::class => fn () => new FileExtensionValueResolver(
                 OptionDefinition::DEFAULT_EXTENSIONS,
@@ -60,6 +51,7 @@ class DefaultValueResolver implements ContainerInterface
                     'fileExtensions' => OptionDefinition::DEFAULT_EXTENSIONS,
                 ]
             ),
+            JobValueResolver::class => fn () => new JobValueResolver(),
             ShowWarningsValueResolver::class => fn () => new ShowWarningsValueResolver(),
             MemoryLimitValueResolver::class => fn () => new MemoryLimitValueResolver(),
             IgnoreExitCodeValueResolver::class => fn () => new IgnoreExitCodeValueResolver(),
@@ -73,6 +65,7 @@ class DefaultValueResolver implements ContainerInterface
         ], $dynamicValueResolvers);
     }
 
+    // @phpstan-ignore class.notFound
     final public function get(string $id): null|ValueResolverInterface|SymfonyValueResolverInterface
     {
         if (!$this->has($id)) {

@@ -13,14 +13,21 @@ declare(strict_types=1);
 
 namespace Overtrue\PHPLint\Tests;
 
-use Overtrue\PHPLint\Command\InvokableCommand;
 use Overtrue\PHPLint\Configuration\FileOptionsResolver;
+use Overtrue\PHPLint\Configuration\OptionDefinition;
+use Overtrue\PHPLint\Configuration\Resolver\ConfigValueResolver;
 use Overtrue\PHPLint\Configuration\Resolver\JobValueResolver;
 use Overtrue\PHPLint\Environment\EnvConfig;
+use Overtrue\PHPLint\Extension\ExtensionEnum;
 use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
+
 use Psr\Log\NullLogger;
+
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
+
+use ReflectionException;
 
 /**
  * @author Laurent Laville
@@ -30,6 +37,9 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
     protected Application $application;
 
+    /**
+     * @throws ReflectionException
+     */
     protected function setUp(): void
     {
         $envConfig = new EnvConfig();
@@ -53,6 +63,9 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         return $this->application;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     protected function getOptionsResolver(array $arguments): FileOptionsResolver
     {
         $application = $this->getApplication();
@@ -60,16 +73,34 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         $command = $application->find('lint');
         $command->mergeApplicationDefinition();
 
+        $this->loadPlugin(ExtensionEnum::OUTPUT_MANAGER->value, $command);
+
         $definition = $command->getDefinition();
 
         $input = new ArrayInput($arguments);
         $input->bind($definition);
 
-        /** @var InvokableCommand $invokableCommand */
-        $invokableCommand = $command->getCode();
+        $configFile = $arguments['--' . OptionDefinition::CONFIGURATION] ?? 'never';
 
-        $parameters = $invokableCommand->getArguments($input);
+        $configValueResolver = new ConfigValueResolver(
+            [OptionDefinition::CONFIGURATION],
+            [OptionDefinition::CONFIGURATION => $configFile],
+        );
 
-        return new FileOptionsResolver($input, $parameters);
+        return new FileOptionsResolver($input, [], $configValueResolver);
+    }
+
+    private function loadPlugin(string $extensionName, Command $command): void
+    {
+        $extension = ExtensionEnum::factory($extensionName);
+
+        $definition = $command->getDefinition();
+        // adds new options defined by this $extension to the $command
+        foreach ($extension::getDefinition()->getOptions() as $option) {
+            if (!$definition->hasOption($option->getName())) {
+                $definition->addOption($option);
+            }
+        }
+        $command->setDefinition($definition);
     }
 }

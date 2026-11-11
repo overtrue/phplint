@@ -34,7 +34,6 @@ class PathValueResolver implements ValueResolverInterface
     public function __construct(
         protected array $argumentNamesAllowed = [],
         protected array $optionNamesAllowed = [],
-        protected array $defaultValues = [],
     ) {
     }
 

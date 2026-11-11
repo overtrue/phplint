@@ -93,7 +93,6 @@ final class DefaultArgumentResolver implements ArgumentResolverInterface, Logger
 
             // introduced with Symfony/Console 8.1
             $rawInputContract = '\\Symfony\\Component\\Console\\Input\\RawInputInterface';
-            // @phpstan-ignore function.impossibleType
             if (class_exists($rawInputContract)) {
                 $coreClasses[] = $rawInputContract;
             }

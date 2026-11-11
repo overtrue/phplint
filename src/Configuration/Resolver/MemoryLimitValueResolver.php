@@ -14,11 +14,12 @@ declare(strict_types=1);
 namespace Overtrue\PHPLint\Configuration\Resolver;
 
 use Overtrue\PHPLint\Console\Attribute\ReflectionMember;
+
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Input\InputInterface;
 
-use function ini_get;
-use function str_ends_with;
+use function ini_parse_quantity;
+use function is_string;
 
 /**
  * @author Laurent Laville
@@ -38,18 +39,13 @@ class MemoryLimitValueResolver implements ValueResolverInterface
         // retrieve the argument name defined by the #[Option(name:)] attribute, or fallback to PHP variable name
         $argumentName = $argumentAttributes?->name ?: $argumentName;
 
-        $value = $input->hasOption($argumentName) ? $input->getOption($argumentName) : null;
+        $memoryLimit = $input->hasOption($argumentName) ? $input->getOption($argumentName) : null;
 
-        if (null === $value) {
-            $value = ini_get('memory_limit');
-            if (str_ends_with($value, 'G')) {
-                $value = intval($value) * 1024 * 1024 * 1024;
-            } elseif (str_ends_with($value, 'M')) {
-                $value = intval($value) * 1024 * 1024;
-            } elseif (str_ends_with($value, 'K')) {
-                $value = intval($value) * 1024;
-            }
+        if (null === $memoryLimit) {
+            return [];
         }
+
+        $value = is_string($memoryLimit) ? ini_parse_quantity($memoryLimit) : $memoryLimit;
 
         return [$value];
     }

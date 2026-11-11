@@ -31,7 +31,7 @@ use Symfony\Component\Console\ArgumentResolver\ValueResolver\ValueResolverInterf
  *
  * Defines which value resolver should be used for a given parameter.
  */
-#[\Attribute(\Attribute::TARGET_PARAMETER | \Attribute::IS_REPEATABLE)]
+#[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::TARGET_PARAMETER | \Attribute::IS_REPEATABLE)]
 class ValueResolver
 {
     /**
