@@ -65,6 +65,7 @@ class DefaultValueResolver implements ContainerInterface
         ], $dynamicValueResolvers);
     }
 
+    // @phpstan-ignore class.notFound
     final public function get(string $id): null|ValueResolverInterface|SymfonyValueResolverInterface
     {
         if (!$this->has($id)) {

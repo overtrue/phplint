@@ -6,3 +6,4 @@ parameters:
         - src/
     excludePaths:
         - src/Output/SarifOutput.php
+    treatPhpDocTypesAsCertain: false

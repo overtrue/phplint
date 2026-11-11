@@ -176,7 +176,7 @@ final class DiagnoseCommand
         if ($profiler) {
             $environment->addProvider(new Profiler());
         }
-        if ($metadata) {
+        if ($metadata && $application instanceof ApplicationInterface) {
             // never display the "cache_results" metadata; use environment variable "PLINT_DIAGNOSTIC=cache" instead
             $environment->addProvider(new Metadata($application->getMetadata(), $filters, [CacheOutput::METADATA_ID]));
         }

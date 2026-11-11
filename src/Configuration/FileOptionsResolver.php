@@ -48,6 +48,7 @@ final class FileOptionsResolver extends AbstractOptionsResolver
     /**
      * Don't remove unused property.
      * Because we used it to resolve locally the default configuration (with the ConfigValueResolver).
+     * @phpstan-ignore property.unused
      */
     private string $configuration;
 
