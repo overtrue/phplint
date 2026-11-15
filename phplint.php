@@ -22,7 +22,7 @@ use Symfony\Component\Console\Input\ArgvInput;
 
 $input = new ArgvInput();
 
-$output = new ConsoleOutput();
+$output = new ConsoleOutput(STDOUT);
 
 // Default colors skin :
 // If you want to override, use the bootstrapping feature
