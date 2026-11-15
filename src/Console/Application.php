@@ -59,6 +59,7 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use ReflectionException;
 use Throwable;
 
+use function array_filter;
 use function class_exists;
 use function in_array;
 use function json_encode;
@@ -317,6 +318,17 @@ final class Application extends BaseApplication implements
         }
 
         $settings = json_decode($masterSettings->describe('value'), true);
+
+        foreach (array_filter($input->getOptions()) as $key => $value) {
+            if (in_array(
+                $key,
+                [OptionDefinition::CONFIGURATION, OptionDefinition::NO_CONFIGURATION]
+            )) {
+                // skip option that cannot be overridden, because already resolved by the Application Runner
+                continue;
+            }
+            $settings[$key] = $value;
+        }
 
         if (!empty($userInput->sourcePath)) {
             $settings[OptionDefinition::PATH] = $userInput->sourcePath;

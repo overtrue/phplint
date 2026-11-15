@@ -147,7 +147,7 @@ class ConsoleApplicationRunner
         $inputDefinition = $this->application->getDefinition();
 
         // $input is not yet bound to a command here
-        $withoutConfiguration = $input->getParameterOption(
+        $withoutConfiguration = $input->hasParameterOption(
             values: '--' . OptionDefinition::NO_CONFIGURATION,
             onlyParams: true
         );
