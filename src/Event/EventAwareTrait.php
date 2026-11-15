@@ -15,6 +15,8 @@ namespace Overtrue\PHPLint\Event;
 
 use Overtrue\PHPLint\Console\SectionEnum;
 
+use Psr\Log\LogLevel;
+
 use Symfony\Component\Console\Event\ConsoleEvent;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Contracts\EventDispatcher\Event;
@@ -65,7 +67,9 @@ trait EventAwareTrait
         $context['__section__'] = SectionEnum::EVENT->label();
         $context['__style__'] = SectionEnum::EVENT->value;
 
-        $this->logger->debug($message, $context);
+        $level =  $event instanceof ConsoleEvent ? LogLevel::INFO : LogLevel::DEBUG;
+
+        $this->logger->log($level, $message, $context);
 
         return $context;
     }
