@@ -121,7 +121,7 @@ final class DefaultArgumentResolver implements ArgumentResolverInterface, Logger
             }
 
             // fallback to service container if the resolver asked ($resolverName) is not provided
-            if (!isset($this->argumentValueResolvers[$resolverName]) && $this->namedResolvers && $resolverName) {
+            if ($resolverName && !isset($this->argumentValueResolvers[$resolverName]) && $this->namedResolvers) {
                 if (!$this->namedResolvers->has($resolverName)) {
                     throw new ResolverNotFoundException($resolverName);
                 }
