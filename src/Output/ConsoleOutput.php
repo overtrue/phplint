@@ -21,13 +21,15 @@ use Overtrue\PHPLint\Metadata\DeprecatedFeatures;
 use Overtrue\PHPLint\Metadata\Metadata;
 use Overtrue\PHPLint\Metadata\MetadataCollection;
 use Overtrue\PHPLint\Runtime\ConsoleApplicationRunner;
+
 use PHP_Parallel_Lint\PhpConsoleColor\ConsoleColor;
 use PHP_Parallel_Lint\PhpConsoleColor\InvalidStyleException;
 use PHP_Parallel_Lint\PhpConsoleHighlighter\Highlighter;
+
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\ConsoleOutput as SymfonyConsoleOutput;
+use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 use function abs;
@@ -56,7 +58,7 @@ use const STR_PAD_LEFT;
  * @author Laurent Laville
  * @since Release 9.0.0
  */
-final class ConsoleOutput extends SymfonyConsoleOutput implements ConsoleOutputInterface, OutputInterface
+final class ConsoleOutput extends StreamOutput implements ConsoleOutputInterface, OutputInterface
 {
     public function getName(): string
     {
