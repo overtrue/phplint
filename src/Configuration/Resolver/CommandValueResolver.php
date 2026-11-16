@@ -72,8 +72,8 @@ readonly class CommandValueResolver implements ValueResolverInterface
                 continue;
             }
 
-            $defaultValue = $mapInput->getClass()->getProperty($name)->getDefaultValue()
-                ?? $this->defaultConfiguration[$spec->name]
+            $defaultValue = $this->defaultConfiguration[$spec->name]
+                ?? $mapInput->getClass()->getProperty($name)->getDefaultValue()
                 ?? null
             ;
 
