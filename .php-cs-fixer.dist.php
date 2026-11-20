@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the overtrue/phplint package
+ *
+ * (c) overtrue
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 $header = <<<EOF
 This file is part of the overtrue/phplint package
 
@@ -10,6 +19,12 @@ with this source code in the file LICENSE.
 EOF;
 
 return (new PhpCsFixer\Config())
+    // allow to run on unsupported PHP Versions
+    // {@link https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/blob/master/README.md#supported-php-versions}
+    // available since PHP-CS-Fixer 3.76.0
+    // use instead `PHP_CS_FIXER_IGNORE_ENV` env var for older versions
+    ->setUnsupportedPhpVersionAllowed(true)
+    // use default @link https://www.php-fig.org/per/coding-style/
     ->setRules([
         '@PSR12' => true,
         'header_comment' => ['header' => $header],
@@ -36,6 +51,6 @@ return (new PhpCsFixer\Config())
         PhpCsFixer\Finder::create()
             ->exclude('vendor')
             ->notPath('fixtures/syntax_error.php')
-            ->in([__DIR__.'/src/', __DIR__.'/examples', __DIR__.'/tests/'])
+            ->in([__DIR__ . '/src/', __DIR__ . '/examples', __DIR__ . '/tests/'])
     )
 ;
