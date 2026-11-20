@@ -23,6 +23,7 @@ jobs:
           - "8.3"
           - "8.4"
           - "8.5"
+          - "8.6"
 
     steps:
       -   # https://github.com/actions/checkout
